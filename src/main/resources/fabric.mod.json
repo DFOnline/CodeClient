@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "codeclient",
+  "version": "${version}",
+  "name": "CodeClient",
+  "description": "Read and write DiamondFire code from external apps",
+  "authors": [
+    "GeorgeRNG"
+  ],
+  "contact": {
+    "website": "https://github.com/DFOnline/CodeClient",
+    "repo": "https://github.com/DFOnline/CodeClient"
+  },
+  "license": "MIT",
+  "icon": "assets/CodeClient/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.dfonline.codeclient.client.CodeClientClient"
+    ],
+    "main": [
+      "dev.dfonline.codeclient.CodeClient"
+    ]
+  },
+  "mixins": [
+    "CodeClient.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.11",
+    "fabric": "*",
+    "minecraft": "1.19.2"
+  }
+}
