@@ -1,6 +1,7 @@
-package dev.dfonline.codeclient;
+package dev.dfonline.codeclient.dev;
 
-import dev.dfonline.codeclient.mixin.MEntity;
+import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.PlotLocation;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityPose;
@@ -10,7 +11,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 
-public class DevClip {
+public class NoClip {
     public static boolean ignoresWalls() {
         if(PlotLocation.getY() == 0) return false;
         if(CodeClient.MC.player.getY() < 50) return false;

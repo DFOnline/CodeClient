@@ -6,7 +6,9 @@
   "client": [
     "MClientConnection",
     "MClientPlayerEntity",
-    "MClientPlayNetworkHandler"
+    "MClientPlayerInteractionManager",
+    "MClientPlayNetworkHandler",
+    "MInGameHud"
   ],
   "injectors": {
     "defaultRequire": 1

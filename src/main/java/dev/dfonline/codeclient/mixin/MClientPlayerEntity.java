@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.DevClip;
+import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -30,9 +30,9 @@ public class MClientPlayerEntity {
     @Inject(method = "sendMovementPackets", at = @At("HEAD"), cancellable = true)
     private void sendMovementPackets(CallbackInfo ci) {
         if(CodeClient.currentAction instanceof MoveToSpawn mts) if(mts.moveModifier()) ci.cancel();
-        if(DevClip.ignoresWalls()) {
+        if(NoClip.ignoresWalls()) {
         ci.cancel();
-            Vec3d pos = DevClip.handleSeverPosition();
+            Vec3d pos = NoClip.handleSeverPosition();
             ClientPlayerEntity player = CodeClient.MC.player;
             this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, player.getYaw(), player.getPitch(), false));
 
@@ -47,6 +47,6 @@ public class MClientPlayerEntity {
 
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double z, CallbackInfo ci) {
-        if(DevClip.ignoresWalls()) ci.cancel();
+        if(NoClip.ignoresWalls()) ci.cancel();
     }
 }

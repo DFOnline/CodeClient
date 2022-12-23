@@ -1,0 +1,55 @@
+package dev.dfonline.codeclient.dev;
+
+import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.PlotLocation;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+
+import java.util.List;
+
+public class InteractionManager {
+    public static boolean isInCodeSpace(BlockPos pos) {
+        return isInCodeSpace(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+    }
+
+    public static boolean isInCodeSpace(Vec3d pos) {
+        Vec3d plot = PlotLocation.getAsVec3d();
+        return
+                (pos.x < plot.x) && (pos.x >= plot.x - 20)
+                        &&
+                (pos.z >= plot.z) && (pos.z <= plot.z + 301)
+            ;
+    }
+
+    public static boolean onBreakBlock(BlockPos pos) {
+        if(!isInCodeSpace(pos)) return false;
+        if((pos.getY() + 1) % 5 == 0) return true;
+        Item type = CodeClient.MC.world.getBlockState(pos).getBlock().asItem();
+        if(List.of(Items.STONE, Items.PISTON, Items.STICKY_PISTON, Items.CHEST).contains(type)) return true;
+        if(type == Items.OAK_SIGN) pos = pos.add(1,0,0);
+        breakCodeBlock(pos);
+        return false;
+    }
+
+    public static boolean onPlaceBlock(BlockPos pos) {
+        if(isInCodeSpace(pos)) {
+            CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
+//            CodeClient.MC.player.playSound(new SoundEvent());
+            return true;
+        }
+        return false;
+    }
+
+    private static void breakCodeBlock(BlockPos pos) {
+        ClientWorld world = CodeClient.MC.world;
+        world.breakBlock(pos, false);
+        world.breakBlock(pos.add(0,1,0), false);
+        world.breakBlock(pos.add(-1,0,0), false);
+        world.breakBlock(pos.add(0,0,1), false);
+    }
+}

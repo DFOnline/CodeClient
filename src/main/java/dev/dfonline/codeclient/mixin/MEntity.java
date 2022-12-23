@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.DevClip;
+import dev.dfonline.codeclient.dev.NoClip;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.MovementType;
@@ -22,13 +22,13 @@ public abstract class MEntity {
 
     @Inject(method = "isInsideWall", at = @At("HEAD"), cancellable = true)
     private void insideWall(CallbackInfoReturnable<Boolean> cir) {
-        if(DevClip.ignoresWalls()) cir.setReturnValue(false);
+        if(NoClip.ignoresWalls()) cir.setReturnValue(false);
     }
 
     @Inject(method = "move", at = @At("HEAD"), cancellable = true)
     private void onMove(MovementType movementType, Vec3d movement, CallbackInfo ci) {
-        if(DevClip.ignoresWalls()) {
-            Vec3d pos = DevClip.handleClientPosition(movement);
+        if(NoClip.ignoresWalls()) {
+            Vec3d pos = NoClip.handleClientPosition(movement);
             this.setPosition(pos);
             ci.cancel();
         }
@@ -36,6 +36,6 @@ public abstract class MEntity {
 
     @Inject(method = "setPose", at = @At("HEAD"), cancellable = true)
     private void onSetPose(EntityPose pose, CallbackInfo ci) {
-        if(this.getId() == CodeClient.MC.player.getId() && DevClip.ignoresWalls()) ci.cancel();
+        if(this.getId() == CodeClient.MC.player.getId() && NoClip.ignoresWalls()) ci.cancel();
     }
 }
