@@ -25,7 +25,8 @@ public abstract class MInGameHud {
         if(OverlayManager.getOverlayText().size() == 0) return;
         TextRenderer textRenderer = getTextRenderer();
         int index = 0;
-        for (Text text : OverlayManager.getOverlayText()){
+        List<Text> overlay = List.copyOf(OverlayManager.getOverlayText());
+        for (Text text : overlay){
             textRenderer.drawWithShadow(matrices, text, 30, 30 + (index * 9), -1);
             index++;
         }

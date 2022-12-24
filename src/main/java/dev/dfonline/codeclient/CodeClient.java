@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import com.mojang.brigadier.context.CommandContext;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.impl.ClearPlot;
+import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
@@ -71,6 +72,15 @@ public class CodeClient implements ModInitializer {
                 currentAction = new None();
                 return 0;
             }));
+
+
+            dispatcher.register(ClientCommandManager.literal("getactiondump").executes(context -> {
+                currentAction = new GetActionDump(true, () -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction.init();
+                return 0;
+            }));
+
+
             dispatcher.register(ClientCommandManager.literal("getspawn").executes(context -> {
                 currentAction = new MoveToSpawn(() -> MC.player.sendMessage(Text.literal("Done!")));
                 currentAction.init();
