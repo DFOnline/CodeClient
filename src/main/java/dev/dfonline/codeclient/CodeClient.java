@@ -1,22 +1,21 @@
 package dev.dfonline.codeclient;
 
-import com.mojang.brigadier.context.CommandContext;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.ClearPlot;
 import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
-import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
+import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 
 public class CodeClient implements ModInitializer {
     public static final String MOD_NAME = "CodeClient";
+    public static final String MOD_ID = "codeclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     public static final MinecraftClient MC = MinecraftClient.getInstance();

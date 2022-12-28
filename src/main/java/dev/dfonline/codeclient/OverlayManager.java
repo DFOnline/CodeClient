@@ -15,6 +15,7 @@ public class OverlayManager {
     public static void setOverlayText() {
         setOverlayText(new ArrayList<>());
     }
+    
     public static void setOverlayText(ArrayList<Text> overlayText) {
         OverlayManager.overlayText = overlayText;
     }

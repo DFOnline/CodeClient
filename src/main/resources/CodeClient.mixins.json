@@ -4,6 +4,7 @@
   "package": "dev.dfonline.codeclient.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "ClientWorldAccessor",
     "MClientConnection",
     "MClientPlayerEntity",
     "MClientPlayerInteractionManager",

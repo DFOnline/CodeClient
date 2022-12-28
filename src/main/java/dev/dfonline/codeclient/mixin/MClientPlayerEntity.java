@@ -25,6 +25,7 @@ public class MClientPlayerEntity {
     private void tick(CallbackInfo ci) {
         CodeClient.onTick();
         CodeClient.currentAction.onTick();
+//        ChestPeeker.tick();
     }
 
     @Inject(method = "sendMovementPackets", at = @At("HEAD"), cancellable = true)

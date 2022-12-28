@@ -12,27 +12,14 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 
 import java.util.List;
 
 public class InteractionManager {
-    public static boolean isInCodeSpace(BlockPos pos) {
-        return isInCodeSpace(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
-    }
-
-    public static boolean isInCodeSpace(Vec3d pos) {
-        Vec3d plot = PlotLocation.getAsVec3d();
-        return
-                (pos.x < plot.x) && (pos.x >= plot.x - 20)
-                        &&
-                (pos.z >= plot.z) && (pos.z <= plot.z + 301)
-            ;
-    }
 
     public static boolean onBreakBlock(BlockPos pos) {
-        if(!isInCodeSpace(pos)) return false;
+        if(!PlotLocation.isInCodeSpace(pos)) return false;
         if((pos.getY() + 1) % 5 == 0) return true;
         Item type = CodeClient.MC.world.getBlockState(pos).getBlock().asItem();
         if(List.of(Items.STONE, Items.PISTON, Items.STICKY_PISTON, Items.CHEST).contains(type)) return true;
@@ -42,7 +29,7 @@ public class InteractionManager {
     }
 
     public static boolean onPlaceBlock(BlockPos pos) {
-        if(isInCodeSpace(pos)) {
+        if(PlotLocation.isInCodeSpace(pos)) {
             CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
             CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
             return true;
