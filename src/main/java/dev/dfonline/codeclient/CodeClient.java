@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.action.impl.ClearPlot;
 import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
+import dev.dfonline.codeclient.dev.NoClip;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -15,7 +16,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
-import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -47,6 +47,9 @@ public class CodeClient implements ModInitializer {
 
     public static void onTick() {
         if(MC.player.getPos().distanceTo(PlotLocation.getAsVec3d()) > 1000) PlotLocation.set(0,0,0);
+        if(NoClip.ignoresWalls()) {
+            MC.player.noClip = true;
+        }
     }
 
     private static ArrayList<ItemStack> TemplatesInInventory() {

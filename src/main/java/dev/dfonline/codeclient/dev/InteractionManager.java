@@ -31,7 +31,7 @@ public class InteractionManager {
     public static boolean onPlaceBlock(BlockPos pos) {
         if(PlotLocation.isInCodeSpace(pos)) {
             CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
-            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+//            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
             return true;
         }
         return false;

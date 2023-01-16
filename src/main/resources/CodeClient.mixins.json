@@ -9,12 +9,11 @@
     "MClientPlayerEntity",
     "MClientPlayerInteractionManager",
     "MClientPlayNetworkHandler",
-    "MInGameHud"
+    "MInGameHud",
+    "MEntity",
+    "MLivingEntity"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "MEntity"
-  ]
+  }
 }

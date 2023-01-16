@@ -25,6 +25,7 @@ public class MClientPlayerEntity {
     private void tick(CallbackInfo ci) {
         CodeClient.onTick();
         CodeClient.currentAction.onTick();
+        if(NoClip.ignoresWalls()) CodeClient.MC.player.noClip = true;
 //        ChestPeeker.tick();
     }
 
