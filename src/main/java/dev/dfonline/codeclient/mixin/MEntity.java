@@ -3,7 +3,6 @@ package dev.dfonline.codeclient.mixin;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.NoClip;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.MovementType;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,10 +32,5 @@ public abstract class MEntity {
             this.setPosition(pos);
             ci.cancel();
         }
-    }
-
-    @Inject(method = "setPose", at = @At("HEAD"), cancellable = true)
-    private void onSetPose(EntityPose pose, CallbackInfo ci) {
-        if(this.getId() == CodeClient.MC.player.getId() && NoClip.ignoresWalls()) ci.cancel();
     }
 }

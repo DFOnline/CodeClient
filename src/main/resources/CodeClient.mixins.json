@@ -12,7 +12,8 @@
     "MEntity",
     "MInGameHud",
     "MInGameOverlayRenderer",
-    "MLivingEntity"
+    "MLivingEntity",
+    "MPlayerEntity"
   ],
   "injectors": {
     "defaultRequire": 1
