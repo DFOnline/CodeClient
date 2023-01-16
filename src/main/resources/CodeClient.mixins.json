@@ -9,8 +9,9 @@
     "MClientPlayerEntity",
     "MClientPlayerInteractionManager",
     "MClientPlayNetworkHandler",
-    "MInGameHud",
     "MEntity",
+    "MInGameHud",
+    "MInGameOverlayRenderer",
     "MLivingEntity"
   ],
   "injectors": {

@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
 public class MClientPlayerEntity {
@@ -50,5 +51,10 @@ public class MClientPlayerEntity {
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double z, CallbackInfo ci) {
         if(NoClip.ignoresWalls()) ci.cancel();
+    }
+
+    @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
+    private void slowDown(CallbackInfoReturnable<Boolean> cir) {
+        if(NoClip.ignoresWalls()) cir.setReturnValue(false);
     }
 }

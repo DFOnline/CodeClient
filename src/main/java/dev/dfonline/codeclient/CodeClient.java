@@ -49,6 +49,7 @@ public class CodeClient implements ModInitializer {
         if(MC.player.getPos().distanceTo(PlotLocation.getAsVec3d()) > 1000) PlotLocation.set(0,0,0);
         if(NoClip.ignoresWalls()) {
             MC.player.noClip = true;
+            MC.player.airStrafingSpeed = 0.07f;
         }
     }
 

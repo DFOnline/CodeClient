@@ -26,13 +26,13 @@ public class NoClip {
         double nearestFloor = Math.floor(player.getY() / 5) * 5;
         Vec3d velocity = player.getVelocity();
 
-        double x = Math.max(player.getX() + movement.x, PlotLocation.getX() - 22);
-        double y = Math.max(player.getY() + movement.y, 50);
-        double z = Math.max(player.getZ() + movement.z, PlotLocation.getZ() - 2);
+        double x = Math.max(player.getX() + movement.x * 1.3, PlotLocation.getX() - 22);
+        double y = Math.max(player.getY() + movement.y * 1, 50);
+        double z = Math.max(player.getZ() + movement.z * 1.3, PlotLocation.getZ() - 2);
 
         player.setOnGround(false);
-        boolean wantsToFall = player.isSneaking() && (player.getPitch() > 40 || player.getAbilities().flying);
-        if((y < nearestFloor && !wantsToFall) || y == 50) {
+        boolean wantsToFall = player.isSneaking() && (player.getPitch() > 40);
+        if((y < nearestFloor && !wantsToFall && !player.getAbilities().flying) || y == 50) {
             player.setVelocityClient(velocity.x, 0, velocity.z);
             y = nearestFloor;
             player.setOnGround(true);
