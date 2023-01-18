@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.dev;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.PlotLocation;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.util.function.BooleanBiFunction;
@@ -10,8 +11,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
+import org.jetbrains.annotations.Nullable;
 
 public class NoClip {
+    public static LineType display = null;
+
     public static boolean ignoresWalls() {
         if(PlotLocation.getY() == 0) return false;
         if(CodeClient.MC.player.getY() < 50) return false;
@@ -66,5 +70,26 @@ public class NoClip {
             BlockState blockState = CodeClient.MC.world.getBlockState(pos);
             return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(CodeClient.MC.world, pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
         });
+    }
+
+    @Nullable
+    public static BlockState replaceBlockAt(BlockPos pos) {
+        if(!PlotLocation.isInCodeSpace(pos)) return null;
+        if(display == null) return null;
+        if(pos.getY() == 49) return null;
+        if((pos.getY() + 1) % 5 != 0) return null;
+        int offset = Math.abs((pos.getX() - 1) - PlotLocation.getX());
+        if(offset >= 19) return null;
+        if(display == LineType.NONE)                      return null;
+        if(display == LineType.LINES  && offset % 3 >= 1) return Blocks.AIR.getDefaultState();
+        if(display == LineType.DOUBLE && offset % 3 == 1) return Blocks.AIR.getDefaultState();
+        return Blocks.RED_STAINED_GLASS.getDefaultState();
+    }
+
+    enum LineType {
+        NONE,
+        LINES,
+        DOUBLE,
+        SOLID,
     }
 }

@@ -4,9 +4,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class PlotLocation {
-    private static int X;
-    private static int Y;
-    private static int Z;
+    private static int X = 0;
+    private static int Y = 0;
+    private static int Z = 0;
 
     public static void set(int x, int y, int z) {
         X = x;
