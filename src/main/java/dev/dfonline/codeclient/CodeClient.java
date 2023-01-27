@@ -6,11 +6,15 @@ import dev.dfonline.codeclient.action.impl.ClearPlot;
 import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
+import dev.dfonline.codeclient.dev.AddCodeScreen;
 import dev.dfonline.codeclient.dev.NoClip;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -18,6 +22,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +35,7 @@ public class CodeClient implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     public static final MinecraftClient MC = MinecraftClient.getInstance();
+    private static KeyBinding editBind;
 
     @NotNull
     public static Action currentAction = new None();
@@ -51,6 +57,10 @@ public class CodeClient implements ModInitializer {
             MC.player.noClip = true;
             MC.player.airStrafingSpeed = 0.07f;
         }
+        while(editBind.isPressed()) {
+            MC.setScreen(new CodeClientScreen(new AddCodeScreen()));
+        }
+//        if(MC.keyboard)
     }
 
     private static ArrayList<ItemStack> TemplatesInInventory() {
@@ -71,9 +81,22 @@ public class CodeClient implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.codeclient.actionpallete",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_Y,
+                "category.codeclient.dev"
+        ));
+
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("abort").executes(context -> {
                 currentAction = new None();
+                return 0;
+            }));
+
+
+            dispatcher.register(ClientCommandManager.literal("testplacer").executes(context -> {
+                MC.openPauseMenu(true);
                 return 0;
             }));
 
