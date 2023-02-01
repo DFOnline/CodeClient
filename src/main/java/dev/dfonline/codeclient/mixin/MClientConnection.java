@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Event;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
@@ -15,6 +16,7 @@ public class MClientConnection {
     private static <T extends PacketListener> void handlePacket(Packet<T> packet, net.minecraft.network.listener.PacketListener listener, CallbackInfo ci) {
         if(CodeClient.handlePacket(packet)) ci.cancel();
         if(CodeClient.currentAction.onReceivePacket(packet)) ci.cancel();
+        Event.handlePacket(packet);
 //        if(ChestPeeker.onPacket(packet)) ci.cancel();
     }
 }

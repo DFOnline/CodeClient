@@ -42,7 +42,7 @@ public class CodeClient implements ModInitializer {
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.","");
-//        if(!List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket", "TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket").contains(name)) LOGGER.info(name);
+//        if(!List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket", "TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
         return false;
     }
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
@@ -52,7 +52,6 @@ public class CodeClient implements ModInitializer {
     }
 
     public static void onTick() {
-        if(MC.player.getPos().distanceTo(PlotLocation.getAsVec3d()) > 1000) PlotLocation.set(0,0,0);
         if(NoClip.ignoresWalls()) {
             MC.player.noClip = true;
             MC.player.airStrafingSpeed = 0.07f;
