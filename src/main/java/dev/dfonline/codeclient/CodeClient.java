@@ -8,8 +8,8 @@ import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.dev.AddCodeScreen;
 import dev.dfonline.codeclient.dev.NoClip;
+import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 
 public class CodeClient implements ModInitializer {
@@ -80,6 +82,12 @@ public class CodeClient implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        try {
+            SocketHandler.start();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+
         editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.codeclient.actionpallete",
                 InputUtil.Type.KEYSYM,
@@ -88,42 +96,57 @@ public class CodeClient implements ModInitializer {
         ));
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("abort").executes(context -> {
-                currentAction = new None();
+            dispatcher.register(literal("auth").executes(context -> {
+                SocketHandler.setAuthorised(true);
+                MC.player.sendMessage(Text.literal("§eThe connect app has been authorised,§l it can now do anything to your plot code."));
+                MC.player.sendMessage(Text.literal("§eYou can remove the app by running §c/auth remove"));
                 return 0;
-            }));
+            }).then(literal("remove").executes(context -> {
+                SocketHandler.setAuthorised(false);
+                MC.player.sendMessage(Text.literal("§eThe connected app is no longer authorised, which might break it."));
+                return 0;
+            })).then(literal("disconnect").executes(context -> {
+                MC.player.sendMessage(Text.of("§cNot implemented."));
+                return 0;
+            })));
 
 
-            dispatcher.register(ClientCommandManager.literal("testplacer").executes(context -> {
+            dispatcher.register(literal("testplacer").executes(context -> {
                 MC.openPauseMenu(true);
                 return 0;
             }));
 
 
-            dispatcher.register(ClientCommandManager.literal("getactiondump").executes(context -> {
+            dispatcher.register(literal("abort").executes(context -> {
+                currentAction = new None();
+                return 0;
+            }));
+
+
+            dispatcher.register(literal("getactiondump").executes(context -> {
                 currentAction = new GetActionDump(true, () -> MC.player.sendMessage(Text.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
 
 
-            dispatcher.register(ClientCommandManager.literal("getspawn").executes(context -> {
+            dispatcher.register(literal("getspawn").executes(context -> {
                 currentAction = new MoveToSpawn(() -> MC.player.sendMessage(Text.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
-            dispatcher.register(ClientCommandManager.literal("clearplot").executes(context -> {
+            dispatcher.register(literal("clearplot").executes(context -> {
                 currentAction = new ClearPlot(() -> MC.player.sendMessage(Text.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
-            dispatcher.register(ClientCommandManager.literal("placetemplate").executes(context -> {
+            dispatcher.register(literal("placetemplate").executes(context -> {
                 currentAction = new PlaceTemplates(TemplatesInInventory(), () -> MC.player.sendMessage(Text.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
 
-            dispatcher.register(ClientCommandManager.literal("codeforme").executes(context -> {
+            dispatcher.register(literal("codeforme").executes(context -> {
                 currentAction = new ClearPlot(() -> {
                     currentAction = new MoveToSpawn(() -> {
                         currentAction = new PlaceTemplates(CodeClient.TemplatesInInventory(), () -> {
