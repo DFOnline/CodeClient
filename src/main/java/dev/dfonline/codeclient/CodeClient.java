@@ -59,7 +59,7 @@ public class CodeClient implements ModInitializer {
     public static void onTick() {
         if(NoClip.ignoresWalls()) {
             MC.player.noClip = true;
-            MC.player.airStrafingSpeed = 0.07f;
+            MC.player.airStrafingSpeed = .07f * (MC.player.getMovementSpeed() * 10);
         }
         while(editBind.isPressed()) {
             MC.setScreen(new CodeClientScreen(new AddCodeScreen()));
