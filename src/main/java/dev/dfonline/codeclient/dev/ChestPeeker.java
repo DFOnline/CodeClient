@@ -2,7 +2,7 @@ package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.OverlayManager;
-import dev.dfonline.codeclient.PlotLocation;
+import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.mixin.ClientWorldAccessor;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.item.ItemStack;
@@ -15,6 +15,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class ChestPeeker {
     private static BlockPos lastBlock = new BlockPos(0,0,0);
@@ -22,8 +23,10 @@ public class ChestPeeker {
 
     public static void tick() {
         if(CodeClient.MC.crosshairTarget instanceof BlockHitResult result) {
+            Dev plot = (Dev) CodeClient.location;
+            Vec3d playerPos = CodeClient.MC.player.getPos();
             BlockPos pos = result.getBlockPos();
-            if(PlotLocation.isInCodeSpace(CodeClient.MC.player.getPos())) {
+            if(plot.isInCodeSpace(playerPos.getX(), playerPos.getZ())) {
                 if(!lastBlock.equals(pos)) {
                     OverlayManager.setOverlayText();
                     lookingLogic(result);

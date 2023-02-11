@@ -1,7 +1,8 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.PlotLocation;
+import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -17,19 +18,22 @@ public class NoClip {
     public static LineType display = null;
 
     public static boolean ignoresWalls() {
-        return PlotLocation.getY() != 0 && !(CodeClient.MC.player.getY() < 50) && !(CodeClient.MC.player.getX() > PlotLocation.getX());
+        Plot plot = (Plot) CodeClient.location;
+        return !(CodeClient.MC.player.getY() < 50) && !(CodeClient.MC.player.getX() > plot.getX());
     }
 
     public static Vec3d handleClientPosition(Vec3d movement) {
         ClientPlayerEntity player = CodeClient.MC.player;
+        Dev plot = (Dev) CodeClient.location;
+
         player.setPose(EntityPose.STANDING);
 
         double nearestFloor = Math.floor(player.getY() / 5) * 5;
         Vec3d velocity = player.getVelocity();
 
-        double x = Math.max(player.getX() + movement.x * 1.3, PlotLocation.getX() - 22);
+        double x = Math.max(player.getX() + movement.x * 1.3, plot.getX() - 22);
         double y = Math.max(player.getY() + movement.y * 1, 50);
-        double z = Math.max(player.getZ() + movement.z * 1.3, PlotLocation.getZ() - 2);
+        double z = Math.max(player.getZ() + movement.z * 1.3, plot.getZ() - 2);
 
         player.setOnGround(false);
         boolean wantsToFall = player.isSneaking() && (player.getPitch() > 40);
@@ -39,8 +43,8 @@ public class NoClip {
             player.setOnGround(true);
         }
 
-        if(x == PlotLocation.getX() - 22 && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
-        if(z == PlotLocation.getZ() - 2  && velocity.getZ() < 0) player.setVelocityClient(velocity.x, velocity.y, 0);
+        if(x == plot.getX() - 22 && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
+        if(z == plot.getZ() - 2  && velocity.getZ() < 0) player.setVelocityClient(velocity.x, velocity.y, 0);
 
         return new Vec3d(x, Math.min(y,256), z);
     }
@@ -51,18 +55,19 @@ public class NoClip {
 
     public static Vec3d handleSeverPosition() {
         ClientPlayerEntity player = CodeClient.MC.player;
-        Vec3d pos = new Vec3d(Math.max(player.getX(), PlotLocation.getX() - 20), player.getY(), Math.max(player.getZ(), PlotLocation.getZ()));
+        Dev plot = (Dev) CodeClient.location;
+        Vec3d pos = new Vec3d(Math.max(player.getX(), plot.getX() - 20), player.getY(), Math.max(player.getZ(), plot.getZ()));
         if(isInsideWall(pos)) {
             double nearestFloor = Math.floor(player.getY() / 5) * 5;
             pos = new Vec3d(pos.x, nearestFloor + 2, pos.z);
         }
-        return new Vec3d(pos.x, (int) pos.y, pos.z);
+        return new Vec3d(pos.x, pos.y, pos.z);
     }
 
     public static boolean isInsideWall(Vec3d playerPos) {
         Vec3d middlePos = playerPos.add(0,(1.8 / 2),0);
         float f = 0.6F + 0.1F * 0.8F;
-        Box box = Box.of(middlePos, f, (1.79 + 1.0E-6 * 0.8F), f);
+        Box box = Box.of(middlePos, f, (1.7 + 1.0E-6 * 0.8F), f);
         return BlockPos.stream(box).anyMatch((pos) -> {
             BlockState blockState = CodeClient.MC.world.getBlockState(pos);
             return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(CodeClient.MC.world, pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
@@ -71,11 +76,12 @@ public class NoClip {
 
     @Nullable
     public static BlockState replaceBlockAt(BlockPos pos) {
-        if(!PlotLocation.isInCodeSpace(pos)) return null;
+        Dev plot = (Dev) CodeClient.location;
+        if(!plot.isInCodeSpace(pos.getX(), pos.getZ())) return null;
         if(display == null) return null;
         if(pos.getY() == 49) return null;
         if((pos.getY() + 1) % 5 != 0) return null;
-        int offset = Math.abs((pos.getX() - 1) - PlotLocation.getX());
+        int offset = Math.abs((pos.getX() - 1) - plot.getX());
         if(offset >= 19) return null;
         if(display == LineType.NONE)                      return null;
         if(display == LineType.LINES  && offset % 3 >= 1) return Blocks.AIR.getDefaultState();

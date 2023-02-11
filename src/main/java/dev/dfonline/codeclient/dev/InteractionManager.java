@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.PlotLocation;
+import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.*;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
@@ -19,7 +19,8 @@ import java.util.List;
 public class InteractionManager {
 
     public static boolean onBreakBlock(BlockPos pos) {
-        if(!PlotLocation.isInCodeSpace(pos)) return false;
+        Dev plot = (Dev) CodeClient.location;
+        if(!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
         if((pos.getY() + 1) % 5 == 0) return true;
         Item type = CodeClient.MC.world.getBlockState(pos).getBlock().asItem();
         if(List.of(Items.STONE, Items.PISTON, Items.STICKY_PISTON, Items.CHEST).contains(type)) return true;
@@ -29,7 +30,8 @@ public class InteractionManager {
     }
 
     public static boolean onPlaceBlock(BlockPos pos) {
-        if(PlotLocation.isInCodeSpace(pos)) {
+        Dev plot = (Dev) CodeClient.location;
+        if(plot.isInCodeSpace(pos.getX(), pos.getZ())) {
             CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
 //            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
             return true;

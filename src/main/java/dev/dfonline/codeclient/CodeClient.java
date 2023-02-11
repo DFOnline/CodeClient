@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.dev.AddCodeScreen;
 import dev.dfonline.codeclient.dev.NoClip;
+import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -44,6 +45,7 @@ public class CodeClient implements ModInitializer {
     @NotNull
     public static Action currentAction = new None();
     public static Size worldPlot = null;
+    public static Location location = null;
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.","");
