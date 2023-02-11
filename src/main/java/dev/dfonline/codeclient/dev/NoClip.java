@@ -17,10 +17,7 @@ public class NoClip {
     public static LineType display = null;
 
     public static boolean ignoresWalls() {
-        if(PlotLocation.getY() == 0) return false;
-        if(CodeClient.MC.player.getY() < 50) return false;
-        if(CodeClient.MC.player.getX() > PlotLocation.getX()) return false;
-        return true;
+        return PlotLocation.getY() != 0 && !(CodeClient.MC.player.getY() < 50) && !(CodeClient.MC.player.getX() > PlotLocation.getX());
     }
 
     public static Vec3d handleClientPosition(Vec3d movement) {
