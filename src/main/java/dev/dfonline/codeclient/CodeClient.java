@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.dfonline.codeclient.WorldPlot.Size;
 
 
 public class CodeClient implements ModInitializer {
@@ -39,8 +40,10 @@ public class CodeClient implements ModInitializer {
     public static final MinecraftClient MC = MinecraftClient.getInstance();
     private static KeyBinding editBind;
 
+
     @NotNull
     public static Action currentAction = new None();
+    public static Size worldPlot = null;
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.","");
@@ -111,10 +114,19 @@ public class CodeClient implements ModInitializer {
             })));
 
 
-            dispatcher.register(literal("testplacer").executes(context -> {
-                MC.openPauseMenu(true);
+            dispatcher.register(literal("worldplot").executes(context -> {
+                worldPlot = null;
                 return 0;
-            }));
+            }).then(literal("basic").executes(context -> {
+                worldPlot = Size.BASIC;
+                return 0;
+            })).then(literal("large").executes(context -> {
+                worldPlot = Size.LARGE;
+                return 0;
+            })).then(literal("massive").executes(context -> {
+                worldPlot = Size.MASSIVE;
+                return 0;
+            })));
 
 
             dispatcher.register(literal("abort").executes(context -> {

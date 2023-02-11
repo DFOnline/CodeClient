@@ -21,6 +21,7 @@ public class Event {
         if(packet instanceof OverlayMessageS2CPacket overlay) {
             if (step == Sequence.WAIT_FOR_MESSAGE && overlay.getMessage().getString().startsWith("DiamondFire - ")) {
                 CodeClient.LOGGER.info("Spawn mode.");
+                CodeClient.worldPlot = null;
                 PlotLocation.set(0,0,0);
                 step = Sequence.WAIT_FOR_CLEAR;
             }
