@@ -6,8 +6,8 @@ import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class AddCodeScreen extends LightweightGuiDescription {
     public AddCodeScreen() {
@@ -16,13 +16,13 @@ public class AddCodeScreen extends LightweightGuiDescription {
         root.setSize(256, 240);
         root.setInsets(Insets.ROOT_PANEL);
 
-        WSprite icon = new WSprite(new Identifier("minecraft:textures/item/redstone.png"));
+        WSprite icon = new WSprite(new ResourceLocation("minecraft:textures/item/redstone.png"));
         root.add(icon, 0, 2, 1, 1);
 
-        WButton button = new WButton(Text.translatable("gui.examplemod.examplebutton"));
+        WButton button = new WButton(Component.translatable("gui.examplemod.examplebutton"));
         root.add(button, 0, 3, 4, 1);
 
-        WLabel label = new WLabel(Text.literal("Test"), 0xFFFFFF);
+        WLabel label = new WLabel(Component.literal("Test"), 0xFFFFFF);
         root.add(label, 0, 4, 2, 1);
 
         root.validate(this);

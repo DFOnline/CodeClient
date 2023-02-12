@@ -1,40 +1,40 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.phys.Vec3;
 
 public class MoveToLocation {
-    private final ClientPlayerEntity player;
-    public MoveToLocation(ClientPlayerEntity player) {
+    private final LocalPlayer player;
+    public MoveToLocation(LocalPlayer player) {
         this.player = player;
     }
 
-    public static Vec3d shiftTowards(Vec3d origin, Vec3d location) {
-        Vec3d pos = origin.relativize(location);
+    public static Vec3 shiftTowards(Vec3 origin, Vec3 location) {
+        Vec3 pos = origin.vectorTo(location);
         double maxLength = 9.9;
         if(pos.length() > maxLength) {
-            return origin.add(pos.normalize().multiply(maxLength));
+            return origin.add(pos.normalize().scale(maxLength));
         }
         else {
             return location;
         }
     }
 
-    public void setPos(Vec3d pos) {
+    public void setPos(Vec3 pos) {
         setPos(pos.x, pos.y, pos.z);
     }
     public void setPos(double x, double y, double z) {
         this.player.setPos(x, y, z);
-        this.player.teleport(x, y, z);
-        CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, false));
+        this.player.teleportToWithTicket(x, y, z);
+        CodeClient.MC.getConnection().send(new ServerboundMovePlayerPacket.Pos(x, y, z, false));
     }
 
-    public static void shove(ClientPlayerEntity player, Vec3d location) {
-        new MoveToLocation(player).teleportTowards(player.getPos(), location);
+    public static void shove(LocalPlayer player, Vec3 location) {
+        new MoveToLocation(player).teleportTowards(player.position(), location);
     }
 
-    public void teleportTowards(Vec3d from, Vec3d to) {
+    public void teleportTowards(Vec3 from, Vec3 to) {
         setPos(shiftTowards(from,to));
     }
 }

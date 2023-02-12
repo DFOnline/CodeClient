@@ -4,15 +4,14 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.PlotLocation;
 import dev.dfonline.codeclient.action.Action;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -33,21 +32,21 @@ public class PlaceTemplates extends Action {
     @Override
     public void init() {
         currentIndex = 0;
-        recoverMainHand = CodeClient.MC.player.getMainHandStack();
+        recoverMainHand = CodeClient.MC.player.getMainHandItem();
     }
 
     static void makeHolding(ItemStack template) {
-        PlayerInventory inv = CodeClient.MC.player.getInventory();
-        CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, template));
-        inv.selectedSlot = 0;
-        inv.setStack(0, template);
+        Inventory inv = CodeClient.MC.player.getInventory();
+        CodeClient.MC.getConnection().send(new ServerboundSetCreativeModeSlotPacket(36, template));
+        inv.selected = 0;
+        inv.setItem(0, template);
     }
 
     static void placeTemplateAt(int row, int level) {
-        Vec3d pos = PlotLocation.getAsVec3d().add((2 + (row * 3)) * -1, level * 5, 0);
+        Vec3 pos = PlotLocation.getAsVec3d().add((2 + (row * 3)) * -1, level * 5, 0);
         new MoveToLocation(CodeClient.MC.player).setPos(pos.add(1,2,1));
-        BlockHitResult blockHitResult = new BlockHitResult(pos.add(0,1,0), Direction.UP, new BlockPos.Mutable(pos.x, pos.y, pos.z), false);
-        CodeClient.MC.interactionManager.interactBlock(CodeClient.MC.player, Hand.MAIN_HAND, blockHitResult);
+        BlockHitResult blockHitResult = new BlockHitResult(pos.add(0,1,0), Direction.UP, new BlockPos.MutableBlockPos(pos.x, pos.y, pos.z), false);
+        CodeClient.MC.gameMode.useItemOn(CodeClient.MC.player, InteractionHand.MAIN_HAND, blockHitResult);
     }
 
     @Override

@@ -7,9 +7,9 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.action.impl.ClearPlot;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.java_websocket.WebSocket;
 
 public class SocketHandler {
@@ -77,11 +77,11 @@ public class SocketHandler {
                 if(arguments.length == 2) {
                     CodeClient.LOGGER.info("Added " + templates.size() + " to the operation");
                     ItemStack template = new ItemStack(Items.ENDER_CHEST);
-                    NbtCompound nbt = new NbtCompound();
-                        NbtCompound PublicBukkitValues = new NbtCompound();
+                    CompoundTag nbt = new CompoundTag();
+                    CompoundTag PublicBukkitValues = new CompoundTag();
                         PublicBukkitValues.putString("hypercube:codetemplatedata","{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + arguments[1] + "\"}");
                     nbt.put("PublicBukkitValues", PublicBukkitValues);
-                    template.setNbt(nbt);
+                    template.setTag(nbt);
                     templates.add(template);
                     return "{\"status\":\"action\",\"action\":\"place\",\"progress\":\"active\",\"message\":\"Added template " + templates.size() + ".\"}";
                 }

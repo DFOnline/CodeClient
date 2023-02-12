@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 public class PlotLocation {
     private static int X = 0;
@@ -29,16 +29,16 @@ public class PlotLocation {
         return Z;
     }
 
-    public static Vec3d getAsVec3d() {
-        return new Vec3d(X,Y,Z);
+    public static Vec3 getAsVec3d() {
+        return new Vec3(X,Y,Z);
     }
 
     public static boolean isInCodeSpace(BlockPos pos) {
-        return isInCodeSpace(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+        return isInCodeSpace(new Vec3(pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static boolean isInCodeSpace(Vec3d pos) {
-        Vec3d plot = getAsVec3d();
+    public static boolean isInCodeSpace(Vec3 pos) {
+        Vec3 plot = getAsVec3d();
         return
                 (pos.x < plot.x) && (pos.x >= plot.x - 20)
                         &&

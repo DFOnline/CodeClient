@@ -1,14 +1,13 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.text.Text;
-
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OverlayManager {
-    private static ArrayList<Text> overlayText = new ArrayList<>();
+    private static ArrayList<net.minecraft.network.chat.Component> overlayText = new ArrayList<>();
 
-    public static List<Text> getOverlayText() {
+    public static List<net.minecraft.network.chat.Component> getOverlayText() {
         return overlayText;
     }
 
@@ -16,11 +15,11 @@ public class OverlayManager {
         setOverlayText(new ArrayList<>());
     }
     
-    public static void setOverlayText(ArrayList<Text> overlayText) {
+    public static void setOverlayText(ArrayList<net.minecraft.network.chat.Component> overlayText) {
         OverlayManager.overlayText = overlayText;
     }
 
-    public static void addOverlayText(Text overlayText) {
+    public static void addOverlayText(net.minecraft.network.chat.Component overlayText) {
         OverlayManager.overlayText.add(overlayText);
     }
 }

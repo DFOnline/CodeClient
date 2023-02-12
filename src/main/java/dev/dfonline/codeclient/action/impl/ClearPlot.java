@@ -4,15 +4,11 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.action.Action;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.Packet;
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
-import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
-import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.List;
 
@@ -26,27 +22,27 @@ public class ClearPlot extends Action {
     @Override
     public void init() {
         currentStep = Step.WAIT_FOR_OPTIONS;
-        CodeClient.MC.player.sendCommand("plot clear");
+        CodeClient.MC.player.commandUnsigned("plot clear");
     }
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if(packet instanceof InventoryS2CPacket inventoryS2CPacket) {
+        if(packet instanceof ClientboundContainerSetContentPacket containerSetContentPacket) {
             if(currentStep == Step.WAIT_FOR_OPTIONS) {
                 for (int i : List.of(9,14,15,44)) {
-                    ItemStack itemStack = inventoryS2CPacket.getContents().get(i);
+                    ItemStack itemStack = containerSetContentPacket.getItems().get(i);
                     Int2ObjectMap<ItemStack> modified = Int2ObjectMaps.singleton(i, new ItemStack(Items.AIR));
-                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.getSyncId(), inventoryS2CPacket.getRevision(), i, 0, SlotActionType.PICKUP, itemStack, modified));
+                    CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(containerSetContentPacket.getContainerId(), containerSetContentPacket.getStateId(), i, 0, ClickType.PICKUP, itemStack, modified));
                 }
                 currentStep = Step.WAIT_FOR_CLEAR;
                 return true;
             }
             if(currentStep == Step.WAIT_FOR_CLEAR) {
                 int i = 11;
-                ItemStack itemStack = inventoryS2CPacket.getContents().get(i);
+                ItemStack itemStack = containerSetContentPacket.getItems().get(i);
                 if(itemStack.getItem().equals(Items.GREEN_CONCRETE)) {
                     Int2ObjectMap<ItemStack> modified = Int2ObjectMaps.singleton(i, new ItemStack(Items.AIR));
-                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.getSyncId(), inventoryS2CPacket.getRevision(), i, 0, SlotActionType.PICKUP, itemStack, modified));
+                    CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(containerSetContentPacket.getContainerId(), containerSetContentPacket.getStateId(), i, 0, ClickType.PICKUP, itemStack, modified));
                     currentStep = Step.DONE;
                     this.callback();
                     return true;
@@ -54,10 +50,10 @@ public class ClearPlot extends Action {
             }
         }
         if(currentStep != Step.DONE) {
-            if(packet instanceof InventoryS2CPacket) return true;
-            if(packet instanceof PlaySoundS2CPacket) return true;
-            if(packet instanceof OpenScreenS2CPacket) return true;
-            if(packet instanceof ScreenHandlerSlotUpdateS2CPacket) return true;
+            if(packet instanceof ClientboundContainerSetContentPacket) return true;
+            if(packet instanceof ClientboundSoundPacket) return true;
+            if(packet instanceof ClientboundOpenScreenPacket) return true;
+            if(packet instanceof ClientboundContainerSetSlotPacket) return true;
         }
         return super.onReceivePacket(packet);
     }

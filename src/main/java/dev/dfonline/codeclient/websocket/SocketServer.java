@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.websocket;
 
 import dev.dfonline.codeclient.CodeClient;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -18,8 +18,8 @@ public class SocketServer extends WebSocketServer {
         SocketHandler.setConnection(conn);
         CodeClient.LOGGER.info(conn.getRemoteSocketAddress().toString() + " has just connected to the CodeClient API.");
         if(CodeClient.MC.player != null) {
-            CodeClient.MC.player.sendMessage(Text.of("§eAn application has connected to CodeClient"));
-            CodeClient.MC.player.sendMessage(Text.of("§eRun §c/auth§e to allow it to§l freely modify your plot"));
+            CodeClient.MC.player.sendSystemMessage(Component.nullToEmpty("§eAn application has connected to CodeClient"));
+            CodeClient.MC.player.sendSystemMessage(Component.nullToEmpty("§eRun §c/auth§e to allow it to§l freely modify your plot"));
         }
     }
 

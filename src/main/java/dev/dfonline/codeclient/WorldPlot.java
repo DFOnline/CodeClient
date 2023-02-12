@@ -1,6 +1,6 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 public class WorldPlot {
     public static boolean shouldNotRender(BlockPos pos) {

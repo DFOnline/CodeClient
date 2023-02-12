@@ -1,8 +1,11 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.network.Packet;
-import net.minecraft.network.listener.PacketListener;
-import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 
 public class Event {
     private static double x;
@@ -10,23 +13,23 @@ public class Event {
     private static Sequence step = Sequence.WAIT_FOR_CLEAR;
 
     public static <T extends PacketListener> void handlePacket(Packet<T> packet) {
-        if(packet instanceof ClearTitleS2CPacket clear) {
-            if (clear.shouldReset()) step = Sequence.WAIT_FOR_POS;
+        if(packet instanceof ClientboundClearTitlesPacket clear) {
+            if (clear.shouldResetTimes()) step = Sequence.WAIT_FOR_POS;
         }
-        if(packet instanceof PlayerPositionLookS2CPacket pos) {
+        if(packet instanceof ClientboundPlayerPositionPacket pos) {
             x = pos.getX();
             z = pos.getZ();
             if(step == Sequence.WAIT_FOR_POS) step = Sequence.WAIT_FOR_MESSAGE;
         }
-        if(packet instanceof OverlayMessageS2CPacket overlay) {
-            if (step == Sequence.WAIT_FOR_MESSAGE && overlay.getMessage().getString().startsWith("DiamondFire - ")) {
+        if(packet instanceof ClientboundSetActionBarTextPacket overlay) {
+            if (step == Sequence.WAIT_FOR_MESSAGE && overlay.getText().getString().startsWith("DiamondFire - ")) {
                 CodeClient.LOGGER.info("Spawn mode.");
                 CodeClient.worldPlot = null;
                 PlotLocation.set(0,0,0);
                 step = Sequence.WAIT_FOR_CLEAR;
             }
         }
-        if(packet instanceof GameMessageS2CPacket message) {
+        if(packet instanceof ClientboundSystemChatPacket message) {
             if(step == Sequence.WAIT_FOR_MESSAGE) {
                 String content = message.content().getString();
                 if(content.equals("» You are now in dev mode.")) {

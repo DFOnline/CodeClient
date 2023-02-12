@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.ClearPlot;
@@ -12,15 +13,14 @@ import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.listener.PacketListener;
-import net.minecraft.text.Text;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -37,8 +37,8 @@ public class CodeClient implements ModInitializer {
     public static final String MOD_ID = "codeclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
-    public static final MinecraftClient MC = MinecraftClient.getInstance();
-    private static KeyBinding editBind;
+    public static final Minecraft MC = Minecraft.getInstance();
+    private static KeyMapping editBind;
 
 
     @NotNull
@@ -58,25 +58,25 @@ public class CodeClient implements ModInitializer {
 
     public static void onTick() {
         if(NoClip.ignoresWalls()) {
-            MC.player.noClip = true;
-            MC.player.airStrafingSpeed = 0.07f;
+            MC.player.noPhysics = true;
+            MC.player.flyingSpeed = 0.07f;
         }
-        while(editBind.isPressed()) {
+        while(editBind.isDown()) {
             MC.setScreen(new CodeClientScreen(new AddCodeScreen()));
         }
 //        if(MC.keyboard)
     }
 
     private static ArrayList<ItemStack> TemplatesInInventory() {
-        PlayerInventory inv = MC.player.getInventory();
+        Inventory inv = MC.player.getInventory();
         ArrayList<ItemStack> templates = new ArrayList<>();
         for (int i = 0; i < (27 + 9); i++) {
-            ItemStack item = inv.getStack(i);
-            if (!item.hasNbt()) continue;
-            NbtCompound nbt = item.getNbt();
+            ItemStack item = inv.getItem(i);
+            if (!item.hasTag()) continue;
+            CompoundTag nbt = item.getTag();
             if (!nbt.contains("PublicBukkitValues")) continue;
             LOGGER.info(String.valueOf(item));
-            NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
+            CompoundTag publicBukkit = nbt.getCompound("PublicBukkitValues");
             if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
             templates.add(item);
         }
@@ -91,9 +91,9 @@ public class CodeClient implements ModInitializer {
             LOGGER.error(e.getMessage());
         }
 
-        editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        editBind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.codeclient.actionpallete",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_Y,
                 "category.codeclient.dev"
         ));
@@ -101,15 +101,15 @@ public class CodeClient implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(literal("auth").executes(context -> {
                 SocketHandler.setAuthorised(true);
-                MC.player.sendMessage(Text.literal("§eThe connect app has been authorised,§l it can now do anything to your plot code."));
-                MC.player.sendMessage(Text.literal("§eYou can remove the app by running §c/auth remove"));
+                MC.player.sendSystemMessage(Component.literal("§eThe connect app has been authorised,§l it can now do anything to your plot code."));
+                MC.player.sendSystemMessage(Component.literal("§eYou can remove the app by running §c/auth remove"));
                 return 0;
             }).then(literal("remove").executes(context -> {
                 SocketHandler.setAuthorised(false);
-                MC.player.sendMessage(Text.literal("§eThe connected app is no longer authorised, which might break it."));
+                MC.player.sendSystemMessage(Component.literal("§eThe connected app is no longer authorised, which might break it."));
                 return 0;
             })).then(literal("disconnect").executes(context -> {
-                MC.player.sendMessage(Text.of("§cNot implemented."));
+                MC.player.sendSystemMessage(Component.nullToEmpty("§cNot implemented."));
                 return 0;
             })));
 
@@ -136,24 +136,24 @@ public class CodeClient implements ModInitializer {
 
 
             dispatcher.register(literal("getactiondump").executes(context -> {
-                currentAction = new GetActionDump(true, () -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new GetActionDump(true, () -> MC.player.sendSystemMessage(Component.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
 
 
             dispatcher.register(literal("getspawn").executes(context -> {
-                currentAction = new MoveToSpawn(() -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new MoveToSpawn(() -> MC.player.sendSystemMessage(Component.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
             dispatcher.register(literal("clearplot").executes(context -> {
-                currentAction = new ClearPlot(() -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new ClearPlot(() -> MC.player.sendSystemMessage(Component.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
             dispatcher.register(literal("placetemplate").executes(context -> {
-                currentAction = new PlaceTemplates(TemplatesInInventory(), () -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new PlaceTemplates(TemplatesInInventory(), () -> MC.player.sendSystemMessage(Component.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
@@ -162,7 +162,7 @@ public class CodeClient implements ModInitializer {
                 currentAction = new ClearPlot(() -> {
                     currentAction = new MoveToSpawn(() -> {
                         currentAction = new PlaceTemplates(CodeClient.TemplatesInInventory(), () -> {
-                            MC.player.sendMessage(Text.literal("Done!"));
+                            MC.player.sendSystemMessage(Component.literal("Done!"));
                         });
                         currentAction.init();
                     });
