@@ -15,6 +15,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.DirectJoinServerScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.chat.Component;
@@ -39,6 +44,8 @@ public class CodeClient implements ModInitializer {
 
     public static final Minecraft MC = Minecraft.getInstance();
     private static KeyMapping editBind;
+
+    public static boolean justStarted = true;
 
 
     @NotNull

@@ -13,7 +13,8 @@
     "MInGameHud",
     "MInGameOverlayRenderer",
     "MLivingEntity",
-    "MPlayerEntity"
+    "MPlayerEntity",
+    "MTitleScreen"
   ],
   "injectors": {
     "defaultRequire": 1
