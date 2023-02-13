@@ -29,8 +29,10 @@ public abstract class MEntity {
         if(this.getId() != CodeClient.MC.player.getId()) return;
         if(NoClip.ignoresWalls()) {
             Vec3d pos = NoClip.handleClientPosition(movement);
-            this.setPosition(pos);
-            ci.cancel();
+            if(pos != null) {
+                this.setPosition(pos);
+                ci.cancel();
+            }
         }
     }
 }

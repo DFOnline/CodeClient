@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.mixin;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
+import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
@@ -32,18 +33,20 @@ public class MClientPlayerEntity {
 
     @Inject(method = "sendMovementPackets", at = @At("HEAD"), cancellable = true)
     private void sendMovementPackets(CallbackInfo ci) {
-        if(CodeClient.currentAction instanceof MoveToSpawn mts) if(mts.moveModifier()) ci.cancel();
-        if(NoClip.ignoresWalls()) {
-        ci.cancel();
-            Vec3d pos = NoClip.handleSeverPosition();
-            ClientPlayerEntity player = CodeClient.MC.player;
-            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, player.getYaw(), player.getPitch(), false));
+        if(CodeClient.location instanceof Dev) {
+            if (CodeClient.currentAction instanceof MoveToSpawn mts) if (mts.moveModifier()) ci.cancel();
+            if (NoClip.ignoresWalls()) {
+                ci.cancel();
+                Vec3d pos = NoClip.handleSeverPosition();
+                ClientPlayerEntity player = CodeClient.MC.player;
+                this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, player.getYaw(), player.getPitch(), false));
 
-            boolean sneaking = player.isSneaking();
-            if (sneaking != this.lastSneaking) {
-                ClientCommandC2SPacket.Mode mode = sneaking ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY : ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
-                this.networkHandler.sendPacket(new ClientCommandC2SPacket(player, mode));
-                this.lastSneaking = sneaking;
+                boolean sneaking = player.isSneaking();
+                if (sneaking != this.lastSneaking) {
+                    ClientCommandC2SPacket.Mode mode = sneaking ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY : ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
+                    this.networkHandler.sendPacket(new ClientCommandC2SPacket(player, mode));
+                    this.lastSneaking = sneaking;
+                }
             }
         }
     }

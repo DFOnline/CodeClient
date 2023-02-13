@@ -73,7 +73,7 @@ public class NoClip {
     public static boolean isInsideWall(Vec3d playerPos) {
         Vec3d middlePos = playerPos.add(0,(1.8 / 2),0);
         float f = 0.6F + 0.1F * 0.8F;
-        Box box = Box.of(middlePos, f, (1.7 + 1.0E-6 * 0.8F), f);
+        Box box = Box.of(middlePos, f, (1.799 + 1.0E-6 * 0.8F), f);
         return BlockPos.stream(box).anyMatch((pos) -> {
             BlockState blockState = CodeClient.MC.world.getBlockState(pos);
             return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(CodeClient.MC.world, pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
