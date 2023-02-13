@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.dev.AddCodeScreen;
 import dev.dfonline.codeclient.dev.NoClip;
+import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
@@ -59,7 +60,7 @@ public class CodeClient implements ModInitializer {
     }
 
     public static void onTick() {
-        if(NoClip.ignoresWalls()) {
+        if(NoClip.ignoresWalls() && location instanceof Dev) {
             MC.player.noClip = true;
             MC.player.airStrafingSpeed = .07f * (MC.player.getMovementSpeed() * 10);
         }
