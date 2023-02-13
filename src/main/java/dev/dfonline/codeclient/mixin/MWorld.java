@@ -16,10 +16,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MWorld {
     @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)
     private void isPlaceable(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
-        Dev plot = (Dev) CodeClient.location;
-        if(WorldPlot.shouldNotRender(pos)) {
-            cir.setReturnValue(Blocks.VOID_AIR.getDefaultState());
+        if(CodeClient.location instanceof Dev plot) {
+            if(WorldPlot.shouldNotRender(pos)) {
+                cir.setReturnValue(Blocks.VOID_AIR.getDefaultState());
+            }
+            if(plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4) cir.setReturnValue(Blocks.BARRIER.getDefaultState());
         }
-        if(plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4) cir.setReturnValue(Blocks.BARRIER.getDefaultState());
     }
 }
