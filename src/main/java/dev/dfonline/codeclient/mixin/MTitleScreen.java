@@ -14,10 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MTitleScreen {
     @Inject(method = "init", at = @At("RETURN"))
     protected void init(CallbackInfo ci) {
-        if(CodeClient.justStarted) {
-            CodeClient.justStarted = false;
-            ServerData serverData = new ServerData("diamondfire", "mcdiamondfire.com", false);
-            ConnectScreen.startConnecting((TitleScreen)(Object)this, CodeClient.MC, ServerAddress.parseString(serverData.ip), serverData);
-        }
+        ServerData serverData = new ServerData("diamondfire", "mcdiamondfire.com", false);
+        ConnectScreen.startConnecting((TitleScreen)(Object)this, CodeClient.MC, ServerAddress.parseString(serverData.ip), serverData);
     }
 }

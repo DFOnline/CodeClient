@@ -45,8 +45,6 @@ public class CodeClient implements ModInitializer {
     public static final Minecraft MC = Minecraft.getInstance();
     private static KeyMapping editBind;
 
-    public static boolean justStarted = true;
-
 
     @NotNull
     public static Action currentAction = new None();
