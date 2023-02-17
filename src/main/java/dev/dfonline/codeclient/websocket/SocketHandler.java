@@ -14,7 +14,7 @@ import org.java_websocket.WebSocket;
 
 public class SocketHandler {
     public static final int PORT = 31375;
-    private static WebSocket connection;
+    private static WebSocket connection = null;
     private static boolean authorised = false;
     private static Action action = Action.NONE;
     private static final ArrayList<ItemStack> templates = new ArrayList<>();
@@ -37,9 +37,6 @@ public class SocketHandler {
 
     public static void setConnection(WebSocket socket) {
         action = Action.NONE;
-        if(connection != null) {
-            connection.send("Connection was closed because another one was opened at " + connection.getRemoteSocketAddress());
-        }
         connection = socket;
     }
 

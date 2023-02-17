@@ -110,6 +110,7 @@ public class CodeClient implements ModInitializer {
                 return 0;
             })).then(literal("disconnect").executes(context -> {
                 MC.player.sendMessage(Text.of("§cNot implemented."));
+                SocketHandler.setConnection(null);
                 return 0;
             })));
 
