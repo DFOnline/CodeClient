@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NoClip {
     public static LineType display = null;
+    public static Vec3d lastPos = new Vec3d(0,0,0);
 
     public static boolean ignoresWalls() {
         if(PlotLocation.getY() == 0) return false;
@@ -59,7 +60,10 @@ public class NoClip {
             double nearestFloor = Math.floor(player.getY() / 5) * 5;
             pos = new Vec3d(pos.x, nearestFloor + 2, pos.z);
         }
-        return new Vec3d(pos.x, (int) pos.y, pos.z);
+        pos = new Vec3d(pos.x, (int) pos.y, pos.z);
+        if(pos.equals(lastPos)) return null;
+        lastPos = pos;
+        return pos;
     }
 
     public static boolean isInsideWall(Vec3d playerPos) {

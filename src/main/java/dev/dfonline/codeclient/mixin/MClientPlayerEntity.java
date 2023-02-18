@@ -36,6 +36,7 @@ public class MClientPlayerEntity {
         if(NoClip.ignoresWalls()) {
         ci.cancel();
             Vec3d pos = NoClip.handleSeverPosition();
+            if(pos == null) return;
             ClientPlayerEntity player = CodeClient.MC.player;
             this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, player.getYaw(), player.getPitch(), false));
 

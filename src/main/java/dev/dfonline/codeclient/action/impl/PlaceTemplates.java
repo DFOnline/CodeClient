@@ -59,7 +59,7 @@ public class PlaceTemplates extends Action {
         };
         if(currentIndex == -1) return;
         timeSinceLastTick = timeSinceLastTick + 1;
-        if(timeSinceLastTick == 3) {
+        if(timeSinceLastTick == 5) {
             timeSinceLastTick = 0;
             makeHolding(templates.get(currentIndex));
             int level = currentIndex / rowSize;
