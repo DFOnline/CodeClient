@@ -11,6 +11,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.screen.slot.Slot;
@@ -66,6 +68,14 @@ public class InteractionManager {
                 if(!varItem.asString().startsWith("{\"id\":\"bl_tag\",\"data\":")) return false;
                 Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap();
                 CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId,revision,slot.getIndex(),button,actionType,item,int2ObjectMap));
+                ItemStack newItem = item.copy();
+                NbtList lore = (NbtList) newItem.getNbt().getCompound("display").get("Lore");
+                int currentIndex = 0;
+                int i = -1;
+                for (NbtElement nbtElement: lore) {
+                    i ++;
+                    if(nbtElement.asString().contains("{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"dark_aqua\",\"text\":\"» \"}")) currentIndex = i;
+                }
                 return true;
             }
         }
