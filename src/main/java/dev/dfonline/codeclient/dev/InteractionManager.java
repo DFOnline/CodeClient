@@ -2,11 +2,19 @@ package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.PlotLocation;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.*;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Hand;
@@ -44,5 +52,23 @@ public class InteractionManager {
         world.setBlockState(pos.add(0,1,0), Blocks.AIR.getDefaultState());
         world.setBlockState(pos.add(-1,0,0), Blocks.AIR.getDefaultState());
         world.setBlockState(pos.add(0,0,1), Blocks.AIR.getDefaultState());
+    }
+
+    public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+        if(!slot.hasStack()) return false;
+        ItemStack item = slot.getStack();
+        if(!item.hasNbt()) return false;
+        NbtCompound nbt = item.getNbt();
+        if(!nbt.contains("PublicBukkitValues")) return false;
+        if(nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
+            if(!bukkitValues.contains("hypercube:varitem")) return false;
+            if(bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
+                if(!varItem.asString().startsWith("{\"id\":\"bl_tag\",\"data\":")) return false;
+                Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap();
+                CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId,revision,slot.getIndex(),button,actionType,item,int2ObjectMap));
+                return true;
+            }
+        }
+        return false;
     }
 }
