@@ -6,13 +6,13 @@
   "client": [
     "ClientWorldAccessor",
     "MClientConnection",
-    "MClientLevel",
     "MClientPlayerEntity",
     "MClientPlayerInteractionManager",
     "MClientPlayNetworkHandler",
     "MEntity",
     "MInGameHud",
     "MInGameOverlayRenderer",
+    "MJoinMultiplayerScreen",
     "MLivingEntity",
     "MPlayerEntity",
     "MTitleScreen"
