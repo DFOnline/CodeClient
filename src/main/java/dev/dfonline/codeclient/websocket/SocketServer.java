@@ -26,6 +26,7 @@ public class SocketServer extends WebSocketServer {
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         CodeClient.LOGGER.info(conn.getRemoteSocketAddress().toString() + " has just disconnected from the CodeClient API.");
+        SocketHandler.setConnection(null);
     }
 
     @Override
