@@ -1,7 +1,12 @@
 package dev.dfonline.codeclient.dev;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.PlotLocation;
+import dev.dfonline.codeclient.action.Action;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.*;
@@ -64,19 +69,42 @@ public class InteractionManager {
         if(!nbt.contains("PublicBukkitValues")) return false;
         if(nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
             if(!bukkitValues.contains("hypercube:varitem")) return false;
-            if(bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
-                if(!varItem.asString().startsWith("{\"id\":\"bl_tag\",\"data\":")) return false;
-                Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap();
-                CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId,revision,slot.getIndex(),button,actionType,item,int2ObjectMap));
-                ItemStack newItem = item.copy();
-                NbtList lore = (NbtList) newItem.getNbt().getCompound("display").get("Lore");
-                int currentIndex = 0;
-                int i = -1;
-                for (NbtElement nbtElement: lore) {
-                    i ++;
-                    if(nbtElement.asString().contains("{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"dark_aqua\",\"text\":\"» \"}")) currentIndex = i;
+            try {
+                if (bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
+                    if (!varItem.asString().startsWith("{\"id\":\"bl_tag\",\"data\":")) return false;
+                    Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap();
+                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
+                    NbtList lore = (NbtList) nbt.getCompound("display").get("Lore");
+                    int offset = 1;
+                    int currentIndex = 0;
+                    int i = -1;
+                    for (NbtElement nbtElement : lore) {
+                        i++;
+                        JsonElement element = JsonParser.parseString(nbtElement.asString());
+                        if (!element.isJsonObject()) continue;
+                        JsonObject json = element.getAsJsonObject();
+
+                        if (nbtElement.asString().equals("{\"text\":\"\"}")) {
+                            offset = i + 1;
+                        }
+
+                        if (json.has("extra") && json.get("extra").isJsonArray() && json.get("extra").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString().equals("» ")) {
+                            lore.set(i, NbtString.of("{\"text\":\"\",\"extra\":[{\"text\":\"" + json.get("extra").getAsJsonArray().get(1).getAsJsonObject().get("text").getAsString() + "\",\"color\":\"#808080\"}]}"));
+                            currentIndex = i;
+                            break;
+                        }
+                    }
+                    int nextline = (currentIndex + (button == 1 ? -2 : 0) + 1);
+                    if(nextline == lore.size()) nextline = offset;
+                    if (nextline == offset - 1) nextline = lore.size() - 1;
+                    if (nextline != -1) {
+                        String name = JsonParser.parseString(lore.get(nextline).asString()).getAsJsonObject().get("extra").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString();
+                        lore.set(nextline, NbtString.of("{\"text\":\"\",\"extra\":[{\"color\":\"dark_aqua\",\"text\":\"» \"},{\"color\":\"aqua\",\"text\":\"" + name + "\"}]}"));
+                    }
+                    return true;
                 }
-                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return false;
