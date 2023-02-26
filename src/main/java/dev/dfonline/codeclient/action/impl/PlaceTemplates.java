@@ -4,10 +4,12 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.PlotLocation;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -46,8 +48,9 @@ public class PlaceTemplates extends Action {
     static void placeTemplateAt(int row, int level) {
         Vec3d pos = PlotLocation.getAsVec3d().add((2 + (row * 3)) * -1, level * 5, 0);
         new MoveToLocation(CodeClient.MC.player).setPos(pos.add(1,2,1));
-        BlockHitResult blockHitResult = new BlockHitResult(pos.add(0,1,0), Direction.UP, new BlockPos.Mutable(pos.x, pos.y, pos.z), false);
-        CodeClient.MC.interactionManager.interactBlock(CodeClient.MC.player, Hand.MAIN_HAND, blockHitResult);
+        BlockHitResult blockHitResult = new BlockHitResult(pos.add(0,1,0), Direction.UP, new BlockPos.Mutable(pos.x, pos.y , pos.z), false);
+        ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, blockHitResult, sequence));
+//        CodeClient.MC.interactionManager.interactBlock(CodeClient.MC.player, Hand.MAIN_HAND, blockHitResult);
     }
 
     @Override

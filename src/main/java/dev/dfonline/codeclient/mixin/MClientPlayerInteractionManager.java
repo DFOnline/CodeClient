@@ -23,9 +23,9 @@ public class MClientPlayerInteractionManager {
         if(InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
     }
 
-    @Inject(method = "interactBlockInternal", at = @At("HEAD") , cancellable = true)
-    private void onInternalBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-        if(InteractionManager.onPlaceBlock(hitResult.getBlockPos())) cir.setReturnValue(ActionResult.FAIL);
+    @Inject(method = "interactBlock", at = @At("HEAD") , cancellable = true)
+    private void onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+        if(InteractionManager.onBlockInteract(player, hand, hitResult)) cir.setReturnValue(ActionResult.FAIL);
     }
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)

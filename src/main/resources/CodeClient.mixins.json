@@ -19,6 +19,7 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "ClientPlayerInteractionManagerAccessor",
     "MChunkRendererRegion",
     "MWorld"
   ]

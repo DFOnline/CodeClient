@@ -1,15 +1,15 @@
 package dev.dfonline.codeclient.dev;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.PlotLocation;
-import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.*;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
@@ -20,13 +20,17 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 
 import java.util.List;
@@ -40,15 +44,6 @@ public class InteractionManager {
         if(List.of(Items.STONE, Items.PISTON, Items.STICKY_PISTON, Items.CHEST).contains(type)) return true;
         if(type == Items.OAK_SIGN) pos = pos.add(1,0,0);
         breakCodeBlock(pos);
-        return false;
-    }
-
-    public static boolean onPlaceBlock(BlockPos pos) {
-        if(PlotLocation.isInCodeSpace(pos)) {
-            CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
-//            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
-            return true;
-        }
         return false;
     }
 
@@ -106,6 +101,26 @@ public class InteractionManager {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        return false;
+    }
+
+    public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
+        if(PlotLocation.isInCodeSpace(hitResult.getPos())) {
+            CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
+//            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+            if(hitResult.getSide() == Direction.UP) {
+                BlockPos from = hitResult.getBlockPos();
+                hitResult = new BlockHitResult(new Vec3d(from.getX(), from.getY() + 1, from.getZ()),Direction.UP,hitResult.getBlockPos().add(0,1,0),false);
+            }
+            BlockHitResult finalHitResult = hitResult;
+            CodeClient.LOGGER.info(String.valueOf(hitResult.getBlockPos()));
+            CodeClient.LOGGER.info(String.valueOf(hitResult.getSide()));
+            CodeClient.LOGGER.info(String.valueOf(hitResult.getPos()));
+            CodeClient.LOGGER.info(String.valueOf(hitResult.getType()));
+            CodeClient.LOGGER.info(String.valueOf(hitResult.isInsideBlock()));
+            ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, finalHitResult, sequence));
+            return true;
         }
         return false;
     }
