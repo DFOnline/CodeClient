@@ -20,8 +20,6 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static dev.dfonline.codeclient.WorldPlot.Size;
 
@@ -125,6 +123,14 @@ public class CodeClient implements ModInitializer {
 
             dispatcher.register(literal("getspawn").executes(context -> {
                 currentAction = new MoveToSpawn(() -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction.init();
+                return 0;
+            }));
+            dispatcher.register(literal("getsize").executes(context -> {
+                currentAction = new GetPlotSize(() -> {
+                    currentAction = new None();
+                    MC.player.sendMessage(Text.literal(worldPlot.name()));
+                });
                 currentAction.init();
                 return 0;
             }));
