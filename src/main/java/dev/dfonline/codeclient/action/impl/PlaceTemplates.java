@@ -3,12 +3,10 @@ package dev.dfonline.codeclient.action.impl;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.PlotLocation;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -38,13 +36,6 @@ public class PlaceTemplates extends Action {
         recoverMainHand = CodeClient.MC.player.getMainHandStack();
     }
 
-    static void makeHolding(ItemStack template) {
-        PlayerInventory inv = CodeClient.MC.player.getInventory();
-        CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, template));
-        inv.selectedSlot = 0;
-        inv.setStack(0, template);
-    }
-
     static void placeTemplateAt(int row, int level) {
         Vec3d pos = PlotLocation.getAsVec3d().add((2 + (row * 3)) * -1, level * 5, 0);
         new MoveToLocation(CodeClient.MC.player).setPos(pos.add(1,2,1));
@@ -57,14 +48,14 @@ public class PlaceTemplates extends Action {
     public void onTick() {
         if(currentIndex >= templates.size()) {
             currentIndex = -1;
-            makeHolding(recoverMainHand);
+            Utility.makeHolding(recoverMainHand);
             this.callback();
         };
         if(currentIndex == -1) return;
         timeSinceLastTick = timeSinceLastTick + 1;
         if(timeSinceLastTick == 5) {
             timeSinceLastTick = 0;
-            makeHolding(templates.get(currentIndex));
+            Utility.makeHolding(templates.get(currentIndex));
             int level = currentIndex / rowSize;
             placeTemplateAt(currentIndex % rowSize, level);
             currentIndex += 1;

@@ -11,7 +11,7 @@ public class WorldPlot {
                     (pos.getX() < PlotLocation.getX() - 21 || (pos.getX() < PlotLocation.getX() - 20 && pos.getY() < 50) || pos.getX() > PlotLocation.getX() + CodeClient.worldPlot.size));
     }
 
-    enum Size {
+    public enum Size {
         BASIC(50),
         LARGE(100),
         MASSIVE(300);

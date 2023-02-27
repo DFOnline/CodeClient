@@ -2,10 +2,7 @@ package dev.dfonline.codeclient;
 
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
-import dev.dfonline.codeclient.action.impl.ClearPlot;
-import dev.dfonline.codeclient.action.impl.GetActionDump;
-import dev.dfonline.codeclient.action.impl.MoveToSpawn;
-import dev.dfonline.codeclient.action.impl.PlaceTemplates;
+import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.dev.AddCodeScreen;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.websocket.SocketHandler;
@@ -15,9 +12,6 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.text.Text;
@@ -67,21 +61,7 @@ public class CodeClient implements ModInitializer {
 //        if(MC.keyboard)
     }
 
-    private static ArrayList<ItemStack> TemplatesInInventory() {
-        PlayerInventory inv = MC.player.getInventory();
-        ArrayList<ItemStack> templates = new ArrayList<>();
-        for (int i = 0; i < (27 + 9); i++) {
-            ItemStack item = inv.getStack(i);
-            if (!item.hasNbt()) continue;
-            NbtCompound nbt = item.getNbt();
-            if (!nbt.contains("PublicBukkitValues")) continue;
-            LOGGER.info(String.valueOf(item));
-            NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-            if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
-            templates.add(item);
-        }
-        return templates;
-    }
+
 
     @Override
     public void onInitialize() {
@@ -154,7 +134,7 @@ public class CodeClient implements ModInitializer {
                 return 0;
             }));
             dispatcher.register(literal("placetemplate").executes(context -> {
-                currentAction = new PlaceTemplates(TemplatesInInventory(), () -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> MC.player.sendMessage(Text.literal("Done!")));
                 currentAction.init();
                 return 0;
             }));
@@ -162,7 +142,7 @@ public class CodeClient implements ModInitializer {
             dispatcher.register(literal("codeforme").executes(context -> {
                 currentAction = new ClearPlot(() -> {
                     currentAction = new MoveToSpawn(() -> {
-                        currentAction = new PlaceTemplates(CodeClient.TemplatesInInventory(), () -> {
+                        currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> {
                             MC.player.sendMessage(Text.literal("Done!"));
                         });
                         currentAction.init();
