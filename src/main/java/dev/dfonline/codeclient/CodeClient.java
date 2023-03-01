@@ -3,18 +3,23 @@ package dev.dfonline.codeclient;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
-import dev.dfonline.codeclient.dev.AddCodeScreen;
+import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.Items;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
+import net.minecraft.network.packet.s2c.play.TeamS2CPacket;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -39,7 +44,7 @@ public class CodeClient implements ModInitializer {
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.","");
-//        if(!List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket", "TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
+//        if(!List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
         return false;
     }
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
@@ -54,12 +59,19 @@ public class CodeClient implements ModInitializer {
             MC.player.airStrafingSpeed = 0.07f;
         }
         while(editBind.isPressed()) {
-            MC.setScreen(new CodeClientScreen(new AddCodeScreen()));
+//            MC.setScreen(new CodeClientScreen(new AddCodeScreen()));
+            MC.setScreen(new DevInventoryScreen(MC.player));
         }
 //        if(MC.keyboard)
     }
 
-
+    public static final ItemGroup OTHER_GROUP = FabricItemGroupBuilder.create(
+                    new Identifier(MOD_ID, "other"))
+            .icon(() -> Items.ENCHANTING_TABLE.getDefaultStack())
+            .appendItems(stacks -> {
+                stacks.add(Items.APPLE.getDefaultStack());
+                stacks.add(Items.GLOWSTONE_DUST.getDefaultStack());
+            }).build();
 
     @Override
     public void onInitialize() {
@@ -115,10 +127,14 @@ public class CodeClient implements ModInitializer {
 
 
             dispatcher.register(literal("getactiondump").executes(context -> {
+                currentAction = new GetActionDump(false, () -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction.init();
+                return 0;
+            }).then(literal("colors").executes(context -> {
                 currentAction = new GetActionDump(true, () -> MC.player.sendMessage(Text.literal("Done!")));
                 currentAction.init();
                 return 0;
-            }));
+            })));
 
 
             dispatcher.register(literal("getspawn").executes(context -> {
