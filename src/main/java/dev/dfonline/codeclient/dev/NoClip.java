@@ -55,7 +55,7 @@ public class NoClip {
 
     public static Vec3d handleSeverPosition() {
         ClientPlayerEntity player = CodeClient.MC.player;
-        Vec3d pos = new Vec3d(Math.max(player.getX(), PlotLocation.getX() - 20), Math.ceil(player.getY()), Math.max(player.getZ(), PlotLocation.getZ()));
+        Vec3d pos = new Vec3d(Math.max(player.getX(), PlotLocation.getX() - 20), player.getY(), Math.max(player.getZ(), PlotLocation.getZ()));
         if(isInsideWall(pos)) {
             double nearestFloor = Math.floor(player.getY() / 5) * 5;
             pos = new Vec3d(pos.x, nearestFloor + 2, pos.z);
@@ -69,7 +69,7 @@ public class NoClip {
     public static boolean isInsideWall(Vec3d playerPos) {
         Vec3d middlePos = playerPos.add(0,1.8 / 2,0);
         float f = 0.6F + 0.1F * 0.8F;
-        Box box = Box.of(middlePos, f, (1.81 + 1.0E-6 * 0.8F), f);
+        Box box = Box.of(middlePos, f, (1.799 + 1.0E-6 * 0.8F), f);
         return BlockPos.stream(box).anyMatch((pos) -> {
             BlockState blockState = CodeClient.MC.world.getBlockState(pos);
             return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(CodeClient.MC.world, pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
