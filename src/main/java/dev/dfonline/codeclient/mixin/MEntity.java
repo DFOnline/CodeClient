@@ -26,6 +26,7 @@ public abstract class MEntity {
 
     @Inject(method = "move", at = @At("HEAD"), cancellable = true)
     private void onMove(MovementType movementType, Vec3d movement, CallbackInfo ci) {
+        if(CodeClient.MC.player == null) return;
         if(this.getId() != CodeClient.MC.player.getId()) return;
         if(NoClip.ignoresWalls()) {
             Vec3d pos = NoClip.handleClientPosition(movement);
