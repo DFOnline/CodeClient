@@ -3,10 +3,8 @@ package dev.dfonline.codeclient.dev.DevInventory;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import dev.dfonline.codeclient.CodeClient;
 import net.fabricmc.api.EnvType;
@@ -23,13 +21,12 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +40,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     static final SimpleInventory Inventory = new SimpleInventory(45);
     private static final Text DELETE_ITEM_SLOT_TEXT = Text.translatable("inventory.binSlot");
     private static int selectedTab;
-    private int scrollPosition;
+    private double scrollPosition;
+    private int scrollHeight = 0;
     private TextFieldWidget searchBox;
     @Nullable
     private List<Slot> slots;
@@ -234,15 +232,20 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             this.handler.slots.addAll(this.slots);
             this.slots = null;
         }
-        scroll();
+        populate();
     }
-    private void scroll() {
+    private void populate() {
         DevInventoryGroup group = GROUPS[selectedTab];
-        List<ItemStack> search = group.searchItems(null);
+        if(group == INVENTORY) return;
+        String text = searchBox.getText();
+        if(text.equals("")) text = null;
+        List<ItemStack> search = group.searchItems(text);
         if( search == null ) return;
-        for (int i = 0; i < search.size() && i < 45; i++) {
-            int value = i + scrollPosition;
-            if(value < 45 && value < search.size()) this.handler.slots.get(value).setStack(search.get(value));
+        scrollHeight = Math.max(0,search.size() - 45);
+        for (int i = 0; i < 45; i++) {
+            int value = i + (int) scrollPosition * 9;
+            if(value < search.size()) this.handler.slots.get(i).setStack(search.get(value));
+            else this.handler.slots.get(i).setStack(Items.AIR.getDefaultStack());
         }
     }
 
@@ -269,7 +272,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
         DevInventoryGroup[] groups = DevInventoryGroup.GROUPS;
 
-
         for(DevInventoryGroup group : groups) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, TEXTURE);
@@ -289,14 +291,13 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         RenderSystem.setShaderTexture(0, TEXTURE);
         this.renderTabIcon(matrices, itemGroup);
 
-
         if(itemGroup.hasSearchBar()) this.searchBox.render(matrices, mouseX, mouseY, delta);
         if (itemGroup != INVENTORY) {
             RenderSystem.setShaderTexture(0, TEXTURE);
             int scrollbarX = this.x + 175;
             int scrollbarY = this.y + 18;
             int k = scrollbarY + 114;
-            this.drawTexture(matrices, scrollbarX, (int)(scrollbarY + ((k - scrollbarY - 17) * (((double)this.scrollPosition / -20)))), 232, 0, 12, 15);
+            this.drawTexture(matrices, scrollbarX, (int)(scrollbarY + ((k - scrollbarY - 17) * ((this.scrollPosition * 9) / (scrollHeight + 9)))), 232, 0, 12, 15);
         }
         else {
             if(this.client.player != null) InventoryScreen.drawEntity(this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
@@ -333,10 +334,10 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.itemRenderer.zOffset = 0.0F;
     }
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        this.scrollPosition += amount;
-        if(scrollPosition > 0) scrollPosition = 0;
+        this.scrollPosition -= amount;
+        if(scrollPosition < 0) scrollPosition = 0;
 
-        scroll();
+        populate();
         return true;
     }
 }

@@ -151,9 +151,12 @@ public class DevInventoryGroup {
 
         PLAYER_EVENT.setItemsProvider(query -> {
             ArrayList<ItemStack> items = new ArrayList<>();
-            for (int i = 0; i < 90; i++) {
+            for (int i = 0; i < 45 * 2; i++) {
                 items.add(Items.DIAMOND.getDefaultStack());
                 items.add(Items.BLAZE_POWDER.getDefaultStack());
+                items.add(Items.DIAMOND_BLOCK.getDefaultStack());
+                items.add(Items.OBSIDIAN.getDefaultStack());
+                items.add(Items.OBSERVER.getDefaultStack());
             }
             return items;
         });
