@@ -221,7 +221,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if(text.equals("")) text = null;
         List<ItemStack> search = group.searchItems(text);
         if( search == null ) return;
-        scrollHeight = Math.max(0,search.size() - 45);
+        scrollHeight = Math.max(0,(int) Math.ceil((double) (search.size() - 45) / 9) * 9);
         for (int i = 0; i < 45; i++) {
             int value = i + (int) scrollPosition * 9;
             if(value < search.size()) this.handler.slots.get(i).setStack(search.get(value));
@@ -275,9 +275,9 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if (itemGroup != INVENTORY) {
             RenderSystem.setShaderTexture(0, TEXTURE);
             int scrollbarX = this.x + 175;
-            int scrollbarY = this.y + 18;
-            int k = scrollbarY + 114;
-            this.drawTexture(matrices, scrollbarX, (int)(scrollbarY + ((k - scrollbarY - 17) * ((this.scrollPosition * 9) / (scrollHeight + 9)))), 232, 0, 12, 15);
+            int scrollbarY = this.y + 18 ;
+            if(scrollHeight == 0) this.drawTexture(matrices, scrollbarX, scrollbarY, 244, 0, 12, 15);
+            else this.drawTexture(matrices, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
         }
         else {
             if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
