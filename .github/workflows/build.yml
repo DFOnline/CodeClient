@@ -34,4 +34,4 @@ jobs:
                   prerelease: true
                   files: |
                       LICENSE
-                      ./build/libs/CodeClient-${{ github.run_number }}.jar
+                      ./build/libs/CodeClient.jar
