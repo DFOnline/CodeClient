@@ -67,10 +67,16 @@ java {
     withSourcesJar()
 }
 
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
-    }
+shadowJar {
+    dependsOn(relocate)
+    configurations = listOf(shade)
+    destinationDirectory.set(file("build/devlibs"))
+    archiveClassifier.set("dev")
+    from("LICENSE")
+}
+
+remapJar {
+    inputFile.value(shadowJar.get().archiveFile)
 }
 
 // configure the maven publication
