@@ -53,17 +53,6 @@ tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         it.options.release = targetJavaVersion
     }
-    shadowJar {
-        dependsOn(relocate)
-        configurations = listOf(shade)
-        destinationDirectory.set(file("build/devlibs"))
-        archiveClassifier.set("dev")
-        from("LICENSE")
-    }
-
-    remapJar {
-        inputFile.value(shadowJar.get().archiveFile)
-    }
 }
 
 java {
@@ -75,7 +64,13 @@ java {
     // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
     // if it is present.
     // If you remove this line, sources will not be generated.
-    withSourcesJar()
+    // withSourcesJar()
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }  
+    }
 }
 
 // configure the maven publication
