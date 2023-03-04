@@ -1,12 +1,16 @@
 package dev.dfonline.codeclient.dev.DevInventory;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.actiondump.ActionDump;
+import dev.dfonline.codeclient.actiondump.CodeBlock;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -89,6 +93,16 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
     protected void init() {
         super.init();
+        if(this.client == null || this.client.player == null) return;
+
+        try {
+            ActionDump.getActionDump();
+        }
+        catch (IOException | JsonParseException e) {
+            this.client.player.sendMessage(Text.of("Could not parse the ActionDump. Either it is bad JSON or not even installed"));
+            CodeClient.LOGGER.error(e.getMessage());
+        }
+
         this.client.keyboard.setRepeatEvents(true);
         TextRenderer textRenderer = this.textRenderer;
         Objects.requireNonNull(this.textRenderer);
@@ -110,10 +124,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.init(client, width, height);
         this.searchBox.setText(string);
         this.setSelectedTab(tab);
-//        if (!this.searchBox.getText().isEmpty()) {
-//            this.search();
-//        }
-
+        this.populate();
     }
 
     public void removed() {
@@ -131,9 +142,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 //    }
 
 //    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-//    }
-
-//    private void search() {
 //    }
 
     protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
@@ -193,34 +201,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
                 int slotIndex = i + 9;
                 int x = 9 + (slotIndex % 9) * slotSize;
                 int y = 36 + slotIndex / 9 * slotSize;
-//                int xPos;
-//                int l;
-//                int m;
-//                int row;
-//                int yPos;
-//                if (slotIndex >= 5 && slotIndex < 9) {
-//                    l = slotIndex - 5;
-//                    m = l / 2;
-//                    row = l % 2;
-//                    xPos = 54 + m * 54;
-//                    yPos = 6 + row * 27;
-//                } else if (slotIndex < 5) {
-//                    xPos = -2000;
-//                    yPos = -2000;
-//                } else if (slotIndex == 45) {
-//                    xPos = 35;
-//                    yPos = 20;
-//                } else {
-//                    l = slotIndex - 9;
-//                    m = l % 9;
-//                    row = l / 9;
-//                    xPos = 9 + m * 18;
-//                    if (slotIndex >= 36) {
-//                        yPos = 112;
-//                    } else {
-//                        yPos = 54 + row * 18;
-//                    }
-//                }
 
                 Slot slot = new Slot(playerScreenHandler.slots.get(slotIndex).inventory, slotIndex, x, y);
                 this.handler.slots.add(slot);
@@ -300,7 +280,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             this.drawTexture(matrices, scrollbarX, (int)(scrollbarY + ((k - scrollbarY - 17) * ((this.scrollPosition * 9) / (scrollHeight + 9)))), 232, 0, 12, 15);
         }
         else {
-            if(this.client.player != null) InventoryScreen.drawEntity(this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
+            if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
         }
 
     }

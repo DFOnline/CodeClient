@@ -1,9 +1,11 @@
 package dev.dfonline.codeclient;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public class FileManager {
     public static Path Path(){
@@ -13,9 +15,10 @@ public class FileManager {
     }
 
     public static void writeFile(String fileName, String content) throws IOException {
-        File file = Path().resolve(fileName).toFile();
-        FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write(content);
-        fileWriter.close();
+        Files.write(Path().resolve(fileName),content.getBytes(), StandardOpenOption.WRITE);
+    }
+
+    public static String readFile(String fileName) throws IOException {
+        return Files.readString(Path().resolve(fileName));
     }
 }

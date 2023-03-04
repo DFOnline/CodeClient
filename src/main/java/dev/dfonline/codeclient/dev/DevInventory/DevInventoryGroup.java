@@ -1,5 +1,8 @@
 package dev.dfonline.codeclient.dev.DevInventory;
 
+import dev.dfonline.codeclient.actiondump.Action;
+import dev.dfonline.codeclient.actiondump.ActionDump;
+import dev.dfonline.codeclient.actiondump.CodeBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtHelper;
@@ -90,20 +93,20 @@ public class DevInventoryGroup {
     public static int TOP_HALF = -1;
     public static final DevInventoryGroup[] GROUPS = new DevInventoryGroup[21];
 
-    public static final DevInventoryGroup PLAYER_EVENT = new DevInventoryGroup("event", "Player Event", Items.DIAMOND_BLOCK.getDefaultStack(), true);
-    public static final DevInventoryGroup PLAYER_IF = new DevInventoryGroup("if_player", "If Player", Items.OAK_PLANKS.getDefaultStack(), true);
-    public static final DevInventoryGroup PLAYER_ACTION = new DevInventoryGroup("player_action", "Player Action", Items.COBBLESTONE.getDefaultStack(), true);
-    public static final DevInventoryGroup ENTITY_EVENT = new DevInventoryGroup("entity_event", "Entity Event", Items.GOLD_BLOCK.getDefaultStack(), true);
-    public static final DevInventoryGroup ENTITY_IF = new DevInventoryGroup("if_entity", "If Entity", Items.BRICKS.getDefaultStack(), true);
-    public static final DevInventoryGroup ENTITY_ACTION = new DevInventoryGroup("game_action", "Entity Action", Items.MOSSY_COBBLESTONE.getDefaultStack(), true);
-    public static final DevInventoryGroup SEARCH = new DevInventoryGroup("search", "Search All", Items.COMPASS.getDefaultStack(), true);
-    public static final DevInventoryGroup VAR_SET = new DevInventoryGroup("set_var", "Set Variable", Items.IRON_BLOCK.getDefaultStack(), true);
-    public static final DevInventoryGroup VAR_IF = new DevInventoryGroup("if_var", "If Variable", Items.OBSIDIAN.getDefaultStack(), true);
-    public static final DevInventoryGroup GAME_ACTION = new DevInventoryGroup("game_action", "Game Action", Items.NETHERRACK.getDefaultStack(), true);
-    public static final DevInventoryGroup GAME_IF = new DevInventoryGroup("if_game", "If Game", Items.RED_NETHER_BRICKS.getDefaultStack(), true);
-    public static final DevInventoryGroup CONTROL = new DevInventoryGroup("control", "Control", Items.COAL_BLOCK.getDefaultStack(), true);
-    public static final DevInventoryGroup SELECT_OBJECT = new DevInventoryGroup("select_obj", "Select Object", Items.PURPUR_BLOCK.getDefaultStack(), true);
-    public static final DevInventoryGroup REPEAT = new DevInventoryGroup("repeat", "Repeat", Items.PRISMARINE.getDefaultStack(), true);
+    public static final DevInventoryGroup PLAYER_EVENT = new DevInventoryGroup("event", "Player Event", Items.DIAMOND_BLOCK.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup PLAYER_IF = new DevInventoryGroup("if_player", "If Player", Items.OAK_PLANKS.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup PLAYER_ACTION = new DevInventoryGroup("player_action", "Player Action", Items.COBBLESTONE.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup ENTITY_EVENT = new DevInventoryGroup("entity_event", "Entity Event", Items.GOLD_BLOCK.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup ENTITY_IF = new DevInventoryGroup("if_entity", "If Entity", Items.BRICKS.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup ENTITY_ACTION = new DevInventoryGroup("game_action", "Entity Action", Items.MOSSY_COBBLESTONE.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup SEARCH = new DevInventoryGroup("search", "Search All", Items.COMPASS.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup VAR_SET = new DevInventoryGroup("set_var", "Set Variable", Items.IRON_BLOCK.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup VAR_IF = new DevInventoryGroup("if_var", "If Variable", Items.OBSIDIAN.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup GAME_ACTION = new DevInventoryGroup("game_action", "Game Action", Items.NETHERRACK.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup GAME_IF = new DevInventoryGroup("if_game", "If Game", Items.RED_NETHER_BRICKS.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup CONTROL = new DevInventoryGroup("control", "Control", Items.COAL_BLOCK.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup SELECT_OBJECT = new DevInventoryGroup("select_obj", "Select Object", Items.PURPUR_BLOCK.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup REPEAT = new DevInventoryGroup("repeat", "Repeat", Items.PRISMARINE.getDefaultStack(), true).useCodeBlock();
     public static final DevInventoryGroup SOUNDS = new DevInventoryGroup("sound", "Sounds", Items.NAUTILUS_SHELL.getDefaultStack(), false);
     public static final DevInventoryGroup PARTICLES = new DevInventoryGroup("particle", "Particles", Items.WHITE_DYE.getDefaultStack(), false);
     public static final DevInventoryGroup POTIONS = new DevInventoryGroup("potion", "Potions", Items.DRAGON_BREATH.getDefaultStack(), false);
@@ -123,6 +126,21 @@ public class DevInventoryGroup {
         }
         return items;
     }
+    private DevInventoryGroup useCodeBlock() {
+        this.itemsProvider = query -> {
+            ArrayList<ItemStack> items = new ArrayList<>();
+            try {
+                for (CodeBlock codeblock: ActionDump.getActionDump().codeblocks) {
+                    if(codeblock.identifier.equals(this.id)) items.add(codeblock.item.getItem());
+                }
+                for(Action action: ActionDump.getActionDump().actions) {
+                    if(action.getCodeBlock().identifier.equals(this.id)) items.add(action.icon.getItem());
+                }
+            } catch (Exception ignored) {}
+            return items;
+        };
+        return this;
+    }
 
     static {
         OTHERS.setItemsProvider(query -> {
@@ -139,24 +157,12 @@ public class DevInventoryGroup {
                 items.set(9,ItemStack.fromNbt(NbtHelper.fromNbtProviderString("{Count:1b,id:\"minecraft:magma_cream\",tag:{CustomModelData:5000,PublicBukkitValues:{\"hypercube:varitem\":'{\"id\":\"var\",\"data\":{\"name\":\"&eVariable\",\"scope\":\"unsaved\"}}'},display:{Lore:['{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"A value item name that refers\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"to an internally stored value.\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"The value can be set using the\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"white\",\"text\":\"Set Variable\"},{\"italic\":false,\"color\":\"gray\",\"text\":\" block.\"}],\"text\":\"\"}','{\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"light_purple\",\"text\":\"How to set:\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Type a variable name in chat\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"while holding this item.\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Shift right-click for options.\"}],\"text\":\"\"}'],Name:'{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"yellow\",\"text\":\"Variable\"}],\"text\":\"\"}'}}}")));
                 items.set(10,ItemStack.fromNbt(NbtHelper.fromNbtProviderString("{Count:1b,id:\"minecraft:name_tag\",tag:{CustomModelData:5000,PublicBukkitValues:{\"hypercube:varitem\":'{\"id\":\"g_val\",\"data\":{\"type\":\"Location\",\"target\":\"Default\"}}'},display:{Lore:['{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"An automatically set value\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"which is set based on the\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"game\\'s current conditions\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"(e.g. a player\\'s location).\"}],\"text\":\"\"}','{\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"light_purple\",\"text\":\"How to set:\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Right-click to select a game\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"value and its target.\"}],\"text\":\"\"}'],Name:'{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"#FFD47F\",\"text\":\"Game Value\"}],\"text\":\"\"}'}}}")));
 
-                items.set(8,ItemStack.fromNbt(NbtHelper.fromNbtProviderString("{Count:1b,id:\"minecraft:written_book\",tag:{CustomModelData:0,HideFlags:127,PublicBukkitValues:{\"hypercube:item_instance\":\"18726d32-57ae-4305-b317-2b084283e704\"},display:{Lore:['{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Right-click to open the\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"reference menu.\"}],\"text\":\"\"}'],Name:'{\"italic\":false,\"extra\":[{\"color\":\"gold\",\"text\":\"◆ \"},{\"color\":\"aqua\",\"text\":\"Reference Book \"},{\"color\":\"gold\",\"text\":\"◆\"}],\"text\":\"\"}'}}}")));
-                items.set(17,ItemStack.fromNbt(NbtHelper.fromNbtProviderString("{Count:1b,id:\"minecraft:blaze_rod\",tag:{CustomModelData:0,HideFlags:127,PublicBukkitValues:{\"hypercube:item_instance\":\"de7f011e-8248-40e6-b04f-8315c4c7be4a\"},display:{Lore:['{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Shows two corresponding brackets\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"for a short amount of time.\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Right-Click a bracket to highlight\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"both.\"}],\"text\":\"\"}'],Name:'{\"italic\":false,\"color\":\"gold\",\"text\":\"Bracket Finder\"}'}}}")));
-                items.set(26, ItemStack.fromNbt(NbtHelper.fromNbtProviderString("{Count:1b,id:\"minecraft:arrow\",tag:{CustomModelData:0,HideFlags:127,display:{Lore:['{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Click on a Condition block with this\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"to switch between \\'IF\\' and \\'IF NOT\\'.\"}],\"text\":\"\"}'],Name:'{\"italic\":false,\"color\":\"red\",\"text\":\"NOT Arrow\"}'}}}")));
+//                items.set(8,ItemStack.fromNbt(NbtHelper.fromNbtProviderString("{Count:1b,id:\"minecraft:written_book\",tag:{CustomModelData:0,HideFlags:127,PublicBukkitValues:{\"hypercube:item_instance\":\"18726d32-57ae-4305-b317-2b084283e704\"},display:{Lore:['{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Right-click to open the\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"reference menu.\"}],\"text\":\"\"}'],Name:'{\"italic\":false,\"extra\":[{\"color\":\"gold\",\"text\":\"◆ \"},{\"color\":\"aqua\",\"text\":\"Reference Book \"},{\"color\":\"gold\",\"text\":\"◆\"}],\"text\":\"\"}'}}}")));
+//                items.set(17,ItemStack.fromNbt(NbtHelper.fromNbtProviderString("{Count:1b,id:\"minecraft:blaze_rod\",tag:{CustomModelData:0,HideFlags:127,PublicBukkitValues:{\"hypercube:item_instance\":\"de7f011e-8248-40e6-b04f-8315c4c7be4a\"},display:{Lore:['{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Shows two corresponding brackets\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"for a short amount of time.\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Right-Click a bracket to highlight\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"both.\"}],\"text\":\"\"}'],Name:'{\"italic\":false,\"color\":\"gold\",\"text\":\"Bracket Finder\"}'}}}")));
+//                items.set(26, ItemStack.fromNbt(NbtHelper.fromNbtProviderString("{Count:1b,id:\"minecraft:arrow\",tag:{CustomModelData:0,HideFlags:127,display:{Lore:['{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"Click on a Condition block with this\"}],\"text\":\"\"}','{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"to switch between \\'IF\\' and \\'IF NOT\\'.\"}],\"text\":\"\"}'],Name:'{\"italic\":false,\"color\":\"red\",\"text\":\"NOT Arrow\"}'}}}")));
             }
             catch (Exception e) {
                 e.printStackTrace();
-            }
-            return items;
-        });
-
-        PLAYER_EVENT.setItemsProvider(query -> {
-            ArrayList<ItemStack> items = new ArrayList<>();
-            for (int i = 0; i < 45 * 2; i++) {
-                items.add(Items.DIAMOND.getDefaultStack());
-                items.add(Items.BLAZE_POWDER.getDefaultStack());
-                items.add(Items.DIAMOND_BLOCK.getDefaultStack());
-                items.add(Items.OBSIDIAN.getDefaultStack());
-                items.add(Items.OBSERVER.getDefaultStack());
             }
             return items;
         });

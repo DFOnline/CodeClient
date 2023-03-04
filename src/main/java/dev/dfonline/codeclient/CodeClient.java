@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient;
 
+import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
@@ -35,6 +36,7 @@ public class CodeClient implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     public static final MinecraftClient MC = MinecraftClient.getInstance();
+    public static final Gson gson = new Gson();
     private static KeyBinding editBind;
 
 
@@ -118,6 +120,15 @@ public class CodeClient implements ModInitializer {
                 worldPlot = Size.MASSIVE;
                 return 0;
             })));
+
+
+            dispatcher.register(literal("fixcc").executes(context -> {
+                currentAction = new None();
+                worldPlot = null;
+                SocketHandler.setConnection(null);
+                PlotLocation.set(0,0,0);
+                return 0;
+            }));
 
 
             dispatcher.register(literal("abort").executes(context -> {
