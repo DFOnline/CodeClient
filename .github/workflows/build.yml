@@ -34,4 +34,4 @@ jobs:
                   prerelease: true
                   files: |
                       LICENSE
-                      ./build/libs/
+                      ./build/libs/CodeClient.jar
