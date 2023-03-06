@@ -133,7 +133,7 @@ public class DevInventoryGroup {
                 for (CodeBlock codeblock: ActionDump.getActionDump().codeblocks) {
                     if(codeblock.identifier.equals(this.id)) items.add(codeblock.item.getItem());
                 }
-                for(Action action: ActionDump.getActionDump().actions) {
+                for (Action action: ActionDump.getActionDump().actions) {
                     if(action.getCodeBlock().identifier.equals(this.id) && !action.icon.name.equals("")) items.add(action.icon.getItem());
                 }
             } catch (Exception ignored) {}
