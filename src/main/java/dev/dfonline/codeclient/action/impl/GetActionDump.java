@@ -7,6 +7,8 @@ import dev.dfonline.codeclient.action.Action;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 
 import java.io.IOException;
 import java.util.Date;
@@ -37,8 +39,20 @@ public class GetActionDump extends Action {
     public boolean onReceivePacket(Packet<?> packet) {
         if(capturedData == null || isDone) return false;
         if(packet instanceof GameMessageS2CPacket message) {
+            TextColor lastColor = null;
+            for(Text text : message.content().getSiblings()) {
+                TextColor color = text.getStyle().getColor();
+                if(lastColor != color) {
+                    lastColor = color;
+                    if(color.getName().contains("#")) {
+                        capturedData.append(String.join("§",color.getName().split("")).replace("#","§x").toLowerCase());
+                    } else {
+                        capturedData.append(Formatting.valueOf(String.valueOf(color).toUpperCase()));
+                    }
+                }
+                capturedData.append(text.getString());
+            }
             String content = message.content().getString();
-            capturedData.append(content);
             capturedData.append("\n");
             lines += 1;
             length += content.length();
