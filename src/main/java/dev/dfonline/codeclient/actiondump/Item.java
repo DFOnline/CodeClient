@@ -16,10 +16,13 @@ public class Item {
     public String[] description;
     public String[] example;
     public String[] worksWith;
+    public String[][] additionalInfo;
     public String requiredRank;
     public String requireTokens;
     public String requireRankAndTokens;
     public boolean advanced;
+    public Boolean cancellable;
+    public Boolean cancelledAutomatically;
     public String loadedItem;
 
     public ItemStack getItem() {
@@ -28,18 +31,33 @@ public class Item {
         NbtCompound nbt = new NbtCompound();
         NbtCompound display = new NbtCompound();
         NbtList lore = new NbtList();
+
         for (String line: description) {
-            addToLore(lore,line);
-//            lore.add(NbtString.of("{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"%s\"}],\"text\":\"\"}".formatted(line)));
+            addToLore(lore, "§7" + line);
         }
         if(example != null && example.length != 0) {
-            lore.add(NbtString.of("{\"text\":\"\"}"));
-//            lore.add(NbtString.of("{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"white\",\"text\":\"Example:\"}],\"text\":\"\"}"));
+            addToLore(lore,"");
+            addToLore(lore,"Example:");
             for (String line: example) {
-//                CodeClient.LOGGER.info(NbtString.escape(line));
-                addToLore(lore,line);
-//                lore.add(NbtString.of("{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"gray\",\"text\":\"%s\"}],\"text\":\"\"}".formatted(.replace("\"","\\\""))));
+                addToLore(lore, "§7" + line);
             }
+        }
+        if(additionalInfo != null && additionalInfo.length != 0) {
+            addToLore(lore,"");
+            addToLore(lore,"§9Additional Info:");
+            for(String[] group : additionalInfo) {
+                int i = 0;
+                for(String line: group) {
+                    if(i == 0) addToLore(lore, "§b» §7" + line);
+                    else addToLore(lore, "§7" + line);
+                    i++;
+                }
+            }
+        }
+        if(cancellable != null && cancellable) {
+            addToLore(lore,"");
+            if(cancelledAutomatically) addToLore(lore, "§4∅ §cCancelled automatically");
+            else addToLore(lore, "§4∅ §cCancellable");
         }
         display.put("Lore",lore);
         nbt.put("display",display);
