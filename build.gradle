@@ -13,10 +13,6 @@ repositories {
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
     mavenCentral()
-    maven {
-        name = "CottonMC"
-        url = uri("https://server.bbkr.space/artifactory/libs-release")
-    }
 }
 
 dependencies {
@@ -27,9 +23,6 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    // Cotton LibUI
-    modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
 
     implementation include("org.java-websocket:Java-WebSocket:1.5.3")
 }
