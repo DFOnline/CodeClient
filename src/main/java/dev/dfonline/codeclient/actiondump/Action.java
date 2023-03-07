@@ -1,9 +1,9 @@
 package dev.dfonline.codeclient.actiondump;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
@@ -35,13 +35,22 @@ public class Action {
         codetemplatedata.addProperty("name", icon.name);
         codetemplatedata.addProperty("version", 1);
 
-//        JsonObject template = new JsonObject();
-//        JsonArray blocks = new JsonArray();
-//        JsonObject action = new JsonObject();
-//        action.addProperty("");
-//        template.
+        JsonObject template = new JsonObject();
+        JsonArray blocks = new JsonArray();
+        JsonObject action = new JsonObject();
+        action.addProperty("id","block");
+        action.addProperty("block", getCodeBlock().identifier);
+        action.addProperty("action", name);
+        JsonObject args = new JsonObject();
+        args.add("items",new JsonArray());
+        action.add("args",args);
+        blocks.add(action);
+        template.add("blocks",blocks);
+        try {
+            codetemplatedata.addProperty("code", Utility.compileTempate(template.toString()));
+        } catch (Exception ignored) {}
 
-        PublicBukkitValues.put("hypercube:codetemplatedata", NbtString.of(codetemplatedata.getAsString()));
+        PublicBukkitValues.put("hypercube:codetemplatedata", NbtString.of(String.valueOf(codetemplatedata)));
         nbt.put("PublicBukkitValues",PublicBukkitValues);
         item.setNbt(nbt);
         return item;

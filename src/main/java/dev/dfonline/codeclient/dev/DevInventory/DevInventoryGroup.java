@@ -134,7 +134,7 @@ public class DevInventoryGroup {
                     if(codeblock.identifier.equals(this.id)) items.add(codeblock.item.getItem());
                 }
                 for (Action action: ActionDump.getActionDump().actions) {
-                    if(action.getCodeBlock().identifier.equals(this.id) && !action.icon.name.equals("")) items.add(action.icon.getItem());
+                    if(action.getCodeBlock().identifier.equals(this.id) && !action.icon.name.equals("")) items.add(action.getItem());
                 }
             } catch (Exception ignored) {}
             return items;

@@ -86,7 +86,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         }
         if(slot.inventory instanceof PlayerInventory) {
             ItemStack slotStack = slot.getStack();
-            CodeClient.LOGGER.info(String.valueOf(slotStack.getNbt()));
             ItemStack cursorItem = this.handler.getCursorStack();
 
             slot.setStack(cursorItem);

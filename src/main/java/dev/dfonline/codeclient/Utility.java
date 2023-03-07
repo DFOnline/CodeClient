@@ -44,6 +44,6 @@ public class Utility {
         gzip.write(data.getBytes());
         gzip.close();
 
-        return Base64.getEncoder().encode(obj.toByteArray()).toString();
+        return new String(Base64.getEncoder().encode(obj.toByteArray()));
     }
 }
