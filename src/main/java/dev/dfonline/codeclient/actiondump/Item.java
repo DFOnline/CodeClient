@@ -24,6 +24,7 @@ public class Item {
     public Boolean cancellable;
     public Boolean cancelledAutomatically;
     public String loadedItem;
+    public Argument[] arguments;
 
     public ItemStack getItem() {
         ItemStack item = Registry.ITEM.get(new Identifier(material.toLowerCase())).getDefaultStack();
@@ -40,6 +41,29 @@ public class Item {
             addToLore(lore,"Example:");
             for (String line: example) {
                 addToLore(lore, "§7" + line);
+            }
+        }
+        if(arguments != null && arguments.length != 0) {
+            addToLore(lore,"");
+            addToLore(lore,"Chest Parameters:");
+            for (Argument arg: arguments) {
+                int i = 0;
+                if(arg.text != null) addToLore(lore, arg.text);
+                if(arg.description != null && description.length != 0) for (String line: arg.description) {
+                    Argument.Type type = Argument.Type.valueOf(arg.type);
+                    if(i == 0) lore.add(NbtString.of("{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"%s\",\"text\":\"%s\"},{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"white\",\"text\":\"%s\"}],\"text\":\"\"}".formatted(type.color.toString(),type.display + (arg.plural ? "(s)" : ""),(arg.optional ? "§f*" : "") + "§8 - §7" + line)));
+                    else addToLore(lore, "§7" + line);
+                    i++;
+                }
+                if(arg.notes != null) for (String[] lines: arg.notes) {
+                    i = 0;
+                    if(lines != null) for (String line: lines) {
+                        if(i == 0) addToLore(lore, "§9⏵ §7" + line);
+                        else addToLore(lore, "§7" + line);
+                        i++;
+                    }
+                }
+
             }
         }
         if(additionalInfo != null && additionalInfo.length != 0) {
