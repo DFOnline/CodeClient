@@ -19,4 +19,8 @@ public class ActionDump {
         }
         return instance;
     }
+
+    public static void clear() {
+        instance = null;
+    }
 }

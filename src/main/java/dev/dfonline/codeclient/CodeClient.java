@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
+import dev.dfonline.codeclient.actiondump.ActionDump;
 import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.websocket.SocketHandler;
@@ -117,6 +118,7 @@ public class CodeClient implements ModInitializer {
                 worldPlot = null;
                 SocketHandler.setConnection(null);
                 PlotLocation.set(0,0,0);
+                ActionDump.clear();
                 return 0;
             }));
 
