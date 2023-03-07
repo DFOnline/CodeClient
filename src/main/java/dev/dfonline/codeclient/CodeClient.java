@@ -61,19 +61,9 @@ public class CodeClient implements ModInitializer {
             MC.player.airStrafingSpeed = 0.07f;
         }
         while(editBind.isPressed()) {
-//            MC.setScreen(new CodeClientScreen(new AddCodeScreen()));
             MC.setScreen(new DevInventoryScreen(MC.player));
         }
-//        if(MC.keyboard)
     }
-
-    public static final ItemGroup OTHER_GROUP = FabricItemGroupBuilder.create(
-                    new Identifier(MOD_ID, "other"))
-            .icon(() -> Items.ENCHANTING_TABLE.getDefaultStack())
-            .appendItems(stacks -> {
-                stacks.add(Items.APPLE.getDefaultStack());
-                stacks.add(Items.GLOWSTONE_DUST.getDefaultStack());
-            }).build();
 
     @Override
     public void onInitialize() {
