@@ -89,13 +89,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             CodeClient.LOGGER.info(String.valueOf(slotStack.getNbt()));
             ItemStack cursorItem = this.handler.getCursorStack();
 
-            try {
-                cursorItem.setNbt(NbtHelper.fromNbtProviderString("{CustomModelData:0,HideFlags:127,PublicBukkitValues:{\"hypercube:item_instance\":\"2427bdd2-9d64-4ff0-b86c-c0763c3c2c40\"},display:{Lore:['{\"italic\":false,\"color\":\"#808080\",\"text\":\"Shift + right click to open the cosmetics menu.\"}'],Name:'{\"italic\":false,\"color\":\"gray\",\"text\":\"Glider\"}'},palette:[]}"));
-            } catch (Exception ignored) {
-                CodeClient.LOGGER.error(ignored.getMessage());
-            }
-
-
             slot.setStack(cursorItem);
             this.handler.setCursorStack(slotStack);
         }
