@@ -10,7 +10,7 @@ import java.util.Objects;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.actiondump.ActionDump;
-import dev.dfonline.codeclient.actiondump.CodeBlock;
+import dev.dfonline.codeclient.actiondump.Item;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -27,7 +27,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.screen.slot.Slot;
@@ -81,7 +80,9 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
         if(slot.inventory instanceof SimpleInventory) {
             if(actionType == SlotActionType.PICKUP) {
-                this.handler.setCursorStack(slot.getStack());
+                CodeClient.LOGGER.info(String.valueOf(this.handler.getCursorStack()));
+                if(this.handler.getCursorStack().getItem().equals(Items.AIR)) this.handler.setCursorStack(slot.getStack());
+                else this.handler.setCursorStack(Items.AIR.getDefaultStack());
             }
         }
         if(slot.inventory instanceof PlayerInventory) {
@@ -90,6 +91,10 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
             slot.setStack(cursorItem);
             this.handler.setCursorStack(slotStack);
+            this.handler.syncState();
+            this.listener.onSlotUpdate(this.handler,slot.id - 9,slot.getStack());
+            CodeClient.LOGGER.info(String.valueOf(slot.id));
+//            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.id,slot.getStack()));
         }
     }
     protected void init() {
@@ -213,6 +218,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             this.handler.slots.addAll(this.slots);
             this.slots = null;
         }
+        this.scrollPosition = 0;
         populate();
     }
     private void populate() {
