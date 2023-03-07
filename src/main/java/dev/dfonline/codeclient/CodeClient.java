@@ -10,25 +10,20 @@ import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.Items;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
-import net.minecraft.network.packet.s2c.play.TeamS2CPacket;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static dev.dfonline.codeclient.WorldPlot.Size;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 
 public class CodeClient implements ModInitializer {
@@ -68,6 +63,7 @@ public class CodeClient implements ModInitializer {
 
     @Override
     public void onInitialize() {
+
         try {
             SocketHandler.start();
         } catch (Exception e) {
