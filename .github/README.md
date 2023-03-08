@@ -14,7 +14,7 @@ A mod for coding more efficiently with utility features including but not limite
 * A palette with all the actions
 
 ## Install
-1. Download the latest release of the mod from **[here](https://github.com/DFOnline/CodeClient/releases/latest)** as well as [Fabric](https://fabricmc.net/use) if you didin't already.
+1. Download the latest release of the mod from **[here](https://github.com/DFOnline/CodeClient/releases/latest)** as well as [Fabric](https://fabricmc.net/use) if you didn't already.
 2. Move the downloaded mod file into the mods folder located at .minecraft/mods.
 3. Launch the game and try it out on [DiamondFire](mcdiamondfire.com).
 
