@@ -253,7 +253,13 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
-
+    public boolean charTyped(char chr, int modifiers) {
+        if(this.searchBox.charTyped(chr, modifiers)) {
+            populate();
+            return true;
+        }
+        return false;
+    }
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
