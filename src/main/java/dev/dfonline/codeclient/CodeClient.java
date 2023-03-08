@@ -115,8 +115,8 @@ public class CodeClient implements ModInitializer {
             dispatcher.register(literal("fixcc").executes(context -> {
                 currentAction = new None();
                 worldPlot = null;
+                location = null;
                 SocketHandler.setConnection(null);
-                PlotLocation.set(0,0,0);
                 ActionDump.clear();
                 return 0;
             }));

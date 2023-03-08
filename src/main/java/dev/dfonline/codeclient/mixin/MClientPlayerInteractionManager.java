@@ -1,7 +1,8 @@
 package dev.dfonline.codeclient.mixin;
 
-import dev.dfonline.codeclient.PlotLocation;
+import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.InteractionManager;
+import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,7 +27,7 @@ public class MClientPlayerInteractionManager {
 
     @Inject(method = "interactBlock", at = @At("HEAD") , cancellable = true)
     private void onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-        if(PlotLocation.isInCodeSpace(hitResult.getBlockPos()) && InteractionManager.onBlockInteract(player, hand, hitResult)) cir.setReturnValue(ActionResult.FAIL);
+        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ()) && InteractionManager.onBlockInteract(player, hand, hitResult)) cir.setReturnValue(ActionResult.FAIL);
     }
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)

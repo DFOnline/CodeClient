@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.PlotLocation;
 import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -122,7 +121,8 @@ public class InteractionManager {
     }
 
     public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
-        if(PlotLocation.isInCodeSpace(hitResult.getPos())) {
+        if(CodeClient.location instanceof Dev plot)
+        if(plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
             CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
 //            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
             if(hitResult.getSide() == Direction.UP) {

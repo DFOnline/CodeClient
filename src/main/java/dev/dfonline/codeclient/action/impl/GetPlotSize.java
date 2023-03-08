@@ -1,10 +1,10 @@
 package dev.dfonline.codeclient.action.impl;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.PlotLocation;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.WorldPlot;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -56,19 +56,21 @@ public class GetPlotSize extends Action {
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if(step == Step.TP && packet instanceof PlayerPositionLookS2CPacket position) {
-            step = Step.DONE;
-            double size = position.getZ() - PlotLocation.getZ();
-            if(size > 49) {
-                CodeClient.worldPlot = WorldPlot.Size.BASIC;
+        if(CodeClient.location instanceof Dev plot) {
+            if(step == Step.TP && packet instanceof PlayerPositionLookS2CPacket position) {
+                step = Step.DONE;
+                double size = position.getZ() - plot.getZ();
+                if(size > 49) {
+                    CodeClient.worldPlot = WorldPlot.Size.BASIC;
+                }
+                if(size > 99) {
+                    CodeClient.worldPlot = WorldPlot.Size.LARGE;
+                }
+                if(size > 299) {
+                    CodeClient.worldPlot = WorldPlot.Size.MASSIVE;
+                }
+                callback();
             }
-            if(size > 99) {
-                CodeClient.worldPlot = WorldPlot.Size.LARGE;
-            }
-            if(size > 299) {
-                CodeClient.worldPlot = WorldPlot.Size.MASSIVE;
-            }
-            callback();
         }
         return false;
     }

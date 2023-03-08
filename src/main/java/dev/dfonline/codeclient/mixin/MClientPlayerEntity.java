@@ -17,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import static dev.dfonline.codeclient.CodeClient.MC;
+
 @Mixin(ClientPlayerEntity.class)
 public class MClientPlayerEntity {
     @Shadow @Final public ClientPlayNetworkHandler networkHandler;
@@ -27,7 +29,7 @@ public class MClientPlayerEntity {
     private void tick(CallbackInfo ci) {
         CodeClient.onTick();
         CodeClient.currentAction.onTick();
-        if(NoClip.ignoresWalls()) CodeClient.MC.player.noClip = true;
+        if(NoClip.ignoresWalls()) MC.player.noClip = true;
 //        ChestPeeker.tick();
     }
 
@@ -35,12 +37,12 @@ public class MClientPlayerEntity {
     private void sendMovementPackets(CallbackInfo ci) {
         if(CodeClient.location instanceof Dev) {
             if (CodeClient.currentAction instanceof MoveToSpawn mts) if (mts.moveModifier()) ci.cancel();
+            ClientPlayerEntity player = MC.player;
             if (NoClip.ignoresWalls()) {
                 ci.cancel();
                 Vec3d pos = NoClip.handleSeverPosition();
-                ClientPlayerEntity player = CodeClient.MC.player;
                 this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, player.getYaw(), player.getPitch(), false));
-
+            }
             boolean sneaking = player.isSneaking();
             if (sneaking != this.lastSneaking) {
                 ClientCommandC2SPacket.Mode mode = sneaking ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY : ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
