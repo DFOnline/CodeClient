@@ -15,7 +15,10 @@ public class FileManager {
     }
 
     public static void writeFile(String fileName, String content) throws IOException {
-        Files.write(Path().resolve(fileName),content.getBytes(), StandardOpenOption.WRITE);
+        Path path = Path().resolve(fileName);
+        Files.deleteIfExists(path);
+        Files.createFile(path);
+        Files.write(path,content.getBytes(), StandardOpenOption.WRITE);
     }
 
     public static String readFile(String fileName) throws IOException {
