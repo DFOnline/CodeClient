@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.PlotLocation;
 import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -38,13 +39,28 @@ import java.util.List;
 public class InteractionManager {
 
     public static boolean onBreakBlock(BlockPos pos) {
-        if(!PlotLocation.isInCodeSpace(pos)) return false;
-        if((pos.getY() + 1) % 5 == 0) return true;
-        Item type = CodeClient.MC.world.getBlockState(pos).getBlock().asItem();
-        if(List.of(Items.STONE, Items.PISTON, Items.STICKY_PISTON, Items.CHEST).contains(type)) return true;
-        if(type == Items.OAK_SIGN) pos = pos.add(1,0,0);
-        breakCodeBlock(pos);
-        return false;
+        if(CodeClient.location instanceof Dev plot) {
+            if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
+            if ((pos.getY() + 1) % 5 == 0) return true;
+            Item type = CodeClient.MC.world.getBlockState(pos).getBlock().asItem();
+            if (List.of(Items.STONE, Items.PISTON, Items.STICKY_PISTON, Items.CHEST).contains(type)) return true;
+            if (type == Items.OAK_SIGN) pos = pos.add(1, 0, 0);
+            breakCodeBlock(pos);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean onPlaceBlock(BlockPos pos) {
+        if(CodeClient.location instanceof Dev plot) {
+            if(plot.isInCodeSpace(pos.getX(), pos.getZ())) {
+                CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
+    //            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static void breakCodeBlock(BlockPos pos) {

@@ -7,6 +7,8 @@ import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.actiondump.ActionDump;
 import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
+import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -39,6 +41,7 @@ public class CodeClient implements ModInitializer {
     @NotNull
     public static Action currentAction = new None();
     public static Size worldPlot = null;
+    public static Location location = null;
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.","");
@@ -52,9 +55,9 @@ public class CodeClient implements ModInitializer {
     }
 
     public static void onTick() {
-        if(NoClip.ignoresWalls()) {
+        if(NoClip.ignoresWalls() && location instanceof Dev) {
             MC.player.noClip = true;
-            MC.player.airStrafingSpeed = 0.07f;
+            MC.player.airStrafingSpeed = .07f * (MC.player.getMovementSpeed() * 10);
         }
         while(editBind.isPressed()) {
             MC.setScreen(new DevInventoryScreen(MC.player));
