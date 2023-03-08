@@ -7,7 +7,7 @@
 
 A DiamondFire utility client for advanced coding.
 
-A mod for coding more efficiently with utility features including but not limited to:
+A Fabric 1.19.2 mod for coding more efficiently with utility features including but not limited to:
 * Automatically placing templates in inventory
 * Rendering only the plot you are currently coding in
 * Moving faster in codespace
