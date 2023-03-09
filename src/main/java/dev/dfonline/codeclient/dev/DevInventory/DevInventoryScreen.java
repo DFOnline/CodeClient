@@ -264,21 +264,21 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         DevInventoryGroup[] groups = DevInventoryGroup.GROUPS;
 
         for(DevInventoryGroup group : groups) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, TEXTURE);
             if (group.getIndex() != selectedTab && group != CODE_VAULT) {
                 this.renderTabIcon(matrices, group);
             }
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         String texture = "item_search";
         if(!itemGroup.hasSearchBar()) texture = "items";
         if(itemGroup == INVENTORY) texture = "inventory";
         RenderSystem.setShaderTexture(0, new Identifier(TAB_TEXTURE_PREFIX + texture + ".png"));
         this.drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE);
         this.renderTabIcon(matrices, itemGroup);
 
