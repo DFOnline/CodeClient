@@ -26,7 +26,7 @@ public class ClearPlot extends Action {
     @Override
     public void init() {
         currentStep = Step.WAIT_FOR_OPTIONS;
-        CodeClient.MC.player.sendCommand("plot clear");
+        CodeClient.MC.getNetworkHandler().sendCommand("plot clear");
     }
 
     @Override

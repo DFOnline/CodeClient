@@ -7,7 +7,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
 
 public class Item {
     public String material;
@@ -27,7 +27,7 @@ public class Item {
     public Argument[] arguments;
 
     public ItemStack getItem() {
-        ItemStack item = Registry.ITEM.get(new Identifier(material.toLowerCase())).getDefaultStack();
+        ItemStack item = Registries.ITEM.get(new Identifier(material.toLowerCase())).getDefaultStack();
 
         NbtCompound nbt = new NbtCompound();
         NbtCompound display = new NbtCompound();

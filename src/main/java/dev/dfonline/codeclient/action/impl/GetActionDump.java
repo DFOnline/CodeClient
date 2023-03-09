@@ -30,7 +30,7 @@ public class GetActionDump extends Action {
 
     @Override
     public void init() {
-        CodeClient.MC.player.sendCommand("dumpactioninfo" + (doColours ? "-c" : ""));
+        CodeClient.MC.getNetworkHandler().sendCommand("dumpactioninfo" + (doColours ? "-c" : ""));
         capturedData = new StringBuilder();
         startTime = new Date();
     }

@@ -64,7 +64,7 @@ public class InteractionManager {
 
     private static void breakCodeBlock(BlockPos pos) {
         ClientWorld world = CodeClient.MC.world;
-        CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.break")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+        CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvent.of(new Identifier("minecraft:block.stone.break")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
         world.setBlockState(pos, Blocks.AIR.getDefaultState());
         world.setBlockState(pos.add(0,1,0), Blocks.AIR.getDefaultState());
         world.setBlockState(pos.add(-1,0,0), Blocks.AIR.getDefaultState());

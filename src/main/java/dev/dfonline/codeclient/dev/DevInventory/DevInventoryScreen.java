@@ -109,7 +109,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             CodeClient.LOGGER.error(e.getMessage());
         }
 
-        this.client.keyboard.setRepeatEvents(true);
         TextRenderer textRenderer = this.textRenderer;
         Objects.requireNonNull(this.textRenderer);
         this.searchBox = new TextFieldWidget(textRenderer, this.x + 82, this.y + 6, 80, 9, Text.translatable("itemGroup.search"));
@@ -138,7 +137,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if (this.client.player != null && this.client.player.getInventory() != null) {
             this.client.player.playerScreenHandler.removeListener(this.listener);
         }
-        this.client.keyboard.setRepeatEvents(false);
     }
 
 //    public boolean charTyped(char chr, int modifiers) {

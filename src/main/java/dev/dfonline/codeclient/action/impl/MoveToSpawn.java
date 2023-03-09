@@ -21,7 +21,7 @@ public class MoveToSpawn extends Action {
 
     @Override
     public void init() {
-        player.sendCommand("plot spawn");
+        CodeClient.MC.getNetworkHandler().sendCommand("plot spawn");
         currentStep = Step.WAIT_FOR_TELEPORT;
     }
 
