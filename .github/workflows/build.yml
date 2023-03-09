@@ -3,7 +3,7 @@ name: Build
 on:
     push:
         branches:
-            - master
+            - main
 permissions:
     id-token: "write"
     contents: "write"
@@ -30,7 +30,6 @@ jobs:
               uses: marvinpinto/action-automatic-releases@latest
               with:
                   repo_token: "${{ secrets.GITHUB_TOKEN }}"
-                  automatic_release_tag: "v${{ github.run_number }}-beta"
-                  prerelease: true
+                  automatic_release_tag: "v${{ github.run_number }}"
                   files: |
                       ./build/libs/
