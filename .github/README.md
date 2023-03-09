@@ -2,12 +2,15 @@
 
 ![CodeClient Banner](CodeClientBanner.png)
 
-[![license](https://img.shields.io/github/license/DFOnline/CodeClient?style=for-the-badge&color=850e05)](../LICENSE)
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=for-the-badge)](https://github.com/RichardLitt/standard-readme)
+[![downloads](https://img.shields.io/github/downloads/DFOnline/CodeClient/total?color=6fc75b&style=for-the-badge)](https://github.com/DFOnline/CodeClient/releases/latest)
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-6fc75b.svg?style=for-the-badge)](https://github.com/RichardLitt/standard-readme)
+
+[![license](https://img.shields.io/github/license/DFOnline/CodeClient?&color=850e05)](../LICENSE)
+[![build](https://img.shields.io/github/actions/workflow/status/DFOnline/CodeClient/build.yml?color=508f42)](https://github.com/DFOnline/CodeClient/releases/latest)
 
 A DiamondFire utility client for advanced coding.
 
-A Fabric 1.19.2 mod for coding more efficiently with utility features including but not limited to:
+A Fabric 1.19.3 mod for coding more efficiently with utility features including but not limited to:
 * Automatically placing templates in inventory
 * Rendering only the plot you are currently coding in
 * Moving faster in codespace
