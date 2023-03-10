@@ -15,11 +15,9 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.*;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -124,13 +122,21 @@ public class InteractionManager {
         if(CodeClient.location instanceof Dev plot)
         if(plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
             CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
-//            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvent.of(new Identifier("minecraft:block.stone.place"), 1), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), hitResult.getBlockPos()));
             if(hitResult.getSide() == Direction.UP) {
                 BlockPos from = hitResult.getBlockPos();
                 hitResult = new BlockHitResult(new Vec3d(from.getX(), from.getY() + 1, from.getZ()),Direction.UP,hitResult.getBlockPos().add(0,1,0),false);
             }
             BlockHitResult finalHitResult = hitResult;
+            ItemStack item = player.getStackInHand(hand);
+            if(item.hasNbt() && item.getNbt() != null && item.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && item.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE)) {
+                ItemStack template = Items.ENDER_CHEST.getDefaultStack();
+                template.setNbt(item.getNbt());
+                CodeClient.LOGGER.info(String.valueOf(player.getInventory().selectedSlot));
+                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, template));
+            }
             ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, finalHitResult, sequence));
+            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, item));
             return true;
         }
         return false;
