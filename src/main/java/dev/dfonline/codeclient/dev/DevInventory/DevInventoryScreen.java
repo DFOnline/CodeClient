@@ -35,6 +35,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -85,7 +86,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
         if(slot.inventory instanceof SimpleInventory) {
             if(actionType == SlotActionType.PICKUP) {
-                CodeClient.LOGGER.info(String.valueOf(this.handler.getCursorStack()));
                 if(this.handler.getCursorStack().getItem().equals(Items.AIR)) this.handler.setCursorStack(slot.getStack());
                 else this.handler.setCursorStack(Items.AIR.getDefaultStack());
             }
@@ -272,6 +272,14 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if(keyCode >= GLFW.GLFW_KEY_0 && keyCode <= GLFW.GLFW_KEY_9) {
+            int number = keyCode - GLFW.GLFW_KEY_1;
+            if(number == -1) number = 9;
+            Slot slot = this.handler.slots.get(number);
+            if(this.client != null && this.client.player != null) this.client.player.setStackInHand(Hand.MAIN_HAND, slot.getStack());
+            this.ignoreNextKey = true;
+            return true;
+        }
         if(keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
             selectedTab += 7 * ((keyCode == GLFW.GLFW_KEY_DOWN) ? -1 : 1);
             selectedTab %= GROUPS.length;
