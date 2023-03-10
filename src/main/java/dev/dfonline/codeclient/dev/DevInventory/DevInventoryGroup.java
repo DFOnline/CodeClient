@@ -130,11 +130,13 @@ public class DevInventoryGroup {
         this.itemsProvider = query -> {
             ArrayList<ItemStack> items = new ArrayList<>();
             try {
-                for (CodeBlock codeblock: ActionDump.getActionDump().codeblocks) {
+                if(query == null) for (CodeBlock codeblock: ActionDump.getActionDump().codeblocks) {
                     if(codeblock.identifier.equals(this.id)) items.add(codeblock.item.getItem());
                 }
                 for (Action action: ActionDump.getActionDump().actions) {
-                    if(action.getCodeBlock().identifier.equals(this.id) && !action.icon.name.equals("")) items.add(action.getItem());
+                    if(action.getCodeBlock().identifier.equals(this.id) && !action.icon.name.equals("")) {
+                        if(query == null || action.name.toLowerCase().contains(query) || action.icon.name.toLowerCase().contains(query)) items.add(action.getItem());
+                    }
                 }
             } catch (Exception ignored) {}
             return items;

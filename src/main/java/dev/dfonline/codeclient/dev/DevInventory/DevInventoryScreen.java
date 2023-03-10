@@ -56,6 +56,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     @Nullable
     private Slot deleteItemSlot;
     private CreativeInventoryListener listener;
+    private boolean ignoreNextKey = false;
 
     public DevInventoryScreen(PlayerEntity player) {
         super(new CreativeInventoryScreen.CreativeScreenHandler(player), player.getInventory(), ScreenTexts.EMPTY);
@@ -191,6 +192,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     private void setSelectedTab(int tab) {
         searchBox.setText("");
         DevInventoryGroup group = GROUPS[tab];
+        searchBox.active = group.hasSearchBar();
         selectedTab = tab;
 
         if(group == DevInventoryGroup.INVENTORY && this.slots == null) {
@@ -257,7 +259,11 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
     public boolean charTyped(char chr, int modifiers) {
-        if(this.searchBox.charTyped(chr, modifiers)) {
+        if(ignoreNextKey) {
+            ignoreNextKey = false;
+            return true;
+        }
+        if(searchBox.charTyped(chr, modifiers)) {
             populate();
             return true;
         }
