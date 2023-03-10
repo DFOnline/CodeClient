@@ -45,9 +45,9 @@ public class InteractionManager {
             if (List.of(Items.STONE, Items.PISTON, Items.STICKY_PISTON, Items.CHEST).contains(type)) return true;
             if (type == Items.OAK_SIGN) pos = pos.add(1, 0, 0);
             breakCodeBlock(pos);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     public static boolean onPlaceBlock(BlockPos pos) {
