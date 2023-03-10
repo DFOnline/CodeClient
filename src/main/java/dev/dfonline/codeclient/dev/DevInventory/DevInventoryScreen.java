@@ -38,6 +38,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import static dev.dfonline.codeclient.dev.DevInventory.DevInventoryGroup.*;
 
@@ -269,6 +270,40 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         }
         return false;
     }
+
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if(keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
+            selectedTab += 7 * ((keyCode == GLFW.GLFW_KEY_DOWN) ? -1 : 1);
+            selectedTab %= GROUPS.length;
+            if(selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
+            setSelectedTab(selectedTab);
+        }
+        if(keyCode != GLFW.GLFW_KEY_TAB && searchBox.isFocused()) {
+            searchBox.keyPressed(keyCode, scanCode, modifiers);
+            populate();
+            return true;
+        }
+        if(keyCode == GLFW.GLFW_KEY_TAB || keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_LEFT) {
+            if((modifiers & GLFW.GLFW_MOD_SHIFT) == 1 || keyCode == GLFW.GLFW_KEY_LEFT) {
+                selectedTab = selectedTab - 1;
+                if(selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
+                setSelectedTab(selectedTab);
+            }
+            else setSelectedTab((selectedTab + 1) % GROUPS.length);
+            return true;
+        }
+        if(searchBox.active) {
+            if(keyCode == GLFW.GLFW_KEY_T) {
+                searchBox.setTextFieldFocused(true);
+                searchBox.setCursorToEnd();
+                searchBox.setSelectionEnd(0);
+                ignoreNextKey = true;
+                return true;
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
