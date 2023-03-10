@@ -21,6 +21,7 @@
   "mixins": [
     "ClientPlayerInteractionManagerAccessor",
     "MChunkRendererRegion",
-    "MWorld"
+    "MWorld",
+    "block.MBarrier"
   ]
 }
