@@ -21,6 +21,7 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Hand;
@@ -122,13 +123,14 @@ public class InteractionManager {
         if(CodeClient.location instanceof Dev plot)
         if(plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
             CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
-            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvent.of(new Identifier("minecraft:block.stone.place"), 1), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), hitResult.getBlockPos()));
+            ItemStack item = player.getStackInHand(hand);
+            BlockSoundGroup group = Block.getBlockFromItem(item.getItem()).getSoundGroup(Block.getBlockFromItem(item.getItem()).getDefaultState());
+            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(group.getPlaceSound(), SoundCategory.BLOCKS, group.getVolume(), group.getPitch(), Random.create(), hitResult.getBlockPos()));
             if(hitResult.getSide() == Direction.UP) {
                 BlockPos from = hitResult.getBlockPos();
                 hitResult = new BlockHitResult(new Vec3d(from.getX(), from.getY() + 1, from.getZ()),Direction.UP,hitResult.getBlockPos().add(0,1,0),false);
             }
             BlockHitResult finalHitResult = hitResult;
-            ItemStack item = player.getStackInHand(hand);
             if(item.hasNbt() && item.getNbt() != null && item.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && item.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE)) {
                 ItemStack template = Items.ENDER_CHEST.getDefaultStack();
                 template.setNbt(item.getNbt());
