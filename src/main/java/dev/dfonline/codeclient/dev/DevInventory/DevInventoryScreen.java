@@ -28,6 +28,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.screen.slot.Slot;
@@ -276,7 +277,9 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             int number = keyCode - GLFW.GLFW_KEY_1;
             if(number == -1) number = 9;
             Slot slot = this.handler.slots.get(number);
-            if(this.client != null && this.client.player != null) this.client.player.setStackInHand(Hand.MAIN_HAND, slot.getStack());
+            if(this.client == null || this.client.player == null) return false;
+            this.client.player.setStackInHand(Hand.MAIN_HAND, slot.getStack());
+            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + client.player.getInventory().selectedSlot, slot.getStack()));
             this.ignoreNextKey = true;
             return true;
         }
