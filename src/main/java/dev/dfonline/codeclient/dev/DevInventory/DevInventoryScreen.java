@@ -279,6 +279,11 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             setSelectedTab(selectedTab);
         }
         if(keyCode != GLFW.GLFW_KEY_TAB && searchBox.isFocused()) {
+            if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                this.searchBox.setTextFieldFocused(false);
+                this.setFocused(null);
+                return false;
+            }
             searchBox.keyPressed(keyCode, scanCode, modifiers);
             populate();
             return true;
