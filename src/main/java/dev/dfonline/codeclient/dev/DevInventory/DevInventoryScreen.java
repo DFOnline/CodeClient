@@ -12,7 +12,6 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.actiondump.ActionDump;
-import dev.dfonline.codeclient.actiondump.Item;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -141,7 +140,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
     public void removed() {
         super.removed();
-        if (this.client.player != null && this.client.player.getInventory() != null) {
+        if (this.client != null && this.client.player != null && this.client.player.getInventory() != null) {
             this.client.player.playerScreenHandler.removeListener(this.listener);
         }
     }
@@ -196,6 +195,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         searchBox.active = group.hasSearchBar();
         selectedTab = tab;
 
+        if(this.client == null || this.client.player == null) return;
         if(group == DevInventoryGroup.INVENTORY && this.slots == null) {
             ScreenHandler playerScreenHandler = this.client.player.playerScreenHandler;
             this.slots = ImmutableList.copyOf((this.handler).slots);
@@ -312,9 +312,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
-        DevInventoryGroup[] groups = DevInventoryGroup.GROUPS;
 
-        for(DevInventoryGroup group : groups) {
+        for(DevInventoryGroup group : DevInventoryGroup.GROUPS) {
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, TEXTURE);
             if (group.getIndex() != selectedTab && group != CODE_VAULT) {
