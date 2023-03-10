@@ -111,9 +111,9 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         }
         catch (IOException | JsonParseException e) {
             CodeClient.LOGGER.error(e.getMessage());
+            Utility.sendMessage(Text.literal("Could not parse the ActionDump. Install it using §b/getactiondump colors §cin Node Beta or download a (maybe outdated) version by clicking on this message.")
+                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://dfonline.dev/public/dbc.json"))), ChatType.FAIL);
         }
-        Utility.sendMessage(Text.literal("Could not parse the ActionDump. Install it using §b/getactiondump colors §cin Node Beta or download a (maybe outdated) version by clicking on this message.")
-                .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://dfonline.dev/public/dbc.json"))), ChatType.FAIL);
 
         TextRenderer textRenderer = this.textRenderer;
         Objects.requireNonNull(this.textRenderer);
