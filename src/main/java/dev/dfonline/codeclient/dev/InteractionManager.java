@@ -130,11 +130,6 @@ public class InteractionManager {
                 hitResult = new BlockHitResult(new Vec3d(from.getX(), from.getY() + 1, from.getZ()),Direction.UP,hitResult.getBlockPos().add(0,1,0),false);
             }
             BlockHitResult finalHitResult = hitResult;
-            CodeClient.LOGGER.info(String.valueOf(hitResult.getBlockPos()));
-            CodeClient.LOGGER.info(String.valueOf(hitResult.getSide()));
-            CodeClient.LOGGER.info(String.valueOf(hitResult.getPos()));
-            CodeClient.LOGGER.info(String.valueOf(hitResult.getType()));
-            CodeClient.LOGGER.info(String.valueOf(hitResult.isInsideBlock()));
             ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, finalHitResult, sequence));
             return true;
         }
