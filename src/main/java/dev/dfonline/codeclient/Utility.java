@@ -1,10 +1,18 @@
 package dev.dfonline.codeclient;
 
 import com.google.gson.JsonObject;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.sound.Sound;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,4 +54,28 @@ public class Utility {
 
         return new String(Base64.getEncoder().encode(obj.toByteArray()));
     }
+
+    public static void sendMessage(String message, ChatType type) {
+        sendMessage(Text.of(message), type);
+    }
+    public static void sendMessage(String message) {
+        sendMessage(Text.of(message), ChatType.INFO);
+    }
+    public static void sendMessage(Text message) {
+        sendMessage(message, ChatType.INFO);
+    }
+
+    public static void sendMessage(Text message, @Nullable ChatType type) {
+        ClientPlayerEntity player = CodeClient.MC.player;
+        if (player == null) return;
+        if (type == null) {
+            player.sendMessage(message, false);
+        } else {
+            player.sendMessage(Text.literal(type.getString() + " ").append(message).setStyle(Style.EMPTY.withColor(type.getTrailing())), false);
+            if (type == ChatType.FAIL) {
+                player.playSound(SoundEvent.of(new Identifier("minecraft:block.note_block.didgeridoo")), SoundCategory.PLAYERS, 2, 0);
+            }
+        }
+    }
 }
+

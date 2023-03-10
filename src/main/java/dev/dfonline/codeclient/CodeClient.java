@@ -83,15 +83,15 @@ public class CodeClient implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(literal("auth").executes(context -> {
                 SocketHandler.setAuthorised(true);
-                MC.player.sendMessage(Text.literal("§eThe connect app has been authorised,§l it can now do anything to your plot code."));
-                MC.player.sendMessage(Text.literal("§eYou can remove the app by running §c/auth remove"));
+                Utility.sendMessage("The connect app has been authorised,§l it can now do anything to your plot code.", ChatType.SUCCESS);
+                Utility.sendMessage("You can remove the app by running §e/auth remove", ChatType.INFO);
                 return 0;
             }).then(literal("remove").executes(context -> {
                 SocketHandler.setAuthorised(false);
-                MC.player.sendMessage(Text.literal("§eThe connected app is no longer authorised, which might break it."));
+                Utility.sendMessage("The connected app is no longer authorised, which might break it.", ChatType.SUCCESS);
                 return 0;
             })).then(literal("disconnect").executes(context -> {
-                MC.player.sendMessage(Text.of("§cNot implemented."));
+                Utility.sendMessage("Not implemented.", ChatType.FAIL);
                 SocketHandler.setConnection(null);
                 return 0;
             })));
@@ -129,36 +129,36 @@ public class CodeClient implements ModInitializer {
 
 
             dispatcher.register(literal("getactiondump").executes(context -> {
-                currentAction = new GetActionDump(false, () -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new GetActionDump(false, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
                 currentAction.init();
                 return 0;
             }).then(literal("colors").executes(context -> {
-                currentAction = new GetActionDump(true, () -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new GetActionDump(true, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
                 currentAction.init();
                 return 0;
             })));
 
 
             dispatcher.register(literal("getspawn").executes(context -> {
-                currentAction = new MoveToSpawn(() -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new MoveToSpawn(() -> Utility.sendMessage("Done!", ChatType.SUCCESS));
                 currentAction.init();
                 return 0;
             }));
             dispatcher.register(literal("getsize").executes(context -> {
                 currentAction = new GetPlotSize(() -> {
                     currentAction = new None();
-                    MC.player.sendMessage(Text.literal(worldPlot.name()));
+                    Utility.sendMessage(Text.literal(worldPlot.name()));
                 });
                 currentAction.init();
                 return 0;
             }));
             dispatcher.register(literal("clearplot").executes(context -> {
-                currentAction = new ClearPlot(() -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new ClearPlot(() -> Utility.sendMessage("Done!", ChatType.SUCCESS));
                 currentAction.init();
                 return 0;
             }));
             dispatcher.register(literal("placetemplate").executes(context -> {
-                currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> MC.player.sendMessage(Text.literal("Done!")));
+                currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
                 currentAction.init();
                 return 0;
             }));
@@ -167,7 +167,7 @@ public class CodeClient implements ModInitializer {
                 currentAction = new ClearPlot(() -> {
                     currentAction = new MoveToSpawn(() -> {
                         currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> {
-                            MC.player.sendMessage(Text.literal("Done!"));
+                            Utility.sendMessage("Done!", ChatType.SUCCESS);
                         });
                         currentAction.init();
                     });

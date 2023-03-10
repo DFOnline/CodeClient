@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.actiondump.ActionDump;
 import dev.dfonline.codeclient.actiondump.Item;
 import net.fabricmc.api.EnvType;
@@ -31,6 +33,8 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -105,9 +109,10 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             ActionDump.getActionDump();
         }
         catch (IOException | JsonParseException e) {
-            this.client.player.sendMessage(Text.of("Could not parse the ActionDump. Either it is bad JSON or not even installed"));
             CodeClient.LOGGER.error(e.getMessage());
         }
+        Utility.sendMessage(Text.literal("Could not parse the ActionDump. Install it using §b/getactiondump colors §cin Node Beta or download a (maybe outdated) version by clicking on this message.")
+                .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://dfonline.dev/public/dbc.json"))), ChatType.FAIL);
 
         TextRenderer textRenderer = this.textRenderer;
         Objects.requireNonNull(this.textRenderer);
