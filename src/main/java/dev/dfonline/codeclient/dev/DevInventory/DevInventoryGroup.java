@@ -1,8 +1,6 @@
 package dev.dfonline.codeclient.dev.DevInventory;
 
-import dev.dfonline.codeclient.actiondump.Action;
-import dev.dfonline.codeclient.actiondump.ActionDump;
-import dev.dfonline.codeclient.actiondump.CodeBlock;
+import dev.dfonline.codeclient.actiondump.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtHelper;
@@ -144,6 +142,25 @@ public class DevInventoryGroup {
         return this;
     }
 
+    private DevInventoryGroup useCategory(Searchable categoryValues[]) {
+        this.itemsProvider = query -> {
+            ArrayList<ItemStack> items = new ArrayList<>();
+            for (Searchable value: categoryValues) {
+                if(query == null) items.add(value.getItem());
+                else {
+                    for (String term: value.getTerms()) {
+                        if(term.toLowerCase().replaceAll("[_ ]","").contains(query)) {
+                            items.add(value.getItem());
+                            break;
+                        }
+                    }
+                }
+            }
+            return items;
+        };
+        return this;
+    }
+
     static {
         OTHERS.setItemsProvider(query -> {
             ArrayList<ItemStack> items = emptyMenu();
@@ -172,5 +189,12 @@ public class DevInventoryGroup {
             }
             return items;
         });
+        try {
+            ActionDump actionDump = ActionDump.getActionDump();
+            GAME_VALUES.useCategory(actionDump.gameValues);
+            SOUNDS.useCategory(actionDump.sounds);
+        }
+        catch (Exception ignored) {
+        }
     }
 }
