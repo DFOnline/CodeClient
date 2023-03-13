@@ -12,7 +12,7 @@ public class Action {
     public String name;
     public String codeblockName;
     public String[] aliases;
-    public Item icon;
+    public Icon icon;
     public String[] subActionBlocks;
 
     public CodeBlock getCodeBlock() {

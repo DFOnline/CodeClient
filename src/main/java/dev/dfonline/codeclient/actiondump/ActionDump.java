@@ -12,6 +12,11 @@ public class ActionDump {
 
     public CodeBlock[] codeblocks;
     public Action[] actions;
+    public GameValue[] gameValues;
+    public Sound[] sounds;
+    public Particle[] particles;
+    public Potion[] potions;
+
 
     public static ActionDump getActionDump() throws IOException {
         if(instance == null) {

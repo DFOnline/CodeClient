@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.actiondump;
 
+import dev.dfonline.codeclient.CodeClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
@@ -9,7 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.Registries;
 
-public class Item {
+public class Icon {
     public String material;
     public String name;
     public String[] deprecatedNote;
@@ -88,7 +89,7 @@ public class Item {
         nbt.put("HideFlags", NbtInt.of(127));
         item.setNbt(nbt);
 
-        item.setCustomName(Text.literal("§b" + name));
+        item.setCustomName(Text.of(name));
 
         return item;
     }
