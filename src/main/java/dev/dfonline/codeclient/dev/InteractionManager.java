@@ -134,7 +134,6 @@ public class InteractionManager {
             if(item.hasNbt() && item.getNbt() != null && item.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && item.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE)) {
                 ItemStack template = Items.ENDER_CHEST.getDefaultStack();
                 template.setNbt(item.getNbt());
-                CodeClient.LOGGER.info(String.valueOf(player.getInventory().selectedSlot));
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, template));
             }
             ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, finalHitResult, sequence));

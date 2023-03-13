@@ -99,7 +99,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             this.handler.setCursorStack(slotStack);
             this.handler.syncState();
             this.listener.onSlotUpdate(this.handler,slot.id - 9,slot.getStack());
-            CodeClient.LOGGER.info(String.valueOf(slot.id));
 //            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.id,slot.getStack()));
         }
     }
