@@ -124,6 +124,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.searchBox.setEditableColor(16777215);
         this.addSelectableChild(this.searchBox);
         setSelectedTab(0);
+        this.setFocused(searchBox);
+        searchBox.setTextFieldFocused(true);
         this.client.player.playerScreenHandler.removeListener(this.listener);
         this.listener = new CreativeInventoryListener(this.client);
         this.client.player.playerScreenHandler.addListener(this.listener);
@@ -272,6 +274,9 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if(keyCode == GLFW.GLFW_KEY_GRAVE_ACCENT) {
+            this.close();
+        }
         if(keyCode >= GLFW.GLFW_KEY_0 && keyCode <= GLFW.GLFW_KEY_9) {
             int number = keyCode - GLFW.GLFW_KEY_1;
             if(number == -1) number = 9;
