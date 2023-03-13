@@ -9,6 +9,7 @@ import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.*;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
@@ -31,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.World;
 
 import java.util.List;
 
@@ -120,18 +122,30 @@ public class InteractionManager {
     }
 
     public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
-        if(CodeClient.location instanceof Dev plot)
-        if(plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
-            CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
+        MinecraftClient MC = CodeClient.MC;
+        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
+
+//            hitResult;
             ItemStack item = player.getStackInHand(hand);
+            boolean clickedStone = MC.world.getBlockState(hitResult.getBlockPos()).getBlock().equals(Blocks.STONE);
+            boolean onTop = hitResult.getSide() == Direction.UP;
+            boolean isTemplate = item.hasNbt() && item.getNbt() != null && item.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && item.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE);
+
+            // play sound
             BlockSoundGroup group = Block.getBlockFromItem(item.getItem()).getSoundGroup(Block.getBlockFromItem(item.getItem()).getDefaultState());
-            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(group.getPlaceSound(), SoundCategory.BLOCKS, group.getVolume(), group.getPitch(), Random.create(), hitResult.getBlockPos()));
-            if(hitResult.getSide() == Direction.UP) {
+            MC.getSoundManager().play(new PositionedSoundInstance(group.getPlaceSound(), SoundCategory.BLOCKS, group.getVolume(), group.getPitch(), Random.create(), hitResult.getBlockPos()));
+
+            MC.player.swingHand(Hand.MAIN_HAND);
+
+
+            if(onTop) {
                 BlockPos from = hitResult.getBlockPos();
                 hitResult = new BlockHitResult(new Vec3d(from.getX(), from.getY() + 1, from.getZ()),Direction.UP,hitResult.getBlockPos().add(0,1,0),false);
             }
+
+
             BlockHitResult finalHitResult = hitResult;
-            if(item.hasNbt() && item.getNbt() != null && item.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && item.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE)) {
+            if(isTemplate) {
                 ItemStack template = Items.ENDER_CHEST.getDefaultStack();
                 template.setNbt(item.getNbt());
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, template));

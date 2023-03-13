@@ -133,7 +133,13 @@ public class DevInventoryGroup {
                 }
                 for (Action action: ActionDump.getActionDump().actions) {
                     if(action.getCodeBlock().identifier.equals(this.id) && !action.icon.name.equals("")) {
-                        if(query == null || action.name.toLowerCase().contains(query) || action.icon.name.toLowerCase().contains(query)) items.add(action.getItem());
+                        if(query == null) items.add(action.getItem());
+                        else {
+                            for (String term: action.getTerms()) {
+                                if(term.toLowerCase().contains(query.toLowerCase())) items.add(action.getItem());
+                                break;
+                            }
+                        }
                     }
                 }
             } catch (Exception ignored) {}
@@ -149,7 +155,7 @@ public class DevInventoryGroup {
                 if(query == null) items.add(value.getItem());
                 else {
                     for (String term: value.getTerms()) {
-                        if(term.toLowerCase().replaceAll("[_ ]","").contains(query)) {
+                        if(term.toLowerCase().replaceAll("[_ ]","").contains(query.toLowerCase())) {
                             items.add(value.getItem());
                             break;
                         }
@@ -199,6 +205,7 @@ public class DevInventoryGroup {
             ActionDump actionDump = ActionDump.getActionDump();
             GAME_VALUES.useCategory(actionDump.gameValues);
             SOUNDS.useCategory(actionDump.sounds);
+            POTIONS.useCategory(actionDump.potions);
         }
         catch (Exception ignored) {
         }

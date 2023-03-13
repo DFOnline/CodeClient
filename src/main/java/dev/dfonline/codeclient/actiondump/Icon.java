@@ -27,6 +27,10 @@ public class Icon {
     public String loadedItem;
     public Argument[] arguments;
 
+    public String getName() {
+        return this.name.replaceAll("§.","");
+    }
+
     public ItemStack getItem() {
         ItemStack item = Registries.ITEM.get(new Identifier(material.toLowerCase())).getDefaultStack();
 

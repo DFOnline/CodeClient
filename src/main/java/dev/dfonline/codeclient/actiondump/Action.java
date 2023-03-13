@@ -8,7 +8,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 
-public class Action {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class Action implements Searchable {
     public String name;
     public String codeblockName;
     public String[] aliases;
@@ -25,15 +29,24 @@ public class Action {
         return null;
     }
 
+    @Override
+    public List<String> getTerms() {
+        ArrayList<String> terms = new ArrayList<>(Arrays.stream(aliases).toList());
+        terms.add(name);
+        terms.add(icon.name.replace("§.",""));
+        return terms;
+    }
+
+    @Override
     public ItemStack getItem() {
         ItemStack item = icon.getItem();
         NbtCompound nbt = item.getNbt();
         assert nbt != null;
         NbtCompound PublicBukkitValues = new NbtCompound();
-        JsonObject codetemplatedata = new JsonObject();
-        codetemplatedata.addProperty("author", CodeClient.MC.getSession().getUsername());
-        codetemplatedata.addProperty("name", icon.name);
-        codetemplatedata.addProperty("version", 1);
+        JsonObject CodeTemplateData = new JsonObject();
+        CodeTemplateData.addProperty("author", CodeClient.MC.getSession().getUsername());
+        CodeTemplateData.addProperty("name", icon.name);
+        CodeTemplateData.addProperty("version", 1);
 
         JsonObject template = new JsonObject();
         JsonArray blocks = new JsonArray();
@@ -47,10 +60,10 @@ public class Action {
         blocks.add(action);
         template.add("blocks",blocks);
         try {
-            codetemplatedata.addProperty("code", Utility.compileTempate(template.toString()));
+            CodeTemplateData.addProperty("code", Utility.compileTempate(template.toString()));
         } catch (Exception ignored) {}
 
-        PublicBukkitValues.put("hypercube:codetemplatedata", NbtString.of(String.valueOf(codetemplatedata)));
+        PublicBukkitValues.put("hypercube:codetemplatedata", NbtString.of(String.valueOf(CodeTemplateData)));
         nbt.put("PublicBukkitValues",PublicBukkitValues);
         item.setNbt(nbt);
         return item;
