@@ -124,8 +124,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.searchBox.setEditableColor(16777215);
         this.addSelectableChild(this.searchBox);
         setSelectedTab(0);
-        this.setFocused(searchBox);
-        searchBox.setTextFieldFocused(true);
         this.client.player.playerScreenHandler.removeListener(this.listener);
         this.listener = new CreativeInventoryListener(this.client);
         this.client.player.playerScreenHandler.addListener(this.listener);
@@ -313,7 +311,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             return true;
         }
         if(searchBox.active) {
-            if(keyCode == GLFW.GLFW_KEY_T) {
+            if(keyCode == GLFW.GLFW_KEY_T || keyCode == GLFW.GLFW_KEY_Y) {
+                if(keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
                 searchBox.setTextFieldFocused(true);
                 searchBox.setCursorToEnd();
                 searchBox.setSelectionEnd(0);
