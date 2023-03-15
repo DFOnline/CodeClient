@@ -13,6 +13,7 @@ import net.minecraft.registry.Registries;
 public class Icon {
     public String material;
     public String name;
+    public Color color;
     public String[] deprecatedNote;
     public String[] description;
     public String[] example;
@@ -91,6 +92,7 @@ public class Icon {
         display.put("Lore",lore);
         nbt.put("display",display);
         nbt.put("HideFlags", NbtInt.of(127));
+        if(color != null) nbt.put("CustomPotionColor", NbtInt.of(color.getColor()));
         item.setNbt(nbt);
 
         item.setCustomName(Text.of(name));
@@ -100,5 +102,15 @@ public class Icon {
 
     private void addToLore(NbtList lore, String text) {
         lore.add(NbtString.of("{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"white\",\"text\":\"%s\"}],\"text\":\"\"}".formatted(text.replace("\"","\\\""))));
+    }
+
+    private class Color {
+        int red;
+        int green;
+        int blue;
+
+        public int getColor() {
+            return (red << 16) + (green << 8) + blue;
+        }
     }
 }
