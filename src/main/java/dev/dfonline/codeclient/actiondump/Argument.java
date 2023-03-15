@@ -26,6 +26,7 @@ public class Argument {
         BLOCK(GOLD, "Block"),
         ENTITY_TYPE(GOLD, "Entity Type"),
         SPAWN_EGG(GOLD, "Spawn Egg"),
+        VEHICLE(GOLD, "Vehicle"),
         PROJECTILE(GOLD, "Projectile"),
         BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag"),
         LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List"),

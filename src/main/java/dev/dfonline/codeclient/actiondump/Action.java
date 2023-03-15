@@ -68,4 +68,8 @@ public class Action implements Searchable {
         item.setNbt(nbt);
         return item;
     }
+
+    public boolean isInvalid() {
+        return this.icon.name.equals("");
+    }
 }

@@ -132,7 +132,7 @@ public class DevInventoryGroup {
                     if(codeblock.identifier.equals(this.id)) items.add(codeblock.item.getItem());
                 }
                 for (Action action: ActionDump.getActionDump().actions) {
-                    if(action.getCodeBlock().identifier.equals(this.id) && !action.icon.name.equals("")) {
+                    if(action.getCodeBlock().identifier.equals(this.id) && !action.isInvalid()) {
                         if(query == null) items.add(action.getItem());
                         else {
                             for (String term: action.getTerms()) {
@@ -206,6 +206,38 @@ public class DevInventoryGroup {
             GAME_VALUES.useCategory(actionDump.gameValues);
             SOUNDS.useCategory(actionDump.sounds);
             POTIONS.useCategory(actionDump.potions);
+
+            SEARCH.setItemsProvider(query -> {
+                ArrayList<ItemStack> items = new ArrayList<>();
+                if(query == null) query = "";
+                else query = query.toLowerCase();
+                for (Action action: actionDump.actions) {
+                    if(action.isInvalid()) continue;
+                    for (String term : action.getTerms()) if(term.toLowerCase().contains(query)) {
+                        items.add(action.getItem());
+                        break;
+                    }
+                }
+                for(GameValue gameValue: actionDump.gameValues) {
+                    for (String term : gameValue.getTerms()) if(term.toLowerCase().contains(query)) {
+                        items.add(gameValue.getItem());
+                        break;
+                    }
+                }
+                for(Sound sound: actionDump.sounds) {
+                    for (String term : sound.getTerms()) if(term.toLowerCase().contains(query)) {
+                        items.add(sound.getItem());
+                        break;
+                    }
+                }
+                for(Potion potion: actionDump.potions) {
+                    for (String term : potion.getTerms()) if(term.toLowerCase().contains(query)) {
+                        items.add(potion.getItem());
+                        break;
+                    }
+                }
+                return items;
+            });
         }
         catch (Exception ignored) {
         }
