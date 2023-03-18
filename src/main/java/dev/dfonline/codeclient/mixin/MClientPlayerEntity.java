@@ -61,4 +61,9 @@ public class MClientPlayerEntity {
     private void slowDown(CallbackInfoReturnable<Boolean> cir) {
         if(NoClip.ignoresWalls()) cir.setReturnValue(false);
     }
+
+    @Inject(method = "shouldAutoJump", at = @At("HEAD"), cancellable = true)
+    private void autoJump(CallbackInfoReturnable<Boolean> cir) {
+        if(NoClip.ignoresWalls()) cir.setReturnValue(false);
+    }
 }
