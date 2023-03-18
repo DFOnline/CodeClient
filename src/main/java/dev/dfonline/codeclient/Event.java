@@ -48,6 +48,10 @@ public class Event {
                 step = Sequence.WAIT_FOR_CLEAR;
             }
         }
+        if(packet instanceof GameJoinS2CPacket) {
+            CodeClient.location = new Spawn();
+            CodeClient.LOGGER.info("Spawn mode.");
+        }
     }
 
     private enum Sequence {
