@@ -22,6 +22,6 @@ public class FileManager {
     }
 
     public static String readFile(String fileName) throws IOException {
-        return Files.readString(Path().resolve(fileName), StandardCharsets.UTF_8);
+        return Files.readString(Path().resolve(fileName), StandardCharsets.ISO_8859_1);
     }
 }
