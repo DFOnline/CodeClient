@@ -32,7 +32,7 @@ public class MClientPlayerInteractionManager {
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     private void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
-        if(slotId == -999) return;;
+        if(slotId < 0) return;
         if(!player.isMainPlayer()) return;
 
         ScreenHandler screenHandler = player.currentScreenHandler;
