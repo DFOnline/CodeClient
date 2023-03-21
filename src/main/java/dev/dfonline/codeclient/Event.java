@@ -4,7 +4,7 @@ import dev.dfonline.codeclient.location.Build;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Play;
 import dev.dfonline.codeclient.location.Spawn;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.s2c.play.*;
 

@@ -4,7 +4,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.action.Action;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;

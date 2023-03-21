@@ -293,7 +293,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         }
         if(keyCode != GLFW.GLFW_KEY_TAB && searchBox.isFocused()) {
             if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
-                this.searchBox.setTextFieldFocused(false);
+                this.searchBox.setFocused(false);
                 this.setFocused(null);
                 return false;
             }
@@ -313,7 +313,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if(searchBox.active) {
             if(keyCode == GLFW.GLFW_KEY_T || keyCode == GLFW.GLFW_KEY_Y) {
                 if(keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
-                searchBox.setTextFieldFocused(true);
+                searchBox.setFocused(true);
                 searchBox.setCursorToEnd();
                 searchBox.setSelectionEnd(0);
                 ignoreNextKey = true;
@@ -355,7 +355,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             else this.drawTexture(matrices, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
         }
         else {
-            if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
+            if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(matrices, this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
         }
 
     }
@@ -380,13 +380,13 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if(!isTopRow) mapY += 64;
 
         this.drawTexture(matrices, originX, originY, mapX, mapY, TAB_WIDTH, 32);
-        this.itemRenderer.zOffset = 100.0F;
+//        this.itemRenderer.zOffset = 100.0F;
         originX += 6;
         originY += 8 + (isTopRow ? 2 : -2);
         ItemStack itemStack = group.getIcon();
-        this.itemRenderer.renderInGuiWithOverrides(itemStack, originX, originY);
-        this.itemRenderer.renderGuiItemOverlay(this.textRenderer, itemStack, originX, originY);
-        this.itemRenderer.zOffset = 0.0F;
+        this.itemRenderer.renderInGuiWithOverrides(matrices, itemStack, originX, originY);
+        this.itemRenderer.renderGuiItemOverlay(matrices, this.textRenderer, itemStack, originX, originY);
+//        this.itemRenderer.zOffset = 0.0F;
     }
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         this.scrollPosition -= amount;

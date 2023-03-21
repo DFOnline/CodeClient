@@ -5,7 +5,7 @@ import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Vec3d;

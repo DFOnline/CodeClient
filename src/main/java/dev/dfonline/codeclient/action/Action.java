@@ -1,6 +1,6 @@
 package dev.dfonline.codeclient.action;
 
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 
 public abstract class Action {
     private final Callback callback;

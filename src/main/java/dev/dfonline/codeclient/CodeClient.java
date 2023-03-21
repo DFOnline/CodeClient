@@ -19,7 +19,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +60,8 @@ public class CodeClient implements ModInitializer {
     public static void onTick() {
         if(NoClip.ignoresWalls() && location instanceof Dev) {
             MC.player.noClip = true;
-            MC.player.airStrafingSpeed = .07f * (MC.player.getMovementSpeed() * 10);
+            // NOOOOOOOOOOOOOOOOO WHY DID YOU DO THIS TO ME
+//            MC.player.airStrafingSpeed = .07f * (MC.player.getMovementSpeed() * 10);
         }
         while(editBind.isPressed()) {
             MC.setScreen(new DevInventoryScreen(MC.player));

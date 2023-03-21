@@ -3,7 +3,7 @@ package dev.dfonline.codeclient.mixin;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Event;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.listener.PacketListener;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
