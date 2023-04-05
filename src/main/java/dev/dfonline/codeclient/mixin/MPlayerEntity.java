@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
 public abstract class MPlayerEntity {
@@ -19,5 +20,12 @@ public abstract class MPlayerEntity {
         if(!this.isMainPlayer()) return;
         if(NoClip.ignoresWalls()) ci.cancel();
         CodeClient.MC.player.setPose(EntityPose.STANDING);
+    }
+
+    @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
+    private void getAirSpeed(CallbackInfoReturnable<Float> cir) {
+        if(NoClip.ignoresWalls()) {
+            cir.setReturnValue(.07f * (CodeClient.MC.player.getMovementSpeed() * 10));
+        }
     }
 }
