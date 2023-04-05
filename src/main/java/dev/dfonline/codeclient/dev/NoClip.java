@@ -18,7 +18,7 @@ public class NoClip {
     public static LineType display = null;
 
     public static boolean ignoresWalls() {
-        if(CodeClient.location instanceof Plot plot) {
+        if(CodeClient.location instanceof Dev plot) {
             return !(CodeClient.MC.player.getY() < 50) && !(CodeClient.MC.player.getX() > plot.getX());
         }
         return false;
