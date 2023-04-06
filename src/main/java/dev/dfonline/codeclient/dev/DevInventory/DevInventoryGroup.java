@@ -96,7 +96,7 @@ public class DevInventoryGroup {
     public static final DevInventoryGroup PLAYER_ACTION = new DevInventoryGroup("player_action", "Player Action", Items.COBBLESTONE.getDefaultStack(), true).useCodeBlock();
     public static final DevInventoryGroup ENTITY_EVENT = new DevInventoryGroup("entity_event", "Entity Event", Items.GOLD_BLOCK.getDefaultStack(), true).useCodeBlock();
     public static final DevInventoryGroup ENTITY_IF = new DevInventoryGroup("if_entity", "If Entity", Items.BRICKS.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup ENTITY_ACTION = new DevInventoryGroup("game_action", "Entity Action", Items.MOSSY_COBBLESTONE.getDefaultStack(), true).useCodeBlock();
+    public static final DevInventoryGroup ENTITY_ACTION = new DevInventoryGroup("entity_action", "Entity Action", Items.MOSSY_COBBLESTONE.getDefaultStack(), true).useCodeBlock();
     public static final DevInventoryGroup SEARCH = new DevInventoryGroup("search", "Search All", Items.COMPASS.getDefaultStack(), true).useCodeBlock();
     public static final DevInventoryGroup VAR_SET = new DevInventoryGroup("set_var", "Set Variable", Items.IRON_BLOCK.getDefaultStack(), true).useCodeBlock();
     public static final DevInventoryGroup VAR_IF = new DevInventoryGroup("if_var", "If Variable", Items.OBSIDIAN.getDefaultStack(), true).useCodeBlock();
