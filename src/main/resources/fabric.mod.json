@@ -22,7 +22,7 @@
       "dev.dfonline.codeclient.CodeClient"
     ],
     "modmenu": [
-      "dev.dfonline.codeclient.Config"
+      "dev.dfonline.codeclient.config.ModMenuIntegration"
     ]
   },
   "mixins": [

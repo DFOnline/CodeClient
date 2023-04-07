@@ -1,16 +1,27 @@
-package dev.dfonline.codeclient;
+package dev.dfonline.codeclient.config;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
+import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.FileManager;
 import dev.isxander.yacl.api.ConfigCategory;
 import dev.isxander.yacl.api.Option;
 import dev.isxander.yacl.api.YetAnotherConfigLib;
 import dev.isxander.yacl.gui.controllers.TickBoxController;
 import net.minecraft.text.Text;
 
-public class Config implements ModMenuApi {
-    private final YetAnotherConfigLib config;
+public class Config {
+    public final YetAnotherConfigLib config;
     public boolean NoClipEnabled;
+
+    public static Config getConfig() {
+        try {
+            return CodeClient.gson.fromJson(FileManager.readFile("options.json"), Config.class);
+        }
+        catch (Exception ignored) {
+            return new Config();
+        }
+    }
 
     public Config() {
             config = YetAnotherConfigLib.createBuilder()
@@ -32,8 +43,4 @@ public class Config implements ModMenuApi {
                     .build();
     }
 
-    @Override
-    public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> new Config().config.generateScreen(parent);
-    }
 }
