@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.location.Dev;
@@ -30,6 +31,7 @@ public class MClientPlayerEntity {
         CodeClient.onTick();
         CodeClient.currentAction.onTick();
         if(NoClip.ignoresWalls()) MC.player.noClip = true;
+        Debug.tick();
 //        ChestPeeker.tick();
     }
 
