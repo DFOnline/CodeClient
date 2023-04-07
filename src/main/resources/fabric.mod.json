@@ -20,6 +20,9 @@
     ],
     "main": [
       "dev.dfonline.codeclient.CodeClient"
+    ],
+    "modmenu": [
+      "dev.dfonline.codeclient.Config"
     ]
   },
   "mixins": [
@@ -28,6 +31,7 @@
   "depends": {
     "fabricloader": ">=0.14.17",
     "fabric": "*",
+    "yet-another-config-lib": ">=2.4.0",
     "minecraft": "1.19.4"
   }
 }
