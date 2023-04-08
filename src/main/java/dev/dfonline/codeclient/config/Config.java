@@ -21,6 +21,10 @@ public class Config {
     public boolean CCDBUG = true;
     public boolean CustomBlockInteractions = true;
     public boolean CustomTagInteraction = false;
+    public boolean AutoJoin = false;
+    public Node AutoNode = Node.None;
+    public boolean AutoJoinPlot = false;
+    public int AutoJoinPlotId = 0;
 
     private void save() {
         try {
@@ -32,6 +36,10 @@ public class Config {
             object.addProperty("CCDBUG",CCDBUG);
             object.addProperty("CustomBlockInteractions",CustomBlockInteractions);
             object.addProperty("CustomTagInteraction",CustomTagInteraction);
+            object.addProperty("AutoJoin", AutoJoin);
+            object.addProperty("AutoNode",AutoNode.name());
+            object.addProperty("AutoJoinPlot",AutoJoinPlot);
+            object.addProperty("AutoJoinPlotId",AutoJoinPlotId);
             FileManager.writeFile("options.json", object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -129,20 +137,70 @@ public class Config {
                                 .controller(TickBoxController::new)
                                 .build())
                         .build())
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.literal("AutoJoin"))
+                        .tooltip(Text.literal("If and where to auto join"))
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Enabled"))
+                                .tooltip(Text.literal("If CodeClient should automatically connect you to DF."))
+                                .binding(
+                                        false,
+                                        () -> AutoJoin,
+                                        opt -> AutoJoin = opt
+                                )
+                                .controller(TickBoxController::new)
+                                .build())
+                        .option(Option.createBuilder(Node.class)
+                                .name(Text.literal("Node"))
+                                .tooltip(Text.literal("Which node you should be sent to, or have DF handle it."))
+                                .binding(
+                                        Node.None,
+                                        () -> AutoNode,
+                                        opt -> AutoNode = opt
+                                )
+                                .controller(EnumController::new)
+//                                .available(AutoJoin)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Auto join plot"))
+                                .tooltip(Text.literal("If you should automatically be sent to a plot."))
+                                .binding(
+                                        false,
+                                        () -> AutoJoinPlot,
+                                        opt -> AutoJoinPlot = opt
+                                )
+                                .controller(TickBoxController::new)
+                                .build())
+                        .option(Option.createBuilder(int.class)
+                                .name(Text.literal("Plot ID"))
+                                .tooltip(Text.literal("The plot ID of the plot to automatically join, if enabled."))
+                                .binding(
+                                        0,
+                                        () -> AutoJoinPlotId,
+                                        opt -> AutoJoinPlotId = opt
+                                )
+                                .controller(IntegerFieldController::new)
+                                .build())
+                        .build())
                 .save(this::save)
                 .build();
     }
 
     public enum Node {
-        None,
-        Node1,
-        Node2,
-        Node3,
-        Node4,
-        Node5,
-        Node6,
-        Node7,
-        Beta,
+        None(""),
+        Node1("node1."),
+        Node2("node2."),
+        Node3("node3."),
+        Node4("node4."),
+        Node5("node5."),
+        Node6("node6."),
+        Node7("node7."),
+        Beta("beta.");
+
+        public final String prepend;
+        Node(String prepend) {
+            this.prepend = prepend;
+        }
     }
 
     public Config() {

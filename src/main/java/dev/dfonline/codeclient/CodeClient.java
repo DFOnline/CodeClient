@@ -39,7 +39,7 @@ public class CodeClient implements ModInitializer {
     public static final MinecraftClient MC = MinecraftClient.getInstance();
     public static final Gson gson = new Gson();
     private static KeyBinding editBind;
-
+    public static AutoJoin autoJoin = AutoJoin.NONE;
 
     @NotNull
     public static Action currentAction = new None();
@@ -68,6 +68,10 @@ public class CodeClient implements ModInitializer {
         while(editBind.isPressed()) {
             MC.setScreen(new DevInventoryScreen(MC.player));
         }
+        if(autoJoin == AutoJoin.PLOT) {
+            MC.getNetworkHandler().sendCommand("join " + Config.getConfig().AutoJoinPlotId);
+            autoJoin = AutoJoin.NONE;
+        }
     }
 
     @Override
@@ -81,6 +85,9 @@ public class CodeClient implements ModInitializer {
                 LOGGER.error(e.getMessage());
             }
         }
+        if(Config.getConfig().AutoJoin) {
+            autoJoin = AutoJoin.GAME;
+        }
 
         editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.codeclient.actionpallete",
@@ -92,5 +99,11 @@ public class CodeClient implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             Commands.register(dispatcher);
         });
+    }
+
+    public enum AutoJoin {
+        NONE,
+        GAME,
+        PLOT
     }
 }
