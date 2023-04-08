@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.NoClip;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,7 +26,7 @@ public abstract class MPlayerEntity {
     @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
     private void getAirSpeed(CallbackInfoReturnable<Float> cir) {
         if(NoClip.ignoresWalls()) {
-            cir.setReturnValue(.07f * (CodeClient.MC.player.getMovementSpeed() * 10));
+            cir.setReturnValue(0.026F * (CodeClient.MC.player.getMovementSpeed() * Config.getConfig().AirSpeed));
         }
     }
 }

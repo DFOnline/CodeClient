@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
@@ -73,10 +74,12 @@ public class CodeClient implements ModInitializer {
     public void onInitialize() {
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
 
-        try {
-            SocketHandler.start();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+        if(Config.getConfig().CodeClientAPI) {
+            try {
+                SocketHandler.start();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+            }
         }
 
         editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(

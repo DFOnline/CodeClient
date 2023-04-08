@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -32,7 +33,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
 
 import java.util.List;
 
@@ -82,7 +82,7 @@ public class InteractionManager {
             if(!bukkitValues.contains("hypercube:varitem")) return false;
             try {
                 if (bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
-                    if (!varItem.asString().startsWith("{\"id\":\"bl_tag\",\"data\":")) return false;
+                    if (!varItem.asString().startsWith("{\"id\":\"bl_tag\",\"data\":") || !Config.getConfig().CustomTagInteraction) return false;
                     Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap();
                     CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
                     NbtList lore = (NbtList) nbt.getCompound("display").get("Lore");
@@ -131,28 +131,29 @@ public class InteractionManager {
             boolean onTop = hitResult.getSide() == Direction.UP && ((hitResult.getBlockPos().getY() + 1) % 5 == 0);
             boolean isTemplate = item.hasNbt() && item.getNbt() != null && item.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && item.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE);
 
-            // play sound
-            BlockSoundGroup group = Block.getBlockFromItem(item.getItem()).getSoundGroup(Block.getBlockFromItem(item.getItem()).getDefaultState());
-            MC.getSoundManager().play(new PositionedSoundInstance(group.getPlaceSound(), SoundCategory.BLOCKS, group.getVolume(), group.getPitch(), Random.create(), hitResult.getBlockPos()));
-
-            MC.player.swingHand(Hand.MAIN_HAND);
-
-
-            if(onTop) {
+            if(onTop && Config.getConfig().PlaceOnAir) {
                 BlockPos from = hitResult.getBlockPos();
                 hitResult = new BlockHitResult(new Vec3d(from.getX(), from.getY() + 1, from.getZ()),Direction.UP,hitResult.getBlockPos().add(0,1,0),false);
             }
 
 
             BlockHitResult finalHitResult = hitResult;
-            if(isTemplate) {
-                ItemStack template = Items.ENDER_CHEST.getDefaultStack();
-                template.setNbt(item.getNbt());
-                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, template));
+            if(onTop || isTemplate || Config.getConfig().CustomBlockInteractions) {
+                // play sound
+                BlockSoundGroup group = Block.getBlockFromItem(item.getItem()).getSoundGroup(Block.getBlockFromItem(item.getItem()).getDefaultState());
+                MC.getSoundManager().play(new PositionedSoundInstance(group.getPlaceSound(), SoundCategory.BLOCKS, group.getVolume(), group.getPitch(), Random.create(), hitResult.getBlockPos()));
+
+                MC.player.swingHand(Hand.MAIN_HAND);
+
+                if(isTemplate) {
+                    ItemStack template = Items.ENDER_CHEST.getDefaultStack();
+                    template.setNbt(item.getNbt());
+                    CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, template));
+                }
+                ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, finalHitResult, sequence));
+                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, item));
+                return true;
             }
-            ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, finalHitResult, sequence));
-            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, item));
-            return true;
         }
         return false;
     }

@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.dev.Debug;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.OverlayManager;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.debug.DebugRenderer;
@@ -25,6 +26,7 @@ public class Debug {
     private static Variable variable;
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+        if(!Config.getConfig().CCDBUG) return false;
         if(packet instanceof OverlayMessageS2CPacket overlay) {
             String message = overlay.getMessage().getString();
             String[] args = message.split(" ");
@@ -48,7 +50,7 @@ public class Debug {
                                 variable = null;
                             }
                         }
-                        if(args[2].equals("value")) {
+                        if(args[2].equals("value") && variable != null) {
                             variable.value = message.replaceFirst("^ccdbug var value ", "");
                             variables.addOrUpdate(variable);
                             variable = null;
@@ -58,7 +60,7 @@ public class Debug {
 //                updateDisplay();
                 return true;
             }
-            if(message.matches("^CPU Usage: \\[▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮] \\([\\d\\.]+%\\)$")) {
+            if(active && message.matches("^CPU Usage: \\[▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮] \\([\\d.]+%\\)$")) {
                 CPU = Double.parseDouble(message.replaceAll("(^CPU Usage: \\[▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮] \\(|%\\)$)",""));
                 return true;
             }
@@ -84,7 +86,7 @@ public class Debug {
     }
 
     public static void tick() {
-        if(active && CodeClient.location instanceof Plot) {
+        if(Config.getConfig().CCDBUG && active && CodeClient.location instanceof Plot) {
             updateDisplay();
         }
         else {
