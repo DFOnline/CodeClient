@@ -2,11 +2,9 @@ package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.EntityPose;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -27,7 +25,6 @@ public class NoClip {
     public static Vec3d handleClientPosition(Vec3d movement) {
         if(CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
-            player.setPose(EntityPose.STANDING);
 
             double nearestFloor = Math.floor(player.getY() / 5) * 5;
             Vec3d velocity = player.getVelocity();

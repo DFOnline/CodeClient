@@ -14,14 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
 public abstract class MPlayerEntity {
-    @Shadow public abstract boolean isMainPlayer();
-
-    @Inject(method = "updatePose", at = @At("HEAD"), cancellable = true)
-    private void updatePose(CallbackInfo ci) {
-        if(!this.isMainPlayer()) return;
-        if(NoClip.ignoresWalls()) ci.cancel();
-        CodeClient.MC.player.setPose(EntityPose.STANDING);
-    }
 
     @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
     private void getAirSpeed(CallbackInfoReturnable<Float> cir) {
