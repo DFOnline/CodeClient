@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin.block;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Build;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.BarrierBlock;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MBarrier {
     @Inject(method = "getRenderType", at = @At("HEAD"), cancellable = true)
     private void getRenderType(BlockState state, CallbackInfoReturnable<BlockRenderType> cir) {
-        if (CodeClient.location instanceof Dev || CodeClient.location instanceof Build)
+        if ((CodeClient.location instanceof Dev || CodeClient.location instanceof Build) && Config.getConfig().InvisibleBlocksInDev)
             cir.setReturnValue(BlockRenderType.MODEL);
     }
 }

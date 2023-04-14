@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.config;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
+import dev.dfonline.codeclient.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.Plot;
 import dev.isxander.yacl.api.*;
 import dev.isxander.yacl.gui.controllers.TickBoxController;
@@ -11,6 +12,9 @@ import dev.isxander.yacl.gui.controllers.slider.IntegerSliderController;
 import dev.isxander.yacl.gui.controllers.string.StringController;
 import dev.isxander.yacl.gui.controllers.string.number.IntegerFieldController;
 import net.minecraft.text.Text;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class Config {
     private static Config instance;
@@ -25,6 +29,8 @@ public class Config {
     public Node AutoNode = Node.None;
     public boolean AutoJoinPlot = false;
     public int AutoJoinPlotId = 0;
+    public CharSetOption FileCharSet = CharSetOption.UTF_8;
+    public boolean InvisibleBlocksInDev = false;
 
     private void save() {
         try {
@@ -40,6 +46,8 @@ public class Config {
             object.addProperty("AutoNode",AutoNode.name());
             object.addProperty("AutoJoinPlot",AutoJoinPlot);
             object.addProperty("AutoJoinPlotId",AutoJoinPlotId);
+            object.addProperty("FileCharSet",FileCharSet.name());
+            object.addProperty("InvisibleBlocksInDev",InvisibleBlocksInDev);
             FileManager.writeFile("options.json", object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -136,6 +144,28 @@ public class Config {
                                 )
                                 .controller(TickBoxController::new)
                                 .build())
+                        .option(Option.createBuilder(CharSetOption.class)
+                                .name(Text.literal("File Charset"))
+                                .tooltip(Text.literal("There can often be artifacts in the ActionDump."))
+                                .binding(
+                                        CharSetOption.UTF_8,
+                                        () -> FileCharSet,
+                                        opt -> FileCharSet = opt
+                                )
+                                .flag(minecraftClient -> ActionDump.clear())
+                                .controller(EnumController::new)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.literal("Show Invisible Blocks"))
+                                .tooltip(Text.literal("If invisible blocks like barriers should be shown whilst in dev and build."))
+                                .binding(
+                                        false,
+                                        () -> InvisibleBlocksInDev,
+                                        opt -> InvisibleBlocksInDev = opt
+                                )
+                                .controller(TickBoxController::new)
+                                .available(false)
+                                .build())
                         .build())
                 .category(ConfigCategory.createBuilder()
                         .name(Text.literal("AutoJoin"))
@@ -200,6 +230,16 @@ public class Config {
         public final String prepend;
         Node(String prepend) {
             this.prepend = prepend;
+        }
+    }
+
+    public enum CharSetOption {
+        ISO_8859_1(StandardCharsets.ISO_8859_1),
+        UTF_8(StandardCharsets.UTF_8);
+
+        public final Charset charSet;
+        CharSetOption(Charset charSet) {
+            this.charSet = charSet;
         }
     }
 

@@ -1,9 +1,9 @@
 package dev.dfonline.codeclient;
 
+import dev.dfonline.codeclient.config.Config;
+
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
@@ -22,6 +22,6 @@ public class FileManager {
     }
 
     public static String readFile(String fileName) throws IOException {
-        return Files.readString(Path().resolve(fileName), StandardCharsets.ISO_8859_1).replace("Â","");
+        return Files.readString(Path().resolve(fileName), Config.getConfig().FileCharSet.charSet);
     }
 }
