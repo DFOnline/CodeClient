@@ -57,7 +57,7 @@ public class Config {
     public static Config getConfig() {
         if(instance == null) {
             try {
-                instance = CodeClient.gson.fromJson(FileManager.readFile("options.json"), Config.class);
+                instance = CodeClient.gson.fromJson(FileManager.readFile("options.json", StandardCharsets.UTF_8), Config.class);
             }
             catch (Exception exception) {
                 CodeClient.LOGGER.info("Config didn't load: " + exception);

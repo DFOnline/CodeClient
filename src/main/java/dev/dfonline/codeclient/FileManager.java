@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import dev.dfonline.codeclient.config.Config;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -21,7 +22,11 @@ public class FileManager {
         Files.write(path,content.getBytes(), StandardOpenOption.WRITE);
     }
 
+    public static String readFile(String fileName, Charset charset) throws IOException {
+        return Files.readString(Path().resolve(fileName), charset);
+
+    }
     public static String readFile(String fileName) throws IOException {
-        return Files.readString(Path().resolve(fileName), Config.getConfig().FileCharSet.charSet);
+        return readFile(fileName, Config.getConfig().FileCharSet.charSet);
     }
 }
