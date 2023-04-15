@@ -65,7 +65,7 @@ public class CodeClient implements ModInitializer {
         if(NoClip.ignoresWalls() && location instanceof Dev) {
             MC.player.noClip = true;
         }
-        while(editBind.isPressed()) {
+        while(editBind.wasPressed()) {
             MC.setScreen(new DevInventoryScreen(MC.player));
         }
         if(autoJoin == AutoJoin.PLOT) {
