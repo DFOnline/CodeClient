@@ -12,7 +12,7 @@
     "repo": "https://github.com/DFOnline/CodeClient"
   },
   "license": "MIT",
-  "icon": "assets/CodeClient/icon.png",
+  "icon": "assets/codeclient/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [

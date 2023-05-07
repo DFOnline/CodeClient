@@ -15,15 +15,14 @@
     "MInGameOverlayRenderer",
     "MLivingEntity",
     "MPlayerEntity",
-    "MTitleScreen"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  },
-  "mixins": [
+    "MTitleScreen",
     "ClientPlayerInteractionManagerAccessor",
     "MChunkRendererRegion",
     "MWorld",
     "block.MBarrier"
-  ]
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": []
 }
