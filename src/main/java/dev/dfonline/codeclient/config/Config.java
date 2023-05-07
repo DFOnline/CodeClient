@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.location.Plot;
 import dev.isxander.yacl.api.*;
 import dev.isxander.yacl.gui.controllers.TickBoxController;
 import dev.isxander.yacl.gui.controllers.cycling.EnumController;
+import dev.isxander.yacl.gui.controllers.slider.FloatSliderController;
 import dev.isxander.yacl.gui.controllers.slider.IntegerSliderController;
 import dev.isxander.yacl.gui.controllers.string.StringController;
 import dev.isxander.yacl.gui.controllers.string.number.IntegerFieldController;
@@ -31,6 +32,7 @@ public class Config {
     public int AutoJoinPlotId = 0;
     public CharSetOption FileCharSet = CharSetOption.UTF_8;
     public boolean InvisibleBlocksInDev = false;
+    public float ReachDistance = 5;
 
     private void save() {
         try {
@@ -48,6 +50,7 @@ public class Config {
             object.addProperty("AutoJoinPlotId",AutoJoinPlotId);
             object.addProperty("FileCharSet",FileCharSet.name());
             object.addProperty("InvisibleBlocksInDev",InvisibleBlocksInDev);
+            object.addProperty("ReachDistance",ReachDistance);
             FileManager.writeFile("options.json", object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -164,6 +167,17 @@ public class Config {
                                         opt -> InvisibleBlocksInDev = opt
                                 )
                                 .controller(TickBoxController::new)
+                                .available(false)
+                                .build())
+                        .option(Option.createBuilder(float.class)
+                                .name(Text.literal("Reach Distance"))
+                                .tooltip(Text.literal("Modified reach distance in dev mode.\nThis will teleport you closer if something is too far away."))
+                                .binding(
+                                        5f,
+                                        () -> ReachDistance,
+                                        opt -> ReachDistance = opt
+                                )
+                                .controller(floatOption -> new FloatSliderController(floatOption,5,10,0.1f))
                                 .available(false)
                                 .build())
                         .build())

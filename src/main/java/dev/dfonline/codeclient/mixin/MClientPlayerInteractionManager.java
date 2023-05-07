@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -37,5 +38,12 @@ public class MClientPlayerInteractionManager {
 
         ScreenHandler screenHandler = player.currentScreenHandler;
         if(InteractionManager.onClickSlot(screenHandler.slots.get(slotId),button,actionType,syncId,screenHandler.getRevision())) ci.cancel();
+    }
+
+    @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
+    private void reachDistance(CallbackInfoReturnable<Float> cir) {
+        if(CodeClient.location instanceof Dev) {
+            cir.setReturnValue(Config.getConfig().ReachDistance);
+        }
     }
 }

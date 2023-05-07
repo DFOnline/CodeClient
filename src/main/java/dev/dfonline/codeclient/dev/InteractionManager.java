@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
@@ -14,6 +15,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.EntityDimensions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -28,11 +30,11 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.List;
 
@@ -121,9 +123,41 @@ public class InteractionManager {
         return false;
     }
 
+    public static boolean isInsideWall(Vec3d playerPos) {
+        Vec3d middlePos = playerPos.add(0,0.75,0);
+        Box box = new EntityDimensions(0.6f,1.8f,true).getBoxAt(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
+        CodeClient.LOGGER.info(String.valueOf(box));
+        return BlockPos.stream(box).anyMatch((pos) -> {
+            BlockState blockState = CodeClient.MC.world.getBlockState(pos);
+            return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(CodeClient.MC.world, pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
+        });
+    }
+
     public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
         MinecraftClient MC = CodeClient.MC;
         if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
+            Vec3d origin = player.getEyePos();
+            if(origin.distanceTo(hitResult.getPos()) > 5.4) {
+                Vec3d diff = hitResult.getPos().relativize(origin);
+                Vec3d pos = hitResult.getPos().add(diff.normalize().multiply(5.4));
+
+                boolean collides = isInsideWall(pos);
+                CodeClient.LOGGER.info(String.valueOf(collides));
+                if(collides) {
+                    Direction[] directions = new Direction[]{Direction.UP, Direction.WEST};
+                    for (Direction direction: directions) {
+                        BlockPos offset = BlockPos.ofFloored(pos.offset(direction,1));
+                        if(!isInsideWall(offset.toCenterPos())) {
+                            CodeClient.LOGGER.info(String.valueOf(direction));
+                            pos = offset.toCenterPos();
+                            break;
+                        }
+                    }
+                }
+
+                Vec3d eyeRel = origin.relativize(player.getPos());
+                MoveToLocation.shove(player,pos.add(eyeRel));
+            }
 
 //            hitResult;
             ItemStack item = player.getStackInHand(hand);
