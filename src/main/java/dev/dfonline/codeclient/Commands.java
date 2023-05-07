@@ -60,14 +60,18 @@ public class Commands {
 
 
         dispatcher.register(literal("getactiondump").executes(context -> {
-            CodeClient.currentAction = new GetActionDump(false, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.NONE, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
             CodeClient.currentAction.init();
             return 0;
-        }).then(literal("colors").executes(context -> {
-            CodeClient.currentAction = new GetActionDump(true, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+        }).then(literal("section").executes(context -> {
+            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.SECTION, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
             CodeClient.currentAction.init();
             return 0;
-        })));
+        }).then(literal("ampersand").executes(context -> {
+            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.AMPERSAND, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+            CodeClient.currentAction.init();
+            return 0;
+        }))));
 
 //            dispatcher.register(literal("widthdump").executes(context -> {
 //                for (int i = 0; i < 65536; i++) {

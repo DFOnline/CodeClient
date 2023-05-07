@@ -16,21 +16,21 @@ import java.util.Objects;
 
 public class GetActionDump extends Action {
     public StringBuilder capturedData = null;
-    private boolean doColours;
+    private ColorMode colorMode;
 
     private int lines;
     private int length;
     private Date startTime;
     private boolean isDone = false;
 
-    public GetActionDump(boolean doColours, Callback callback) {
+    public GetActionDump(ColorMode colorMode, Callback callback) {
         super(callback);
-        this.doColours = doColours;
+        this.colorMode = colorMode;
     }
 
     @Override
     public void init() {
-        CodeClient.MC.getNetworkHandler().sendCommand("dumpactioninfo" + (doColours ? "-c" : ""));
+        CodeClient.MC.getNetworkHandler().sendCommand("dumpactioninfo");
         capturedData = new StringBuilder();
         startTime = new Date();
     }
@@ -42,12 +42,12 @@ public class GetActionDump extends Action {
             TextColor lastColor = null;
             for(Text text : message.content().getSiblings()) {
                 TextColor color = text.getStyle().getColor();
-                if(lastColor != color) {
+                if(color != null && (lastColor != color) && (colorMode != ColorMode.NONE)) {
                     lastColor = color;
                     if(color.getName().contains("#")) {
-                        capturedData.append(String.join("§",color.getName().split("")).replace("#","§x").toLowerCase());
+                        capturedData.append(String.join(colorMode.text,color.getName().split("")).replace("#", colorMode.text+"x").toLowerCase());
                     } else {
-                        capturedData.append(Formatting.valueOf(String.valueOf(color).toUpperCase()));
+                        capturedData.append(Formatting.valueOf(String.valueOf(color).toUpperCase()).toString().replace("§", colorMode.text));
                     }
                 }
                 capturedData.append(text.getString());
@@ -85,5 +85,16 @@ public class GetActionDump extends Action {
     @Override
     public boolean onSendPacket(Packet<?> packet) {
         return capturedData != null && !isDone;
+    }
+
+    public enum ColorMode {
+        NONE(null),
+        AMPERSAND("&"),
+        SECTION("§");
+
+        public final String text;
+        ColorMode(String text) {
+            this.text = text;
+        }
     }
 }
