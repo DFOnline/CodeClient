@@ -27,10 +27,6 @@ public abstract class MEntity {
 
     @Shadow public abstract boolean isSneaking();
 
-    @Shadow public abstract void readNbt(NbtCompound nbt);
-
-    @Shadow public abstract void requestTeleport(double destX, double destY, double destZ);
-
     @Shadow @Final protected static TrackedData<EntityPose> POSE;
 
     @Inject(method = "isInsideWall", at = @At("HEAD"), cancellable = true)
