@@ -67,11 +67,11 @@ public class Commands {
             CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.SECTION, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
             CodeClient.currentAction.init();
             return 0;
-        }).then(literal("ampersand").executes(context -> {
+        })).then(literal("ampersand").executes(context -> {
             CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.AMPERSAND, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
             CodeClient.currentAction.init();
             return 0;
-        }))));
+        })));
 
 //            dispatcher.register(literal("widthdump").executes(context -> {
 //                for (int i = 0; i < 65536; i++) {
