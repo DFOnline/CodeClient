@@ -149,7 +149,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(CharSetOption.class)
                                 .name(Text.literal("File Charset"))
-                                .tooltip(Text.literal("There can often be artifacts in the ActionDump."))
+                                .tooltip(Text.literal("There can often be artifacts in the ActionDump, change this to fix it."))
                                 .binding(
                                         CharSetOption.UTF_8,
                                         () -> FileCharSet,
