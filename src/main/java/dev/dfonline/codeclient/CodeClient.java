@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
+import dev.dfonline.codeclient.location.Spawn;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -68,9 +69,13 @@ public class CodeClient implements ModInitializer {
         if(editBind.wasPressed() && location instanceof Dev) {
             MC.setScreen(new DevInventoryScreen(MC.player));
         }
-        if(autoJoin == AutoJoin.PLOT) {
-            MC.getNetworkHandler().sendCommand("join " + Config.getConfig().AutoJoinPlotId);
-            autoJoin = AutoJoin.NONE;
+        if(CodeClient.location instanceof Spawn spawn && spawn.consumeHasJustJoined()) {
+            if(autoJoin == AutoJoin.PLOT) {
+                MC.getNetworkHandler().sendCommand("join " + Config.getConfig().AutoJoinPlotId);
+                autoJoin = AutoJoin.NONE;
+            } else if(Config.getConfig().AutoFly) {
+                MC.getNetworkHandler().sendCommand("fly");
+            }
         }
     }
 

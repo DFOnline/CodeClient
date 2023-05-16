@@ -33,6 +33,7 @@ public class Config {
     public CharSetOption FileCharSet = CharSetOption.UTF_8;
     public boolean InvisibleBlocksInDev = false;
     public float ReachDistance = 5;
+    public boolean AutoFly = false;
 
     private void save() {
         try {
@@ -51,6 +52,7 @@ public class Config {
             object.addProperty("FileCharSet",FileCharSet.name());
             object.addProperty("InvisibleBlocksInDev",InvisibleBlocksInDev);
             object.addProperty("ReachDistance",ReachDistance);
+            object.addProperty("AutoFly",AutoFly);
             FileManager.writeFile("options.json", object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -146,6 +148,7 @@ public class Config {
                                         opt -> CustomTagInteraction = opt
                                 )
                                 .controller(TickBoxController::new)
+                                .available(false)
                                 .build())
                         .option(Option.createBuilder(CharSetOption.class)
                                 .name(Text.literal("File Charset"))
@@ -179,6 +182,16 @@ public class Config {
                                 )
                                 .controller(floatOption -> new FloatSliderController(floatOption,5,10,0.1f))
                                 .available(false)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Auto Fly"))
+                                .tooltip(Text.literal("Automatically runs /fly when you go to spawn."))
+                                .binding(
+                                        false,
+                                        () -> AutoFly,
+                                        opt -> AutoFly = opt
+                                )
+                                .controller(TickBoxController::new)
                                 .build())
                         .build())
                 .category(ConfigCategory.createBuilder()

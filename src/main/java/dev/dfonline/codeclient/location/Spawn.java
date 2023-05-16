@@ -1,7 +1,23 @@
 package dev.dfonline.codeclient.location;
 
+import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
+
 public class Spawn extends Location {
-    public Spawn() {}
+    private boolean hasJustJoined = false;
+
+    public Spawn() {
+        hasJustJoined = true;
+    }
+
+    /**
+     * If the player has gone to spawn, returns true once if they have just gone to spawn.
+     */
+    public boolean consumeHasJustJoined() {
+        boolean justJoined = hasJustJoined;
+        hasJustJoined = false;
+        return justJoined;
+    }
 
     @Override
     public String name() {
