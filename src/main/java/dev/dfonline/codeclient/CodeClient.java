@@ -39,7 +39,7 @@ public class CodeClient implements ModInitializer {
 
     public static final MinecraftClient MC = MinecraftClient.getInstance();
     public static final Gson gson = new Gson();
-    private static KeyBinding editBind;
+    public static KeyBinding editBind;
     public static AutoJoin autoJoin = AutoJoin.NONE;
 
     @NotNull

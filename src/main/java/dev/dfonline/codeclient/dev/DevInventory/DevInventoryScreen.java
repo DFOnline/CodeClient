@@ -331,7 +331,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             return true;
         }
         if(searchBox.active) {
-            if(keyCode == GLFW.GLFW_KEY_T || keyCode == GLFW.GLFW_KEY_Y) {
+            if(CodeClient.MC.options.chatKey.matchesKey(keyCode,scanCode) || CodeClient.editBind.matchesKey(keyCode,scanCode)) {
                 if(keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
                 searchBox.setFocused(true);
                 searchBox.setCursorToEnd();
