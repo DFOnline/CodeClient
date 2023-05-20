@@ -38,6 +38,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -59,6 +60,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     private Slot deleteItemSlot;
     private CreativeInventoryListener listener;
     private boolean ignoreNextKey = false;
+    private boolean scrolling = false;
 
     public DevInventoryScreen(PlayerEntity player) {
         super(new CreativeInventoryScreen.CreativeScreenHandler(player), player.getInventory(), ScreenTexts.EMPTY);
@@ -167,12 +169,29 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             Integer clicked = getGroupFromMouse(mouseX,mouseY);
             if(clicked != null && clicked != selectedTab) setSelectedTab(clicked);
 
-//            if (selectedTab != ItemGroup.INVENTORY.getIndex() && this.isClickInScrollbar(mouseX, mouseY)) {
-//                this.scrolling = this.hasScrollbar();
-//                return true;
-//            }
+            if(isClickInScrollbar(mouseX,mouseY)) {
+                this.scrolling = true;
+            }
         }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if(button == 0) {
+            this.scrolling = false;
+        }
+        return super.mouseReleased(mouseX,mouseY,button);
+    }
+
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if(this.scrolling) {
+            int scrollOriginY = this.y + 18;
+            int scrollEnd = scrollOriginY + 112;
+            double percentThrough = MathHelper.clamp(((float)mouseY - (float)scrollOriginY - 7.5F) / ((float)(scrollEnd - scrollOriginY) - 15.0F),0,1);
+            this.scrollPosition = ((double) this.scrollHeight / 9) * percentThrough;
+            populate();
+        }
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     private Integer getGroupFromMouse(double mouseX, double mouseY) {
@@ -395,5 +414,15 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
         populate();
         return true;
+    }
+
+    protected boolean isClickInScrollbar(double mouseX, double mouseY) {
+        int windowX = this.x;
+        int windowY = this.y;
+        int scrollOriginX = windowX + 175;
+        int scrollOriginY = windowY + 18;
+        int scrollFarX = scrollOriginX + 14;
+        int scrollFarY = scrollOriginY + 112;
+        return mouseX >= (double)scrollOriginX && mouseY >= (double)scrollOriginY && mouseX < (double)scrollFarX && mouseY < (double)scrollFarY;
     }
 }
