@@ -95,16 +95,16 @@ public class Commands {
             CodeClient.currentAction.init();
             return 0;
         }));
-        dispatcher.register(literal("clearplot").executes(context -> {
-            CodeClient.currentAction = new ClearPlot(() -> Utility.sendMessage("Done!", ChatType.SUCCESS));
-            CodeClient.currentAction.init();
-            return 0;
-        }));
-        dispatcher.register(literal("placetemplate").executes(context -> {
-            CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
-            CodeClient.currentAction.init();
-            return 0;
-        }));
+//        dispatcher.register(literal("clearplot").executes(context -> {
+//            CodeClient.currentAction = new ClearPlot(() -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+//            CodeClient.currentAction.init();
+//            return 0;
+//        }));
+//        dispatcher.register(literal("placetemplate").executes(context -> {
+//            CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+//            CodeClient.currentAction.init();
+//            return 0;
+//        }));
 
         dispatcher.register(literal("codeforme").executes(context -> {
             CodeClient.currentAction = new ClearPlot(() -> {
