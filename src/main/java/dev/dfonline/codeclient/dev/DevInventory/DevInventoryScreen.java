@@ -125,7 +125,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.searchBox.setVisible(true);
         this.searchBox.setEditableColor(16777215);
         this.addSelectableChild(this.searchBox);
-        setSelectedTab(0);
+        setSelectedTab(6);
         this.client.player.playerScreenHandler.removeListener(this.listener);
         this.listener = new CreativeInventoryListener(this.client);
         this.client.player.playerScreenHandler.addListener(this.listener);
