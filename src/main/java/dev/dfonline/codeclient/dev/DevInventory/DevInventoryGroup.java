@@ -206,6 +206,7 @@ public class DevInventoryGroup {
             GAME_VALUES.useCategory(actionDump.gameValues);
             SOUNDS.useCategory(actionDump.sounds);
             POTIONS.useCategory(actionDump.potions);
+            PARTICLES.useCategory(actionDump.particles);
 
             SEARCH.setItemsProvider(query -> {
                 ArrayList<ItemStack> items = new ArrayList<>();

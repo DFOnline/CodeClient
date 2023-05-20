@@ -2,10 +2,10 @@ package dev.dfonline.codeclient;
 
 import com.google.gson.JsonObject;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.sound.Sound;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -76,6 +76,20 @@ public class Utility {
                 player.playSound(SoundEvent.of(new Identifier("minecraft:block.note_block.didgeridoo")), SoundCategory.PLAYERS, 2, 0);
             }
         }
+    }
+
+    public static NbtString nbtify(Text text) {
+        JsonObject json = Text.Serializer.toJsonTree(text).getAsJsonObject();
+
+        if(!json.has("color")) json.addProperty("color","white");
+        if(!json.has("italic")) json.addProperty("italic",false);
+        if(!json.has("bold")) json.addProperty("bold",false);
+
+        return NbtString.of(json.toString());
+    }
+
+    public static Text textFromString(String text) throws Exception {
+        throw new Exception("Not implemented");
     }
 }
 
