@@ -1,14 +1,13 @@
 package dev.dfonline.codeclient.actiondump;
 
-import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 
 public class Icon {
     public String material;
@@ -95,13 +94,13 @@ public class Icon {
         if(color != null) nbt.put("CustomPotionColor", NbtInt.of(color.getColor()));
         item.setNbt(nbt);
 
-        item.setCustomName(Text.of(name));
+        item.setCustomName(Utility.textFromString(name));
 
         return item;
     }
 
     private void addToLore(NbtList lore, String text) {
-        lore.add(NbtString.of("{\"extra\":[{\"bold\":false,\"italic\":false,\"underlined\":false,\"strikethrough\":false,\"obfuscated\":false,\"color\":\"white\",\"text\":\"%s\"}],\"text\":\"\"}".formatted(text.replace("\"","\\\""))));
+        lore.add(Utility.nbtify(Utility.textFromString(text)));
     }
 
     private class Color {

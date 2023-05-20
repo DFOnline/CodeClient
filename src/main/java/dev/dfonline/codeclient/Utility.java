@@ -9,8 +9,11 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 public class Utility {
@@ -88,8 +93,28 @@ public class Utility {
         return NbtString.of(json.toString());
     }
 
-    public static Text textFromString(String text) throws Exception {
-        throw new Exception("Not implemented");
+    public static Text textFromString(String text) {
+        MutableText output = Text.empty();
+        MutableText component = Text.empty().setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0xFFFFFF)).withItalic(false));
+
+        Matcher m = Pattern.compile("§(([0-9a-kfmnolr])|x(§[0-9a-f]){6})|[^§]+").matcher(text);
+        while (m.find()) {
+            String data = m.group();
+            if(data.startsWith("§")) {
+                if(data.startsWith("§x")) {
+                    component = component.setStyle(component.getStyle().withColor(Integer.valueOf(data.replaceAll("§x|§",""), 16)));
+                }
+                else {
+                    component = component.formatted(Formatting.byCode(data.charAt(1)));
+                }
+            }
+            else {
+                component.append(data);
+                output.append(component);
+                component = Text.empty().setStyle(component.getStyle());
+            }
+        }
+        return output;
     }
 }
 
