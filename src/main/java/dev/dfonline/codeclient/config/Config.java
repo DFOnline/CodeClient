@@ -35,6 +35,7 @@ public class Config {
     public boolean InvisibleBlocksInDev = false;
     public float ReachDistance = 5;
     public boolean AutoFly = false;
+    public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
 
     private void save() {
         try {
@@ -54,6 +55,7 @@ public class Config {
             object.addProperty("InvisibleBlocksInDev",InvisibleBlocksInDev);
             object.addProperty("ReachDistance",ReachDistance);
             object.addProperty("AutoFly",AutoFly);
+            object.addProperty("CodeLayerInteractionMode",CodeLayerInteractionMode.name());
             FileManager.writeFile("options.json", object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -197,6 +199,16 @@ public class Config {
                                 )
                                 .controller(TickBoxController::new)
                                 .build())
+                        .option(Option.createBuilder(LayerInteractionMode.class)
+                                .name(Text.literal("Layer Interaction"))
+                                .tooltip(layerInteractionMode -> Text.literal("How you interact with layers and virtual layers.\n" + layerInteractionMode.description))
+                                .binding(
+                                        LayerInteractionMode.AUTO,
+                                        () -> CodeLayerInteractionMode,
+                                        opt -> CodeLayerInteractionMode = opt
+                                )
+                                .controller(EnumController::new)
+                                .build())
                         .build())
                 .category(ConfigCategory.createBuilder()
                         .name(Text.literal("AutoJoin"))
@@ -271,6 +283,17 @@ public class Config {
         public final Charset charSet;
         CharSetOption(Charset charSet) {
             this.charSet = charSet;
+        }
+    }
+
+    public enum LayerInteractionMode {
+        OFF("Makes interaction with layers default."),
+        AUTO("When you are above a layer it is a virtual barrier layer."),
+        ON("There are always virtual barrier layers.");
+
+        public final String description;
+        LayerInteractionMode(String description) {
+            this.description = description;
         }
     }
 
