@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.actiondump.ActionDump;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
@@ -49,6 +50,7 @@ public class Commands {
             CodeClient.location = null;
             SocketHandler.setConnection(null);
             ActionDump.clear();
+            Config.clear();
             return 0;
         }));
 

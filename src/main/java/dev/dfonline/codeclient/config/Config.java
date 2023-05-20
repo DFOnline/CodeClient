@@ -4,13 +4,14 @@ import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.actiondump.ActionDump;
-import dev.dfonline.codeclient.location.Plot;
-import dev.isxander.yacl.api.*;
+import dev.isxander.yacl.api.ConfigCategory;
+import dev.isxander.yacl.api.Option;
+import dev.isxander.yacl.api.OptionFlag;
+import dev.isxander.yacl.api.YetAnotherConfigLib;
 import dev.isxander.yacl.gui.controllers.TickBoxController;
 import dev.isxander.yacl.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl.gui.controllers.slider.FloatSliderController;
 import dev.isxander.yacl.gui.controllers.slider.IntegerSliderController;
-import dev.isxander.yacl.gui.controllers.string.StringController;
 import dev.isxander.yacl.gui.controllers.string.number.IntegerFieldController;
 import net.minecraft.text.Text;
 
@@ -70,6 +71,9 @@ public class Config {
             }
         }
         return instance;
+    }
+    public static void clear() {
+        instance = null;
     }
 
     public YetAnotherConfigLib getLibConfig() {
