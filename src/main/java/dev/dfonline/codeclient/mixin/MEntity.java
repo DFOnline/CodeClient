@@ -29,6 +29,8 @@ public abstract class MEntity {
 
     @Shadow @Final protected static TrackedData<EntityPose> POSE;
 
+    @Shadow private int id;
+
     @Inject(method = "isInsideWall", at = @At("HEAD"), cancellable = true)
     private void insideWall(CallbackInfoReturnable<Boolean> cir) {
         if(NoClip.ignoresWalls()) cir.setReturnValue(false);
@@ -54,5 +56,12 @@ public abstract class MEntity {
         if(pose == EntityPose.STANDING) return;
         if(pose != EntityPose.CROUCHING) ci.cancel();
         if(!this.isSneaking()) ci.cancel();
+    }
+
+    @Inject(method = "wouldPoseNotCollide", at = @At("HEAD"), cancellable = true)
+    private void wouldPoseNotCollide(EntityPose pose, CallbackInfoReturnable<Boolean> cir) {
+        if(this.id == CodeClient.MC.player.getId() && NoClip.ignoresWalls()) {
+            cir.setReturnValue(true);
+        }
     }
 }
