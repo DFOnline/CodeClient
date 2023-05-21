@@ -34,7 +34,10 @@ import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -190,5 +193,23 @@ public class InteractionManager {
             }
         }
         return false;
+    }
+
+    @Nullable
+    public static VoxelShape customVoxelShape(BlockView world, BlockPos pos) {
+        if(CodeClient.location instanceof Dev plot) {
+            Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
+            boolean hideCodeSpace =
+                    mode != Config.LayerInteractionMode.OFF
+                    && plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4
+                    && (
+                            mode == Config.LayerInteractionMode.ON
+                            || pos.getY() + 1 < CodeClient.MC.player.getEyeY()
+                    )
+            ;
+            if(hideCodeSpace) return VoxelShapes.cuboid(0, 1 - 1d / (4096) ,0,1,1,1);
+            if(mode != Config.LayerInteractionMode.OFF && plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() + 1 > CodeClient.MC.player.getEyeY()) return VoxelShapes.empty();
+        }
+        return null;
     }
 }

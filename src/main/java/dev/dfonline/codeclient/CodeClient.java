@@ -37,7 +37,7 @@ public class CodeClient implements ModInitializer {
     public static final String MOD_ID = "codeclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
-    public static final MinecraftClient MC = MinecraftClient.getInstance();
+    public static MinecraftClient MC = MinecraftClient.getInstance();
     public static final Gson gson = new Gson();
     public static KeyBinding editBind;
     public static AutoJoin autoJoin = AutoJoin.NONE;
@@ -81,6 +81,7 @@ public class CodeClient implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        MC = MinecraftClient.getInstance();
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
 
         if(Config.getConfig().CodeClientAPI) {

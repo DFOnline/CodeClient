@@ -4,7 +4,9 @@
   "package": "dev.dfonline.codeclient.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "ClientPlayerInteractionManagerAccessor",
     "ClientWorldAccessor",
+    "MChunkRendererRegion",
     "MClientConnection",
     "MClientPlayerEntity",
     "MClientPlayerInteractionManager",
@@ -16,10 +18,9 @@
     "MLivingEntity",
     "MPlayerEntity",
     "MTitleScreen",
-    "ClientPlayerInteractionManagerAccessor",
-    "MChunkRendererRegion",
-    "MWorld",
-    "block.MBarrier"
+    "MWorldRenderer",
+    "block.MBarrier",
+    "block.MAbstractBlockState"
   ],
   "injectors": {
     "defaultRequire": 1
