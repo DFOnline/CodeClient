@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.mixin;
+package dev.dfonline.codeclient.mixin.entity.player;
 
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.network.SequencedPacketCreator;

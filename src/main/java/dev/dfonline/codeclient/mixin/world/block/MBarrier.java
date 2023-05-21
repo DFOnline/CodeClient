@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.mixin.block;
+package dev.dfonline.codeclient.mixin.world.block;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;

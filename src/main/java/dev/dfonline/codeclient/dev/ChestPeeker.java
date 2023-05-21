@@ -3,7 +3,7 @@ package dev.dfonline.codeclient.dev;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.mixin.ClientWorldAccessor;
+import dev.dfonline.codeclient.mixin.world.ClientWorldAccessor;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;

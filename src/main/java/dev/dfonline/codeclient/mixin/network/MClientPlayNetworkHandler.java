@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.mixin;
+package dev.dfonline.codeclient.mixin.network;
 
 import dev.dfonline.codeclient.CodeClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;

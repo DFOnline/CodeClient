@@ -1,13 +1,11 @@
-package dev.dfonline.codeclient.mixin.block;
+package dev.dfonline.codeclient.mixin.world.block;
 
 import dev.dfonline.codeclient.dev.InteractionManager;
 import net.minecraft.block.AbstractBlock.AbstractBlockState;
-import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

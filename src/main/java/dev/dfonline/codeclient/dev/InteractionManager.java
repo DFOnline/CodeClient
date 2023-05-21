@@ -7,7 +7,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.mixin.ClientPlayerInteractionManagerAccessor;
+import dev.dfonline.codeclient.mixin.entity.player.ClientPlayerInteractionManagerAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.*;

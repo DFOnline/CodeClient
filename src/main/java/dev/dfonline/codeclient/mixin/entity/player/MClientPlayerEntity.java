@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.mixin;
+package dev.dfonline.codeclient.mixin.entity.player;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.Debug.Debug;

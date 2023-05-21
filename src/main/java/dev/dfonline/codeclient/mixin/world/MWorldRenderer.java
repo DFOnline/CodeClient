@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.mixin;
+package dev.dfonline.codeclient.mixin.world;
 
 import dev.dfonline.codeclient.dev.InteractionManager;
 import net.minecraft.block.BlockState;
