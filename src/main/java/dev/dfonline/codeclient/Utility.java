@@ -93,9 +93,9 @@ public class Utility {
         return NbtString.of(json.toString());
     }
 
-    public static Text textFromString(String text) {
-        MutableText output = Text.empty();
-        MutableText component = Text.empty().setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0xFFFFFF)).withItalic(false));
+    public static MutableText textFromString(String text) {
+        MutableText output = Text.empty().setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0xFFFFFF)).withItalic(false));
+        MutableText component = Text.empty();
 
         Matcher m = Pattern.compile("§(([0-9a-kfmnolr])|x(§[0-9a-f]){6})|[^§]+").matcher(text);
         while (m.find()) {

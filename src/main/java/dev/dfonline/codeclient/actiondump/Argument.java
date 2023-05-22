@@ -21,7 +21,7 @@ public class Argument {
         PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect"),
         POTION(TextColor.fromRgb(0xFF557F), "Potion Effect"),
         VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable"),
-        ANY_TYPE(TextColor.fromRgb(0xFFD47F8), "Any Value"),
+        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value"),
         ITEM(GOLD, "Item"),
         BLOCK(GOLD, "Block"),
         ENTITY_TYPE(GOLD, "Entity Type"),
@@ -30,7 +30,7 @@ public class Argument {
         PROJECTILE(GOLD, "Projectile"),
         BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag"),
         LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List"),
-        DICT(TextColor.fromRgb(0xFFD47F8), "Dictionary"),
+        DICT(TextColor.fromRgb(0x55AAFF), "Dictionary"),
         NONE(TextColor.fromRgb(0x808080), "None"),
         ;
 
