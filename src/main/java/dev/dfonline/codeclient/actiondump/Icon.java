@@ -4,13 +4,17 @@ import dev.dfonline.codeclient.Utility;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
+import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
+import java.util.List;
+
 public class Icon {
     public String material;
+    public String head;
     public String name;
     public Color color;
     public String[] deprecatedNote;
@@ -92,7 +96,24 @@ public class Icon {
         nbt.put("display",display);
         nbt.put("HideFlags", NbtInt.of(127));
         if(color != null) nbt.put("CustomPotionColor", NbtInt.of(color.getColor()));
+
+        if(head != null) {
+            NbtCompound SkullOwner = new NbtCompound();
+                NbtIntArray Id = new NbtIntArray(List.of(0,0,0,0));
+                SkullOwner.put("Id",Id);
+                SkullOwner.putString("Name","DF-HEAD");
+                NbtCompound Properties = new NbtCompound();
+                    NbtList textures = new NbtList();
+                        NbtCompound texture = new NbtCompound();
+                            texture.putString("Value",head);
+                    textures.add(texture);
+                    Properties.put("textures",textures);
+                SkullOwner.put("Properties",Properties);
+            nbt.put("SkullOwner",SkullOwner);
+        }
+
         item.setNbt(nbt);
+
 
         item.setCustomName(Utility.textFromString(name));
 
