@@ -6,9 +6,9 @@ import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.actiondump.ActionDump;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -31,23 +31,23 @@ public class Commands {
 
 
         dispatcher.register(literal("worldplot").executes(context -> {
-            CodeClient.worldPlot = null;
+            if(CodeClient.location instanceof Plot plot) plot.setSize(null);
             return 0;
         }).then(literal("basic").executes(context -> {
-            CodeClient.worldPlot = WorldPlot.Size.BASIC;
+            if(CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.BASIC);
             return 0;
         })).then(literal("large").executes(context -> {
-            CodeClient.worldPlot = WorldPlot.Size.LARGE;
+            if(CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.LARGE);
             return 0;
         })).then(literal("massive").executes(context -> {
-            CodeClient.worldPlot = WorldPlot.Size.MASSIVE;
+            if(CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.MASSIVE);
             return 0;
         })));
 
 
         dispatcher.register(literal("fixcc").executes(context -> {
             CodeClient.currentAction = new None();
-            CodeClient.worldPlot = null;
+            if(CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.BASIC);
             CodeClient.location = null;
             SocketHandler.setConnection(null);
             ActionDump.clear();
@@ -93,7 +93,7 @@ public class Commands {
             if(!(CodeClient.location instanceof Dev)) return 1;
             CodeClient.currentAction = new GetPlotSize(() -> {
                 CodeClient.currentAction = new None();
-                Utility.sendMessage(Text.literal(CodeClient.worldPlot.name()));
+                Utility.sendMessage("Done!");
             });
             CodeClient.currentAction.init();
             return 0;

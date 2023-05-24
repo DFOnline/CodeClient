@@ -2,9 +2,9 @@ package dev.dfonline.codeclient.action.impl;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
-import dev.dfonline.codeclient.WorldPlot;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -61,13 +61,13 @@ public class GetPlotSize extends Action {
                 step = Step.DONE;
                 double size = position.getZ() - plot.getZ();
                 if(size > 49) {
-                    CodeClient.worldPlot = WorldPlot.Size.BASIC;
+                    plot.setSize(Plot.Size.BASIC);
                 }
                 if(size > 99) {
-                    CodeClient.worldPlot = WorldPlot.Size.LARGE;
+                    plot.setSize(Plot.Size.LARGE);
                 }
                 if(size > 299) {
-                    CodeClient.worldPlot = WorldPlot.Size.MASSIVE;
+                    plot.setSize(Plot.Size.MASSIVE);
                 }
                 callback();
             }

@@ -1,9 +1,6 @@
 package dev.dfonline.codeclient;
 
-import dev.dfonline.codeclient.location.Build;
-import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.location.Play;
-import dev.dfonline.codeclient.location.Spawn;
+import dev.dfonline.codeclient.location.*;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.s2c.play.*;
@@ -25,7 +22,7 @@ public class Event {
         if(packet instanceof OverlayMessageS2CPacket overlay) {
             if (step == Sequence.WAIT_FOR_MESSAGE && overlay.getMessage().getString().startsWith("DiamondFire - ")) {
                 CodeClient.LOGGER.info("Spawn mode.");
-                CodeClient.worldPlot = null;
+                if(CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.BASIC);
                 CodeClient.location = new Spawn();
                 step = Sequence.WAIT_FOR_CLEAR;
             }

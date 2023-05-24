@@ -1,7 +1,6 @@
 package dev.dfonline.codeclient.mixin.render;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.WorldPlot;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.BlockState;
@@ -17,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MChunkRendererRegion {
     @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)
     private void getAppearance(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
-        if(CodeClient.location instanceof Dev) {
-            if(WorldPlot.shouldNotRender(pos)) {
-                    cir.setReturnValue(Blocks.VOID_AIR.getDefaultState());
+        if(CodeClient.location instanceof Dev dev) {
+            if(!dev.isInPlot(pos)) {
+                cir.setReturnValue(Blocks.VOID_AIR.getDefaultState());
             }
             BlockState state = NoClip.replaceBlockAt(pos);
             if(state != null) cir.setReturnValue(state);

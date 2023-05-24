@@ -29,8 +29,6 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static dev.dfonline.codeclient.WorldPlot.Size;
-
 
 public class CodeClient implements ModInitializer {
     public static final String MOD_NAME = "CodeClient";
@@ -44,7 +42,6 @@ public class CodeClient implements ModInitializer {
 
     @NotNull
     public static Action currentAction = new None();
-    public static Size worldPlot = null;
     public static Location location = null;
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
