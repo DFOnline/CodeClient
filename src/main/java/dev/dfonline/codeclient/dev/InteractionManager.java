@@ -137,63 +137,66 @@ public class InteractionManager {
     }
 
     public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
-        MinecraftClient MC = CodeClient.MC;
-        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
-            Vec3d origin = player.getEyePos();
-            if(origin.distanceTo(hitResult.getPos()) > 5.4) {
-                Vec3d diff = hitResult.getPos().relativize(origin);
-                Vec3d pos = hitResult.getPos().add(diff.normalize().multiply(5.4));
-
-                boolean collides = isInsideWall(pos);
-                CodeClient.LOGGER.info(String.valueOf(collides));
-                if(collides) {
-                    Direction[] directions = new Direction[]{Direction.UP, Direction.WEST};
-                    for (Direction direction: directions) {
-                        BlockPos offset = BlockPos.ofFloored(pos.offset(direction,1));
-                        if(!isInsideWall(offset.toCenterPos())) {
-                            CodeClient.LOGGER.info(String.valueOf(direction));
-                            pos = offset.toCenterPos();
-                            break;
-                        }
-                    }
-                }
-
-                Vec3d eyeRel = origin.relativize(player.getPos());
-                MoveToLocation.shove(player,pos.add(eyeRel));
-            }
-
-//            hitResult;
-            ItemStack item = player.getStackInHand(hand);
-            boolean clickedStone = MC.world.getBlockState(hitResult.getBlockPos()).getBlock().equals(Blocks.STONE);
-            boolean onTop = hitResult.getSide() == Direction.UP && ((hitResult.getBlockPos().getY() + 1) % 5 == 0);
-            boolean isTemplate = item.hasNbt() && item.getNbt() != null && item.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && item.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE);
-
-            if(onTop && Config.getConfig().PlaceOnAir) {
-                BlockPos from = hitResult.getBlockPos();
-                hitResult = new BlockHitResult(new Vec3d(from.getX(), from.getY() + 1, from.getZ()),Direction.UP,hitResult.getBlockPos().add(0,1,0),false);
-            }
-
-
-            BlockHitResult finalHitResult = hitResult;
-            if(onTop || isTemplate || Config.getConfig().CustomBlockInteractions) {
-                // play sound
-                BlockSoundGroup group = Block.getBlockFromItem(item.getItem()).getSoundGroup(Block.getBlockFromItem(item.getItem()).getDefaultState());
-                MC.getSoundManager().play(new PositionedSoundInstance(group.getPlaceSound(), SoundCategory.BLOCKS, group.getVolume(), group.getPitch(), Random.create(), hitResult.getBlockPos()));
-
-                MC.player.swingHand(Hand.MAIN_HAND);
-
-                if(isTemplate) {
-                    ItemStack template = Items.ENDER_CHEST.getDefaultStack();
-                    template.setNbt(item.getNbt());
-                    CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, template));
-                }
-                ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, finalHitResult, sequence));
-                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, item));
-                return true;
-            }
-        }
         return false;
     }
+//    public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
+//        MinecraftClient MC = CodeClient.MC;
+//        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
+//            Vec3d origin = player.getEyePos();
+//            if(origin.distanceTo(hitResult.getPos()) > 5.4) {
+//                Vec3d diff = hitResult.getPos().relativize(origin);
+//                Vec3d pos = hitResult.getPos().add(diff.normalize().multiply(5.4));
+//
+//                boolean collides = isInsideWall(pos);
+//                CodeClient.LOGGER.info(String.valueOf(collides));
+//                if(collides) {
+//                    Direction[] directions = new Direction[]{Direction.UP, Direction.WEST};
+//                    for (Direction direction: directions) {
+//                        BlockPos offset = BlockPos.ofFloored(pos.offset(direction,1));
+//                        if(!isInsideWall(offset.toCenterPos())) {
+//                            CodeClient.LOGGER.info(String.valueOf(direction));
+//                            pos = offset.toCenterPos();
+//                            break;
+//                        }
+//                    }
+//                }
+//
+//                Vec3d eyeRel = origin.relativize(player.getPos());
+//                MoveToLocation.shove(player,pos.add(eyeRel));
+//            }
+//
+////            hitResult;
+//            ItemStack item = player.getStackInHand(hand);
+//            boolean clickedStone = MC.world.getBlockState(hitResult.getBlockPos()).getBlock().equals(Blocks.STONE);
+//            boolean onTop = hitResult.getSide() == Direction.UP && ((hitResult.getBlockPos().getY() + 1) % 5 == 0);
+//            boolean isTemplate = item.hasNbt() && item.getNbt() != null && item.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && item.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE);
+//
+//            if(onTop && Config.getConfig().PlaceOnAir) {
+//                BlockPos from = hitResult.getBlockPos();
+//                hitResult = new BlockHitResult(new Vec3d(from.getX(), from.getY() + 1, from.getZ()),Direction.UP,hitResult.getBlockPos().add(0,1,0),false);
+//            }
+//
+//
+//            BlockHitResult finalHitResult = hitResult;
+//            if(onTop || isTemplate || Config.getConfig().CustomBlockInteractions) {
+//                // play sound
+//                BlockSoundGroup group = Block.getBlockFromItem(item.getItem()).getSoundGroup(Block.getBlockFromItem(item.getItem()).getDefaultState());
+//                MC.getSoundManager().play(new PositionedSoundInstance(group.getPlaceSound(), SoundCategory.BLOCKS, group.getVolume(), group.getPitch(), Random.create(), hitResult.getBlockPos()));
+//
+//                MC.player.swingHand(Hand.MAIN_HAND);
+//
+//                if(isTemplate) {
+//                    ItemStack template = Items.ENDER_CHEST.getDefaultStack();
+//                    template.setNbt(item.getNbt());
+//                    CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, template));
+//                }
+//                ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, finalHitResult, sequence));
+//                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, item));
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     @Nullable
     public static VoxelShape customVoxelShape(BlockView world, BlockPos pos) {
@@ -208,7 +211,7 @@ public class InteractionManager {
                     )
             ;
             if(hideCodeSpace) return VoxelShapes.cuboid(0, 1 - 1d / (4096) ,0,1,1,1);
-            if(mode != Config.LayerInteractionMode.OFF && plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() + 1 > CodeClient.MC.player.getEyeY()) return VoxelShapes.empty();
+            if(mode != Config.LayerInteractionMode.OFF && plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && pos.getY() % 5 == 4) return VoxelShapes.empty();
         }
         return null;
     }
