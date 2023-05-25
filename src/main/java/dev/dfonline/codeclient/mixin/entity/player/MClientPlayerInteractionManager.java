@@ -16,20 +16,24 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
-public class MClientPlayerInteractionManager {
+public abstract class MClientPlayerInteractionManager {
     @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
     public void onAttackBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if(InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
     }
 
-    @Inject(method = "interactBlock", at = @At("HEAD") , cancellable = true)
-    private void onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ()) && InteractionManager.onBlockInteract(player, hand, hitResult)) cir.setReturnValue(ActionResult.FAIL);
+    @ModifyVariable(method = "interactBlock", at = @At("HEAD"), argsOnly = true)
+    private BlockHitResult onBlockInteract(BlockHitResult hitResult) {
+        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ())) {
+            return InteractionManager.onBlockInteract(hitResult);
+        }
+        return hitResult;
     }
     @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
     public void interactItemMovement(ClientPlayNetworkHandler instance, Packet<?> packet) {

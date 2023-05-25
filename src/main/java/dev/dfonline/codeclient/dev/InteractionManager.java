@@ -4,35 +4,35 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.mixin.entity.player.ClientPlayerInteractionManagerAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.block.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -136,8 +136,21 @@ public class InteractionManager {
         });
     }
 
-    public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
-        return false;
+    public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
+        if(CodeClient.location instanceof Dev plot) {
+            BlockPos pos = hitResult.getBlockPos();
+            if(plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4) { // Is a code space level (glass)
+                if(hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
+                    BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(),Direction.DOWN,hitResult.getBlockPos().add(0,1,0),hitResult.isInsideBlock());
+                    return newHitResult;
+                }
+            }
+            if(hitResult.getSide() == Direction.DOWN) {
+                BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos(), hitResult.isInsideBlock());
+                return newHitResult;
+            }
+        }
+        return hitResult;
     }
 //    public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
 //        MinecraftClient MC = CodeClient.MC;
@@ -202,16 +215,18 @@ public class InteractionManager {
     public static VoxelShape customVoxelShape(BlockView world, BlockPos pos) {
         if(CodeClient.location instanceof Dev plot) {
             Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
+            boolean isLevel = plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4;
             boolean hideCodeSpace =
                     mode != Config.LayerInteractionMode.OFF
-                    && plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4
+                    && isLevel
                     && (
                             mode == Config.LayerInteractionMode.ON
                             || pos.getY() + 1 < CodeClient.MC.player.getEyeY()
                     )
+                    && !world.getBlockState(pos.add(0,1,0)).isSolidBlock(world, pos)
             ;
             if(hideCodeSpace) return VoxelShapes.cuboid(0, 1 - 1d / (4096) ,0,1,1,1);
-            if(mode != Config.LayerInteractionMode.OFF && plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && pos.getY() % 5 == 4) return VoxelShapes.empty();
+            if(mode != Config.LayerInteractionMode.OFF && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && isLevel) return VoxelShapes.empty();
         }
         return null;
     }
