@@ -37,7 +37,7 @@ public abstract class Plot extends Location {
         int x = pos.getX();
         int z = pos.getZ();
         // Signs can be out of the plot so blocks above the floor one outside the plot are shown.
-        boolean inX = ((x >= originX - 20) || ((pos.getY() >= 50) && (x >= originX - 21))) && (x < originZ + size.size);
+        boolean inX = ((x >= originX - 20) || ((pos.getY() >= 50) && (x >= originX - 21))) && (x <= originX + size.size);
         boolean inZ = (z >= originZ) && (z <= originZ + size.size);
 
         return inX && inZ;
