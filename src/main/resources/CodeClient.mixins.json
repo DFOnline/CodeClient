@@ -4,26 +4,28 @@
   "package": "dev.dfonline.codeclient.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "entity.MEntity",
+    "entity.MLivingEntity",
     "entity.player.ClientPlayerInteractionManagerAccessor",
-    "world.ClientWorldAccessor",
-    "render.MChunkRendererRegion",
-    "network.MClientConnection",
     "entity.player.MClientPlayerEntity",
     "entity.player.MClientPlayerInteractionManager",
+    "entity.player.MPlayerEntity",
+    "network.MClientConnection",
     "network.MClientPlayNetworkHandler",
+    "render.MChunkRendererRegion",
     "render.MDebugRenderer",
-    "entity.MEntity",
     "render.hud.MInGameHud",
     "render.hud.MInGameOverlayRenderer",
-    "entity.MLivingEntity",
-    "entity.player.MPlayerEntity",
     "render.hud.MTitleScreen",
+    "world.ClientWorldAccessor",
     "world.MWorldRenderer",
-    "world.block.MBarrier",
-    "world.block.MAbstractBlockState"
+    "world.block.MAbstractBlockState",
+    "world.block.MBarrier"
   ],
   "injectors": {
     "defaultRequire": 1
   },
-  "mixins": []
+  "mixins": [
+    "world.block.MBlockItem"
+  ]
 }

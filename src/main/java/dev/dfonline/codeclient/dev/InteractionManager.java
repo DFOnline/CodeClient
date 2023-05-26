@@ -141,6 +141,7 @@ public class InteractionManager {
             BlockPos pos = hitResult.getBlockPos();
             if(plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4) { // Is a code space level (glass)
                 if(hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
+                    if(CodeClient.MC.world.getBlockState(pos).isAir() && !Config.getConfig().PlaceOnAir) return hitResult;
                     BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(),Direction.DOWN,hitResult.getBlockPos().add(0,1,0),hitResult.isInsideBlock());
                     return newHitResult;
                 }
