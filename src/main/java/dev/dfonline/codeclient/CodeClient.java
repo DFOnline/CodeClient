@@ -42,6 +42,7 @@ public class CodeClient implements ModInitializer {
 
     @NotNull
     public static Action currentAction = new None();
+    public static Location lastLocation = null;
     public static Location location = null;
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {

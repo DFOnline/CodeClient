@@ -21,9 +21,7 @@ public class Event {
         }
         if(packet instanceof OverlayMessageS2CPacket overlay) {
             if (step == Sequence.WAIT_FOR_MESSAGE && overlay.getMessage().getString().startsWith("DiamondFire - ")) {
-                CodeClient.LOGGER.info("Spawn mode.");
-                if(CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.BASIC);
-                CodeClient.location = new Spawn();
+                updateLocation(new Spawn());
                 step = Sequence.WAIT_FOR_CLEAR;
             }
         }
@@ -31,24 +29,26 @@ public class Event {
             if(step == Sequence.WAIT_FOR_MESSAGE) {
                 String content = message.content().getString();
                 if(content.equals("» You are now in dev mode.")) {
-                    CodeClient.LOGGER.info("Dev mode.");
-                    CodeClient.location = new Dev(x,z);
+                    updateLocation(new Dev(x,z));
                 }
                 if(content.equals("» You are now in build mode.")) {
-                    CodeClient.LOGGER.info("Build mode.");
-                    CodeClient.location = new Build();
+                    updateLocation(new Build());
                 }
                 if(content.startsWith("» Joined game: ") && content.endsWith(".")) {
-                    CodeClient.LOGGER.info("Play mode.");
-                    CodeClient.location = new Play();
+                    updateLocation(new Play());
                 }
                 step = Sequence.WAIT_FOR_CLEAR;
             }
         }
         if(packet instanceof GameJoinS2CPacket) {
-            CodeClient.location = new Spawn();
-            CodeClient.LOGGER.info("Spawn mode.");
+            updateLocation(new Spawn());
         }
+    }
+
+    public static void updateLocation(Location location) {
+        CodeClient.lastLocation = CodeClient.location;
+        CodeClient.location = location;
+        CodeClient.LOGGER.info("Changed location: " + location.name());
     }
 
     private enum Sequence {
