@@ -30,7 +30,7 @@ public class MClientPlayerEntity {
     private void tick(CallbackInfo ci) {
         CodeClient.onTick();
         CodeClient.currentAction.onTick();
-        if(NoClip.ignoresWalls()) MC.player.noClip = true;
+        if(NoClip.isIgnoringWalls()) MC.player.noClip = true;
         Debug.tick();
 //        ChestPeeker.tick();
     }
@@ -40,7 +40,7 @@ public class MClientPlayerEntity {
         if(CodeClient.location instanceof Dev) {
             if (CodeClient.currentAction instanceof MoveToSpawn mts) if (mts.moveModifier()) ci.cancel();
             ClientPlayerEntity player = MC.player;
-            if (NoClip.ignoresWalls()) {
+            if (NoClip.isIgnoringWalls()) {
                 ci.cancel();
                 Vec3d pos = NoClip.handleSeverPosition();
                 this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, player.getYaw(), player.getPitch(), false));
@@ -56,16 +56,16 @@ public class MClientPlayerEntity {
 
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double z, CallbackInfo ci) {
-        if(NoClip.ignoresWalls()) ci.cancel();
+        if(NoClip.isIgnoringWalls()) ci.cancel();
     }
 
     @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
     private void slowDown(CallbackInfoReturnable<Boolean> cir) {
-        if(NoClip.ignoresWalls()) cir.setReturnValue(false);
+        if(NoClip.isIgnoringWalls()) cir.setReturnValue(false);
     }
 
     @Inject(method = "shouldAutoJump", at = @At("HEAD"), cancellable = true)
     private void autoJump(CallbackInfoReturnable<Boolean> cir) {
-        if(NoClip.ignoresWalls()) cir.setReturnValue(false);
+        if(NoClip.isIgnoringWalls()) cir.setReturnValue(false);
     }
 }

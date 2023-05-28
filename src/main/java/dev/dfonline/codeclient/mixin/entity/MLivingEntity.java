@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MLivingEntity {
     @Inject(method = "getJumpVelocity", at = @At("RETURN"), cancellable = true)
     private void jumpVelocity(CallbackInfoReturnable<Float> cir) {
-        if(NoClip.ignoresWalls() && CodeClient.MC.player.getPitch() < -40) {
+        if(NoClip.isIgnoringWalls() && CodeClient.MC.player.getPitch() < -40) {
             cir.setReturnValue(NoClip.getJumpHeight());
         }
     }

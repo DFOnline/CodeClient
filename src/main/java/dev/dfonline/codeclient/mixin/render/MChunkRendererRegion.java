@@ -17,7 +17,8 @@ public class MChunkRendererRegion {
     @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)
     private void getAppearance(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
         if(CodeClient.location instanceof Dev dev) {
-            if(!dev.isInPlot(pos)) {
+            Boolean inPlot = dev.isInPlot(pos);
+            if(inPlot != null && !inPlot) {
                 cir.setReturnValue(Blocks.VOID_AIR.getDefaultState());
             }
             BlockState state = NoClip.replaceBlockAt(pos);

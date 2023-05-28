@@ -14,7 +14,7 @@ public abstract class MPlayerEntity {
 
     @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
     private void getAirSpeed(CallbackInfoReturnable<Float> cir) {
-        if(NoClip.ignoresWalls() && !CodeClient.MC.player.getAbilities().flying) {
+        if(NoClip.isIgnoringWalls() && !CodeClient.MC.player.getAbilities().flying) {
             cir.setReturnValue(0.026F * (CodeClient.MC.player.getMovementSpeed() * Config.getConfig().AirSpeed));
         }
     }

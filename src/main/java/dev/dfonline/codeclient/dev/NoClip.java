@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -15,11 +16,12 @@ import org.jetbrains.annotations.Nullable;
 public class NoClip {
     public static LineType display = null;
 
-    public static boolean ignoresWalls() {
-        if(CodeClient.location instanceof Dev plot) {
-            return !(CodeClient.MC.player.getY() < 50) && !(CodeClient.MC.player.getX() > plot.getX());
-        }
-        return false;
+    public static boolean isIgnoringWalls() {
+        return Config.getConfig().NoClipEnabled && isInDevSpace();
+    }
+
+    public static boolean isInDevSpace() {
+        return CodeClient.location instanceof Dev plot && CodeClient.MC.player.getX() <= plot.getX();
     }
 
     public static Vec3d handleClientPosition(Vec3d movement) {

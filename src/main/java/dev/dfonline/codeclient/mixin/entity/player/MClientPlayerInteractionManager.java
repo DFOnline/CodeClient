@@ -37,7 +37,7 @@ public abstract class MClientPlayerInteractionManager {
     }
     @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
     public void interactItemMovement(ClientPlayNetworkHandler instance, Packet<?> packet) {
-        if(!NoClip.ignoresWalls()) {
+        if(!NoClip.isIgnoringWalls()) {
             instance.sendPacket(packet);
         }
     }

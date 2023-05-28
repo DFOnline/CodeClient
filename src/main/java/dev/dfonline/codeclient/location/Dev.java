@@ -10,6 +10,7 @@ public class Dev extends Creator {
         setOrigin((int) (x + 9.5), (int) (z - 10.5));
     }
 
+    @Deprecated
     public boolean isInCodeSpace(double x, double z) {
         return
                 (x < originX) && (x >= originX - 20)

@@ -61,7 +61,7 @@ public class CodeClient implements ModInitializer {
     }
 
     public static void onTick() {
-        if(NoClip.ignoresWalls() && location instanceof Dev) {
+        if(NoClip.isIgnoringWalls() && location instanceof Dev) {
             MC.player.noClip = true;
         }
         if(editBind.wasPressed() && location instanceof Dev) {
