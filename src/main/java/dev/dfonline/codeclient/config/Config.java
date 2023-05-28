@@ -4,16 +4,14 @@ import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.actiondump.ActionDump;
-import dev.isxander.yacl.api.ConfigCategory;
-import dev.isxander.yacl.api.Option;
-import dev.isxander.yacl.api.OptionFlag;
-import dev.isxander.yacl.api.YetAnotherConfigLib;
+import dev.isxander.yacl.api.*;
 import dev.isxander.yacl.gui.controllers.TickBoxController;
 import dev.isxander.yacl.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl.gui.controllers.slider.FloatSliderController;
 import dev.isxander.yacl.gui.controllers.slider.IntegerSliderController;
 import dev.isxander.yacl.gui.controllers.string.number.IntegerFieldController;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -82,41 +80,11 @@ public class Config {
         return YetAnotherConfigLib.createBuilder()
                 .title(Text.literal("CodeClient Config"))
                 .category(ConfigCategory.createBuilder()
-                        .name(Text.literal("CodeClient"))
-                        .tooltip(Text.literal("Enable or disable features of CodeClient"))
-//                        .option(Option.createBuilder(boolean.class)
-//                                .name(Text.literal("NoClip"))
-//                                .tooltip(Text.literal("If you can NoClip in the dev space."))
-//                                .binding(
-//                                        true,
-//                                        () -> NoClipEnabled,
-//                                        option -> NoClipEnabled = option
-//                                )
-//                                .controller(TickBoxController::new)
-//                                .build())
-                        .option(Option.createBuilder(int.class)
-                                .name(Text.literal("AirStrafe Modifier"))
-                                .tooltip(Text.literal("How much faster you go when jumping in dev space."))
-                                .binding(
-                                        10,
-                                        () -> AirSpeed,
-                                        opt -> AirSpeed = opt
-                                )
-                                .controller(opt -> new IntegerSliderController(opt, 10, 30, 1))
-                                .build())
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Place on Air"))
-                                .tooltip(Text.literal("Allows you to place on the virtual barriers in the dev space."))
-                                .binding(
-                                        false,
-                                        () -> PlaceOnAir,
-                                        opt -> PlaceOnAir = opt
-                                )
-                                .controller(TickBoxController::new)
-                                .build())
+                        .name(Text.literal("General"))
+                        .tooltip(Text.literal("General always specific options for CodeClient"))
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("CodeClient API"))
-                                .tooltip(Text.literal("Enables/disabled the CC API, which allows authenticated apps to place templates and clear plots.\n(requires restart)"))
+                                .tooltip(Text.literal("Allows external apps to add code to your plot.\n(requires restart)"))
                                 .binding(
                                         false,
                                         () -> CodeClientAPI,
@@ -125,40 +93,9 @@ public class Config {
                                 .controller(TickBoxController::new)
                                 .flag(OptionFlag.GAME_RESTART)
                                 .build())
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("CCDBUG"))
-                                .tooltip(Text.literal("Toggle CCDBUG, which is a variable and entity watcher for debugging."))
-                                .binding(
-                                        true,
-                                        () -> CCDBUG,
-                                        opt -> CCDBUG = opt
-                                )
-                                .controller(TickBoxController::new)
-                                .build())
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Custom Block Interactions"))
-                                .tooltip(Text.literal("Toggle weather codespace blocks are instantly hidden and no flashing placed block."))
-                                .binding(
-                                        true,
-                                        () -> CustomBlockInteractions,
-                                        opt -> CustomBlockInteractions = opt
-                                )
-                                .controller(TickBoxController::new)
-                                .build())
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Custom Tag Interaction"))
-                                .tooltip(Text.literal("Toggle \"faster\" block tags, with interactions client handled."))
-                                .binding(
-                                        false,
-                                        () -> CustomTagInteraction,
-                                        opt -> CustomTagInteraction = opt
-                                )
-                                .controller(TickBoxController::new)
-                                .available(false)
-                                .build())
                         .option(Option.createBuilder(CharSetOption.class)
                                 .name(Text.literal("File Charset"))
-                                .tooltip(Text.literal("There can often be artifacts in the ActionDump, change this to fix it."))
+                                .tooltip(Text.literal("Can fix artifacts in ActionDump loading."))
                                 .binding(
                                         CharSetOption.UTF_8,
                                         () -> FileCharSet,
@@ -166,28 +103,6 @@ public class Config {
                                 )
                                 .flag(minecraftClient -> ActionDump.clear())
                                 .controller(EnumController::new)
-                                .build())
-                        .option(Option.createBuilder(Boolean.class)
-                                .name(Text.literal("Show Invisible Blocks"))
-                                .tooltip(Text.literal("If invisible blocks like barriers should be shown whilst in dev and build."))
-                                .binding(
-                                        false,
-                                        () -> InvisibleBlocksInDev,
-                                        opt -> InvisibleBlocksInDev = opt
-                                )
-                                .controller(TickBoxController::new)
-                                .available(false)
-                                .build())
-                        .option(Option.createBuilder(float.class)
-                                .name(Text.literal("Reach Distance"))
-                                .tooltip(Text.literal("Modified reach distance in dev mode.\nThis will teleport you closer if something is too far away."))
-                                .binding(
-                                        5f,
-                                        () -> ReachDistance,
-                                        opt -> ReachDistance = opt
-                                )
-                                .controller(floatOption -> new FloatSliderController(floatOption,5,10,0.1f))
-                                .available(false)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Auto Fly"))
@@ -199,23 +114,118 @@ public class Config {
                                 )
                                 .controller(TickBoxController::new)
                                 .build())
-                        .option(Option.createBuilder(LayerInteractionMode.class)
-                                .name(Text.literal("Layer Interaction"))
-                                .tooltip(layerInteractionMode -> Text.literal("How you interact with layers and virtual layers.\n" + layerInteractionMode.description))
+                        .build())
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.literal("Dev Mode"))
+                        .tooltip(Text.literal("Customize how you code."))
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.literal("Navigation"))
+                                .tooltip(Text.literal("How you move about."))
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("NoClip"))
+                                        .tooltip(Text.literal("If you can NoClip in the dev space."))
+                                        .binding(
+                                                true,
+                                                () -> NoClipEnabled,
+                                                option -> NoClipEnabled = option
+                                        )
+                                        .controller(TickBoxController::new)
+                                        .build())
+                                .option(Option.createBuilder(int.class)
+                                        .name(Text.literal("AirStrafe Modifier"))
+                                        .tooltip(Text.literal("How much faster you go when jumping in dev space.\nYour jump speed will be based of walking speed"))
+                                        .binding(
+                                                10,
+                                                () -> AirSpeed,
+                                                opt -> AirSpeed = opt
+                                        )
+                                        .controller(opt -> new IntegerSliderController(opt, 10, 30, 1))
+                                        .build())
+                                .build())
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.literal("Interaction"))
+                                .tooltip(Text.literal("Customize how you actually interact with code, placing and breaking code blocks."))
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Custom Block Interactions"))
+                                        .tooltip(Text.literal("Hides the local block when placing, and hides a codeblock on breaking.\nThis can allow faster placing of blocks."))
+                                        .binding(
+                                                true,
+                                                () -> CustomBlockInteractions,
+                                                opt -> CustomBlockInteractions = opt
+                                        )
+                                        .controller(TickBoxController::new)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Custom Tag Interaction"))
+                                        .tooltip(Text.literal("Toggle \"faster\" block tags, with interactions client handled."))
+                                        .binding(
+                                                false,
+                                                () -> CustomTagInteraction,
+                                                opt -> CustomTagInteraction = opt
+                                        )
+                                        .controller(TickBoxController::new)
+                                        .available(false)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Place on Air"))
+                                        .tooltip(Text.literal("Allows you to place on air where codespaces would go.\n").append(Text.literal("This will interfere with other players who don't have this mod, such as helpers!").formatted(Formatting.YELLOW,Formatting.BOLD)))
+                                        .binding(
+                                                false,
+                                                () -> PlaceOnAir,
+                                                opt -> PlaceOnAir = opt
+                                        )
+                                        .controller(TickBoxController::new)
+                                        .build())
+                                .option(Option.createBuilder(float.class)
+                                        .name(Text.literal("Reach Distance"))
+                                        .tooltip(Text.literal("Extend your reach distance, moving you forward if you can't reach."))
+                                        .binding(
+                                                5f,
+                                                () -> ReachDistance,
+                                                opt -> ReachDistance = opt
+                                        )
+                                        .controller(floatOption -> new FloatSliderController(floatOption,5,10,0.1f))
+                                        .available(false)
+                                        .build())
+                                .option(Option.createBuilder(LayerInteractionMode.class)
+                                        .name(Text.literal("Layer Interaction"))
+                                        .tooltip(layerInteractionMode -> Text.literal("Controls how you interact with code layers, including ones that don't exist.\n" + layerInteractionMode.description))
+                                        .binding(
+                                                LayerInteractionMode.AUTO,
+                                                () -> CodeLayerInteractionMode,
+                                                opt -> CodeLayerInteractionMode = opt
+                                        )
+                                        .controller(EnumController::new)
+                                        .build())
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("CCDBUG"))
+                                .tooltip(Text.literal("Toggle CCDBUG, which is a variable and entity watcher for debugging."))
                                 .binding(
-                                        LayerInteractionMode.AUTO,
-                                        () -> CodeLayerInteractionMode,
-                                        opt -> CodeLayerInteractionMode = opt
+                                        true,
+                                        () -> CCDBUG,
+                                        opt -> CCDBUG = opt
                                 )
-                                .controller(EnumController::new)
+                                .controller(TickBoxController::new)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.literal("Show Invisible Blocks"))
+                                .tooltip(Text.literal("Show blocks like barriers and other invisible blocks whilst building or coding."))
+                                .binding(
+                                        false,
+                                        () -> InvisibleBlocksInDev,
+                                        opt -> InvisibleBlocksInDev = opt
+                                )
+                                .controller(TickBoxController::new)
+                                .available(false)
                                 .build())
                         .build())
                 .category(ConfigCategory.createBuilder()
                         .name(Text.literal("AutoJoin"))
-                        .tooltip(Text.literal("If and where to auto join"))
+                        .tooltip(Text.literal("If and where to auto join."))
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Enabled"))
-                                .tooltip(Text.literal("If CodeClient should automatically connect you to DF."))
+//                                .tooltip(Text.literal("If CodeClient should automatically connect you to DF."))
                                 .binding(
                                         false,
                                         () -> AutoJoin,
@@ -225,7 +235,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(Node.class)
                                 .name(Text.literal("Node"))
-                                .tooltip(Text.literal("Which node you should be sent to, or have DF handle it."))
+                                .tooltip(Text.literal("Enable the above option."))
                                 .binding(
                                         Node.None,
                                         () -> AutoNode,
@@ -235,8 +245,8 @@ public class Config {
 //                                .available(AutoJoin)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Auto join plot"))
-                                .tooltip(Text.literal("If you should automatically be sent to a plot."))
+                                .name(Text.literal("Auto Join Plot"))
+                                .tooltip(Text.literal("When you connect, automatically run /join.\nIf you want a plot on beta, make sure you set the node."))
                                 .binding(
                                         false,
                                         () -> AutoJoinPlot,
@@ -246,7 +256,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(int.class)
                                 .name(Text.literal("Plot ID"))
-                                .tooltip(Text.literal("The plot ID of the plot to automatically join, if enabled."))
+                                .tooltip(Text.literal("Enable the above option."))
                                 .binding(
                                         0,
                                         () -> AutoJoinPlotId,
@@ -287,9 +297,9 @@ public class Config {
     }
 
     public enum LayerInteractionMode {
-        OFF("Makes interaction with layers default."),
-        AUTO("When you are above a layer it is a virtual barrier layer."),
-        ON("There are always virtual barrier layers.");
+        OFF("No changes."),
+        AUTO("Code layers are custom when you are above them."),
+        ON("Code layers are always custom.");
 
         public final String description;
         LayerInteractionMode(String description) {
