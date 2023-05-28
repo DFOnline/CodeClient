@@ -217,7 +217,9 @@ public class InteractionManager {
         if(CodeClient.location instanceof Dev plot) {
             Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
             boolean isLevel = plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4;
+            boolean noClipAllowsBlock = Config.getConfig().NoClipEnabled || world.getBlockState(pos).isAir();
             boolean hideCodeSpace =
+                    noClipAllowsBlock &&
                     mode != Config.LayerInteractionMode.OFF
                     && isLevel
                     && (
@@ -227,7 +229,7 @@ public class InteractionManager {
                     && !world.getBlockState(pos.add(0,1,0)).isSolidBlock(world, pos)
             ;
             if(hideCodeSpace) return VoxelShapes.cuboid(0, 1 - 1d / (4096) ,0,1,1,1);
-            if(mode != Config.LayerInteractionMode.OFF && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && isLevel) return VoxelShapes.empty();
+            if(noClipAllowsBlock && mode != Config.LayerInteractionMode.OFF && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && isLevel) return VoxelShapes.empty();
         }
         return null;
     }

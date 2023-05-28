@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.location;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public abstract class Plot extends Location {
     protected Integer id;
@@ -32,12 +33,33 @@ public abstract class Plot extends Location {
         return originZ;
     }
 
-    public boolean isInPlot(BlockPos pos) {
-        if(size == null) return true;
-        int x = pos.getX();
-        int z = pos.getZ();
-        // Signs can be out of the plot so blocks above the floor one outside the plot are shown.
-        boolean inX = ((x >= originX - 20) || ((pos.getY() >= 50) && (x >= originX - 21))) && (x <= originX + size.size);
+    public Boolean isInPlot(BlockPos pos) {
+        if(size == null) return null;
+
+        return isInArea(pos.toCenterPos()) && isInDev(pos.toCenterPos());
+    }
+
+    /**
+     * The play or build area.
+     */
+    public Boolean isInArea(Vec3d pos) {
+        if(size == null) return null;
+
+        double x = pos.getX();
+        double z = pos.getZ();
+
+        boolean inX = (x >= originX) && (x <= originX + size.size);
+        boolean inZ = (z >= originZ) && (z <= originZ + size.size);
+
+        return inX && inZ;
+    }
+    public Boolean isInDev(Vec3d pos) {
+        if(size == null) return null;
+
+        double x = pos.getX();
+        double z = pos.getZ();
+
+        boolean inX = (x >= originX - 20) || ((pos.getY() >= 50) && (x >= originX - 21));
         boolean inZ = (z >= originZ) && (z <= originZ + size.size);
 
         return inX && inZ;
