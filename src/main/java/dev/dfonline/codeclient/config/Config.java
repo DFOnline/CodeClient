@@ -34,6 +34,7 @@ public class Config {
     public float ReachDistance = 5;
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
+    public boolean AirControl = false;
 
     private void save() {
         try {
@@ -54,6 +55,7 @@ public class Config {
             object.addProperty("ReachDistance",ReachDistance);
             object.addProperty("AutoFly",AutoFly);
             object.addProperty("CodeLayerInteractionMode",CodeLayerInteractionMode.name());
+            object.addProperty("AirControl",AirControl);
             FileManager.writeFile("options.json", object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -140,6 +142,16 @@ public class Config {
                                                 opt -> AirSpeed = opt
                                         )
                                         .controller(opt -> new IntegerSliderController(opt, 10, 30, 1))
+//                                        .build())
+//                                .option(Option.createBuilder(boolean.class)
+//                                        .name(Text.literal("Air Control"))
+//                                        .tooltip(Text.literal("Gives you the same control in air as walking."))
+//                                        .binding(
+//                                                false,
+//                                                () -> AirControl,
+//                                                opt -> AirControl = opt
+//                                        )
+//                                        .controller(TickBoxController::new)
                                         .build())
                                 .build())
                         .group(OptionGroup.createBuilder()
