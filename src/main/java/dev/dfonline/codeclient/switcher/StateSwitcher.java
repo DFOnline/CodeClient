@@ -4,6 +4,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.location.*;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ public class StateSwitcher extends GenericSwitcher {
 
     @Override
     protected void init() {
+        footer = Text.literal("[ F4 ]").formatted(Formatting.AQUA).append(Text.literal(" Next").formatted(Formatting.WHITE));
         selected = 0;
         if(CodeClient.lastLocation instanceof Plot) {
             if(CodeClient.lastLocation instanceof Play) selected = 0;

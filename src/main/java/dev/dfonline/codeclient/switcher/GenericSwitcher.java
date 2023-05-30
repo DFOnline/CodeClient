@@ -1,7 +1,6 @@
 package dev.dfonline.codeclient.switcher;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.dfonline.codeclient.CodeClient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
@@ -25,6 +24,7 @@ public class GenericSwitcher extends Screen {
     private Integer lastMouseY;
     protected List<Option> options = new ArrayList<>();
     protected Integer selected;
+    protected Text footer = Text.literal("No Footer");
     
     public final int HOLD_KEY;
     public final int PRESS_KEY;
@@ -70,7 +70,7 @@ public class GenericSwitcher extends Screen {
         Option selected = getSelected();
         Text selectedText = selected != null ? selected.text : Text.literal("Select");
         drawCenteredTextWithShadow(matrices, this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, 0xFFFFFF);
-        drawCenteredTextWithShadow(matrices, this.textRenderer, Text.literal("Footer"), this.width / 2, this.height / 2 + 5, 0xFFFFFF);
+        drawCenteredTextWithShadow(matrices, this.textRenderer, footer, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
         int i = 0;
         for (SelectableButtonWidget button : buttons) {
             if(usingMouseToSelect) {
