@@ -43,7 +43,7 @@ import java.util.List;
 public class InteractionManager {
 
     public static boolean onBreakBlock(BlockPos pos) {
-        if(CodeClient.location instanceof Dev plot) {
+        if(CodeClient.location instanceof Dev plot && Config.getConfig().CustomBlockInteractions) {
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
             if ((pos.getY() + 1) % 5 == 0) return true;
             Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
@@ -140,13 +140,12 @@ public class InteractionManager {
             BlockPos pos = hitResult.getBlockPos();
             if(plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4) { // Is a code space level (glass)
                 if(hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
-                    if(CodeClient.MC.world.getBlockState(pos).isAir() && !Config.getConfig().PlaceOnAir) return hitResult;
-                    BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(),Direction.DOWN,hitResult.getBlockPos().add(0,1,0),hitResult.isInsideBlock());
-                    return newHitResult;
+                    if(CodeClient.MC.world.getBlockState(pos).isAir() && Config.getConfig().PlaceOnAir) return new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos().add(0,1,0),hitResult.isInsideBlock());
+                    if(Config.getConfig().CustomBlockInteractions) return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos(), hitResult.isInsideBlock());
                 }
             }
             if(hitResult.getSide() == Direction.DOWN) {
-                BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos(), hitResult.isInsideBlock());
+                BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos().add(0,-1,0), hitResult.isInsideBlock());
                 return newHitResult;
             }
         }
