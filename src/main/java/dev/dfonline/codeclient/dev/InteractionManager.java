@@ -8,14 +8,13 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityDimensions;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -47,9 +46,9 @@ public class InteractionManager {
         if(CodeClient.location instanceof Dev plot) {
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
             if ((pos.getY() + 1) % 5 == 0) return true;
-            Item type = CodeClient.MC.world.getBlockState(pos).getBlock().asItem();
-            if (List.of(Items.STONE, Items.PISTON, Items.STICKY_PISTON, Items.CHEST).contains(type)) return true;
-            if (type == Items.OAK_SIGN) pos = pos.add(1, 0, 0);
+            Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
+            if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON, Blocks.CHEST).contains(type)) return true;
+            if (type == Blocks.OAK_SIGN) pos = pos.add(1, 0, 0);
             breakCodeBlock(pos);
             return true;
         }
