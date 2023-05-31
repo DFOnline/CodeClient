@@ -176,7 +176,6 @@ public class Config {
                                                 opt -> CustomTagInteraction = opt
                                         )
                                         .controller(TickBoxController::new)
-                                        .available(false)
                                         .build())
                                 .option(Option.createBuilder(boolean.class)
                                         .name(Text.literal("Place on Air"))

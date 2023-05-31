@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -24,6 +25,10 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.function.BooleanBiFunction;
@@ -38,9 +43,12 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class InteractionManager {
+    private static int lastRevision = 0;
 
     public static boolean onBreakBlock(BlockPos pos) {
         if(CodeClient.location instanceof Dev plot && Config.getConfig().CustomBlockInteractions) {
@@ -81,41 +89,71 @@ public class InteractionManager {
         ItemStack item = slot.getStack();
         if(!item.hasNbt()) return false;
         NbtCompound nbt = item.getNbt();
-        if(!nbt.contains("PublicBukkitValues")) return false;
-        if(nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
-            if(!bukkitValues.contains("hypercube:varitem")) return false;
+        if (nbt != null && !nbt.contains("PublicBukkitValues")) return false;
+        if (nbt != null && nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
+            if (!bukkitValues.contains("hypercube:varitem")) return false;
             try {
                 if (bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
-                    if (!varItem.asString().startsWith("{\"id\":\"bl_tag\",\"data\":") || !Config.getConfig().CustomTagInteraction) return false;
-                    Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap();
+                    if (!Config.getConfig().CustomTagInteraction) return false;
+                    JsonElement varElement = JsonParser.parseString(varItem.asString());
+                    if (!varElement.isJsonObject()) return false;
+                    JsonObject varObject = (JsonObject) varElement;
+                    if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
+                    if (revision == lastRevision) return true;
+                    lastRevision = revision;
+
+                    Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
                     CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
-                    NbtList lore = (NbtList) nbt.getCompound("display").get("Lore");
-                    int offset = 1;
-                    int currentIndex = 0;
-                    int i = -1;
-                    for (NbtElement nbtElement : lore) {
+
+                    String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
+                    NbtCompound display = nbt.getCompound("display");
+                    NbtList lore = (NbtList) display.get("Lore");
+                    if(lore == null) return true;
+
+                    int i = 0;
+                    Integer tagStartIndex = null;
+                    Integer selectedIndex = null;
+                    List<String> options = new ArrayList<>();
+
+                    for (NbtElement element : lore) {
+                        Text text = Text.Serializer.fromJson(element.asString());
+                        if(text == null) return false;
+                        TextColor color = text.getStyle().getColor();
+                        if (color == null) {
+                            List<Text> siblings = text.getSiblings();
+                            if (siblings.size() == 2)
+                                if (text.getSiblings().get(0).getStyle().getColor().equals(TextColor.fromFormatting(Formatting.DARK_AQUA))) {
+                                    if (tagStartIndex == null) tagStartIndex = i;
+                                    options.add(text.getSiblings().get(1).getString());
+                                    selectedIndex = i;
+                                }
+                        } else if (color.equals(TextColor.fromRgb(0x808080))) {
+                            if (tagStartIndex == null) tagStartIndex = i;
+                            options.add(text.getString());
+                        }
                         i++;
-                        JsonElement element = JsonParser.parseString(nbtElement.asString());
-                        if (!element.isJsonObject()) continue;
-                        JsonObject json = element.getAsJsonObject();
-
-                        if (nbtElement.asString().equals("{\"text\":\"\"}")) {
-                            offset = i + 1;
-                        }
-
-                        if (json.has("extra") && json.get("extra").isJsonArray() && json.get("extra").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString().equals("» ")) {
-                            lore.set(i, NbtString.of("{\"text\":\"\",\"extra\":[{\"text\":\"" + json.get("extra").getAsJsonArray().get(1).getAsJsonObject().get("text").getAsString() + "\",\"color\":\"#808080\"}]}"));
-                            currentIndex = i;
-                            break;
-                        }
                     }
-                    int nextline = (currentIndex + (button == 1 ? -2 : 0) + 1);
-                    if(nextline == lore.size()) nextline = offset;
-                    if (nextline == offset - 1) nextline = lore.size() - 1;
-                    if (nextline != -1) {
-                        String name = JsonParser.parseString(lore.get(nextline).asString()).getAsJsonObject().get("extra").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString();
-                        lore.set(nextline, NbtString.of("{\"text\":\"\",\"extra\":[{\"color\":\"dark_aqua\",\"text\":\"» \"},{\"color\":\"aqua\",\"text\":\"" + name + "\"}]}"));
+
+                    if (selectedIndex == null) return true;
+
+                    int shift = button == 0 ? 1 : -1;
+                    int selectionIndex = selectedIndex - tagStartIndex;
+                    int newSelection = (selectionIndex + shift) % (options.size());
+                    if (newSelection < 0) newSelection = options.size() + newSelection;
+
+                    int optionIndex = 0;
+                    for (String option : options) {
+                        MutableText text = Text.empty();
+                        if (optionIndex == newSelection) {
+                            text.append(Text.literal("» ").formatted(Formatting.DARK_AQUA)).append(Text.literal(option).formatted(Formatting.AQUA));
+                        } else
+                            text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
+                        lore.set(tagStartIndex + optionIndex, Utility.nbtify(text));
+                        optionIndex++;
                     }
+                    display.put("Lore",lore);
+                    item.setSubNbt("display",display);
+                    slot.setStack(item);
                     return true;
                 }
             } catch (Exception e) {
