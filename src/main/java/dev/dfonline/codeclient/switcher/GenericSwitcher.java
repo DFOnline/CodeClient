@@ -16,17 +16,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GenericSwitcher extends Screen {
+/**
+ * A switcher screen which looks like the F3+F4 game mode switcher.
+ * It can reasonably hold up to 4 options.
+ */
+public abstract class GenericSwitcher extends Screen {
     private static final Identifier TEXTURE = new Identifier("textures/gui/container/gamemode_switcher.png");
     private List<SelectableButtonWidget> buttons = new ArrayList<>();
     private boolean usingMouseToSelect = false;
     private Integer lastMouseX;
     private Integer lastMouseY;
-    protected List<Option> options = new ArrayList<>();
     protected Integer selected;
     protected Text footer = Text.literal("No Footer");
-    
+
+    /**
+     * Key to hold down, generally F3.
+     * The selected option will be run when this is released.
+     */
     public final int HOLD_KEY;
+    /**
+     * The key to open and select the next option.
+     */
     public final int PRESS_KEY;
 
     protected GenericSwitcher(Text title, int holdKey, int pressKey) {
@@ -36,10 +46,13 @@ public class GenericSwitcher extends Screen {
     }
 
 
+    abstract List<Option> getOptions();
+
     @Override
     protected void init() {
         super.init();
         this.usingMouseToSelect = false;
+        List<Option> options = getOptions();
         int width = options.size() * 31 - 5;
         int i = 0;
         for (Option option : options) {
@@ -105,6 +118,7 @@ public class GenericSwitcher extends Screen {
     }
 
     private Option getSelected() {
+        List<Option> options = getOptions();
         if(selected >= options.size()) return null;
         if(selected < 0) return null;
         return options.get(selected);

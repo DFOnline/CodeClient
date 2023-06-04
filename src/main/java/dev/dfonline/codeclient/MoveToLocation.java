@@ -4,12 +4,19 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
+/**
+ * Utility for moving the player.
+ */
 public class MoveToLocation {
     private final ClientPlayerEntity player;
     public MoveToLocation(ClientPlayerEntity player) {
         this.player = player;
     }
 
+    /**
+     * Shifts a location, not a player.
+     * Will not shift more than 9.9 blocks, since the player cannot teleport further than that.
+     */
     public static Vec3d shiftTowards(Vec3d origin, Vec3d location) {
         Vec3d pos = origin.relativize(location);
         double maxLength = 9.9;
@@ -34,6 +41,9 @@ public class MoveToLocation {
         new MoveToLocation(player).teleportTowards(player.getPos(), location);
     }
 
+    /**
+     * Moves the player up to 10 blocks towards `to` from `from`
+     */
     public void teleportTowards(Vec3d from, Vec3d to) {
         setPos(shiftTowards(from,to));
     }

@@ -9,6 +9,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 public class FileManager {
+    /**
+     * Verify the existence and get the mod data folder.
+     * @return
+     */
     public static Path Path(){
         Path path = CodeClient.MC.runDirectory.toPath().resolve(CodeClient.MOD_ID);
         path.toFile().mkdir();
@@ -26,6 +30,11 @@ public class FileManager {
         return Files.readString(Path().resolve(fileName), charset);
 
     }
+
+    /**
+     * Reads a file with the configured charset.
+     * Will load the config if it isn't.
+     */
     public static String readFile(String fileName) throws IOException {
         return readFile(fileName, Config.getConfig().FileCharSet.charSet);
     }

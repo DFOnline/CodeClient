@@ -60,7 +60,7 @@ public class Action implements Searchable {
         blocks.add(action);
         template.add("blocks",blocks);
         try {
-            CodeTemplateData.addProperty("code", Utility.compileTempate(template.toString()));
+            CodeTemplateData.addProperty("code", Utility.compileTemplate(template.toString()));
         } catch (Exception ignored) {}
 
         PublicBukkitValues.put("hypercube:codetemplatedata", NbtString.of(String.valueOf(CodeTemplateData)));

@@ -5,6 +5,9 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.s2c.play.*;
 
+/**
+ * Detects mode changes.
+ */
 public class Event {
     private static double x;
     private static double z;

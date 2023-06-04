@@ -37,29 +37,48 @@ public class CodeClient implements ModInitializer {
 
     public static MinecraftClient MC = MinecraftClient.getInstance();
     public static final Gson gson = new Gson();
+    /**
+     * Starts the "Code Palette" screen if pressed.
+     */
     public static KeyBinding editBind;
     public static AutoJoin autoJoin = AutoJoin.NONE;
 
+    /**
+     * One at a time actions to do things like placing templates, or clearing a plot.
+     */
     @NotNull
     public static Action currentAction = new None();
     public static Location lastLocation = null;
     public static Location location = null;
 
+    /**
+     * For debugging and general packet cancelling.
+     * @return If the packet should be cancelled and not acted on. True to ignore.
+     * @param <T> Server2Client
+     */
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.","");
 //        if(!List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
         if((MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen) && packet instanceof CloseScreenS2CPacket) {
             return true;
         }
-
         return false;
     }
+
+    /**
+     * For debugging purposes.
+     * @return If the packet shouldn't be sent. True to not send.
+     * @param <T> ClientToServer
+     */
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.","");
 //        LOGGER.info(name);
         return false;
     }
 
+    /**
+     * For debugging and small changes which don't get their need a whole method.
+     */
     public static void onTick() {
         if(NoClip.isIgnoringWalls() && location instanceof Dev) {
             MC.player.noClip = true;
@@ -77,6 +96,13 @@ public class CodeClient implements ModInitializer {
         }
     }
 
+    /**
+     * Registers barriers as visible.
+     * Starts the API.
+     * Sets up auto join if enabled.
+     * Setups the edit bind.
+     * Registers command callback.
+     */
     @Override
     public void onInitialize() {
         MC = MinecraftClient.getInstance();
@@ -106,8 +132,17 @@ public class CodeClient implements ModInitializer {
     }
 
     public enum AutoJoin {
+        /**
+         * Done or nothing to act on.
+         */
         NONE,
+        /**
+         * If the main menu should take us to the server.
+         */
         GAME,
+        /**
+         * If we need to automatically join the plot.
+         */
         PLOT
     }
 }

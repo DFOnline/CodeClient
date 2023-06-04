@@ -21,11 +21,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 public class Utility {
+    /**
+     * Ensure the player is holding an item, by holding and setting the first slot.
+     * @param template Any item
+     */
     public static void makeHolding(ItemStack template) {
         PlayerInventory inv = CodeClient.MC.player.getInventory();
         CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, template));
@@ -33,7 +38,10 @@ public class Utility {
         inv.setStack(0, template);
     }
 
-    public static ArrayList<ItemStack> TemplatesInInventory() {
+    /**
+     * Gets all templates in the players inventory.
+     */
+    public static List<ItemStack> TemplatesInInventory() {
         PlayerInventory inv = CodeClient.MC.player.getInventory();
         ArrayList<ItemStack> templates = new ArrayList<>();
         for (int i = 0; i < (27 + 9); i++) {
@@ -49,9 +57,14 @@ public class Utility {
     }
 
     public static String compileTemplate(JsonObject data) throws IOException {
-        return compileTempate(data.getAsString());
+        return compileTemplate(data.getAsString());
     }
-    public static String compileTempate(String data) throws IOException {
+
+    /**
+     * GZIPs and base64's data for use in templates.
+     * @throws IOException If an I/O error happened with gzip
+     */
+    public static String compileTemplate(String data) throws IOException {
         ByteArrayOutputStream obj = new ByteArrayOutputStream();
         GZIPOutputStream gzip = new GZIPOutputStream(obj);
         gzip.write(data.getBytes());
@@ -83,6 +96,10 @@ public class Utility {
         }
     }
 
+    /**
+     * Prepares a text object for use in an item's display tag
+     * @return Usable in lore and as a name in nbt.
+     */
     public static NbtString nbtify(Text text) {
         JsonObject json = Text.Serializer.toJsonTree(text).getAsJsonObject();
 
@@ -93,6 +110,11 @@ public class Utility {
         return NbtString.of(json.toString());
     }
 
+    /**
+     * Parses § formatted strings.
+     * @param text § formatted string.
+     * @return Text with all parsed text as siblings.
+     */
     public static MutableText textFromString(String text) {
         MutableText output = Text.empty().setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0xFFFFFF)).withItalic(false));
         MutableText component = Text.empty();
