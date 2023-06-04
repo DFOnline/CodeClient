@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.ChestPeeker;
+import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
@@ -52,11 +54,16 @@ public class CodeClient implements ModInitializer {
     public static Location location = null;
 
     /**
-     * For debugging and general packet cancelling.
+     * For all recieving packet events and debugging.
      * @return If the packet should be cancelled and not acted on. True to ignore.
      * @param <T> Server2Client
      */
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+        if(currentAction.onReceivePacket(packet)) return true;
+        if(Debug.handlePacket(packet)) return true;
+        Event.handlePacket(packet);
+//        if(ChestPeeker.onPacket(packet)) return true;
+
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.","");
 //        if(!List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
         if((MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen) && packet instanceof CloseScreenS2CPacket) {
@@ -66,25 +73,31 @@ public class CodeClient implements ModInitializer {
     }
 
     /**
-     * For debugging purposes.
+     * All outgoing packet events and debugging.
      * @return If the packet shouldn't be sent. True to not send.
      * @param <T> ClientToServer
      */
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
+        if(CodeClient.currentAction.onSendPacket(packet)) return true;
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.","");
 //        LOGGER.info(name);
         return false;
     }
 
     /**
-     * For debugging and small changes which don't get their need a whole method.
+     * All tick events and debugging.
      */
     public static void onTick() {
-        if(NoClip.isIgnoringWalls() && location instanceof Dev) {
-            MC.player.noClip = true;
-        }
-        if(editBind.wasPressed() && location instanceof Dev) {
-            MC.setScreen(new DevInventoryScreen(MC.player));
+
+        currentAction.onTick();
+        Debug.tick();
+//        ChestPeeker.tick();
+
+        if(location instanceof Dev) {
+            if(NoClip.isIgnoringWalls()) MC.player.noClip = true;
+            if(editBind.wasPressed()) {
+                MC.setScreen(new DevInventoryScreen(MC.player));
+            }
         }
         if(CodeClient.location instanceof Spawn spawn && spawn.consumeHasJustJoined()) {
             if(autoJoin == AutoJoin.PLOT) {

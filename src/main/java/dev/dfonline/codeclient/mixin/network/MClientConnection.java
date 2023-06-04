@@ -16,9 +16,5 @@ public class MClientConnection {
     @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
     private static <T extends PacketListener> void handlePacket(Packet<T> packet, net.minecraft.network.listener.PacketListener listener, CallbackInfo ci) {
         if(CodeClient.handlePacket(packet)) ci.cancel();
-        if(CodeClient.currentAction.onReceivePacket(packet)) ci.cancel();
-        if(Debug.handlePacket(packet)) ci.cancel();
-        Event.handlePacket(packet);
-//        if(ChestPeeker.onPacket(packet)) ci.cancel();
     }
 }

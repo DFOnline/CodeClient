@@ -29,10 +29,6 @@ public class MClientPlayerEntity {
     @Inject(method = "tick", at = @At("HEAD"))
     private void tick(CallbackInfo ci) {
         CodeClient.onTick();
-        CodeClient.currentAction.onTick();
-        if(NoClip.isIgnoringWalls()) MC.player.noClip = true;
-        Debug.tick();
-//        ChestPeeker.tick();
     }
 
     @Inject(method = "sendMovementPackets", at = @At("HEAD"), cancellable = true)

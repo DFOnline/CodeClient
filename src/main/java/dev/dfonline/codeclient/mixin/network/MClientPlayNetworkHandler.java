@@ -13,6 +13,5 @@ public abstract class MClientPlayNetworkHandler {
     @Inject(method = "sendPacket", at = @At("HEAD"), cancellable = true)
     private void sendPacket(Packet<?> packet, CallbackInfo ci) {
         if(CodeClient.onSendPacket(packet)) ci.cancel();
-        if(CodeClient.currentAction.onSendPacket(packet)) ci.cancel();
     }
 }
