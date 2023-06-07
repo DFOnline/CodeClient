@@ -11,6 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +104,9 @@ public abstract class GenericSwitcher extends Screen {
             this.selected %= getOptions().size();
             return true;
         }
+        if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            this.close();
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
@@ -173,5 +177,10 @@ public abstract class GenericSwitcher extends Screen {
     @Override
     public boolean shouldPause() {
         return false;
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return true;
     }
 }
