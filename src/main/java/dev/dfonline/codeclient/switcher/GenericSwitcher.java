@@ -100,7 +100,7 @@ public abstract class GenericSwitcher extends Screen {
         if(keyCode == PRESS_KEY) {
             this.usingMouseToSelect = false;
             this.selected ++;
-            this.selected %= 3;
+            this.selected %= getOptions().size();
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
