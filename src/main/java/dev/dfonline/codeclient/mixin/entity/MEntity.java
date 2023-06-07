@@ -5,6 +5,9 @@ import dev.dfonline.codeclient.dev.NoClip;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.MovementType;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,6 +26,26 @@ public abstract class MEntity {
     @Inject(method = "isInsideWall", at = @At("HEAD"), cancellable = true)
     private void insideWall(CallbackInfoReturnable<Boolean> cir) {
         if(NoClip.isIgnoringWalls()) cir.setReturnValue(false);
+    }
+
+    @Inject(method = "isSubmergedIn", at = @At("HEAD"), cancellable = true)
+    private void swimInDevSubmerged(TagKey<Fluid> fluidTag, CallbackInfoReturnable<Boolean> cir) {
+        if(NoClip.isInDevSpace() && fluidTag == FluidTags.WATER) {
+            cir.setReturnValue(true);
+        }
+    }
+    @Inject(method = "isTouchingWater", at = @At("HEAD"), cancellable = true)
+    private void swimInDevTouch(CallbackInfoReturnable<Boolean> cir) {
+        if(NoClip.isInDevSpace()) {
+            cir.setReturnValue(true);
+        }
+    }
+
+    @Inject(method = "isSwimming", at = @At("HEAD"), cancellable = true)
+    private void swimInDev(CallbackInfoReturnable<Boolean> cir) {
+        if(NoClip.isInDevSpace()) {
+            cir.setReturnValue(true);
+        }
     }
 
     @Inject(method = "move", at = @At("HEAD"), cancellable = true)

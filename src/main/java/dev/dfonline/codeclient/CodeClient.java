@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
@@ -96,7 +97,11 @@ public class CodeClient implements ModInitializer {
         if(location instanceof Dev) {
             if(MC.player == null) return;
             MC.player.getAbilities().allowFlying = true;
-            if(NoClip.isIgnoringWalls()) MC.player.noClip = true;
+            if(NoClip.isIgnoringWalls()) {
+                MC.player.noClip = true;
+                MC.player.setSwimming(true);
+                MC.player.setPose(EntityPose.SWIMMING);
+            }
             if(editBind.wasPressed()) {
                 MC.setScreen(new DevInventoryScreen(MC.player));
             }
