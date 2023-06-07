@@ -94,6 +94,8 @@ public class CodeClient implements ModInitializer {
 //        ChestPeeker.tick();
 
         if(location instanceof Dev) {
+            if(MC.player == null) return;
+            MC.player.getAbilities().allowFlying = true;
             if(NoClip.isIgnoringWalls()) MC.player.noClip = true;
             if(editBind.wasPressed()) {
                 MC.setScreen(new DevInventoryScreen(MC.player));
