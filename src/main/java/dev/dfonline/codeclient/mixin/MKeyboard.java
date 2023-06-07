@@ -1,7 +1,9 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.location.Creator;
 import dev.dfonline.codeclient.location.Plot;
+import dev.dfonline.codeclient.switcher.SpeedSwitcher;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import net.minecraft.client.Keyboard;
 import org.lwjgl.glfw.GLFW;
@@ -21,6 +23,12 @@ public class MKeyboard {
         if(key == stateSwitcherKey) {
             if(CodeClient.location instanceof Plot) {
                 CodeClient.MC.setScreen(new StateSwitcher());
+                cir.setReturnValue(true);
+            }
+        }
+        if(key == speedSwitcherKey) {
+            if(CodeClient.location instanceof Creator) {
+                CodeClient.MC.setScreen(new SpeedSwitcher());
                 cir.setReturnValue(true);
             }
         }
