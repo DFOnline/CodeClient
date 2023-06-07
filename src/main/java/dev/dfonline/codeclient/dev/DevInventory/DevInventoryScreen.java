@@ -3,11 +3,6 @@ package dev.dfonline.codeclient.dev.DevInventory;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.systems.RenderSystem;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-
 import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
@@ -15,7 +10,6 @@ import dev.dfonline.codeclient.actiondump.ActionDump;
 import dev.dfonline.codeclient.actiondump.Searchable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryListener;
@@ -42,6 +36,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 import static dev.dfonline.codeclient.dev.DevInventory.DevInventoryGroup.*;
 
@@ -307,7 +305,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             Slot slot = this.handler.slots.get(number);
             if(this.client == null || this.client.player == null) return false;
             this.client.player.setStackInHand(Hand.MAIN_HAND, slot.getStack());
-            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + client.player.getInventory().selectedSlot, slot.getStack()));
+            if(CodeClient.MC.getNetworkHandler() != null) CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + client.player.getInventory().selectedSlot, slot.getStack()));
             this.ignoreNextKey = true;
             return true;
         }
@@ -367,7 +365,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if(!itemGroup.hasSearchBar()) texture = "items";
         if(itemGroup == INVENTORY) texture = "inventory";
         RenderSystem.setShaderTexture(0, new Identifier(TAB_TEXTURE_PREFIX + texture + ".png"));
-        this.drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE);
@@ -378,8 +376,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             RenderSystem.setShaderTexture(0, TEXTURE);
             int scrollbarX = this.x + 175;
             int scrollbarY = this.y + 18 ;
-            if(scrollHeight == 0) this.drawTexture(matrices, scrollbarX, scrollbarY, 244, 0, 12, 15);
-            else this.drawTexture(matrices, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
+            if(scrollHeight == 0) drawTexture(matrices, scrollbarX, scrollbarY, 244, 0, 12, 15);
+            else drawTexture(matrices, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
         }
         else {
             if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(matrices, this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
@@ -406,7 +404,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if (isSelected) mapY += 32;
         if(!isTopRow) mapY += 64;
 
-        this.drawTexture(matrices, originX, originY, mapX, mapY, TAB_WIDTH, 32);
+        drawTexture(matrices, originX, originY, mapX, mapY, TAB_WIDTH, 32);
 //        this.itemRenderer.zOffset = 100.0F;
         originX += 6;
         originY += 8 + (isTopRow ? 2 : -2);
