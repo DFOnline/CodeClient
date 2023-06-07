@@ -14,7 +14,6 @@ import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * A switcher screen which looks like the F3+F4 game mode switcher.
@@ -89,7 +88,7 @@ public abstract class GenericSwitcher extends Screen {
             if(usingMouseToSelect) {
                 if(button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
             }
-            button.selected = Objects.equals(button.option, selected);
+            button.selected = this.selected == i;
             button.render(matrices, mouseX, mouseY, delta);
             ++i;
         }
@@ -153,7 +152,8 @@ public abstract class GenericSwitcher extends Screen {
             drawTexture(matrices, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
             matrices.pop();
 
-            itemRenderer.renderInGuiWithOverrides(matrices, option.icon(), this.getX() + 5, this.getY() + 5);
+            itemRenderer.renderInGuiWithOverrides(matrices, option.icon, this.getX() + 5, this.getY() + 5);
+            itemRenderer.renderGuiItemOverlay(matrices, textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
 
             if(selected) {
                 RenderSystem.setShaderTexture(0, TEXTURE);
