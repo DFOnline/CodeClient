@@ -12,6 +12,7 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.actiondump.ActionDump;
+import dev.dfonline.codeclient.actiondump.Searchable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -55,7 +56,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     private int scrollHeight = 0;
     private TextFieldWidget searchBox;
     @Nullable
-    private List<Slot> slots;
+    private List<Slot> survivalInventorySwapList;
+    private List<Searchable> searchResults;
     @Nullable
     private Slot deleteItemSlot;
     private CreativeInventoryListener listener;
@@ -131,14 +133,15 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.client.player.playerScreenHandler.addListener(this.listener);
     }
 
-    public void resize(MinecraftClient client, int width, int height) {
-        int tab = selectedTab;
-        String string = this.searchBox.getText();
-        this.init(client, width, height);
-        this.searchBox.setText(string);
-        this.setSelectedTab(tab);
-        this.populate();
-    }
+//    public void resize(MinecraftClient client, int width, int height) {
+//        int tab = selectedTab;
+//        String string = this.searchBox.getText();
+//        this.init(client, width, height);
+//        this.searchBox.setText(string);
+////        this.setSelectedTab(tab);
+//        selectedTab = tab;
+//        this.scroll();
+//    }
 
     public void removed() {
         super.removed();
@@ -189,7 +192,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             int scrollEnd = scrollOriginY + 112;
             double percentThrough = MathHelper.clamp(((float)mouseY - (float)scrollOriginY - 7.5F) / ((float)(scrollEnd - scrollOriginY) - 15.0F),0,1);
             this.scrollPosition = ((double) this.scrollHeight / 9) * percentThrough;
-            populate();
+            scroll();
         }
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
@@ -215,11 +218,11 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         selectedTab = tab;
 
         if(this.client == null || this.client.player == null) return;
-        if(group == DevInventoryGroup.INVENTORY && this.slots == null) {
+        if(group == DevInventoryGroup.INVENTORY && this.survivalInventorySwapList == null) {
             ScreenHandler playerScreenHandler = this.client.player.playerScreenHandler;
-            this.slots = ImmutableList.copyOf((this.handler).slots);
+            this.survivalInventorySwapList = ImmutableList.copyOf((this.handler).slots);
             this.handler.slots.clear();
-            for (Slot slot : this.slots) {
+            for (Slot slot : this.survivalInventorySwapList) {
                 if (slot.inventory instanceof PlayerInventory) this.handler.slots.add(slot);
             }
 
@@ -238,27 +241,31 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             }
             return;
         }
-        else if(this.slots != null) {
+        else if(this.survivalInventorySwapList != null) {
             this.handler.slots.clear();
-            this.handler.slots.addAll(this.slots);
-            this.slots = null;
+            this.handler.slots.addAll(this.survivalInventorySwapList);
+            this.survivalInventorySwapList = null;
         }
         this.scrollPosition = 0;
         populate();
+    }
+
+    private void scroll() {
+        if( searchResults == null ) return;
+        scrollHeight = Math.max(0,(int) Math.ceil((double) (searchResults.size() - 45) / 9) * 9);
+        for (int i = 0; i < 45; i++) {
+            int value = i + (int) scrollPosition * 9;
+            if(value < searchResults.size()) this.handler.slots.get(i).setStack(searchResults.get(value).getItem());
+            else this.handler.slots.get(i).setStack(Items.AIR.getDefaultStack());
+        }
     }
     private void populate() {
         DevInventoryGroup group = GROUPS[selectedTab];
         if(group == INVENTORY) return;
         String text = searchBox.getText();
         if(text.equals("")) text = null;
-        List<ItemStack> search = group.searchItems(text);
-        if( search == null ) return;
-        scrollHeight = Math.max(0,(int) Math.ceil((double) (search.size() - 45) / 9) * 9);
-        for (int i = 0; i < 45; i++) {
-            int value = i + (int) scrollPosition * 9;
-            if(value < search.size()) this.handler.slots.get(i).setStack(search.get(value));
-            else this.handler.slots.get(i).setStack(Items.AIR.getDefaultStack());
-        }
+        searchResults = group.searchItems(text);
+        this.scroll();
     }
 
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -413,7 +420,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if(scrollPosition < 0) scrollPosition = 0;
         if((scrollPosition * 9) > scrollHeight) scrollPosition = (double) scrollHeight / 9;
 
-        populate();
+        scroll();
         return true;
     }
 
