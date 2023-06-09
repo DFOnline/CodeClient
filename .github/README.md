@@ -10,16 +10,17 @@
 
 A DiamondFire utility client for advanced coding.
 
-A Fabric 1.19.3 mod for coding more efficiently with utility features including but not limited to:
+A Fabric 1.20 mod for coding more efficiently with utility features including but not limited to:
 * Automatically placing templates in inventory
 * Rendering only the plot you are currently coding in
 * Moving faster in codespace
 * A palette with all the actions
 
 ## Install
-1. Download the latest release of the mod from **[here](https://github.com/DFOnline/CodeClient/releases/latest)** as well as [Fabric](https://fabricmc.net/use) if you didn't already.
-2. Move the downloaded mod file into the mods folder located at .minecraft/mods.
-3. Launch the game and try it out on [DiamondFire](mcdiamondfire.com).
+1. Download the latest release of the mod from **[here](https://github.com/DFOnline/CodeClient/releases/latest)**.
+2. Download all the other required mods, they are [Fabric API](https://modrinth.com/mod/fabric-api), [Yet Another Config Lib](https://modrinth.com/mod/yacl), and optionally [Mod Menu](https://modrinth.com/mod/modmenu)
+3. Move the downloaded mod files into the mods folder located at .minecraft/mods.
+4. Launch the game and try it out on [DiamondFire](mcdiamondfire.com).
 
 ## Contributing
 
