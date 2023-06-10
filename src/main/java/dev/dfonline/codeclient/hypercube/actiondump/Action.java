@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +26,9 @@ public class Action implements Searchable {
                 if(codeblockName.equals(codeBlock.name)) return codeBlock;
             }
         }
-        catch (Exception ignored) {}
+        catch (IOException exception) {
+            CodeClient.LOGGER.error(exception.toString());
+        }
         return null;
     }
 

@@ -15,7 +15,7 @@ public class Sound extends VarItem implements Searchable {
 
     public ItemStack getItem() {
         JsonObject data = new JsonObject();
-        data.addProperty("sound", icon.getName());
+        data.addProperty("sound", icon.getCleanName());
         data.addProperty("pitch",1);
         data.addProperty("vol",2);
         return super.getItem("snd",data);
