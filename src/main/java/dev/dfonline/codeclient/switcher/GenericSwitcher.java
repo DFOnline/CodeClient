@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.switcher;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -62,18 +63,19 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if(checkFinished()) return;
-        matrices.push();
+        context.getMatrices().push();
         RenderSystem.enableBlend();
-        RenderSystem.setShaderTexture(0,TEXTURE);
         int centerX = this.width / 2 - 62;
         int centerY = this.height / 2 - 31 - 27;
-        drawTexture(matrices, centerX, centerY, 0.0F, 0.0F, 125, 75, 128, 128);
-        matrices.pop();
+        context.drawTexture(TEXTURE, centerX, centerY, 0.0F, 0.0F, 125, 75, 128, 128);
+        context.getMatrices().pop();
+        super.render(context, mouseX, mouseY, delta);
 
         if(lastMouseX == null) lastMouseX = mouseX;
         if(lastMouseY == null) lastMouseY = mouseY;
+
         if(!usingMouseToSelect) {
             if(this.lastMouseX != mouseX || this.lastMouseY != mouseY) this.usingMouseToSelect = true;
             lastMouseX = mouseX;
@@ -82,18 +84,20 @@ public abstract class GenericSwitcher extends Screen {
 
         Option selected = getSelected();
         Text selectedText = selected != null ? selected.text : Text.literal("Select");
-        drawCenteredTextWithShadow(matrices, this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, 0xFFFFFF);
-        drawCenteredTextWithShadow(matrices, this.textRenderer, footer, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
+
+        context.drawTextWithShadow(this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, 0xFFFFFF);
+        context.drawTextWithShadow(this.textRenderer, footer, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
+
         int i = 0;
+
         for (SelectableButtonWidget button : buttons) {
             if(usingMouseToSelect) {
                 if(button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
             }
             button.selected = this.selected == i;
-            button.render(matrices, mouseX, mouseY, delta);
+            button.render(context, mouseX, mouseY, delta);
             ++i;
         }
-        super.render(matrices, mouseX, mouseY, delta);
     }
 
     @Override
@@ -149,22 +153,19 @@ public abstract class GenericSwitcher extends Screen {
         }
 
         @Override
-        public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            RenderSystem.setShaderTexture(0, TEXTURE);
-            matrices.push();
-            matrices.translate((float)this.getX(), (float)this.getY(), 0.0F);
-            drawTexture(matrices, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
-            matrices.pop();
+        public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+            context.getMatrices().push();
+            context.getMatrices().translate((float)this.getX(), (float)this.getY(), 0.0F);
+            context.drawTexture(TEXTURE,0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
+            context.getMatrices().pop();
 
-            itemRenderer.renderInGuiWithOverrides(matrices, option.icon, this.getX() + 5, this.getY() + 5);
-            itemRenderer.renderGuiItemOverlay(matrices, textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
+            context.drawItemInSlot(textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
 
             if(selected) {
-                RenderSystem.setShaderTexture(0, TEXTURE);
-                matrices.push();
-                matrices.translate((float)this.getX(), (float)this.getY(), 0.0F);
-                drawTexture(matrices, 0, 0, 26.0F, 75.0F, 26, 26, 128, 128);
-                matrices.pop();
+                context.getMatrices().push();
+                context.getMatrices().translate((float)this.getX(), (float)this.getY(), 0.0F);
+                context.drawTexture(TEXTURE, 0, 0, 26.0F, 75.0F, 26, 26, 128, 128);
+                context.getMatrices().pop();
             }
         }
 
