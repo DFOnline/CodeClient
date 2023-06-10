@@ -3,7 +3,7 @@ package dev.dfonline.codeclient.config;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
-import dev.dfonline.codeclient.actiondump.ActionDump;
+import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.isxander.yacl.api.*;
 import dev.isxander.yacl.gui.controllers.TickBoxController;
 import dev.isxander.yacl.gui.controllers.cycling.EnumController;

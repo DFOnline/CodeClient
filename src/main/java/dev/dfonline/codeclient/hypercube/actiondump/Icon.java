@@ -1,6 +1,5 @@
-package dev.dfonline.codeclient.actiondump;
+package dev.dfonline.codeclient.hypercube.actiondump;
 
-import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;

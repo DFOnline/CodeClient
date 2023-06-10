@@ -1,6 +1,6 @@
 package dev.dfonline.codeclient.dev.DevInventory;
 
-import dev.dfonline.codeclient.actiondump.*;
+import dev.dfonline.codeclient.hypercube.actiondump.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtHelper;

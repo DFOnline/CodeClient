@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.actiondump;
+package dev.dfonline.codeclient.hypercube.actiondump;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;

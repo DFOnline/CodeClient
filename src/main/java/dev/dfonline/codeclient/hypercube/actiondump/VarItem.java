@@ -1,6 +1,5 @@
-package dev.dfonline.codeclient.actiondump;
+package dev.dfonline.codeclient.hypercube.actiondump;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;

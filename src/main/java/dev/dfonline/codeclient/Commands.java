@@ -3,7 +3,7 @@ package dev.dfonline.codeclient;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
-import dev.dfonline.codeclient.actiondump.ActionDump;
+import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
