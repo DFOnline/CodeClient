@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.actiondump;
+package dev.dfonline.codeclient.hypercube.actiondump;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
@@ -20,13 +20,13 @@ public class Particle extends VarItem implements Searchable {
 
     @Override
     public List<String> getTerms() {
-        return List.of(particle, icon.getName());
+        return List.of(particle, icon.getCleanName());
     }
 
     public ItemStack getItem() {
         JsonObject data = new JsonObject();
 
-        data.addProperty("particle", icon.getName());
+        data.addProperty("particle", icon.getCleanName());
 
         JsonObject cluster = new JsonObject();
         cluster.addProperty("amount",1);

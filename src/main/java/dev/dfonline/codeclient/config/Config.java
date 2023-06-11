@@ -6,10 +6,6 @@ import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.actiondump.ActionDump;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
-import dev.isxander.yacl3.gui.controllers.TickBoxController;
-import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
-import dev.isxander.yacl3.gui.controllers.slider.FloatSliderController;
-import dev.isxander.yacl3.gui.controllers.string.number.IntegerFieldController;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 

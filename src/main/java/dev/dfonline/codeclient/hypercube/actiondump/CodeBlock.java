@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.actiondump;
+package dev.dfonline.codeclient.hypercube.actiondump;
 
 import net.minecraft.item.ItemStack;
 
@@ -11,7 +11,7 @@ public class CodeBlock implements Searchable {
 
     @Override
     public List<String> getTerms() {
-        return List.of(name, item.getName());
+        return List.of(name, item.getCleanName());
     }
 
     @Override

@@ -1,6 +1,5 @@
-package dev.dfonline.codeclient.actiondump;
+package dev.dfonline.codeclient.hypercube.actiondump;
 
-import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -34,7 +33,11 @@ public class Icon {
     public String loadedItem;
     public Argument[] arguments;
 
-    public String getName() {
+    /**
+     * Gets the pure name, without any color codes.
+     * @return
+     */
+    public String getCleanName() {
         return this.name.replaceAll("§.","");
     }
 
@@ -105,6 +108,9 @@ public class Icon {
             else addToLore(lore, "§4∅ §cCancellable");
         }
         display.put("Lore",lore);
+
+        display.put("Name",Utility.nbtify(Utility.textFromString(name)));
+
         nbt.put("display",display);
         nbt.put("HideFlags", NbtInt.of(127));
         if(color != null) nbt.put("CustomPotionColor", NbtInt.of(color.getColor()));
@@ -125,9 +131,6 @@ public class Icon {
         }
 
         item.setNbt(nbt);
-
-        item.setCustomName(Utility.textFromString(name));
-
         return item;
     }
 

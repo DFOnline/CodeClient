@@ -27,20 +27,19 @@ public abstract class MEntity {
 
     @Inject(method = "move", at = @At("HEAD"), cancellable = true)
     private void onMove(MovementType movementType, Vec3d movement, CallbackInfo ci) {
+        if(!NoClip.isIgnoringWalls()) return;
         if(CodeClient.MC.player == null) return;
         if(this.getId() != CodeClient.MC.player.getId()) return;
-        if(NoClip.isIgnoringWalls()) {
-            Vec3d pos = NoClip.handleClientPosition(movement);
-            if(pos != null) {
-                this.setPosition(pos);
-                ci.cancel();
-            }
+        Vec3d pos = NoClip.handleClientPosition(movement);
+        if(pos != null) {
+            this.setPosition(pos);
+            ci.cancel();
         }
     }
 
     @Inject(method = "wouldPoseNotCollide", at = @At("HEAD"), cancellable = true)
     private void wouldPoseNotCollide(EntityPose pose, CallbackInfoReturnable<Boolean> cir) {
-        if(this.getId() == CodeClient.MC.player.getId() && NoClip.isIgnoringWalls()) {
+        if(NoClip.isIgnoringWalls() && this.getId() == CodeClient.MC.player.getId()) {
             cir.setReturnValue(true);
         }
     }

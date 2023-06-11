@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.actiondump;
+package dev.dfonline.codeclient.hypercube.actiondump;
 
 import net.minecraft.item.ItemStack;
 
