@@ -17,7 +17,7 @@ public class MTitleScreen {
     public void onInit(CallbackInfo ci) {
         if(CodeClient.autoJoin == CodeClient.AutoJoin.GAME) {
             ServerInfo info = new ServerInfo("DiamondFire", Config.getConfig().AutoNode.prepend + "mcdiamondfire.com", false);
-            ConnectScreen.connect((TitleScreen)(Object)this, CodeClient.MC, ServerAddress.parse(info.address), info);
+            ConnectScreen.connect((TitleScreen)(Object)this, CodeClient.MC, ServerAddress.parse(info.address), info, true);
 
             CodeClient.autoJoin =Config.getConfig().AutoJoinPlot ? CodeClient.AutoJoin.PLOT : CodeClient.AutoJoin.NONE;
         }

@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.mixin.render.hud;
 
 import dev.dfonline.codeclient.OverlayManager;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -18,13 +19,13 @@ public abstract class MInGameHud {
     @Shadow public abstract TextRenderer getTextRenderer();
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void onRender(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
+    private void onRender(DrawContext context, float tickDelta, CallbackInfo ci) {
         if(OverlayManager.getOverlayText().size() == 0) return;
         TextRenderer textRenderer = getTextRenderer();
         int index = 0;
         List<Text> overlay = List.copyOf(OverlayManager.getOverlayText());
         for (Text text : overlay){
-            textRenderer.drawWithShadow(matrices, text, 30, 30 + (index * 9), -1);
+            context.drawTextWithShadow(textRenderer, text, 30, 30 + (index * 9), -1);
             index++;
         }
     }

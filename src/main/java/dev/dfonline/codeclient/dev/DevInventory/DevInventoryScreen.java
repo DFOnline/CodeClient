@@ -11,6 +11,7 @@ import dev.dfonline.codeclient.hypercube.actiondump.Searchable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryListener;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -65,7 +66,6 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     public DevInventoryScreen(PlayerEntity player) {
         super(new CreativeInventoryScreen.CreativeScreenHandler(player), player.getInventory(), ScreenTexts.EMPTY);
         player.currentScreenHandler = this.handler;
-        this.passEvents = true;
         this.backgroundHeight = 136;
         this.backgroundWidth = 195;
     }
@@ -157,11 +157,11 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 //    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
 //    }
 
-    protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
+    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
         if (itemGroup != DevInventoryGroup.INVENTORY) {
             RenderSystem.disableBlend();
-            this.textRenderer.draw(matrices, itemGroup.getName(), 8.0F, 6.0F, 4210752);
+            context.drawText(textRenderer, itemGroup.getName(), 8, 6, 0x404040, false);
         }
     }
 //
@@ -266,22 +266,22 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.scroll();
     }
 
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
+        super.render(context, mouseX, mouseY, delta);
 
         Integer hoveredGroup = getGroupFromMouse(mouseX,mouseY);
         if(hoveredGroup != null) {
             DevInventoryGroup group = GROUPS[hoveredGroup];
-            if(group != CODE_VAULT || GROUPS[selectedTab] == CODE_VAULT) this.renderTooltip(matrices, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
+            if(group != CODE_VAULT || GROUPS[selectedTab] == CODE_VAULT) context.drawTooltip(textRenderer, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
         }
 
         if (this.deleteItemSlot != null && this.isPointWithinBounds(this.deleteItemSlot.x, this.deleteItemSlot.y, 16, 16, mouseX, mouseY)) {
-            this.renderTooltip(matrices, DELETE_ITEM_SLOT_TEXT, mouseX, mouseY);
+            context.drawTooltip(textRenderer, DELETE_ITEM_SLOT_TEXT, mouseX, mouseY);
         }
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.drawMouseoverTooltip(matrices, mouseX, mouseY);
+        this.drawMouseoverTooltip(context, mouseX, mouseY);
     }
     public boolean charTyped(char chr, int modifiers) {
         if(ignoreNextKey) {
@@ -348,7 +348,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
 
@@ -356,7 +356,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, TEXTURE);
             if (group.getIndex() != selectedTab && group != CODE_VAULT) {
-                this.renderTabIcon(matrices, group);
+                this.renderTabIcon(context, group);
             }
         }
 
@@ -364,23 +364,21 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         String texture = "item_search";
         if(!itemGroup.hasSearchBar()) texture = "items";
         if(itemGroup == INVENTORY) texture = "inventory";
-        RenderSystem.setShaderTexture(0, new Identifier(TAB_TEXTURE_PREFIX + texture + ".png"));
-        drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        context.drawTexture(new Identifier(TAB_TEXTURE_PREFIX + texture + ".png"), this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        this.renderTabIcon(matrices, itemGroup);
+        this.renderTabIcon(context, itemGroup);
 
-        if(itemGroup.hasSearchBar()) this.searchBox.render(matrices, mouseX, mouseY, delta);
+        if(itemGroup.hasSearchBar()) this.searchBox.render(context, mouseX, mouseY, delta);
         if (itemGroup != INVENTORY) {
-            RenderSystem.setShaderTexture(0, TEXTURE);
             int scrollbarX = this.x + 175;
             int scrollbarY = this.y + 18 ;
-            if(scrollHeight == 0) drawTexture(matrices, scrollbarX, scrollbarY, 244, 0, 12, 15);
-            else drawTexture(matrices, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
+            if(scrollHeight == 0) context.drawTexture(TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15);
+            else context.drawTexture(TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
         }
         else {
-            if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(matrices, this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
+            if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(context, this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
         }
 
     }
@@ -393,7 +391,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             && mouseY >= y && mouseY <= (y + TAB_HEIGHT);
     }
 
-    protected void renderTabIcon(MatrixStack matrices, DevInventoryGroup group) {
+    protected void renderTabIcon(DrawContext context, DevInventoryGroup group) {
         boolean isSelected = group.getIndex() == selectedTab;
         boolean isTopRow = group.isTopHalf();
         int column = group.getColumn();
@@ -404,13 +402,12 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if (isSelected) mapY += 32;
         if(!isTopRow) mapY += 64;
 
-        drawTexture(matrices, originX, originY, mapX, mapY, TAB_WIDTH, 32);
+        context.drawTexture(TEXTURE, originX, originY, mapX, mapY, TAB_WIDTH, 32);
 //        this.itemRenderer.zOffset = 100.0F;
         originX += 6;
         originY += 8 + (isTopRow ? 2 : -2);
         ItemStack itemStack = group.getIcon();
-        this.itemRenderer.renderInGuiWithOverrides(matrices, itemStack, originX, originY);
-        this.itemRenderer.renderGuiItemOverlay(matrices, this.textRenderer, itemStack, originX, originY);
+        context.drawItemInSlot(textRenderer, itemStack, originX, originY);
 //        this.itemRenderer.zOffset = 0.0F;
     }
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
