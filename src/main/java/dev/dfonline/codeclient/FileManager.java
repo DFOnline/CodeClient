@@ -28,7 +28,10 @@ public class FileManager {
 
     public static String readFile(String fileName, Charset charset) throws IOException {
         return Files.readString(Path().resolve(fileName), charset);
+    }
 
+    public static boolean exists(String fileName) {
+        return Files.exists(Path().resolve(fileName));
     }
 
     /**

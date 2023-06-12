@@ -5,7 +5,11 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.isxander.yacl3.api.*;
-import dev.isxander.yacl3.api.controller.*;
+import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
+import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
+import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
+import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
+import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -66,6 +70,9 @@ public class Config {
             catch (Exception exception) {
                 CodeClient.LOGGER.info("Config didn't load: " + exception);
                 instance = new Config();
+                if(FileManager.exists("options.json")) {
+                    instance.save();
+                }
             }
         }
         return instance;
@@ -105,7 +112,7 @@ public class Config {
                                         opt -> FileCharSet = opt
                                 )
                                 .flag(minecraftClient -> ActionDump.clear())
-                                .controller(EnumControllerBuilder::create)
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, CharSetOption.class))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Auto Fly"))
@@ -154,7 +161,7 @@ public class Config {
                                         .controller(opt -> IntegerSliderControllerBuilder.create(opt)
                                                 .range(0, 30)
                                                 .step(1))
-//                                        .build())
+                                        .build())
 //                                .option(Option.createBuilder(boolean.class)
 //                                        .name(Text.literal("Air Control"))
 //                                        .description(OptionDescription.createBuilder()
@@ -166,7 +173,7 @@ public class Config {
 //                                                opt -> AirControl = opt
 //                                        )
 //                                        .controller(TickBoxController::new)
-                                        .build())
+//                                        .build())
                                 .build())
                         .group(OptionGroup.createBuilder()
                                 .name(Text.literal("Interaction"))
@@ -224,6 +231,7 @@ public class Config {
                                         .controller(opt -> FloatSliderControllerBuilder.create(opt)
                                                 .range(5f, 10f)
                                                 .step(0.1f))
+                                        .available(false)
                                         .build())
                                 .option(Option.createBuilder(LayerInteractionMode.class)
                                         .name(Text.literal("Layer Interaction"))
@@ -236,7 +244,7 @@ public class Config {
                                                 () -> CodeLayerInteractionMode,
                                                 opt -> CodeLayerInteractionMode = opt
                                         )
-                                        .controller(EnumControllerBuilder::create)
+                                        .controller(nodeOption -> () -> new EnumController<>(nodeOption, LayerInteractionMode.class))
                                         .build())
                                 .build())
                         .option(Option.createBuilder(boolean.class)
@@ -290,7 +298,7 @@ public class Config {
                                         () -> AutoNode,
                                         opt -> AutoNode = opt
                                 )
-                                .controller(EnumControllerBuilder::create)
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Node.class))
 //                                .available(AutoJoin)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
