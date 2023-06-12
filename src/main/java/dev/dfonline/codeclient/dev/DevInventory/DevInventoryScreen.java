@@ -18,7 +18,6 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
@@ -407,7 +406,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         originX += 6;
         originY += 8 + (isTopRow ? 2 : -2);
         ItemStack itemStack = group.getIcon();
-        context.drawItemInSlot(textRenderer, itemStack, originX, originY);
+        context.drawItem(itemStack, originX, originY);
 //        this.itemRenderer.zOffset = 0.0F;
     }
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {

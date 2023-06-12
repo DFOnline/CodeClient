@@ -8,7 +8,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -23,7 +22,7 @@ import java.util.List;
  */
 public abstract class GenericSwitcher extends Screen {
     private static final Identifier TEXTURE = new Identifier("textures/gui/container/gamemode_switcher.png");
-    private List<SelectableButtonWidget> buttons = new ArrayList<>();
+    private final List<SelectableButtonWidget> buttons = new ArrayList<>();
     private boolean usingMouseToSelect = false;
     private Integer lastMouseX;
     private Integer lastMouseY;
@@ -115,6 +114,7 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     private boolean checkFinished() {
+        if(this.client == null) return false;
         if(!InputUtil.isKeyPressed(this.client.getWindow().getHandle(), HOLD_KEY)) {
             Option selected = getSelected();
             if(selected != null) selected.run();
@@ -159,6 +159,7 @@ public abstract class GenericSwitcher extends Screen {
             context.drawTexture(TEXTURE,0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
             context.getMatrices().pop();
 
+            context.drawItem(option.icon, this.getX() + 5, this.getY() + 5);
             context.drawItemInSlot(textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
 
             if(selected) {

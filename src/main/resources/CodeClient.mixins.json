@@ -17,7 +17,7 @@
     "render.MDebugRenderer",
     "render.hud.MInGameHud",
     "render.hud.MInGameOverlayRenderer",
-    "render.hud.MItemRenderer",
+    "render.hud.MDrawContext",
     "render.hud.MTitleScreen",
     "world.ClientWorldAccessor",
     "world.MWorldRenderer",

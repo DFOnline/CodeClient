@@ -5,7 +5,6 @@ import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -19,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DrawContext.class)
-public abstract class MItemRenderer {
+public abstract class MDrawContext {
     @Shadow @Final private MatrixStack matrices;
 
     @Shadow public abstract int drawText(TextRenderer textRenderer, Text text, int x, int y, int color, boolean shadow);
@@ -39,7 +38,7 @@ public abstract class MItemRenderer {
 
         this.matrices.translate(0.0F, 0.0F, 200.0F);
         Scope scope = Scope.valueOf(scopeName);
-        this.drawText(textRenderer,Text.literal(scope.shortName).formatted(scope.color),x,y,0xFFFFFF,false);
+        this.drawText(textRenderer,Text.literal(scope.shortName).formatted(scope.color),x,y,0xFFFFFF,true);
         matrices.translate(0.0F, 0.0F, -200.0F);
     }
 }
