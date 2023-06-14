@@ -25,6 +25,10 @@ public abstract class Plot extends Location {
         this.size = size;
     }
 
+    public Size getSize() {
+        return size;
+    }
+
     public Integer getX() {
         return originX;
     }

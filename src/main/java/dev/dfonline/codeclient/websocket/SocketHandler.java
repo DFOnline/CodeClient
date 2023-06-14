@@ -3,10 +3,13 @@ package dev.dfonline.codeclient.websocket;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
+import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.action.impl.ClearPlot;
+import dev.dfonline.codeclient.action.impl.GetPlotSize;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
+import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -41,28 +44,74 @@ public class SocketHandler {
     }
 
     public static String onMessage(String message) {
-        if(!authorised) return "{\"status\":\"error\",\"error\":\"auth\",\"message\":\"This app isn't authorized, check you have run /auth in the game.\"}";
-        if(action == Action.CLEAR) return "{\"status\":\"error\",\"error\":\"clearing\",\"message\":\"The client is already clearing a plot. If it is stuck, run /abort and /auth.\"}";
-        if(action == Action.SPAWN) return "{\"status\":\"error\",\"error\":\"spawn\",\"message\":\"The client is trying to go to the plot spawn. If it is stuck, run /abort and /auth.\"}";
+        JsonObject response = new JsonObject();
+        if(!authorised) {
+            response.addProperty("status","error");
+            response.addProperty("error","auth");
+            response.addProperty("message","This app isn't authorized, check you have run /auth in the game.");
+            return response.toString();
+        }
+        if(action == Action.CLEAR) {
+            response.addProperty("status","error");
+            response.addProperty("error","clear");
+            response.addProperty("message","The client is already clearing a plot. If it is stuck, run /abort.");
+            return response.toString();
+        }
+        if(action == Action.SPAWN) {
+            response.addProperty("status","error");
+            response.addProperty("error","spawn");
+            response.addProperty("message","The client is trying to go to the plot spawn. If it is stuck, run /abort.");
+            return response.toString();
+        }
         String[] arguments = message.split(" ");
         switch (arguments[0]) {
             case "clear" -> {
                 action = Action.CLEAR;
+                response.addProperty("status","action");
+                response.addProperty("action","clear");
                 CodeClient.currentAction = new ClearPlot(() -> {
-                    connection.send("{\"status\":\"action\",\"action\":\"clear\",\"progress\":\"finish\",\"message\":\"Finished clear plot.\"}");
+                    response.addProperty("progress","finish");
+                    response.addProperty("message","Finished clear plot.");
+                    connection.send(response.toString());
                     action = Action.NONE;
                 });
                 CodeClient.currentAction.init();
-                return "{\"status\":\"action\",\"action\":\"clear\",\"progress\":\"start\",\"message\":\"Starting clear plot.\"}";
+                response.addProperty("progress","start");
+                response.addProperty("message","Starting clear plot.");
+                return response.toString();
             }
             case "spawn" -> {
                 action = Action.SPAWN;
+                response.addProperty("status","action");
+                response.addProperty("action","spawn");
                 CodeClient.currentAction = new MoveToSpawn(() -> {
-                    connection.send("{\"status\":\"action\",\"action\":\"spawn\",\"progress\":\"finish\",\"message\":\"Finished move to spawn.\"}");
+                    response.addProperty("progress","finish");
+                    response.addProperty("message","Finished move to spawn.");
+                    connection.send(response.toString());
                     action = Action.NONE;
                 });
                 CodeClient.currentAction.init();
-                return "{\"status\":\"action\",\"action\":\"spawn\",\"progress\":\"start\",\"message\":\"Starting move to spawn.\"}";
+                response.addProperty("progress","start");
+                response.addProperty("message","Starting move to spawn.");
+                return response.toString();
+            }
+            case "size" -> {
+                action = Action.SIZE;
+                response.addProperty("status","action");
+                response.addProperty("action","size");
+                CodeClient.currentAction = new GetPlotSize(() -> {
+                    response.addProperty("progress","finish");
+                    response.addProperty("message","Finished get plot size.");
+                    if(CodeClient.location instanceof Plot plot) {
+                        response.addProperty("data",plot.getSize().name());
+                    }
+                    connection.send(response.toString());
+                    action = Action.NONE;
+                });
+                CodeClient.currentAction.init();
+                response.addProperty("progress","start");
+                response.addProperty("message","Starting get plot size.");
+                return response.toString();
             }
             case "place" -> {
                 if(action != Action.TEMPLATES) {
@@ -93,10 +142,16 @@ public class SocketHandler {
                 }
             }
             case "swap" -> {
-                return "{\"status\":\"error\",\"error\":\"swapping\",\"message\":\"Not implemented.\"}";
+                response.addProperty("status","error");
+                response.addProperty("error","swap");
+                response.addProperty("message","Not implemented.");
+                return response.toString();
             }
             default -> {
-                return "{\"status\":\"error\",\"error\":\"generic\",\"message\":\"Invalid command.\"}";
+                response.addProperty("status","error");
+                response.addProperty("error","generic");
+                response.addProperty("message","Invalid command.");
+                return response.toString();
             }
         }
         return null;
@@ -106,6 +161,7 @@ public class SocketHandler {
         NONE,
         CLEAR, // Clearing a plot
         SPAWN, // Moving client to plot origin
+        SIZE, // Getting plot size
         TEMPLATES, // Collecting templates for PLACE
         PLACE, // Aforementioned place, places collected templates into plot
     }
