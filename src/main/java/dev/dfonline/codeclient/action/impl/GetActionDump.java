@@ -16,7 +16,7 @@ import java.util.Objects;
 
 public class GetActionDump extends Action {
     public StringBuilder capturedData = null;
-    private ColorMode colorMode;
+    private final ColorMode colorMode;
 
     private int lines;
     private int length;
@@ -30,6 +30,7 @@ public class GetActionDump extends Action {
 
     @Override
     public void init() {
+        if(CodeClient.MC == null || CodeClient.MC.getNetworkHandler() == null) return;
         CodeClient.MC.getNetworkHandler().sendCommand("dumpactioninfo");
         capturedData = new StringBuilder();
         startTime = new Date();
