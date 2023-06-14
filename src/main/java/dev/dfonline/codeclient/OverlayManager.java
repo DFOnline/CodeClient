@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,6 +21,13 @@ public class OverlayManager {
      */
     public static void setOverlayText() {
         setOverlayText(new ArrayList<>());
+    }
+
+    /**
+     * Clears and sets the overlay text.
+     */
+    public static void setOverlayText(Text overlayText) {
+        setOverlayText(new ArrayList<>(Collections.singleton(overlayText)));
     }
 
     /**
