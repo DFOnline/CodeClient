@@ -22,6 +22,11 @@ A Fabric 1.20 mod for coding more efficiently with utility features including bu
 3. Move the downloaded mod files into the mods folder located at .minecraft/mods.
 4. Launch the game and try it out on [DiamondFire](mcdiamondfire.com).
 
+## Versions
+* [1.20 (latest)](https://github.com/DFOnline/CodeClient/releases/latest)
+* [1.19.4](https://github.com/DFOnline/CodeClient/releases/tag/v71)
+* [1.19.3](https://github.com/DFOnline/CodeClient/releases/tag/v48)
+
 ## Contributing
 
 Feel free to help! [Open an issue](https://github.com/DFOnline/CodeClient/issues/new) or submit PRs.
