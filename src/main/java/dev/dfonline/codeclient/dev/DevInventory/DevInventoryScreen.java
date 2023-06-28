@@ -31,6 +31,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -112,8 +113,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         }
         catch (IOException | JsonParseException e) {
             CodeClient.LOGGER.error(e.getMessage());
-            Utility.sendMessage(Text.literal("Could not parse the ActionDump. Install it using §b/getactiondump colors §cin Node Beta or download a (maybe outdated) version by clicking on this message.")
-                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://dfonline.dev/public/dbc.json"))), ChatType.FAIL);
+            Utility.sendMessage(Text.literal("Could not parse the ActionDump. Go to ").append(Text.literal("https://github.com/DFOnline/CodeClient/wiki/actiondump").formatted(Formatting.AQUA)).append(Text.literal(" to find out how to fix this."))
+                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump"))), ChatType.FAIL);
         }
 
         TextRenderer textRenderer = this.textRenderer;

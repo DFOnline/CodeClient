@@ -252,6 +252,7 @@ public class InteractionManager {
             boolean isLevel = plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4;
             boolean noClipAllowsBlock = Config.getConfig().NoClipEnabled || world.getBlockState(pos).isAir();
             boolean hideCodeSpace =
+                    pos.getY() >= 50 &&
                     noClipAllowsBlock &&
                     mode != Config.LayerInteractionMode.OFF
                     && isLevel
