@@ -48,8 +48,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class InteractionManager {
-    private static int lastRevision = 0;
-
     public static boolean onBreakBlock(BlockPos pos) {
         if(CodeClient.location instanceof Dev plot && Config.getConfig().CustomBlockInteractions) {
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
@@ -95,12 +93,11 @@ public class InteractionManager {
             try {
                 if (bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
                     if (!Config.getConfig().CustomTagInteraction) return false;
+                    if (actionType == SlotActionType.PICKUP_ALL) return false;
                     JsonElement varElement = JsonParser.parseString(varItem.asString());
                     if (!varElement.isJsonObject()) return false;
                     JsonObject varObject = (JsonObject) varElement;
                     if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
-                    if (revision == lastRevision) return true;
-                    lastRevision = revision;
 
                     Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
                     CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
