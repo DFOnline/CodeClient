@@ -40,7 +40,7 @@ public abstract class Plot extends Location {
     public Boolean isInPlot(BlockPos pos) {
         if(size == null) return null;
 
-        return isInArea(pos.toCenterPos()) && isInDev(pos.toCenterPos());
+        return isInArea(pos.toCenterPos()) || isInDev(pos.toCenterPos());
     }
 
     /**
@@ -52,8 +52,8 @@ public abstract class Plot extends Location {
         double x = pos.getX();
         double z = pos.getZ();
 
-        boolean inX = (x >= originX) && (x <= originX + size.size);
-        boolean inZ = (z >= originZ) && (z <= originZ + size.size);
+        boolean inX = (x >= originX) && (x <= originX + size.size + 1);
+        boolean inZ = (z >= originZ) && (z <= originZ + size.size + 1);
 
         return inX && inZ;
     }
@@ -63,8 +63,8 @@ public abstract class Plot extends Location {
         double x = pos.getX();
         double z = pos.getZ();
 
-        boolean inX = (x >= originX - 20) || ((pos.getY() >= 50) && (x >= originX - 21));
-        boolean inZ = (z >= originZ) && (z <= originZ + size.size);
+        boolean inX = (x < originX) && ((x >= originX - 20) || ((pos.getY() >= 50) && (x >= originX - 21)));
+        boolean inZ = (z >= originZ) && (z <= originZ + size.size + 1);
 
         return inX && inZ;
     }

@@ -15,19 +15,17 @@
     "network.MClientPlayNetworkHandler",
     "render.MChunkRendererRegion",
     "render.MDebugRenderer",
+    "render.hud.MDrawContext",
     "render.hud.MInGameHud",
     "render.hud.MInGameOverlayRenderer",
-    "render.hud.MDrawContext",
     "render.hud.MTitleScreen",
     "world.ClientWorldAccessor",
     "world.MWorldRenderer",
     "world.block.MAbstractBlockState",
-    "world.block.MBarrier"
+    "world.block.MBarrier",
+    "world.block.MBlockItem"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "world.block.MBlockItem"
-  ]
+  }
 }

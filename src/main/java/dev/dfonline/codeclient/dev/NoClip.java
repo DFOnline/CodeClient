@@ -34,6 +34,9 @@ public class NoClip {
             double x = Math.max(player.getX() + movement.x * 1.3, plot.getX() - 22);
             double y = Math.max(player.getY() + movement.y * 1, 50);
             double z = Math.max(player.getZ() + movement.z * 1.3, plot.getZ() - 2);
+            if(plot.getSize() != null) {
+                z = Math.min(z, plot.getZ() + plot.getSize().size + 3);
+            }
 
             player.setOnGround(false);
             boolean wantsToFall = player.isSneaking() && (player.getPitch() > 40);
@@ -58,7 +61,16 @@ public class NoClip {
     public static Vec3d handleSeverPosition() {
         if(CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
-            Vec3d pos = new Vec3d(Math.max(player.getX(), plot.getX() - 20), player.getY(), Math.max(player.getZ(), plot.getZ()));
+
+            double z = Math.max(player.getZ(), plot.getZ());
+            if(plot.getSize() != null) {
+                z = Math.min(z, plot.getZ() + plot.getSize().size + 0.999);
+            }
+
+            Vec3d pos = new Vec3d(Math.max(player.getX(), plot.getX() - 20),
+                    player.getY(),
+                    z);
+
             if (isInsideWall(pos)) {
                 double nearestFloor = Math.floor(player.getY() / 5) * 5;
                 pos = new Vec3d(pos.x, nearestFloor + 2, pos.z);

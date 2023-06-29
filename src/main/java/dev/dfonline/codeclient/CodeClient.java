@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.ChestPeeker;
 import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
