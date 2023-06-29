@@ -19,8 +19,7 @@ public class SocketHandler {
     public static final int PORT = 31375;
     private static WebSocket connection = null;
     private static boolean authorised = false;
-    private static Action action = Action.NONE;
-    private static final ArrayList<ItemStack> templates = new ArrayList<>();
+    private static ArrayList<Action> ActionQueue;
 
     public static void start() {
         SocketServer websocket = new SocketServer(new InetSocketAddress("localhost", PORT));
@@ -66,52 +65,13 @@ public class SocketHandler {
         String[] arguments = message.split(" ");
         switch (arguments[0]) {
             case "clear" -> {
-                action = Action.CLEAR;
-                response.addProperty("status","action");
-                response.addProperty("action","clear");
-                CodeClient.currentAction = new ClearPlot(() -> {
-                    response.addProperty("progress","finish");
-                    response.addProperty("message","Finished clear plot.");
-                    connection.send(response.toString());
-                    action = Action.NONE;
-                });
-                CodeClient.currentAction.init();
-                response.addProperty("progress","start");
-                response.addProperty("message","Starting clear plot.");
-                return response.toString();
+                ActionQueue.add(new Clear());
             }
             case "spawn" -> {
-                action = Action.SPAWN;
-                response.addProperty("status","action");
-                response.addProperty("action","spawn");
-                CodeClient.currentAction = new MoveToSpawn(() -> {
-                    response.addProperty("progress","finish");
-                    response.addProperty("message","Finished move to spawn.");
-                    connection.send(response.toString());
-                    action = Action.NONE;
-                });
-                CodeClient.currentAction.init();
-                response.addProperty("progress","start");
-                response.addProperty("message","Starting move to spawn.");
-                return response.toString();
+
             }
             case "size" -> {
-                action = Action.SIZE;
-                response.addProperty("status","action");
-                response.addProperty("action","size");
-                CodeClient.currentAction = new GetPlotSize(() -> {
-                    response.addProperty("progress","finish");
-                    response.addProperty("message","Finished get plot size.");
-                    if(CodeClient.location instanceof Plot plot) {
-                        response.addProperty("data",plot.getSize().name());
-                    }
-                    connection.send(response.toString());
-                    action = Action.NONE;
-                });
-                CodeClient.currentAction.init();
-                response.addProperty("progress","start");
-                response.addProperty("message","Starting get plot size.");
-                return response.toString();
+
             }
             case "place" -> {
                 if(action != Action.TEMPLATES) {
@@ -122,22 +82,10 @@ public class SocketHandler {
                 }
                 if(arguments.length == 2) {
                     CodeClient.LOGGER.info("Added " + templates.size() + " to the operation");
-                    ItemStack template = new ItemStack(Items.ENDER_CHEST);
-                    NbtCompound nbt = new NbtCompound();
-                        NbtCompound PublicBukkitValues = new NbtCompound();
-                        PublicBukkitValues.putString("hypercube:codetemplatedata","{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + arguments[1] + "\"}");
-                    nbt.put("PublicBukkitValues", PublicBukkitValues);
-                    template.setNbt(nbt);
-                    templates.add(template);
+
                     return "{\"status\":\"action\",\"action\":\"place\",\"progress\":\"active\",\"message\":\"Added template " + templates.size() + ".\"}";
                 }
                 if(arguments.length == 1) {
-                    CodeClient.currentAction = new PlaceTemplates(templates, () -> {
-                        connection.send("{\"status\":\"spawn\",\"action\":\"place\",\"progress\":\"finish\",\"message\":\"Finished placing templates.\"}");
-                        templates.clear();
-                        action = Action.NONE;
-                    });
-                    CodeClient.currentAction.init();
                     action = Action.PLACE;
                 }
             }
@@ -157,12 +105,111 @@ public class SocketHandler {
         return null;
     }
 
-    private enum Action {
-        NONE,
-        CLEAR, // Clearing a plot
-        SPAWN, // Moving client to plot origin
-        SIZE, // Getting plot size
-        TEMPLATES, // Collecting templates for PLACE
-        PLACE, // Aforementioned place, places collected templates into plot
+    private void next() {
+
+    }
+
+    private abstract static class Action {
+        boolean active = false;
+        public final String name;
+
+        Action(String name) {
+            this.name = name;
+        }
+
+        /**
+         * When the action is added to the queue
+         */
+        public abstract void set(WebSocket responder);
+
+        /**
+         * When the queue reaches the action
+         */
+        public abstract void start(WebSocket responder);
+
+        /**
+         * If a message is sent when this is the last set
+         */
+        public abstract void message(WebSocket responder, String message);
+    }
+
+    private class Clear extends SocketHandler.Action {
+        Clear() {super("clear");}
+        @Override public void set(WebSocket responder) {}
+        @Override public void start(WebSocket responder) {
+            CodeClient.currentAction = new ClearPlot(() -> {
+                next();
+            });
+            CodeClient.currentAction.init();
+        }
+        @Override public void message(WebSocket responder, String message) {}
+    }
+    private class Spawn extends SocketHandler.Action {
+        Spawn() {
+            super("spawn");
+        }
+        @Override public void set(WebSocket responder) {}
+        @Override
+        public void start(WebSocket responder) {
+            CodeClient.currentAction = new MoveToSpawn(() -> {
+                next();
+            });
+            CodeClient.currentAction.init();
+        }
+        @Override public void message(WebSocket responder, String message) {}
+    }
+    private class Size extends SocketHandler.Action {
+        Size() {
+            super("size");
+        }
+
+        @Override public void set(WebSocket responder) {}
+
+        @Override
+        public void start(WebSocket responder) {
+            if(CodeClient.location instanceof Plot plot) {
+                if(plot.getSize() != null) {
+                    responder.send(plot.getSize().name());
+                    next();
+                }
+                else {
+                    CodeClient.currentAction = new GetPlotSize(() -> {
+                        responder.send(plot.getSize().name());
+                        next();
+                    });
+                }
+            }
+        }
+
+        @Override
+        public void message(WebSocket responder, String message) {}
+    }
+    private class Place extends SocketHandler.Action {
+        private static final ArrayList<ItemStack> templates = new ArrayList<>();
+
+        Place() {
+            super("place");
+        }
+
+        @Override public void set(WebSocket responder) {}
+
+        @Override
+        public void start(WebSocket responder) {
+            CodeClient.currentAction = new PlaceTemplates(templates, () -> {
+                next();
+            });
+            CodeClient.currentAction.init();
+        }
+
+        @Override
+        public void message(WebSocket responder, String message) {
+            ItemStack template = new ItemStack(Items.ENDER_CHEST);
+            NbtCompound nbt = new NbtCompound();
+            NbtCompound PublicBukkitValues = new NbtCompound();
+            PublicBukkitValues.putString("hypercube:codetemplatedata","{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + message + "\"}");
+            nbt.put("PublicBukkitValues", PublicBukkitValues);
+            template.setNbt(nbt);
+            templates.add(template);
+        }
     }
 }
