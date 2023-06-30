@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.websocket;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
@@ -19,94 +20,95 @@ public class SocketHandler {
     public static final int PORT = 31375;
     private static WebSocket connection = null;
     private static boolean authorised = false;
-    private static ArrayList<Action> ActionQueue;
+    private static final ArrayList<Action> actionQueue = new ArrayList<>();
+    private static SocketServer websocket;
+    private static Thread socketThread;
 
     public static void start() {
-        SocketServer websocket = new SocketServer(new InetSocketAddress("localhost", PORT));
-
         try {
-            new Thread(websocket, "CodeClient-API").start();
+            websocket = new SocketServer(new InetSocketAddress("localhost", PORT));
+            socketThread = new Thread(websocket, "CodeClient-API");
+            socketThread.start();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    public static void stop() {
+        try {
+            websocket.stop();
+        } catch (Exception ignored) {}
+    }
+
     public static void setAuthorised(boolean isAuthorised) {
-        action = Action.NONE;
+        actionQueue.clear();
         authorised = isAuthorised;
-        if(isAuthorised) connection.send("{\"status\":\"auth\",\"message\":\"This app was just authorized from the game!\"}");
+        if(isAuthorised) connection.send("auth");
     }
 
     public static void setConnection(WebSocket socket) {
-        action = Action.NONE;
         connection = socket;
+        actionQueue.clear();
     }
 
-    public static String onMessage(String message) {
+    public static void onMessage(String message) {
         JsonObject response = new JsonObject();
         if(!authorised) {
-            response.addProperty("status","error");
-            response.addProperty("error","auth");
-            response.addProperty("message","This app isn't authorized, check you have run /auth in the game.");
-            return response.toString();
-        }
-        if(action == Action.CLEAR) {
-            response.addProperty("status","error");
-            response.addProperty("error","clear");
-            response.addProperty("message","The client is already clearing a plot. If it is stuck, run /abort.");
-            return response.toString();
-        }
-        if(action == Action.SPAWN) {
-            response.addProperty("status","error");
-            response.addProperty("error","spawn");
-            response.addProperty("message","The client is trying to go to the plot spawn. If it is stuck, run /abort.");
-            return response.toString();
+            connection.send("noauth");
+            return;
         }
         String[] arguments = message.split(" ");
+        Action topAction = getTopAction();
+        if(arguments[0] == null) return;
+        if(topAction != null && arguments.length > 1 && Objects.equals(topAction.name, arguments[0])) {
+            topAction.message(connection,message.substring(arguments[0].length() + 1));
+            return;
+        }
         switch (arguments[0]) {
             case "clear" -> {
-                ActionQueue.add(new Clear());
+                SocketHandler.actionQueue.add(new Clear());
             }
             case "spawn" -> {
-
+                SocketHandler.actionQueue.add(new Spawn());
             }
             case "size" -> {
-
+                SocketHandler.actionQueue.add(new Size());
             }
             case "place" -> {
-                if(action != Action.TEMPLATES) {
-                    CodeClient.LOGGER.info("Starting place operation");
-                    action = Action.TEMPLATES;
-                    templates.clear();
-                    return "{\"status\":\"action\",\"action\":\"place\",\"progress\":\"start\",\"message\":\"Starting place operation.\"}";
-                }
-                if(arguments.length == 2) {
-                    CodeClient.LOGGER.info("Added " + templates.size() + " to the operation");
-
-                    return "{\"status\":\"action\",\"action\":\"place\",\"progress\":\"active\",\"message\":\"Added template " + templates.size() + ".\"}";
-                }
-                if(arguments.length == 1) {
-                    action = Action.PLACE;
-                }
+                SocketHandler.actionQueue.add(new Place());
             }
             case "swap" -> {
                 response.addProperty("status","error");
                 response.addProperty("error","swap");
                 response.addProperty("message","Not implemented.");
-                return response.toString();
+                connection.send(response.toString());
             }
             default -> {
-                response.addProperty("status","error");
-                response.addProperty("error","generic");
-                response.addProperty("message","Invalid command.");
-                return response.toString();
+                connection.send("invalid");
             }
         }
-        return null;
+        Action firstAction = actionQueue.get(0);
+        if(firstAction == null) return;
+        if(firstAction.active) return;
+        next();
     }
 
-    private void next() {
+    private static Action getTopAction() {
+        if(actionQueue.size() == 0) return null;
+        return actionQueue.get(actionQueue.size() - 1);
+    }
 
+    private static void next() {
+        if(actionQueue.size() == 0) return;
+        Action firstAction = actionQueue.get(0);
+        if(firstAction == null) return;
+        if(firstAction.active) {
+            actionQueue.remove(0);
+            next();
+            return;
+        }
+        firstAction.active = true;
+        firstAction.start(connection);
     }
 
     private abstract static class Action {
@@ -133,7 +135,7 @@ public class SocketHandler {
         public abstract void message(WebSocket responder, String message);
     }
 
-    private class Clear extends SocketHandler.Action {
+    private static class Clear extends SocketHandler.Action {
         Clear() {super("clear");}
         @Override public void set(WebSocket responder) {}
         @Override public void start(WebSocket responder) {
@@ -144,7 +146,7 @@ public class SocketHandler {
         }
         @Override public void message(WebSocket responder, String message) {}
     }
-    private class Spawn extends SocketHandler.Action {
+    private static class Spawn extends SocketHandler.Action {
         Spawn() {
             super("spawn");
         }
@@ -158,7 +160,7 @@ public class SocketHandler {
         }
         @Override public void message(WebSocket responder, String message) {}
     }
-    private class Size extends SocketHandler.Action {
+    private static class Size extends SocketHandler.Action {
         Size() {
             super("size");
         }
@@ -184,7 +186,7 @@ public class SocketHandler {
         @Override
         public void message(WebSocket responder, String message) {}
     }
-    private class Place extends SocketHandler.Action {
+    private static class Place extends SocketHandler.Action {
         private static final ArrayList<ItemStack> templates = new ArrayList<>();
 
         Place() {
@@ -195,7 +197,9 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
+            if(templates.size() == 0) return;
             CodeClient.currentAction = new PlaceTemplates(templates, () -> {
+                responder.send("place done");
                 next();
             });
             CodeClient.currentAction.init();
@@ -203,6 +207,10 @@ public class SocketHandler {
 
         @Override
         public void message(WebSocket responder, String message) {
+            if(message.equals("go")) {
+                this.start(responder);
+            }
+
             ItemStack template = new ItemStack(Items.ENDER_CHEST);
             NbtCompound nbt = new NbtCompound();
             NbtCompound PublicBukkitValues = new NbtCompound();

@@ -11,6 +11,7 @@ import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.location.Spawn;
 import dev.dfonline.codeclient.websocket.SocketHandler;
+import dev.dfonline.codeclient.websocket.SocketServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -121,6 +122,10 @@ public class CodeClient implements ModInitializer {
     public void onInitialize() {
         MC = MinecraftClient.getInstance();
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            SocketHandler.stop();
+        },"CodeClient Clean up"));
 
         if(Config.getConfig().CodeClientAPI) {
             try {

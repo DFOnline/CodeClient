@@ -17,6 +17,7 @@ public class SocketServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
+        CodeClient.LOGGER.info("connection");
         SocketHandler.setConnection(conn);
         CodeClient.LOGGER.info(conn.getRemoteSocketAddress().toString() + " has just connected to the CodeClient API.");
         Utility.sendMessage("An application has connected to CodeClient", ChatType.INFO);
@@ -31,8 +32,7 @@ public class SocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        String response = SocketHandler.onMessage(message);
-        if(response != null) conn.send(response);
+        SocketHandler.onMessage(message);
     }
 
     @Override
