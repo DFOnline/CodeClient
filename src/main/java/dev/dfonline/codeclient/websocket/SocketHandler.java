@@ -104,9 +104,11 @@ public class SocketHandler {
         if(firstAction == null) return;
         if(firstAction.active) {
             actionQueue.remove(0);
+            CodeClient.LOGGER.info(firstAction.name + " done");
             next();
             return;
         }
+        CodeClient.LOGGER.info("starting " + firstAction.name);
         firstAction.active = true;
         firstAction.start(connection);
     }
@@ -171,12 +173,12 @@ public class SocketHandler {
         public void start(WebSocket responder) {
             if(CodeClient.location instanceof Plot plot) {
                 if(plot.getSize() != null) {
-                    responder.send(plot.getSize().name());
+                    if(responder.isOpen()) responder.send(plot.getSize().name());
                     next();
                 }
                 else {
                     CodeClient.currentAction = new GetPlotSize(() -> {
-                        responder.send(plot.getSize().name());
+                        if(responder.isOpen()) responder.send(plot.getSize().name());
                         next();
                     });
                 }
@@ -187,7 +189,8 @@ public class SocketHandler {
         public void message(WebSocket responder, String message) {}
     }
     private static class Place extends SocketHandler.Action {
-        private static final ArrayList<ItemStack> templates = new ArrayList<>();
+        private final ArrayList<ItemStack> templates = new ArrayList<>();
+        public boolean ready = false;
 
         Place() {
             super("place");
@@ -197,9 +200,9 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            if(templates.size() == 0) return;
+            if(!ready) return;
             CodeClient.currentAction = new PlaceTemplates(templates, () -> {
-                responder.send("place done");
+                if(responder.isOpen()) responder.send("place done");
                 next();
             });
             CodeClient.currentAction.init();
@@ -208,7 +211,10 @@ public class SocketHandler {
         @Override
         public void message(WebSocket responder, String message) {
             if(message.equals("go")) {
-                this.start(responder);
+                this.ready = true;
+                if(Objects.equals(actionQueue.get(0), this)) {
+                    this.start(responder);
+                }
             }
 
             ItemStack template = new ItemStack(Items.ENDER_CHEST);
