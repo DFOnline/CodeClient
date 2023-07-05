@@ -50,7 +50,7 @@ public class GetPlotSize extends Action {
             CodeClient.MC.interactionManager.attackBlock(CodeClient.MC.player.getBlockPos(), Direction.UP);
             CodeClient.MC.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             CodeClient.MC.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(CodeClient.MC.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-            Utility.makeHolding(recoverMainHand);
+            if(recoverMainHand != null) Utility.makeHolding(recoverMainHand);
         }
     }
 
