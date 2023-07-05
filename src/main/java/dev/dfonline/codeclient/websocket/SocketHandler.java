@@ -47,8 +47,8 @@ public class SocketHandler {
     }
 
     public static void setConnection(WebSocket socket) {
+        if(socket != null) actionQueue.clear();
         connection = socket;
-        actionQueue.clear();
     }
 
     public static void onMessage(String message) {

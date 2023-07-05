@@ -15,6 +15,7 @@ import dev.dfonline.codeclient.websocket.SocketServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -26,6 +27,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -123,9 +125,7 @@ public class CodeClient implements ModInitializer {
         MC = MinecraftClient.getInstance();
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            SocketHandler.stop();
-        },"CodeClient Clean up"));
+        ClientLifecycleEvents.CLIENT_STOPPING.register(new Identifier(MOD_ID,"close"), client -> SocketHandler.stop());
 
         if(Config.getConfig().CodeClientAPI) {
             try {
