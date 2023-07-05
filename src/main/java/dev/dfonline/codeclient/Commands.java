@@ -109,19 +109,19 @@ public class Commands {
 //            return 0;
 //        }));
 
-        dispatcher.register(literal("codeforme").executes(context -> {
-            if(!(CodeClient.location instanceof Dev)) return 1;
-            CodeClient.currentAction = new ClearPlot(() -> {
-                CodeClient.currentAction = new MoveToSpawn(() -> {
-                    CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> {
-                        Utility.sendMessage("Done!", ChatType.SUCCESS);
-                    });
-                    CodeClient.currentAction.init();
-                });
-                CodeClient.currentAction.init();
-            });
-            CodeClient.currentAction.init();
-            return 0;
-        }));
+//        dispatcher.register(literal("codeforme").executes(context -> {
+//            if(!(CodeClient.location instanceof Dev)) return 1;
+//            CodeClient.currentAction = new ClearPlot(() -> {
+//                CodeClient.currentAction = new MoveToSpawn(() -> {
+//                    CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> {
+//                        Utility.sendMessage("Done!", ChatType.SUCCESS);
+//                    });
+//                    CodeClient.currentAction.init();
+//                });
+//                CodeClient.currentAction.init();
+//            });
+//            CodeClient.currentAction.init();
+//            return 0;
+//        }));
     }
 }
