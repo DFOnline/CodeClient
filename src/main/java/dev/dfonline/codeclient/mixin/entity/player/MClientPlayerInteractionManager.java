@@ -6,11 +6,18 @@ import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,6 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class MClientPlayerInteractionManager {
+    private static ItemStack item = null;
+
     @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
     public void onAttackBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if(InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
@@ -35,6 +44,26 @@ public abstract class MClientPlayerInteractionManager {
         }
         return hitResult;
     }
+
+    @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V"))
+    public void beforeSendPlace(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+        ItemStack handItem = player.getStackInHand(hand);
+        boolean isTemplate = handItem.hasNbt() && handItem.getNbt() != null && handItem.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && handItem.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE);
+        if(!isTemplate) return;
+        ItemStack template = Items.ENDER_CHEST.getDefaultStack();
+        template.setNbt(handItem.getNbt());
+        CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, template));
+        item = handItem;
+    }
+
+    @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V", shift = At.Shift.AFTER))
+    public void afterSendPlace(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+        if(item != null) {
+            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + player.getInventory().selectedSlot, item));
+            item = null;
+        }
+    }
+
     @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
     public void interactItemMovement(ClientPlayNetworkHandler instance, Packet<?> packet) {
         if(!NoClip.isIgnoringWalls()) {
