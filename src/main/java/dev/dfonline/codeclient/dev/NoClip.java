@@ -36,7 +36,10 @@ public class NoClip {
             double z = Math.max(player.getZ() + movement.z * 1.3, plot.getZ() - 2);
             if(plot.getSize() != null) {
                 z = Math.min(z, plot.getZ() + plot.getSize().size + 3);
+                if(z == plot.getZ() + plot.getSize().size + 3 && velocity.getZ() > 0) player.setVelocityClient(velocity.x, velocity.y, 0);
             }
+            if(z == plot.getZ() - 2  && velocity.getZ() < 0) player.setVelocityClient(velocity.x, velocity.y, 0);
+            if(x == plot.getX() - 22 && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
 
             player.setOnGround(false);
             boolean wantsToFall = player.isSneaking() && (player.getPitch() > 40);
@@ -45,9 +48,6 @@ public class NoClip {
                 y = nearestFloor;
                 player.setOnGround(true);
             }
-
-            if(x == plot.getX() - 22 && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
-            if(z == plot.getZ() - 2  && velocity.getZ() < 0) player.setVelocityClient(velocity.x, velocity.y, 0);
 
             return new Vec3d(x, Math.min(y,256), z);
         }
