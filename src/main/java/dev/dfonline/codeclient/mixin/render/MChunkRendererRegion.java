@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MChunkRendererRegion {
     @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)
     private void getAppearance(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
-        if(CodeClient.location instanceof Dev dev) {
-            Boolean inPlot = dev.isInPlot(pos);
+        if(CodeClient.location instanceof Plot plot) {
+            Boolean inPlot = plot.isInPlot(pos);
             if(inPlot != null && !inPlot) {
                 cir.setReturnValue(Blocks.VOID_AIR.getDefaultState());
             }

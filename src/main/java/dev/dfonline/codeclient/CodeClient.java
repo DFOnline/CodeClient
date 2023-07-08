@@ -87,6 +87,7 @@ public class CodeClient implements ModInitializer {
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
         if(CodeClient.currentAction.onSendPacket(packet)) return true;
         if(BuildClip.onPacket(packet)) return true;
+        Event.onSendPacket(packet);
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.","");
 //        LOGGER.info(name);
         return false;

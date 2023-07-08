@@ -21,6 +21,17 @@ public abstract class Plot extends Location {
         this.originZ = z;
     }
 
+    public void copyValuesFrom(Plot plot) {
+        this.id = plot.id;
+        this.name = plot.name;
+        this.owner = plot.owner;
+        this.originX = plot.originX;
+        this.originZ = plot.originZ;
+        this.hasBuild = plot.hasBuild;
+        this.hasDev = plot.hasDev;
+        this.size = plot.size;
+    }
+
     public void setSize(Size size) {
         this.size = size;
     }

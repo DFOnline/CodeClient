@@ -3,7 +3,10 @@ package dev.dfonline.codeclient;
 import dev.dfonline.codeclient.location.*;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.listener.PacketListener;
+import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
 import net.minecraft.network.packet.s2c.play.*;
+
+import java.util.List;
 
 /**
  * Detects mode changes.
@@ -12,6 +15,7 @@ public class Event {
     private static double x;
     private static double z;
     private static Sequence step = Sequence.WAIT_FOR_CLEAR;
+    private static boolean switchingMode = false;
 
     public static <T extends PacketListener> void handlePacket(Packet<T> packet) {
         if(packet instanceof ClearTitleS2CPacket clear) {
@@ -48,10 +52,23 @@ public class Event {
         }
     }
 
+    public static <T extends PacketListener> void onSendPacket(Packet<T> packet) {
+        if(packet instanceof CommandExecutionC2SPacket command) {
+            if(List.of("play","build","code","dev").contains(command.command().replaceFirst("mode ",""))) {
+                switchingMode = true;
+            }
+        }
+    }
+
     public static void updateLocation(Location location) {
         CodeClient.lastLocation = CodeClient.location;
         CodeClient.location = location;
-        CodeClient.LOGGER.info("Changed location: " + location.name());
+        if(switchingMode) {
+            switchingMode = false;
+            if(location instanceof Plot plot && CodeClient.lastLocation instanceof Plot last) plot.copyValuesFrom(last);
+            CodeClient.LOGGER.info("Switched location: " + location.name());
+        }
+        else CodeClient.LOGGER.info("Changed location: " + location.name());
     }
 
     private enum Sequence {
