@@ -33,9 +33,13 @@ public class Utility {
      */
     public static void makeHolding(ItemStack template) {
         PlayerInventory inv = CodeClient.MC.player.getInventory();
-        CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, template));
+        Utility.sendHandItem(template);
         inv.selectedSlot = 0;
         inv.setStack(0, template);
+    }
+
+    public static void sendHandItem(ItemStack item) {
+        CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + CodeClient.MC.player.getInventory().selectedSlot, item));
     }
 
     /**

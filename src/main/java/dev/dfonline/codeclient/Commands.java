@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
+import dev.dfonline.codeclient.dev.BuildClip;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
@@ -49,6 +50,7 @@ public class Commands {
             CodeClient.currentAction = new None();
             if(CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.BASIC);
             CodeClient.location = null;
+            BuildClip.disableClipping();
             SocketHandler.setConnection(null);
             ActionDump.clear();
             Config.clear();

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.BuildClip;
 import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
@@ -11,7 +12,6 @@ import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.location.Spawn;
 import dev.dfonline.codeclient.websocket.SocketHandler;
-import dev.dfonline.codeclient.websocket.SocketServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -45,6 +45,10 @@ public class CodeClient implements ModInitializer {
      * Starts the "Code Palette" screen if pressed.
      */
     public static KeyBinding editBind;
+    /**
+     * If in build mode, holding this will allow you to phase through blocks.
+     */
+    public static KeyBinding clipBind;
     public static AutoJoin autoJoin = AutoJoin.NONE;
 
     /**
@@ -63,6 +67,7 @@ public class CodeClient implements ModInitializer {
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         if(currentAction.onReceivePacket(packet)) return true;
         if(Debug.handlePacket(packet)) return true;
+        if(BuildClip.handlePacket(packet)) return true;
         Event.handlePacket(packet);
 //        if(ChestPeeker.onPacket(packet)) return true;
 
@@ -81,6 +86,7 @@ public class CodeClient implements ModInitializer {
      */
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
         if(CodeClient.currentAction.onSendPacket(packet)) return true;
+        if(BuildClip.onPacket(packet)) return true;
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.","");
 //        LOGGER.info(name);
         return false;
@@ -90,9 +96,9 @@ public class CodeClient implements ModInitializer {
      * All tick events and debugging.
      */
     public static void onTick() {
-
         currentAction.onTick();
         Debug.tick();
+        BuildClip.tick();
 //        ChestPeeker.tick();
 
         if(location instanceof Dev) {
@@ -142,6 +148,12 @@ public class CodeClient implements ModInitializer {
                 "key.codeclient.actionpallete",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_Y,
+                "category.codeclient.dev"
+        ));
+        clipBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.codeclient.phaser",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_V,
                 "category.codeclient.dev"
         ));
 

@@ -8,6 +8,7 @@
     "entity.MEntity",
     "entity.MLivingEntity",
     "entity.player.ClientPlayerInteractionManagerAccessor",
+    "entity.player.MAbstractClientPlayerEntity",
     "entity.player.MClientPlayerEntity",
     "entity.player.MClientPlayerInteractionManager",
     "entity.player.MPlayerEntity",

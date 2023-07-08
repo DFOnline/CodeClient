@@ -1,9 +1,8 @@
 package dev.dfonline.codeclient.mixin.entity.player;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.dev.Debug.Debug;
-import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
+import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
