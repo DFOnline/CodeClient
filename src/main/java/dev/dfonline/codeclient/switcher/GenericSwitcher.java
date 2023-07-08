@@ -84,8 +84,8 @@ public abstract class GenericSwitcher extends Screen {
         Option selected = getSelected();
         Text selectedText = selected != null ? selected.text : Text.literal("Select");
 
-        context.drawTextWithShadow(this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, 0xFFFFFF);
-        context.drawTextWithShadow(this.textRenderer, footer, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
+        context.drawCenteredTextWithShadow(this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, 0xFFFFFF);
+        context.drawCenteredTextWithShadow(this.textRenderer, footer, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
 
         int i = 0;
 
