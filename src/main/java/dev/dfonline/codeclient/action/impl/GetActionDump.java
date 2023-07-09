@@ -11,6 +11,7 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Objects;
 
@@ -77,9 +78,9 @@ public class GetActionDump extends Action {
                 OverlayManager.addOverlayText(Text.literal("Type").append(Text.literal(" /abort ").formatted(Formatting.GREEN)).append(Text.literal("to hide this.")).formatted(Formatting.LIGHT_PURPLE));
                 OverlayManager.addOverlayText(Text.literal(""));
                 try {
-                    FileManager.writeFile("actiondump.json",capturedData.toString());
+                    Path path = FileManager.writeFile("actiondump.json",capturedData.toString());
                     OverlayManager.addOverlayText(Text.literal("There will now be a file in your Minecraft directory.").formatted(Formatting.LIGHT_PURPLE));
-                    OverlayManager.addOverlayText(Text.literal(FileManager.Path().resolve("actiondump").toString()).formatted(Formatting.GREEN));
+                    OverlayManager.addOverlayText(Text.literal(path.toString()).formatted(Formatting.GREEN));
                 } catch (IOException e) {
                     OverlayManager.addOverlayText(Text.literal("An error occurred whilst writing to a file,").formatted(Formatting.RED));
                     OverlayManager.addOverlayText(Text.literal("so instead it has been written to your console.").formatted(Formatting.RED));

@@ -19,11 +19,12 @@ public class FileManager {
         return path;
     }
 
-    public static void writeFile(String fileName, String content) throws IOException {
+    public static Path writeFile(String fileName, String content) throws IOException {
         Path path = Path().resolve(fileName);
         Files.deleteIfExists(path);
         Files.createFile(path);
         Files.write(path,content.getBytes(), StandardOpenOption.WRITE);
+        return path;
     }
 
     public static String readFile(String fileName, Charset charset) throws IOException {

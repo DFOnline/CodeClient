@@ -10,6 +10,12 @@ import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+
+import java.nio.file.Path;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -78,11 +84,25 @@ public class Commands {
             return 0;
         })));
 
-//            dispatcher.register(literal("widthdump").executes(context -> {
-//                for (int i = 0; i < 65536; i++) {
-//
-//                }
-//            }));
+        dispatcher.register(literal("widthdump").executes(context -> {
+            StringBuilder data = new StringBuilder("WIDTHDUMP\nFORMAT GOES AS\n<UNICODE> <WIDTH> <BOLD WIDTH>\n");
+            for (int codePoint = Character.MIN_CODE_POINT; codePoint <= Character.MAX_CODE_POINT; codePoint++) {
+                String character = new String(Character.toChars(codePoint));
+                TextRenderer renderer = CodeClient.MC.textRenderer;
+                data.append(character).append(" ").append(renderer.getWidth(character)).append(" ").append(renderer.getWidth(Text.literal(character).formatted(Formatting.BOLD))).append("\n");
+            }
+            String dataFinal = data.toString();
+            try {
+                Path path = FileManager.writeFile("widthdump.txt",dataFinal);
+                Utility.sendMessage(Text.literal("Written to " + path).setStyle(Text.empty().getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toString()))),ChatType.SUCCESS);
+            }
+            catch (Exception ignored) {
+                Utility.sendMessage("Couldn't save to a file. It has been logged into the console.",ChatType.FAIL);
+                CodeClient.LOGGER.info(dataFinal);
+            }
+            return 0;
+        }));
+
 
 
         dispatcher.register(literal("getspawn").executes(context -> {
