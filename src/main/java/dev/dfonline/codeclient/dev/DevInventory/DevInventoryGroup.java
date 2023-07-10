@@ -33,6 +33,7 @@ public class DevInventoryGroup {
         global++;
     }
     private DevInventoryGroup disableSearch() {
+        this.itemsProvider = null;
         this.hasSearchBar = false;
         return this;
     }

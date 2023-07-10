@@ -258,11 +258,14 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
     private void populate() {
         DevInventoryGroup group = GROUPS[selectedTab];
-        if(group == INVENTORY) return;
+//        if(group == INVENTORY) {
+//            searchResults = null;
+//            return;
+//        }
         String text = searchBox.getText();
         if(text.equals("")) text = null;
         searchResults = group.searchItems(text);
-        this.scroll();
+        if(searchResults != null) this.scroll();
     }
 
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -410,6 +413,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 //        this.itemRenderer.zOffset = 0.0F;
     }
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if(!GROUPS[selectedTab].hasSearchBar()) return false;
         this.scrollPosition -= amount;
         if(scrollPosition < 0) scrollPosition = 0;
         if((scrollPosition * 9) > scrollHeight) scrollPosition = (double) scrollHeight / 9;
@@ -419,6 +423,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     protected boolean isClickInScrollbar(double mouseX, double mouseY) {
+        if(!GROUPS[selectedTab].hasSearchBar()) return false;
         int windowX = this.x;
         int windowY = this.y;
         int scrollOriginX = windowX + 175;
