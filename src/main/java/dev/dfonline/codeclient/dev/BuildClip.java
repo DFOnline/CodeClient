@@ -1,7 +1,9 @@
 package dev.dfonline.codeclient.dev;
 
+import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.location.Build;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -18,6 +20,9 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -33,6 +38,7 @@ public class BuildClip {
     private static Vec3d lastPos = new Vec3d(0,0,0);
     private static boolean allowPacket = false;
     private static boolean waitForTP = false;
+    private static boolean dontSpamBuildWarn = false;
 
     public static void tick() {
 //        CodeClient.LOGGER.info(String.valueOf(CodeClient.MC.player.getPos()));
@@ -41,6 +47,7 @@ public class BuildClip {
             if(plot.getX() == null) {
                 if(CodeClient.clipBind.wasPressed()) Utility.sendMessage(CodeClient.MOD_NAME + " doesn't know the plot origin location.");
             }
+//            CodeClient.LOGGER.info("dev and X");
             if(!clipping && CodeClient.clipBind.isPressed() && plot.getX() != null) startClipping();
             if(clipping) {
                 allowPacket = true;
@@ -51,6 +58,14 @@ public class BuildClip {
         }
         else if(clipping) {
             disableClipping();
+        }
+
+        if(CodeClient.location instanceof Build) {
+            if(CodeClient.clipBind.isPressed() && !dontSpamBuildWarn) {
+                dontSpamBuildWarn = true;
+                Utility.sendMessage(Text.literal("Cannot use phaser in build mode, since ").append(Text.literal("it uses locations items").setStyle(Text.empty().getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,"https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))).formatted(Formatting.AQUA,Formatting.UNDERLINE)).append(" to teleport."), ChatType.FAIL);
+            }
+            if(dontSpamBuildWarn && !CodeClient.clipBind.isPressed()) dontSpamBuildWarn = false;
         }
     }
 
@@ -75,7 +90,6 @@ public class BuildClip {
     }
 
     private static void startClipping() {
-        CodeClient.LOGGER.info("Start clipping");
         PlayerAbilities abilities = CodeClient.MC.player.getAbilities();
         lastPos = CodeClient.MC.player.getPos();
         wasFlying = abilities.flying;
@@ -85,7 +99,6 @@ public class BuildClip {
     }
 
     private static void finishClipping() {
-        CodeClient.LOGGER.info("Commit clip");
         disableClipping();
         if(CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
@@ -119,7 +132,6 @@ public class BuildClip {
     }
 
     public static void disableClipping() {
-        CodeClient.LOGGER.info("Disable clipping");
         clipping = false;
     }
 }
