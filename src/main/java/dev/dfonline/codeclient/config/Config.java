@@ -35,6 +35,7 @@ public class Config {
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
     public boolean AirControl = false;
+    public boolean FocusSearch = false;
 
     private void save() {
         try {
@@ -56,6 +57,7 @@ public class Config {
             object.addProperty("AutoFly",AutoFly);
             object.addProperty("CodeLayerInteractionMode",CodeLayerInteractionMode.name());
             object.addProperty("AirControl",AirControl);
+            object.addProperty("FocusSearch",FocusSearch);
             FileManager.writeFile("options.json", object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -246,6 +248,16 @@ public class Config {
                                         )
                                         .controller(nodeOption -> () -> new EnumController<>(nodeOption, LayerInteractionMode.class))
                                         .build())
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Auto Focus Search"))
+                                .description(OptionDescription.of(Text.literal("When opening the Code Palette (").append(Text.keybind("key.codeclient.actionpallete")).append(") automatically select the search bar."),Text.literal("This is disabled because it interferes with navigation binds.")))
+                                .binding(
+                                        false,
+                                        () -> FocusSearch,
+                                        opt -> FocusSearch = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("CCDBUG"))

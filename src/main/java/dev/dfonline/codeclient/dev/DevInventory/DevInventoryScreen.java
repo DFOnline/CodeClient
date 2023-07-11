@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Searchable;
 import net.fabricmc.api.EnvType;
@@ -124,7 +125,12 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.searchBox.setVisible(true);
         this.searchBox.setEditableColor(16777215);
         this.addSelectableChild(this.searchBox);
+        // TODO: config for defaults on open
         setSelectedTab(6);
+        if(Config.getConfig().FocusSearch)
+        searchBox.setFocused(true);
+        searchBox.setCursorToEnd();
+        searchBox.setSelectionEnd(0);
         this.client.player.playerScreenHandler.removeListener(this.listener);
         this.listener = new CreativeInventoryListener(this.client);
         this.client.player.playerScreenHandler.addListener(this.listener);
@@ -212,6 +218,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         searchBox.setText("");
         DevInventoryGroup group = GROUPS[tab];
         searchBox.active = group.hasSearchBar();
+
         selectedTab = tab;
 
         if(this.client == null || this.client.player == null) return;
