@@ -22,14 +22,14 @@ public abstract class Plot extends Location {
     }
 
     public void copyValuesFrom(Plot plot) {
-        this.id = plot.id;
-        this.name = plot.name;
-        this.owner = plot.owner;
-        this.originX = plot.originX;
-        this.originZ = plot.originZ;
-        this.hasBuild = plot.hasBuild;
-        this.hasDev = plot.hasDev;
-        this.size = plot.size;
+        if(plot.id != null) this.id = plot.id;
+        if(plot.name != null) this.name = plot.name;
+        if(plot.owner != null) this.owner = plot.owner;
+        if(plot.originX != null) this.originX = plot.originX;
+        if(plot.originZ != null) this.originZ = plot.originZ;
+        if(plot.hasBuild != null) this.hasBuild = plot.hasBuild;
+        if(plot.hasDev != null) this.hasDev = plot.hasDev;
+        if(plot.size != null) this.size = plot.size;
     }
 
     public void setSize(Size size) {
@@ -69,13 +69,13 @@ public abstract class Plot extends Location {
         return inX && inZ;
     }
     public Boolean isInDev(Vec3d pos) {
-        if(size == null) return null;
+        if(originX == null || originZ == null) return null;
 
         double x = pos.getX();
         double z = pos.getZ();
 
         boolean inX = (x < originX) && ((x >= originX - 20) || ((pos.getY() >= 50) && (x >= originX - 21)));
-        boolean inZ = (z >= originZ) && (z <= originZ + size.size + 1);
+        boolean inZ = (z >= originZ) && (z <= originZ + (size != null ? size.size : 300) + 1);
 
         return inX && inZ;
     }

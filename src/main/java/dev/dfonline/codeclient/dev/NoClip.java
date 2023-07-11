@@ -21,7 +21,7 @@ public class NoClip {
     }
 
     public static boolean isInDevSpace() {
-        return CodeClient.location instanceof Dev plot && CodeClient.MC.player.getX() <= plot.getX();
+        return CodeClient.location instanceof Dev plot && plot.getX() != null && CodeClient.MC.player.getX() <= plot.getX();
     }
 
     public static Vec3d handleClientPosition(Vec3d movement) {
@@ -93,7 +93,8 @@ public class NoClip {
     @Nullable
     public static BlockState replaceBlockAt(BlockPos pos) {
         if(CodeClient.location instanceof Dev plot) {
-            if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return null;
+            Boolean isInDev = plot.isInDev(pos.toCenterPos());
+            if (isInDev == null || !isInDev) return null;
             if (display == null) return null;
             if (pos.getY() == 49) return null;
             if ((pos.getY() + 1) % 5 != 0) return null;

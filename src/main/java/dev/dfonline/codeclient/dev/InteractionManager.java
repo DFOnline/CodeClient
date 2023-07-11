@@ -249,7 +249,8 @@ public class InteractionManager {
     public static VoxelShape customVoxelShape(BlockView world, BlockPos pos) {
         if(CodeClient.MC != null && CodeClient.MC.player != null && CodeClient.location instanceof Dev plot) {
             Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
-            boolean isLevel = plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4;
+            Boolean isInDev = plot.isInDev(pos.toCenterPos());
+            boolean isLevel = isInDev != null && isInDev && pos.getY() % 5 == 4;
             boolean noClipAllowsBlock = Config.getConfig().NoClipEnabled || world.getBlockState(pos).isAir();
             boolean hideCodeSpace =
                     pos.getY() >= 50 &&
