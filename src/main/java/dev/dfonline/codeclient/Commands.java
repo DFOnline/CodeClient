@@ -85,11 +85,11 @@ public class Commands {
         })));
 
         dispatcher.register(literal("widthdump").executes(context -> {
-            StringBuilder data = new StringBuilder("WIDTHDUMP\nFORMAT GOES AS\n<UNICODE> <WIDTH> <BOLD WIDTH>\n");
+            StringBuilder data = new StringBuilder("CODECLIENT WIDTHDUMP\nFORMAT GOES AS\n<UNICODE> <WIDTH>\n");
             for (int codePoint = Character.MIN_CODE_POINT; codePoint <= Character.MAX_CODE_POINT; codePoint++) {
                 String character = new String(Character.toChars(codePoint));
                 TextRenderer renderer = CodeClient.MC.textRenderer;
-                data.append(character).append(" ").append(renderer.getWidth(character)).append(" ").append(renderer.getWidth(Text.literal(character).formatted(Formatting.BOLD))).append("\n");
+                data.append(character).append(" ").append(renderer.getWidth(character)).append("\n");
             }
             String dataFinal = data.toString();
             try {
