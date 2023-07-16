@@ -2,30 +2,36 @@ package dev.dfonline.codeclient.mixin.render;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.NoClip;
-import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.render.chunk.ChunkRendererRegion;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ChunkRendererRegion.class)
-public class MChunkRendererRegion {
-    @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)
-    private void getAppearance(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
-        if(CodeClient.location instanceof Plot plot) {
-            Boolean inPlot = plot.isInPlot(pos);
-            if(inPlot != null && !inPlot) {
-                cir.setReturnValue(Blocks.VOID_AIR.getDefaultState());
-            }
-            BlockState state = NoClip.replaceBlockAt(pos);
-            if(state != null) cir.setReturnValue(state);
-        }
-    }
+@Mixin(World.class)
+public abstract class MChunkRendererRegion {
+    @Shadow public abstract boolean setBlockState(BlockPos pos, BlockState state);
+
+//    @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)
+//    private void getAppearance(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
+//        if(CodeClient.location instanceof Plot plot) {
+//            Boolean inPlot = plot.isInPlot(pos);
+//            if(inPlot != null && !inPlot) {
+//                cir.setReturnValue(Blocks.VOID_AIR.getDefaultState());
+//            }
+//            BlockState state = NoClip.replaceBlockAt(pos);
+//            if(state != null) {
+//                CodeClient.MC.world.setBlockState(pos, state);
+//                this.setBlockState(pos, state);
+//                cir.setReturnValue(state);
+//            }
+//        }
+//    }
 
     @Inject(method = "getBlockState", at = @At("RETURN"))
     private void getSize(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
