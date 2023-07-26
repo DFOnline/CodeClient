@@ -36,6 +36,7 @@ public class Config {
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
     public boolean AirControl = false;
     public boolean FocusSearch = false;
+    public CharSetOption SaveCharSet = CharSetOption.UTF_8;
 
     private void save() {
         try {
@@ -58,7 +59,8 @@ public class Config {
             object.addProperty("CodeLayerInteractionMode",CodeLayerInteractionMode.name());
             object.addProperty("AirControl",AirControl);
             object.addProperty("FocusSearch",FocusSearch);
-            FileManager.writeFile("options.json", object.toString());
+            object.addProperty("SaveCharSet",SaveCharSet.name());
+            FileManager.writeFile("options.json", object.toString(), false);
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
         }
@@ -104,7 +106,7 @@ public class Config {
                                 .flag(OptionFlag.GAME_RESTART)
                                 .build())
                         .option(Option.createBuilder(CharSetOption.class)
-                                .name(Text.literal("File Charset"))
+                                .name(Text.literal("Read Charset"))
                                 .description(OptionDescription.createBuilder()
                                         .text(Text.literal("Can fix artifacts in ActionDump loading."))
                                         .build())
@@ -112,6 +114,19 @@ public class Config {
                                         CharSetOption.UTF_8,
                                         () -> FileCharSet,
                                         opt -> FileCharSet = opt
+                                )
+                                .flag(minecraftClient -> ActionDump.clear())
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, CharSetOption.class))
+                                .build())
+                        .option(Option.createBuilder(CharSetOption.class)
+                                .name(Text.literal("Save Charset"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("When getting the actiondump get it in a needed format."),Text.literal("Default recommended."))
+                                        .build())
+                                .binding(
+                                        CharSetOption.UTF_8,
+                                        () -> SaveCharSet,
+                                        opt -> SaveCharSet = opt
                                 )
                                 .flag(minecraftClient -> ActionDump.clear())
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CharSetOption.class))

@@ -70,7 +70,7 @@ public class GetActionDump extends Action {
             OverlayManager.addOverlayText(Text.literal("GetActionDump:").formatted(Formatting.GOLD));
             OverlayManager.addOverlayText(Text.literal("Size: ").formatted(Formatting.LIGHT_PURPLE).append(Text.literal(String.valueOf(length)).formatted(Formatting.GREEN)));
             OverlayManager.addOverlayText(Text.literal("Lines: ").formatted(Formatting.LIGHT_PURPLE).append(Text.literal(String.valueOf(lines)).formatted(Formatting.GREEN)));
-            OverlayManager.addOverlayText(Text.literal("Time: ").formatted(Formatting.LIGHT_PURPLE).append(Text.literal(String.valueOf((float) (new Date().getTime() - startTime.getTime()) / 1000))).formatted(Formatting.GREEN));
+            OverlayManager.addOverlayText(Text.literal("Time: ").formatted(Formatting.LIGHT_PURPLE).append(Text.literal(String.valueOf((float) (new Date().getTime() - startTime.getTime()) / 1000)).formatted(Formatting.GREEN)));
             if(Objects.equals(content, "}")) {
                 isDone = true;
                 OverlayManager.addOverlayText(Text.literal(""));

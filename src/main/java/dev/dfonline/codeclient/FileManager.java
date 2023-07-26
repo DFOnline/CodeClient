@@ -2,7 +2,7 @@ package dev.dfonline.codeclient;
 
 import dev.dfonline.codeclient.config.Config;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,10 +20,18 @@ public class FileManager {
     }
 
     public static Path writeFile(String fileName, String content) throws IOException {
+        return writeFile(fileName, content, true);
+    }
+    public static Path writeFile(String fileName, String content, boolean doCharSet) throws IOException {
         Path path = Path().resolve(fileName);
         Files.deleteIfExists(path);
         Files.createFile(path);
-        Files.write(path,content.getBytes(), StandardOpenOption.WRITE);
+        if(doCharSet) {
+            Files.write(path, content.getBytes(Config.getConfig().SaveCharSet.charSet), StandardOpenOption.WRITE);
+        }
+        else {
+            Files.write(path, content.getBytes(), StandardOpenOption.WRITE);
+        }
         return path;
     }
 
