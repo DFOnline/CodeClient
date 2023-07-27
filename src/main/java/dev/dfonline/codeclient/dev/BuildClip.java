@@ -74,12 +74,13 @@ public class BuildClip {
             allowPacket = false;
             return false;
         }
-        return clipping && (packet instanceof PlayerMoveC2SPacket || packet instanceof ClientCommandC2SPacket);
+        return (clipping || waitForTP) && (packet instanceof PlayerMoveC2SPacket || packet instanceof ClientCommandC2SPacket);
     }
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         if(!waitForTP) return false;
         if(packet instanceof PlayerPositionLookS2CPacket move) {
             CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.getTeleportId()));
+            CodeClient.MC.player.setPosition(move.getX(), move.getY(), move.getZ());
             return true;
         }
         if(packet instanceof PlaySoundFromEntityS2CPacket) {
