@@ -1,6 +1,6 @@
 package dev.dfonline.codeclient.mixin.render;
 
-import dev.dfonline.codeclient.dev.Debug.Debug;
+import dev.dfonline.codeclient.CodeClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.debug.DebugRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MDebugRenderer {
     @Inject(method = "render", at = @At("HEAD"))
     private void onRender(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-        Debug.render(matrices, vertexConsumers);
+        CodeClient.onRender(matrices, vertexConsumers, cameraX, cameraY, cameraZ);
     }
 }

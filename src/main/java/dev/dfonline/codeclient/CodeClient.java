@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.dev.BuildClip;
 import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.NoClip;
+import dev.dfonline.codeclient.dev.RecentChestInsert;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.location.Spawn;
@@ -23,7 +24,9 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
@@ -101,6 +104,7 @@ public class CodeClient implements ModInitializer {
         Debug.tick();
         BuildClip.tick();
 //        ChestPeeker.tick();
+        RecentChestInsert.tick();
 
         if(location instanceof Dev) {
             if(MC.player == null) return;
@@ -118,6 +122,10 @@ public class CodeClient implements ModInitializer {
                 MC.getNetworkHandler().sendCommand("fly");
             }
         }
+    }
+    public static void onRender(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
+        Debug.render(matrices, vertexConsumers);
+        RecentChestInsert.render(matrices, vertexConsumers, cameraX, cameraY, cameraZ);
     }
 
     /**
