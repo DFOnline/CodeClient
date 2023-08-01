@@ -5,14 +5,13 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.isxander.yacl3.api.*;
-import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
-import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
-import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
-import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
+import dev.isxander.yacl3.api.controller.*;
+import dev.isxander.yacl3.gui.controllers.ColorController;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.awt.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -38,6 +37,7 @@ public class Config {
     public boolean FocusSearch = false;
     public CharSetOption SaveCharSet = CharSetOption.UTF_8;
     public boolean RecentChestInsert = true;
+    public Color ChestHighlightColor = new Color(0.2F, 1.0F, 1.0F);
 
     private void save() {
         try {
@@ -294,11 +294,23 @@ public class Config {
                                         .text(Text.literal("Highlights the chest you inserted (left-clicked) an item into"))
                                         .build())
                                 .binding(
-                                        false,
+                                        true,
                                         () -> RecentChestInsert,
                                         opt -> RecentChestInsert = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Color.class)
+                                .name(Text.literal("Recent Inserted Chest Highlight Color"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("Color of chest highlight"))
+                                        .build())
+                                .binding(
+                                        new Color(0.2F, 1.0F, 1.0F),
+                                        () -> ChestHighlightColor,
+                                        opt -> ChestHighlightColor = opt
+                                )
+                                .controller(ColorControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Show Invisible Blocks"))
