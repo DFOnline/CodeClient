@@ -37,6 +37,7 @@ public class Config {
     public boolean AirControl = false;
     public boolean FocusSearch = false;
     public CharSetOption SaveCharSet = CharSetOption.UTF_8;
+    public boolean RecentChestInsert = true;
 
     private void save() {
         try {
@@ -60,6 +61,7 @@ public class Config {
             object.addProperty("AirControl",AirControl);
             object.addProperty("FocusSearch",FocusSearch);
             object.addProperty("SaveCharSet",SaveCharSet.name());
+            object.addProperty("RecentChestInsert",RecentChestInsert);
             FileManager.writeFile("options.json", object.toString(), false);
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -283,6 +285,18 @@ public class Config {
                                         true,
                                         () -> CCDBUG,
                                         opt -> CCDBUG = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.literal("Highlight Recent Inserted Chest"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("Highlights the chest you inserted (left-clicked) an item into"))
+                                        .build())
+                                .binding(
+                                        false,
+                                        () -> RecentChestInsert,
+                                        opt -> RecentChestInsert = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

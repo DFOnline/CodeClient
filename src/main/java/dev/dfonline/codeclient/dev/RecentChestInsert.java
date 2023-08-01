@@ -19,7 +19,7 @@ public class RecentChestInsert {
     }
 
     public static void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
-        if(CodeClient.location instanceof Dev plot) {
+        if(CodeClient.location instanceof Dev) {
             if(lastChest == null) return;
             VoxelShape shape = CodeClient.MC.world.getBlockState(lastChest).getOutlineShape(CodeClient.MC.world, lastChest).offset(lastChest.getX(),lastChest.getY(),lastChest.getZ());
             VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
@@ -28,7 +28,7 @@ public class RecentChestInsert {
     }
 
     public static void tick() {
-        if(lastChest != null) alpha -= 2;
+        if(lastChest != null) alpha -= 0.5;
         if(alpha <= 0) lastChest = null;
     }
 }

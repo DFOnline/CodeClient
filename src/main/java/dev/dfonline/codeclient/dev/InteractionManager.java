@@ -51,7 +51,7 @@ public class InteractionManager {
     public static boolean onBreakBlock(BlockPos pos) {
         if(CodeClient.location instanceof Dev plot && Config.getConfig().CustomBlockInteractions) {
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
-            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
+            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST && !CodeClient.MC.player.getMainHandStack().isEmpty() && Config.getConfig().RecentChestInsert) {
                 RecentChestInsert.setLastChest(pos);
             }
             if ((pos.getY() + 1) % 5 == 0) return true;
