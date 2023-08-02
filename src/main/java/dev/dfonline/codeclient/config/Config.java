@@ -38,7 +38,7 @@ public class Config {
     public boolean FocusSearch = false;
     public CharSetOption SaveCharSet = CharSetOption.UTF_8;
     public boolean RecentChestInsert = true;
-    public Color ChestHighlightColor = new Color(0.2F, 1.0F, 1.0F);
+    public int ChestHighlightColor = 0x51FFFF;
     public boolean HighlightChestsWithAir = false;
     public int HighlightChestDuration = 10;
 
@@ -67,6 +67,7 @@ public class Config {
             object.addProperty("RecentChestInsert",RecentChestInsert);
             object.addProperty("HighlightChestsWithAir",HighlightChestsWithAir);
             object.addProperty("HighlightChestDuration",HighlightChestDuration);
+            object.addProperty("ChestHighlightColor",ChestHighlightColor);
             FileManager.writeFile("options.json", object.toString(), false);
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -313,8 +314,8 @@ public class Config {
                                                 .build())
                                         .binding(
                                                 new Color(0.2F, 1.0F, 1.0F),
-                                                () -> ChestHighlightColor,
-                                                opt -> ChestHighlightColor = opt
+                                                () -> new Color(ChestHighlightColor),
+                                                opt -> ChestHighlightColor = opt.getRGB()
                                         )
                                         .controller(ColorControllerBuilder::create)
                                         .build())

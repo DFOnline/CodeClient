@@ -26,8 +26,8 @@ public class RecentChestInsert {
             if(lastChest == null) return;
             VoxelShape shape = CodeClient.MC.world.getBlockState(lastChest).getOutlineShape(CodeClient.MC.world, lastChest).offset(lastChest.getX(),lastChest.getY(),lastChest.getZ());
             VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
-            Color color =  Config.getConfig().ChestHighlightColor;
-            WorldRenderer.drawShapeOutline(matrices, vertexConsumer, shape, -cameraX, -cameraY, -cameraZ, (float) color.getRed() / 255, (float) color.getGreen() / 255, (float) color.getBlue() / 255, Math.min(alpha,1), true);
+            int color =  Config.getConfig().ChestHighlightColor;
+            WorldRenderer.drawShapeOutline(matrices, vertexConsumer, shape, -cameraX, -cameraY, -cameraZ, (float) (color >> 16) / 255, (float) ((color & 0xFF00) >> 8) / 255, (float) (color & 0x0000FF) / 255, Math.min(alpha,1), true);
         }
     }
 
