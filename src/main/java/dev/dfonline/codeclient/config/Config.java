@@ -68,7 +68,7 @@ public class Config {
             object.addProperty("HighlightChestsWithAir",HighlightChestsWithAir);
             object.addProperty("HighlightChestDuration",HighlightChestDuration);
             object.addProperty("ChestHighlightColor",ChestHighlightColor);
-            FileManager.writeFile("options.json", object.toString(), false);
+            FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
         }
@@ -77,14 +77,12 @@ public class Config {
     public static Config getConfig() {
         if(instance == null) {
             try {
-                instance = CodeClient.gson.fromJson(FileManager.readFile("options.json", StandardCharsets.UTF_8), Config.class);
+                instance = CodeClient.gson.fromJson(FileManager.readConfig(), Config.class);
             }
             catch (Exception exception) {
                 CodeClient.LOGGER.info("Config didn't load: " + exception);
+                CodeClient.LOGGER.info("Making a new one.");
                 instance = new Config();
-                if(FileManager.exists("options.json")) {
-                    instance.save();
-                }
             }
         }
         return instance;

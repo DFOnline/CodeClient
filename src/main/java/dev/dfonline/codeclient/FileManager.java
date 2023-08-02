@@ -1,7 +1,9 @@
 package dev.dfonline.codeclient;
 
 import dev.dfonline.codeclient.config.Config;
+import net.fabricmc.loader.api.FabricLoader;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -22,6 +24,20 @@ public class FileManager {
     public static Path writeFile(String fileName, String content) throws IOException {
         return writeFile(fileName, content, true);
     }
+
+    public static File getConfigFile() {
+        return new File(FabricLoader.getInstance().getConfigDir().toFile(), CodeClient.MOD_ID + ".json");
+    }
+    public static void writeConfig(String content) throws IOException {
+        boolean ignore;
+        File file = getConfigFile();
+        if(!file.exists()) ignore = file.createNewFile();
+        Files.write(file.toPath(), content.getBytes(), StandardOpenOption.WRITE);
+    }
+    public static String readConfig() throws IOException {
+        return Files.readString(getConfigFile().toPath());
+    }
+
     public static Path writeFile(String fileName, String content, boolean doCharSet) throws IOException {
         Path path = Path().resolve(fileName);
         Files.deleteIfExists(path);
