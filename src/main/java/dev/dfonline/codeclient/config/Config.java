@@ -38,6 +38,7 @@ public class Config {
     public CharSetOption SaveCharSet = CharSetOption.UTF_8;
     public boolean RecentChestInsert = true;
     public Color ChestHighlightColor = new Color(0.2F, 1.0F, 1.0F);
+    public boolean HighlightChestsWithAir = false;
 
     private void save() {
         try {
@@ -62,6 +63,7 @@ public class Config {
             object.addProperty("FocusSearch",FocusSearch);
             object.addProperty("SaveCharSet",SaveCharSet.name());
             object.addProperty("RecentChestInsert",RecentChestInsert);
+            object.addProperty("HighlightChestsWithAir",HighlightChestsWithAir);
             FileManager.writeFile("options.json", object.toString(), false);
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -266,6 +268,44 @@ public class Config {
                                         .controller(nodeOption -> () -> new EnumController<>(nodeOption, LayerInteractionMode.class))
                                         .build())
                                 .build())
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.literal("Chest Highlighting"))
+                                .description(OptionDescription.of(Text.literal("How punching chests should highlight them. For tracking items you insert via punching.")))
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.literal("Highlight Recent Inserted Chest"))
+                                        .description(OptionDescription.createBuilder()
+                                                .text(Text.literal("Highlights the chest you inserted (left-clicked) an item into"))
+                                                .build())
+                                        .binding(
+                                                true,
+                                                () -> RecentChestInsert,
+                                                opt -> RecentChestInsert = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.literal("Highlight With Empty Hand"))
+                                        .description(OptionDescription.of(Text.literal("If punching a chest with an empty hand should highlight it.")))
+                                        .binding(
+                                                false,
+                                                () -> HighlightChestsWithAir,
+                                                opt -> HighlightChestsWithAir = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.literal("Recent Inserted Chest Highlight Color"))
+                                        .description(OptionDescription.createBuilder()
+                                                .text(Text.literal("Color of chest highlight"))
+                                                .build())
+                                        .binding(
+                                                new Color(0.2F, 1.0F, 1.0F),
+                                                () -> ChestHighlightColor,
+                                                opt -> ChestHighlightColor = opt
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build())
+                                .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Auto Focus Search"))
                                 .description(OptionDescription.of(Text.literal("When opening the Code Palette (").append(Text.keybind("key.codeclient.actionpallete")).append(") automatically select the search bar."),Text.literal("This is disabled because it interferes with navigation binds.")))
@@ -287,30 +327,6 @@ public class Config {
                                         opt -> CCDBUG = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
-                                .build())
-                        .option(Option.createBuilder(Boolean.class)
-                                .name(Text.literal("Highlight Recent Inserted Chest"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Highlights the chest you inserted (left-clicked) an item into"))
-                                        .build())
-                                .binding(
-                                        true,
-                                        () -> RecentChestInsert,
-                                        opt -> RecentChestInsert = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
-                        .option(Option.createBuilder(Color.class)
-                                .name(Text.literal("Recent Inserted Chest Highlight Color"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Color of chest highlight"))
-                                        .build())
-                                .binding(
-                                        new Color(0.2F, 1.0F, 1.0F),
-                                        () -> ChestHighlightColor,
-                                        opt -> ChestHighlightColor = opt
-                                )
-                                .controller(ColorControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Show Invisible Blocks"))

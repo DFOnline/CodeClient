@@ -32,7 +32,7 @@ public class RecentChestInsert {
     }
 
     public static void tick() {
-        if(lastChest != null) alpha -= 0.5;
+        if(lastChest != null) alpha -= 0.5F;
         if(alpha <= 0) lastChest = null;
     }
 }
