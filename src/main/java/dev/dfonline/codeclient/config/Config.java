@@ -8,6 +8,7 @@ import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.gui.controllers.ColorController;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
+import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -39,6 +40,7 @@ public class Config {
     public boolean RecentChestInsert = true;
     public Color ChestHighlightColor = new Color(0.2F, 1.0F, 1.0F);
     public boolean HighlightChestsWithAir = false;
+    public int HighlightChestDuration = 10;
 
     private void save() {
         try {
@@ -64,6 +66,7 @@ public class Config {
             object.addProperty("SaveCharSet",SaveCharSet.name());
             object.addProperty("RecentChestInsert",RecentChestInsert);
             object.addProperty("HighlightChestsWithAir",HighlightChestsWithAir);
+            object.addProperty("HighlightChestDuration",HighlightChestDuration);
             FileManager.writeFile("options.json", object.toString(), false);
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -292,6 +295,16 @@ public class Config {
                                                 opt -> HighlightChestsWithAir = opt
                                         )
                                         .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(int.class)
+                                        .name(Text.literal("Highlight Duration"))
+                                        .description(OptionDescription.of(Text.literal("How long the highlight should show."),Text.literal("The last second will fade out.")))
+                                        .binding(
+                                                10,
+                                                () -> HighlightChestDuration,
+                                                opt -> HighlightChestDuration = opt
+                                        )
+                                        .controller(integerOption -> new IntegerFieldControllerBuilderImpl(integerOption).min(1))
                                         .build())
                                 .option(Option.createBuilder(Color.class)
                                         .name(Text.literal("Recent Inserted Chest Highlight Color"))

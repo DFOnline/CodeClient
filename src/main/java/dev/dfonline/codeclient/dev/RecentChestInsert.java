@@ -18,7 +18,7 @@ public class RecentChestInsert {
     private static BlockPos lastChest = null;
     public static void setLastChest(BlockPos pos) {
         lastChest = pos;
-        alpha = 10F;
+        alpha = Config.getConfig().HighlightChestDuration;
     }
 
     public static void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
@@ -32,7 +32,7 @@ public class RecentChestInsert {
     }
 
     public static void tick() {
-        if(lastChest != null) alpha -= 0.5F;
+        if(lastChest != null) alpha -= 0.05F;
         if(alpha <= 0) lastChest = null;
     }
 }
