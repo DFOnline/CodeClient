@@ -33,10 +33,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -171,6 +168,22 @@ public class InteractionManager {
             BlockState blockState = CodeClient.MC.world.getBlockState(pos);
             return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(CodeClient.MC.world, pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
         });
+    }
+
+    /**
+     * Gets where a df block will place from a hit result.
+     * @return The pos for the block behind the sign. Null if the place should've failed.
+     */
+    @Nullable
+    public static BlockPos getPlacePos(BlockHitResult hitResult) {
+        BlockState state = CodeClient.MC.world.getBlockState(hitResult.getBlockPos());
+        BlockPos pos = state.getBlock() == Blocks.STONE ? hitResult.getBlockPos().south() : hitResult.getBlockPos().offset(hitResult.getSide());
+        if(pos.getY() % 5 != 0) return null;
+        Vec3i[] check = {new Vec3i(1,0,0), new Vec3i(1,0,1), new Vec3i(1, 0 ,2), new Vec3i(2,0,0), new Vec3i(-1,0,0)};
+        for (Vec3i offset: check) {
+            if(CodeClient.MC.world.getBlockState(pos.add(offset)).isSolidBlock(CodeClient.MC.world,pos.add(offset))) return null;
+        }
+        return pos;
     }
 
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
