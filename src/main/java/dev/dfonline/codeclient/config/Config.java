@@ -83,6 +83,7 @@ public class Config {
                 CodeClient.LOGGER.info("Config didn't load: " + exception);
                 CodeClient.LOGGER.info("Making a new one.");
                 instance = new Config();
+                instance.save();
             }
         }
         return instance;

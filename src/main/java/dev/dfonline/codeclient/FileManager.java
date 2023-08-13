@@ -31,6 +31,8 @@ public class FileManager {
     public static void writeConfig(String content) throws IOException {
         boolean ignore;
         File file = getConfigFile();
+        Files.deleteIfExists(file.toPath());
+        Files.createFile(file.toPath());
         if(!file.exists()) ignore = file.createNewFile();
         Files.write(file.toPath(), content.getBytes(), StandardOpenOption.WRITE);
     }
