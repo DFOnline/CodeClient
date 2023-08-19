@@ -9,6 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +39,7 @@ public abstract class MDrawContext {
 
         this.matrices.translate(0.0F, 0.0F, 200.0F);
         Scope scope = Scope.valueOf(scopeName);
-        this.drawText(textRenderer,Text.literal(scope.shortName).formatted(scope.color),x,y,0xFFFFFF,true);
+        this.drawText(textRenderer,Text.literal(scope.shortName).setStyle(Style.EMPTY.withColor(scope.color)),x,y,0xFFFFFF,true);
         matrices.translate(0.0F, 0.0F, -200.0F);
     }
 }
