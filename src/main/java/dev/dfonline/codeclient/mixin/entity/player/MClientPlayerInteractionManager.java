@@ -71,6 +71,13 @@ public abstract class MClientPlayerInteractionManager {
         }
     }
 
+    @Inject(method = "interactItem", at = @At("HEAD"), cancellable = true)
+    public void interactItem(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+        if(InteractionManager.onItemInteract(player, hand)) {
+            cir.setReturnValue(ActionResult.PASS);
+        }
+    }
+
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     private void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
         if(slotId < 0) return;

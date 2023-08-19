@@ -113,7 +113,7 @@ public abstract class GenericSwitcher extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    private boolean checkFinished() {
+    protected boolean checkFinished() {
         if(this.client == null) return false;
         if(!InputUtil.isKeyPressed(this.client.getWindow().getHandle(), HOLD_KEY)) {
             Option selected = getSelected();
@@ -124,7 +124,7 @@ public abstract class GenericSwitcher extends Screen {
         return false;
     }
 
-    private Option getSelected() {
+    protected Option getSelected() {
         List<Option> options = getOptions();
         if(selected >= options.size()) return null;
         if(selected < 0) return null;
