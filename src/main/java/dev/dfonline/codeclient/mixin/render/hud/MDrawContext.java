@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,8 +39,13 @@ public abstract class MDrawContext {
         String scopeName = data.get("scope").getAsString();
 
         this.matrices.translate(0.0F, 0.0F, 200.0F);
-        Scope scope = Scope.valueOf(scopeName);
-        this.drawText(textRenderer,Text.literal(scope.shortName).setStyle(Style.EMPTY.withColor(scope.color)),x,y,0xFFFFFF,true);
+        try {
+            Scope scope = Scope.valueOf(scopeName);
+            this.drawText(textRenderer,Text.literal(scope.shortName).setStyle(Style.EMPTY.withColor(scope.color)),x,y,0xFFFFFF,true);
+        }
+        catch (Exception ignored) {
+            this.drawText(textRenderer,Text.literal("?").formatted(Formatting.RED),x,y,0xFFFFFF,true);
+        }
         matrices.translate(0.0F, 0.0F, -200.0F);
     }
 }
