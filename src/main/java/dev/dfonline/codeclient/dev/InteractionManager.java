@@ -206,7 +206,7 @@ public class InteractionManager {
     }
 
     public static boolean onItemInteract(PlayerEntity player, Hand hand) {
-//        if(!player.isSneaking()) return false;
+        if(player.isSneaking()) return false;
 
         ItemStack stack = player.getStackInHand(hand);
 

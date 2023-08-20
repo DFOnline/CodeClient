@@ -9,7 +9,7 @@ public enum Scope {
     unsaved(TextColor.fromFormatting(Formatting.GRAY), "GAME", "G"),
     local(TextColor.fromFormatting(Formatting.GREEN), "LOCAL", "L"),
     saved(TextColor.fromFormatting(Formatting.YELLOW), "SAVE", "S"),
-    line(TextColor.fromRgb(5614335), "LINE", "L");
+    line(TextColor.fromRgb(0x55aaff), "LINE", "L");
 
     public final TextColor color;
     public final String longName;
