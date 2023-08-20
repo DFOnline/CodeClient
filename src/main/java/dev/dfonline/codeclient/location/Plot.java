@@ -68,14 +68,18 @@ public abstract class Plot extends Location {
 
         return inX && inZ;
     }
+
+    public Boolean isInDev(BlockPos pos) {
+        return isInDev(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+    }
     public Boolean isInDev(Vec3d pos) {
         if(originX == null || originZ == null) return null;
 
-        double x = pos.getX();
-        double z = pos.getZ();
+        int x = (int) pos.getX();
+        int z = (int) pos.getZ();
 
-        boolean inX = (x < originX) && ((x >= originX - 20) || ((pos.getY() >= 50) && (x >= originX - 21)));
-        boolean inZ = (z >= originZ) && (z <= originZ + (size != null ? size.size : 300) + 1);
+        boolean inX = (x < originX) && ((x >= originX - 19) || (pos.getY() >= 50) && (x >= originX - 20));
+        boolean inZ = (z >= originZ) && (z <= originZ + (size != null ? size.size : 300));
 
         return inX && inZ;
     }
