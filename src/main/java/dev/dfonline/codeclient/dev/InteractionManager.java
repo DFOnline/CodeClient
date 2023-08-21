@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.switcher.ScopeSwitcher;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
@@ -15,6 +16,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -189,7 +191,7 @@ public class InteractionManager {
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
         if(CodeClient.location instanceof Dev plot) {
             BlockPos pos = hitResult.getBlockPos();
-            if(plot.isInCodeSpace(pos.getX(), plot.getZ()) && pos.getY() % 5 == 4) { // Is a code space level (glass)
+            if(plot.isInDev(pos) && pos.getY() % 5 == 4) { // Is a code space level (glass)
                 if(hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
                     if(CodeClient.MC.world.getBlockState(pos).isAir() && Config.getConfig().PlaceOnAir) return new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos().add(0,1,0),hitResult.isInsideBlock());
                     if(Config.getConfig().CustomBlockInteractions) return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos(), hitResult.isInsideBlock());
@@ -202,6 +204,27 @@ public class InteractionManager {
         }
         return hitResult;
     }
+
+    public static boolean onItemInteract(PlayerEntity player, Hand hand) {
+        if(player.isSneaking()) return false;
+
+        ItemStack stack = player.getStackInHand(hand);
+
+        NbtCompound nbt = stack.getNbt();
+        if(nbt == null) return false;
+        NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
+        if(pbv == null) return false;
+        NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
+        if(varItem == null) return false;
+        JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
+        if(!var.get("id").getAsString().equals("var")) return false;
+        JsonObject data = var.get("data").getAsJsonObject();
+        String scopeName = data.get("scope").getAsString();
+
+        CodeClient.MC.setScreen(new ScopeSwitcher(scopeName));
+        return true;
+    }
+
 //    public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
 //        MinecraftClient MC = CodeClient.MC;
 //        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
@@ -265,7 +288,7 @@ public class InteractionManager {
     public static VoxelShape customVoxelShape(BlockView world, BlockPos pos) {
         if(CodeClient.MC != null && CodeClient.MC.player != null && CodeClient.location instanceof Dev plot) {
             Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
-            Boolean isInDev = plot.isInDev(pos.toCenterPos());
+            Boolean isInDev = plot.isInDev(pos);
             boolean isLevel = isInDev != null && isInDev && pos.getY() % 5 == 4;
             boolean noClipAllowsBlock = Config.getConfig().NoClipEnabled || world.getBlockState(pos).isAir();
             boolean hideCodeSpace =

@@ -24,6 +24,7 @@ public abstract class GenericSwitcher extends Screen {
     private static final Identifier TEXTURE = new Identifier("textures/gui/container/gamemode_switcher.png");
     private final List<SelectableButtonWidget> buttons = new ArrayList<>();
     private boolean usingMouseToSelect = false;
+    protected boolean hasClicked = false;
     private Integer lastMouseX;
     private Integer lastMouseY;
     protected Integer selected;
@@ -113,9 +114,26 @@ public abstract class GenericSwitcher extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    private boolean checkFinished() {
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int i = 0;
+
+        for (SelectableButtonWidget widget : buttons) {
+            if(widget.getX() < mouseX && widget.getX() + 31 > mouseX
+                    && widget.getY() < mouseY && widget.getY() + 31 > mouseY) this.selected = i;
+            widget.selected = this.selected == i;
+            if(widget.selected) {
+                hasClicked = true;
+                return true;
+            }
+            ++i;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    protected boolean checkFinished() {
         if(this.client == null) return false;
-        if(!InputUtil.isKeyPressed(this.client.getWindow().getHandle(), HOLD_KEY)) {
+        if(hasClicked || !InputUtil.isKeyPressed(this.client.getWindow().getHandle(), HOLD_KEY)) {
             Option selected = getSelected();
             if(selected != null) selected.run();
             this.client.setScreen(null);
@@ -124,7 +142,7 @@ public abstract class GenericSwitcher extends Screen {
         return false;
     }
 
-    private Option getSelected() {
+    protected Option getSelected() {
         List<Option> options = getOptions();
         if(selected >= options.size()) return null;
         if(selected < 0) return null;

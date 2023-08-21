@@ -41,6 +41,7 @@ public class Config {
     public int ChestHighlightColor = 0x51FFFF;
     public boolean HighlightChestsWithAir = false;
     public int HighlightChestDuration = 10;
+    public boolean UseIForLineScope = false;
 
     private void save() {
         try {
@@ -68,6 +69,7 @@ public class Config {
             object.addProperty("HighlightChestsWithAir",HighlightChestsWithAir);
             object.addProperty("HighlightChestDuration",HighlightChestDuration);
             object.addProperty("ChestHighlightColor",ChestHighlightColor);
+            object.addProperty("UseIForLineScope",UseIForLineScope);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -353,6 +355,16 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .available(false)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.literal("Show I On Local Scope"))
+                                .description(OptionDescription.of(Text.literal("In variable icons use I for line variables.")))
+                                .binding(
+                                        false,
+                                        () -> UseIForLineScope,
+                                        opt -> UseIForLineScope = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .build())
                 .category(ConfigCategory.createBuilder()

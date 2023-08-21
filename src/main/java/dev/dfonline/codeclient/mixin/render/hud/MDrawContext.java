@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.mixin.render.hud;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -41,7 +42,7 @@ public abstract class MDrawContext {
         this.matrices.translate(0.0F, 0.0F, 200.0F);
         try {
             Scope scope = Scope.valueOf(scopeName);
-            this.drawText(textRenderer,Text.literal(scope.shortName).setStyle(Style.EMPTY.withColor(scope.color)),x,y,0xFFFFFF,true);
+            this.drawText(textRenderer,Text.literal((Config.getConfig().UseIForLineScope && scope == Scope.line) ? "I" : scope.shortName).setStyle(Style.EMPTY.withColor(scope.color)),x,y,0xFFFFFF,true);
         }
         catch (Exception ignored) {
             this.drawText(textRenderer,Text.literal("?").formatted(Formatting.RED),x,y,0xFFFFFF,true);
