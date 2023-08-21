@@ -77,6 +77,7 @@ public class ScopeSwitcher extends GenericSwitcher {
         data.addProperty("scope",name);
         pbv.put("hypercube:varitem",NbtString.of(var.toString()));
         Utility.sendHandItem(stack);
+        CodeClient.MC.gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
     }
 
     @Override
