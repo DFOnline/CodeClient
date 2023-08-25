@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
@@ -17,6 +18,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -25,6 +27,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,10 +41,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MClientPlayerInteractionManager {
     @Shadow protected abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
 
+    @Shadow private boolean breakingBlock;
+    @Shadow private BlockPos currentBreakingPos;
+    @Shadow private float currentBreakingProgress;
+    @Shadow private float blockBreakingSoundCooldown;
+    @Shadow @Final private MinecraftClient client;
+
+    @Shadow public abstract int getBlockBreakingProgress();
+
+    @Shadow public abstract boolean breakBlock(BlockPos pos);
+
+    @Shadow private int blockBreakingCooldown;
+
+    @Shadow protected abstract boolean isCurrentlyBreaking(BlockPos pos);
+
+    @Shadow public abstract boolean attackBlock(BlockPos pos, Direction direction);
+
     private static ItemStack item = null;
 
     @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
-    public void onAttackBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    public void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if(InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
     }
 
@@ -109,6 +128,52 @@ public abstract class MClientPlayerInteractionManager {
     private void reachDistance(CallbackInfoReturnable<Float> cir) {
         if(CodeClient.location instanceof Dev) {
             cir.setReturnValue(Config.getConfig().ReachDistance);
+        }
+    }
+
+    @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
+    private void attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+        if(CodeClient.location instanceof Dev dev) {
+            if(!dev.isInDev(pos)) return;
+            BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
+            if(breakPos != null) {
+                this.breakingBlock = true;
+                this.currentBreakingPos = pos;
+                this.currentBreakingProgress = 0.0F;
+                this.blockBreakingSoundCooldown = 0.0F;
+                this.client.world.setBlockBreakingInfo(this.client.player.getId(), this.currentBreakingPos, this.getBlockBreakingProgress());
+                cir.setReturnValue(true);
+            }
+        }
+    }
+    @Inject(method = "updateBlockBreakingProgress", at = @At("HEAD"), cancellable = true)
+    private void updateBlockBreakingProgress(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+        if (CodeClient.location instanceof Dev dev) {
+            if (!dev.isInDev(pos)) return;
+            BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
+            if (breakingBlock && !currentBreakingPos.equals(pos)) {
+                if(breakPos != null) {
+                    this.attackBlock(pos,direction);
+                    cir.setReturnValue(true);
+                }
+                return;
+            };
+            if (breakPos != null) {
+                this.currentBreakingProgress += InteractionManager.calcBlockBreakingDelta(pos);
+                if (this.currentBreakingProgress >= 1.0F) {
+                    this.breakingBlock = false;
+                    this.sendSequencedPacket(this.client.world, (sequence) -> {
+                        this.breakBlock(pos);
+                        return new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
+                    });
+                    this.currentBreakingProgress = 0.0F;
+                    this.blockBreakingSoundCooldown = 0.0F;
+                    this.blockBreakingCooldown = 5;
+                }
+
+                this.client.world.setBlockBreakingInfo(this.client.player.getId(), this.currentBreakingPos, this.getBlockBreakingProgress());
+                cir.setReturnValue(true);
+            }
         }
     }
 }

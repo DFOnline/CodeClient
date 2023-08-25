@@ -47,17 +47,29 @@ import java.util.List;
 import java.util.Objects;
 
 public class InteractionManager {
+    /**
+     * Assuming pos is in a codespace.
+     * @param pos The targeted pos.
+     * @return The origin of the codeblock to be broken. null if it shouldn't break.
+     */
+    public static BlockPos isBlockBreakable(BlockPos pos) {
+        if (pos.getY() % 5 != 0) return null;
+        Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
+        if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON, Blocks.CHEST).contains(type)) return null;
+        if (type == Blocks.OAK_SIGN) return pos.add(1, 0, 0);
+        return pos;
+    }
+
     public static boolean onBreakBlock(BlockPos pos) {
         if(CodeClient.location instanceof Dev plot && Config.getConfig().CustomBlockInteractions) {
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
             if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST && (!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir) && Config.getConfig().RecentChestInsert) {
                 RecentChestInsert.setLastChest(pos);
             }
-            if ((pos.getY() + 1) % 5 == 0) return true;
-            Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
-            if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON, Blocks.CHEST).contains(type)) return true;
-            if (type == Blocks.OAK_SIGN) pos = pos.add(1, 0, 0);
-            breakCodeBlock(pos);
+            BlockPos breakPos = isBlockBreakable(pos);
+            if(breakPos != null) {
+                breakCodeBlock(breakPos);
+            }
             return true;
         }
         return false;
@@ -225,6 +237,14 @@ public class InteractionManager {
         return true;
     }
 
+    public static boolean attackBlock(BlockPos pos) {
+        if(CodeClient.location instanceof Dev dev) {
+            CodeClient.MC.world.setBlockBreakingInfo(CodeClient.MC.player.getId(), pos, 9);
+            return true;
+        }
+        return false;
+    }
+
 //    public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
 //        MinecraftClient MC = CodeClient.MC;
 //        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {
@@ -306,5 +326,9 @@ public class InteractionManager {
             if(noClipAllowsBlock && mode != Config.LayerInteractionMode.OFF && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && isLevel) return VoxelShapes.empty();
         }
         return null;
+    }
+
+    public static float calcBlockBreakingDelta(BlockPos pos) {
+        return 0.1F;
     }
 }
