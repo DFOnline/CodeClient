@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
+import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 
@@ -14,6 +15,7 @@ public class Argument {
     private static TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
     public enum Type {
         TEXT(TextColor.fromFormatting(Formatting.AQUA), "Text"),
+        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text"),
         NUMBER(TextColor.fromFormatting(Formatting.RED), "§cNumber"),
         LOCATION(TextColor.fromFormatting(Formatting.GREEN), "§aLocation"),
         VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector"),
