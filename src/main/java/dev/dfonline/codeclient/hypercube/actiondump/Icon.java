@@ -2,10 +2,7 @@ package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.Utility;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtIntArray;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -31,6 +28,7 @@ public class Icon {
     public Boolean cancellable;
     public Boolean cancelledAutomatically;
     public String loadedItem;
+    public Integer tags;
     public Argument[] arguments;
 
     /**
@@ -61,6 +59,7 @@ public class Icon {
         if(arguments != null && arguments.length != 0) {
             addToLore(lore,"");
             addToLore(lore,"Chest Parameters:");
+            boolean hasOptional = false;
             for (Argument arg: arguments) {
                 int i = 0;
                 if(arg.text != null) addToLore(lore, arg.text);
@@ -71,7 +70,10 @@ public class Icon {
                         MutableText typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color));
                         if(arg.plural) typeText.append("(s)");
                         text.append(typeText);
-                        if(arg.optional) text.append(Text.literal("*").formatted(Formatting.WHITE));
+                        if(arg.optional) {
+                            text.append(Text.literal("*").formatted(Formatting.WHITE));
+                            hasOptional = true;
+                        }
                         text.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
                         text.append(Utility.textFromString(line).formatted(Formatting.GRAY));
                         lore.add(Utility.nbtify(text));
@@ -87,7 +89,13 @@ public class Icon {
                         i++;
                     }
                 }
-
+            }
+            if(tags != null && tags != 0) {
+                lore.add(Utility.nbtify(Text.literal("# ").formatted(Formatting.DARK_AQUA).append(Text.literal(tags + " Tag" + (tags != 1 ? "s" : "")).formatted(Formatting.GRAY))));
+            }
+            if(hasOptional) {
+                lore.add(Utility.nbtify(Text.empty()));
+                lore.add(Utility.nbtify(Text.literal("*Optional").formatted(Formatting.GRAY)));
             }
         }
         if(additionalInfo != null && additionalInfo.length != 0) {
