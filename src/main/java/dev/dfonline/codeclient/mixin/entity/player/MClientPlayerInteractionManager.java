@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.dev.BlockBreakDeltaCalculator;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -137,6 +138,7 @@ public abstract class MClientPlayerInteractionManager {
         if(!Config.getConfig().CustomBlockBreaking) return;
         if(CodeClient.location instanceof Dev dev) {
             if(!dev.isInDev(pos)) return;
+            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
             if(breakPos == null) {
                 cancelBlockBreaking();
