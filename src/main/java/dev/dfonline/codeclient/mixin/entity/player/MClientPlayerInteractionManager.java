@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.mixin.entity.player;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.BlockBreakDeltaCalculator;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
@@ -160,7 +161,7 @@ public abstract class MClientPlayerInteractionManager {
                 CodeClient.MC.interactionManager.attackBlock(pos,direction);
                 return;
             }
-            this.currentBreakingProgress += InteractionManager.calcBlockBreakingDelta(breakPos);
+            this.currentBreakingProgress += BlockBreakDeltaCalculator.calculateBlockDelta(breakPos);
             if (this.currentBreakingProgress >= 1.0F) {
                 this.breakingBlock = false;
                 this.sendSequencedPacket(this.client.world, (sequence) -> {

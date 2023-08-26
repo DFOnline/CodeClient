@@ -68,23 +68,12 @@ public class InteractionManager {
             }
             BlockPos breakPos = isBlockBreakable(pos);
             if(breakPos != null) {
+                BlockBreakDeltaCalculator.breakBlock(pos);
                 breakCodeBlock(breakPos);
             }
             return true;
         }
         return false;
-    }
-
-    public static boolean onPlaceBlock(BlockPos pos) {
-        if(CodeClient.location instanceof Dev plot) {
-            if(plot.isInCodeSpace(pos.getX(), pos.getZ())) {
-                CodeClient.MC.player.swingHand(Hand.MAIN_HAND);
-    //            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(new SoundEvent(new Identifier("minecraft:block.stone.place")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
-                return true;
-            }
-            return false;
-        }
-        return true;
     }
 
     private static void breakCodeBlock(BlockPos pos) {
@@ -326,9 +315,5 @@ public class InteractionManager {
             if(noClipAllowsBlock && mode != Config.LayerInteractionMode.OFF && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && isLevel) return VoxelShapes.empty();
         }
         return null;
-    }
-
-    public static float calcBlockBreakingDelta(BlockPos pos) {
-        return 0.1F;
     }
 }
