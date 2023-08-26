@@ -56,7 +56,7 @@ public class InteractionManager {
         if (pos.getY() % 5 != 0) return null;
         Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
         if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON, Blocks.CHEST).contains(type)) return null;
-        if (type == Blocks.OAK_SIGN) return pos.add(1, 0, 0);
+        if (type == Blocks.OAK_WALL_SIGN) return pos.east();
         return pos;
     }
 

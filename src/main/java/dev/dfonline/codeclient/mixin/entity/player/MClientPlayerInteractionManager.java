@@ -53,9 +53,9 @@ public abstract class MClientPlayerInteractionManager {
 
     @Shadow private int blockBreakingCooldown;
 
-    @Shadow protected abstract boolean isCurrentlyBreaking(BlockPos pos);
+    @Shadow private int lastSelectedSlot;
 
-    @Shadow public abstract boolean attackBlock(BlockPos pos, Direction direction);
+    @Shadow public abstract void cancelBlockBreaking();
 
     private static ItemStack item = null;
 
@@ -136,44 +136,44 @@ public abstract class MClientPlayerInteractionManager {
         if(CodeClient.location instanceof Dev dev) {
             if(!dev.isInDev(pos)) return;
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
-            if(breakPos != null) {
-                this.breakingBlock = true;
-                this.currentBreakingPos = pos;
-                this.currentBreakingProgress = 0.0F;
-                this.blockBreakingSoundCooldown = 0.0F;
-                this.client.world.setBlockBreakingInfo(this.client.player.getId(), this.currentBreakingPos, this.getBlockBreakingProgress());
+            if(breakPos == null) {
+                cancelBlockBreaking();
                 cir.setReturnValue(true);
+                return;
             }
+            this.breakingBlock = true;
+            this.currentBreakingPos = breakPos;
+            this.currentBreakingProgress = 0.0F;
+            this.blockBreakingSoundCooldown = 0.0F;
+            this.client.world.setBlockBreakingInfo(this.client.player.getId(), this.currentBreakingPos, this.getBlockBreakingProgress());
+            cir.setReturnValue(true);
         }
     }
     @Inject(method = "updateBlockBreakingProgress", at = @At("HEAD"), cancellable = true)
     private void updateBlockBreakingProgress(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         if (CodeClient.location instanceof Dev dev) {
             if (!dev.isInDev(pos)) return;
+            cir.cancel();
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
-            if (breakingBlock && !currentBreakingPos.equals(pos)) {
-                if(breakPos != null) {
-                    this.attackBlock(pos,direction);
-                    cir.setReturnValue(true);
-                }
+            if(breakPos == null || !breakPos.equals(currentBreakingPos) || !breakingBlock) {
+                cancelBlockBreaking();
+                CodeClient.MC.interactionManager.attackBlock(pos,direction);
                 return;
-            };
-            if (breakPos != null) {
-                this.currentBreakingProgress += InteractionManager.calcBlockBreakingDelta(pos);
-                if (this.currentBreakingProgress >= 1.0F) {
-                    this.breakingBlock = false;
-                    this.sendSequencedPacket(this.client.world, (sequence) -> {
-                        this.breakBlock(pos);
-                        return new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
-                    });
-                    this.currentBreakingProgress = 0.0F;
-                    this.blockBreakingSoundCooldown = 0.0F;
-                    this.blockBreakingCooldown = 5;
-                }
-
-                this.client.world.setBlockBreakingInfo(this.client.player.getId(), this.currentBreakingPos, this.getBlockBreakingProgress());
-                cir.setReturnValue(true);
             }
+            this.currentBreakingProgress += InteractionManager.calcBlockBreakingDelta(breakPos);
+            if (this.currentBreakingProgress >= 1.0F) {
+                this.breakingBlock = false;
+                this.sendSequencedPacket(this.client.world, (sequence) -> {
+                    this.breakBlock(pos);
+                    return new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
+                });
+                this.currentBreakingProgress = 0.0F;
+                this.blockBreakingSoundCooldown = 0.0F;
+                this.blockBreakingCooldown = 5;
+            }
+
+            this.client.world.setBlockBreakingInfo(this.client.player.getId(), this.currentBreakingPos, this.getBlockBreakingProgress());
+            cir.setReturnValue(true);
         }
     }
 }
