@@ -226,14 +226,6 @@ public class InteractionManager {
         return true;
     }
 
-    public static boolean attackBlock(BlockPos pos) {
-        if(CodeClient.location instanceof Dev dev) {
-            CodeClient.MC.world.setBlockBreakingInfo(CodeClient.MC.player.getId(), pos, 9);
-            return true;
-        }
-        return false;
-    }
-
 //    public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
 //        MinecraftClient MC = CodeClient.MC;
 //        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getPos().getX(), hitResult.getPos().getZ())) {

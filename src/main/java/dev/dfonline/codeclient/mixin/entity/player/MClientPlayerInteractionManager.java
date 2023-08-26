@@ -134,6 +134,7 @@ public abstract class MClientPlayerInteractionManager {
 
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     private void attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+        if(!Config.getConfig().CustomBlockBreaking) return;
         if(CodeClient.location instanceof Dev dev) {
             if(!dev.isInDev(pos)) return;
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
@@ -152,6 +153,7 @@ public abstract class MClientPlayerInteractionManager {
     }
     @Inject(method = "updateBlockBreakingProgress", at = @At("HEAD"), cancellable = true)
     private void updateBlockBreakingProgress(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+        if(!Config.getConfig().CustomBlockBreaking) return;
         if (CodeClient.location instanceof Dev dev) {
             if (!dev.isInDev(pos)) return;
             cir.cancel();

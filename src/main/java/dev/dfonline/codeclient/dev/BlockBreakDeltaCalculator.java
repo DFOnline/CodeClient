@@ -1,6 +1,5 @@
 package dev.dfonline.codeclient.dev;
 
-import dev.dfonline.codeclient.CodeClient;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;

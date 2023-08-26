@@ -42,6 +42,7 @@ public class Config {
     public boolean HighlightChestsWithAir = false;
     public int HighlightChestDuration = 10;
     public boolean UseIForLineScope = false;
+    public boolean CustomBlockBreaking = true;
 
     private void save() {
         try {
@@ -70,6 +71,7 @@ public class Config {
             object.addProperty("HighlightChestDuration",HighlightChestDuration);
             object.addProperty("ChestHighlightColor",ChestHighlightColor);
             object.addProperty("UseIForLineScope",UseIForLineScope);
+            object.addProperty("CustomBlockBreaking",CustomBlockBreaking);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -216,6 +218,16 @@ public class Config {
                                                 true,
                                                 () -> CustomBlockInteractions,
                                                 opt -> CustomBlockInteractions = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Custom Block Breaking"))
+                                        .description(OptionDescription.of(Text.literal("Keep codeblocks safe from accidental breaking."),Text.literal("They will have the survival breaking animation."),Text.literal("Breaking multiple will temporarily increase the speed.")))
+                                        .binding(
+                                                true,
+                                                () -> CustomBlockBreaking,
+                                                opt -> CustomBlockBreaking = opt
                                         )
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
