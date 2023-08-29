@@ -369,7 +369,7 @@ public class Config {
                                 .available(false)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.literal("Show I On Local Scope"))
+                                .name(Text.literal("Show I On Line Scope"))
                                 .description(OptionDescription.of(Text.literal("In variable icons use I for line variables.")))
                                 .binding(
                                         false,
