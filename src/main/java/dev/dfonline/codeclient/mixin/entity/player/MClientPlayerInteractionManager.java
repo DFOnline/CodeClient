@@ -158,6 +158,7 @@ public abstract class MClientPlayerInteractionManager {
         if(!Config.getConfig().CustomBlockBreaking) return;
         if (CodeClient.location instanceof Dev dev) {
             if (!dev.isInDev(pos)) return;
+            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
             cir.cancel();
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
             if(breakPos == null || !breakPos.equals(currentBreakingPos) || !breakingBlock) {
