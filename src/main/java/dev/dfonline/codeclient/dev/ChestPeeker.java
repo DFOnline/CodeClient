@@ -1,17 +1,16 @@
 package dev.dfonline.codeclient.dev;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.OverlayManager;
+import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.mixin.world.ClientWorldAccessor;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.debug.DebugRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -20,22 +19,18 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
-import org.joml.Quaternionfc;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -109,11 +104,65 @@ public class ChestPeeker {
                 for (NbtElement itemData : items) {
                     if (itemData instanceof NbtCompound compound) {
                         ItemStack item = Registries.ITEM.get(Identifier.tryParse(compound.getString("id"))).getDefaultStack();
-                        item.setCount(compound.getInt("count"));
-                        item.setNbt(compound.getCompound("tag"));
+                        item.setCount(compound.getInt("Count"));
+                        NbtCompound tag = compound.getCompound("tag");
+                        item.setNbt(tag);
+                        NbtList lore = tag.getCompound("display").getList("Lore",NbtElement.STRING_TYPE);
+
                         MutableText text = Text.empty();
                         text.append(Text.literal(" • ").formatted(Formatting.DARK_GRAY));
-                        text.append(item.getName());
+                        String varItem = tag.getCompound("PublicBukkitValues").getString("hypercube:varitem");
+                        if(Objects.equals(varItem, "")) {
+                            text.append(compound.getInt("Count") + "x ");
+                            text.append(item.getName());
+                        }
+                        else {
+                            JsonObject object = JsonParser.parseString(varItem).getAsJsonObject();
+                            Type type = Type.valueOf(object.get("id").getAsString());
+                            JsonObject data = object.get("data").getAsJsonObject();
+//                            JsonArray lore = data.get("display").getAsJsonObject().get("Lore").getAsJsonArray();
+                            text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
+                            if(type == Type.var) {
+                                Scope scope = Scope.valueOf(data.get("scope").getAsString());
+                                text.append(scope.shortName).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
+                            }
+                            if(type == Type.num || type == Type.txt || type == Type.comp || type == Type.var || type == Type.g_val || type == Type.pn_el) {
+                                text.append(item.getName());
+                            }
+                            if(type == Type.loc) {
+                                JsonObject loc = data.get("loc").getAsJsonObject();
+                                text.append("[%.2f, %.2f, %.2f, %.2f, %.2f]".formatted(
+                                        loc.get("x").getAsFloat(),
+                                        loc.get("y").getAsFloat(),
+                                        loc.get("z").getAsFloat(),
+                                        loc.get("pitch").getAsFloat(),
+                                        loc.get("yaw").getAsFloat()));
+                            }
+                            if(type == Type.vec) {
+                                text.append(Text.literal("<%.2f, %.2f, %.2f>".formatted(
+                                        data.get("x").getAsFloat(),
+                                        data.get("y").getAsFloat(),
+                                        data.get("z").getAsFloat())
+                                ).fillStyle(Style.EMPTY.withColor(Type.vec.color)));
+                            }
+                            if(type == Type.snd) {
+                                text.append(Text.Serializer.fromJson(lore.getString(0)));
+                                text.append(Text.literal(" P: ").formatted(Formatting.GRAY));
+                                text.append(Text.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
+                                text.append(Text.literal(" V: ").formatted(Formatting.GRAY));
+                                text.append(Text.literal("%.1f".formatted(data.get("vol").getAsFloat())));
+                            }
+                            if(type == Type.part) {
+                                text.append(Text.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
+                                text.append(Text.Serializer.fromJson(lore.getString(0)));
+                            }
+                            if(type == Type.pot) {
+                                text.append(Text.Serializer.fromJson(lore.getString(0)));
+                                text.append(Text.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
+                                int dur = data.get("dur").getAsInt();
+                                text.append(dur >= 1000000 ? "Infinite" : dur % 20 == 0 ? "%d:%02d".formatted((dur / 1200), (dur / 20) % 60) : (dur + "ticks"));
+                            }
+                        }
                         texts.add(text);
                     }
                 }
@@ -143,7 +192,7 @@ public class ChestPeeker {
                     Matrix4f matrix4f = matrices.peek().getPositionMatrix();
                     matrix4f.translate(x,y,0F);
                     VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getTextBackgroundSeeThrough());
-                    int color = 0xFF_00_00_00;
+                    int color = 0x88_00_00_00;
                     vertexConsumer.vertex(matrix4f, -1.0F, -1.0F, 0.0F).color(color).light(15728880).next();
                     vertexConsumer.vertex(matrix4f, -1.0F, (float)texts.size() * 9, 0.0F).color(color).light(15728880).next();
                     vertexConsumer.vertex(matrix4f, (float)widest, (float)texts.size() * 9, 0.0F).color(color).light(15728880).next();
@@ -155,6 +204,32 @@ public class ChestPeeker {
                 }
                 matrices.pop();
             }
+        }
+    }
+
+    enum Type {
+        txt("str", Formatting.AQUA),
+        comp("txt", TextColor.fromRgb(0x7fd42a)),
+        num("num", Formatting.RED),
+        loc("loc", Formatting.GREEN),
+        vec("vec", TextColor.fromRgb(0x2affaa)),
+        snd("snd", Formatting.BLUE),
+        part("par", TextColor.fromRgb(0xaa55ff)),
+        pot("pot", TextColor.fromRgb(0xff557f)),
+        var("var", Formatting.YELLOW),
+        g_val("val", TextColor.fromRgb(0xffd47f)),
+        pn_el("param",TextColor.fromRgb(0xaaffaa)),
+        bl_tag("tag", Formatting.YELLOW);
+
+        public final String name;
+        public final TextColor color;
+        Type(String name, TextColor color) {
+            this.name = name;
+            this.color = color;
+        }
+        Type(String name, Formatting color) {
+            this.name = name;
+            this.color = TextColor.fromFormatting(color);
         }
     }
 }
