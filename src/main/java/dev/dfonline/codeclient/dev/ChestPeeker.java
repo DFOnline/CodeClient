@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.dev;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.Blocks;
@@ -40,6 +41,7 @@ public class ChestPeeker {
     private static NbtList items = null;
 
     public static void tick() {
+        if(!Config.getConfig().ChestPeeker) return;
         if(CodeClient.location instanceof Dev dev) {
             if(CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
                 BlockPos pos = block.getBlockPos();
@@ -62,6 +64,7 @@ public class ChestPeeker {
                     bet.putInt("y", pos.getY());
                     bet.putInt("z", pos.getZ());
                     item.setSubNbt("BlockEntityTag", bet);
+                    item.setCustomName(Text.literal("if you see this the chest broke a little."));
                     CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
                     CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1, item));
                     return;
@@ -76,7 +79,8 @@ public class ChestPeeker {
      * @return true to cancel packet.
      */
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
-        if(CodeClient.location instanceof Dev dev) {
+        if(!Config.getConfig().ChestPeeker) return false;
+        if(CodeClient.location instanceof Dev) {
             if(currentBlock == null) return false;
             if(packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
@@ -94,13 +98,14 @@ public class ChestPeeker {
     }
 
     public static void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers) {
+        if(!Config.getConfig().ChestPeeker) return;
         if (CodeClient.location instanceof Dev && currentBlock != null && items != null) {
             ArrayList<Text> texts = new ArrayList<>();
             if(items.isEmpty()) {
-                texts.add(Text.literal("Empty Chest").formatted(Formatting.GOLD));
+                texts.add(Text.literal("Empty").formatted(Formatting.GOLD));
             }
             else {
-                texts.add(Text.literal("Chest").formatted(Formatting.GOLD));
+                texts.add(Text.literal("Contents").formatted(Formatting.GOLD));
                 for (NbtElement itemData : items) {
                     if (itemData instanceof NbtCompound compound) {
                         ItemStack item = Registries.ITEM.get(Identifier.tryParse(compound.getString("id"))).getDefaultStack();
@@ -182,7 +187,6 @@ public class ChestPeeker {
                 int width = textRenderer.getWidth(text);
                 if(width > widest) widest = width;
             }
-            widest = Math.max(widest,45);
 
             Camera camera = CodeClient.MC.gameRenderer.getCamera();
             if (camera.isReady() && CodeClient.MC.getEntityRenderDispatcher().gameOptions != null) {

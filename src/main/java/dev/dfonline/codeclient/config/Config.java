@@ -6,7 +6,6 @@ import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
-import dev.isxander.yacl3.gui.controllers.ColorController;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
 import net.minecraft.text.Text;
@@ -43,6 +42,7 @@ public class Config {
     public int HighlightChestDuration = 10;
     public boolean UseIForLineScope = false;
     public boolean CustomBlockBreaking = true;
+    public boolean ChestPeeker = true;
 
     private void save() {
         try {
@@ -72,6 +72,7 @@ public class Config {
             object.addProperty("ChestHighlightColor",ChestHighlightColor);
             object.addProperty("UseIForLineScope",UseIForLineScope);
             object.addProperty("CustomBlockBreaking",CustomBlockBreaking);
+            object.addProperty("ChestPeeker",ChestPeeker);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -375,6 +376,16 @@ public class Config {
                                         false,
                                         () -> UseIForLineScope,
                                         opt -> UseIForLineScope = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.literal("Preview Chest Contents"))
+                                .description(OptionDescription.of(Text.literal("Show a popup with with item info when looking at a chest.")))
+                                .binding(
+                                        true,
+                                        () -> ChestPeeker,
+                                        opt -> ChestPeeker = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
