@@ -116,52 +116,60 @@ public class ChestPeeker {
                             text.append(compound.getInt("Count") + "x ");
                             text.append(item.getName());
                         }
-                        else {
-                            JsonObject object = JsonParser.parseString(varItem).getAsJsonObject();
-                            Type type = Type.valueOf(object.get("id").getAsString());
-                            JsonObject data = object.get("data").getAsJsonObject();
-//                            JsonArray lore = data.get("display").getAsJsonObject().get("Lore").getAsJsonArray();
-                            text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
-                            if(type == Type.var) {
-                                Scope scope = Scope.valueOf(data.get("scope").getAsString());
-                                text.append(scope.shortName).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
-                            }
-                            if(type == Type.num || type == Type.txt || type == Type.comp || type == Type.var || type == Type.g_val || type == Type.pn_el) {
-                                text.append(item.getName());
-                            }
-                            if(type == Type.loc) {
-                                JsonObject loc = data.get("loc").getAsJsonObject();
-                                text.append("[%.2f, %.2f, %.2f, %.2f, %.2f]".formatted(
-                                        loc.get("x").getAsFloat(),
-                                        loc.get("y").getAsFloat(),
-                                        loc.get("z").getAsFloat(),
-                                        loc.get("pitch").getAsFloat(),
-                                        loc.get("yaw").getAsFloat()));
-                            }
-                            if(type == Type.vec) {
-                                text.append(Text.literal("<%.2f, %.2f, %.2f>".formatted(
-                                        data.get("x").getAsFloat(),
-                                        data.get("y").getAsFloat(),
-                                        data.get("z").getAsFloat())
-                                ).fillStyle(Style.EMPTY.withColor(Type.vec.color)));
-                            }
-                            if(type == Type.snd) {
-                                text.append(Text.Serializer.fromJson(lore.getString(0)));
-                                text.append(Text.literal(" P: ").formatted(Formatting.GRAY));
-                                text.append(Text.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
-                                text.append(Text.literal(" V: ").formatted(Formatting.GRAY));
-                                text.append(Text.literal("%.1f".formatted(data.get("vol").getAsFloat())));
-                            }
-                            if(type == Type.part) {
-                                text.append(Text.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
-                                text.append(Text.Serializer.fromJson(lore.getString(0)));
-                            }
-                            if(type == Type.pot) {
-                                text.append(Text.Serializer.fromJson(lore.getString(0)));
-                                text.append(Text.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
-                                int dur = data.get("dur").getAsInt();
-                                text.append(dur >= 1000000 ? "Infinite" : dur % 20 == 0 ? "%d:%02d".formatted((dur / 1200), (dur / 20) % 60) : (dur + "ticks"));
-                            }
+                        else{
+                            try {
+                                    JsonObject object = JsonParser.parseString(varItem).getAsJsonObject();
+                                    Type type = Type.valueOf(object.get("id").getAsString());
+                                    JsonObject data = object.get("data").getAsJsonObject();
+    //                            JsonArray lore = data.get("display").getAsJsonObject().get("Lore").getAsJsonArray();
+                                    text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
+                                    if (type == Type.var) {
+                                        Scope scope = Scope.valueOf(data.get("scope").getAsString());
+                                        text.append(scope.shortName).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
+                                    }
+                                    if (type == Type.num || type == Type.txt || type == Type.comp || type == Type.var || type == Type.g_val || type == Type.pn_el) {
+                                        text.append(item.getName());
+                                    }
+                                    if (type == Type.loc) {
+                                        JsonObject loc = data.get("loc").getAsJsonObject();
+                                        text.append("[%.2f, %.2f, %.2f, %.2f, %.2f]".formatted(
+                                                loc.get("x").getAsFloat(),
+                                                loc.get("y").getAsFloat(),
+                                                loc.get("z").getAsFloat(),
+                                                loc.get("pitch").getAsFloat(),
+                                                loc.get("yaw").getAsFloat()));
+                                    }
+                                    if (type == Type.vec) {
+                                        text.append(Text.literal("<%.2f, %.2f, %.2f>".formatted(
+                                                data.get("x").getAsFloat(),
+                                                data.get("y").getAsFloat(),
+                                                data.get("z").getAsFloat())
+                                        ).fillStyle(Style.EMPTY.withColor(Type.vec.color)));
+                                    }
+                                    if (type == Type.snd) {
+                                        text.append(Text.Serializer.fromJson(lore.getString(0)));
+                                        text.append(Text.literal(" P: ").formatted(Formatting.GRAY));
+                                        text.append(Text.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
+                                        text.append(Text.literal(" V: ").formatted(Formatting.GRAY));
+                                        text.append(Text.literal("%.1f".formatted(data.get("vol").getAsFloat())));
+                                    }
+                                    if (type == Type.part) {
+                                        text.append(Text.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
+                                        text.append(Text.Serializer.fromJson(lore.getString(0)));
+                                    }
+                                    if (type == Type.pot) {
+                                        text.append(Text.Serializer.fromJson(lore.getString(0)));
+                                        text.append(Text.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
+                                        int dur = data.get("dur").getAsInt();
+                                        text.append(dur >= 1000000 ? "Infinite" : dur % 20 == 0 ? "%d:%02d".formatted((dur / 1200), (dur / 20) % 60) : (dur + "ticks"));
+                                    }
+                                    if (type == Type.bl_tag) {
+                                        text.append(Text.literal(data.get("tag").getAsString()).formatted(Formatting.YELLOW));
+                                        text.append(Text.literal(" » ").formatted(Formatting.DARK_AQUA));
+                                        text.append(Text.literal(data.get("option").getAsString()).formatted(Formatting.AQUA));
+                                    }
+                                    if (type == Type.hint) continue;
+                                } catch (Exception ignored) {continue;}
                         }
                         texts.add(text);
                     }
@@ -219,7 +227,8 @@ public class ChestPeeker {
         var("var", Formatting.YELLOW),
         g_val("val", TextColor.fromRgb(0xffd47f)),
         pn_el("param",TextColor.fromRgb(0xaaffaa)),
-        bl_tag("tag", Formatting.YELLOW);
+        bl_tag("tag", Formatting.YELLOW),
+        hint("hint", TextColor.fromRgb(0xaaff55));
 
         public final String name;
         public final TextColor color;
