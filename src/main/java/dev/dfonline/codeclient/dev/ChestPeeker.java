@@ -39,6 +39,7 @@ import java.util.Objects;
 public class ChestPeeker {
     private static BlockPos currentBlock = null;
     private static NbtList items = null;
+    private static boolean shouldClearChest = false;
 
     public static void tick() {
         if(!Config.getConfig().ChestPeeker) return;
@@ -55,6 +56,7 @@ public class ChestPeeker {
                     }
                     currentBlock = pos;
                     items = null;
+                    shouldClearChest = true;
 
                     ItemStack item = Items.CHEST.getDefaultStack();
                     NbtCompound bet = new NbtCompound();
@@ -81,7 +83,7 @@ public class ChestPeeker {
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         if(!Config.getConfig().ChestPeeker) return false;
         if(CodeClient.location instanceof Dev) {
-            if(currentBlock == null) return false;
+            if(!shouldClearChest) return false;
             if(packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
                 if(slot.getSlot() != 1) return false;
@@ -90,7 +92,8 @@ public class ChestPeeker {
                 NbtCompound bet = nbt.getCompound("BlockEntityTag");
                 if(bet == null) return false;
                 if(!Objects.equals(bet.getString("id"), "minecraft:chest")) return false;
-                items = bet.getList("Items", NbtElement.COMPOUND_TYPE);
+                if(currentBlock != null) items = bet.getList("Items", NbtElement.COMPOUND_TYPE);
+                shouldClearChest = false;
                 return true;
             }
         }
@@ -121,7 +124,7 @@ public class ChestPeeker {
                             text.append(compound.getInt("Count") + "x ");
                             text.append(item.getName());
                         }
-                        else{
+                        else {
                             try {
                                     JsonObject object = JsonParser.parseString(varItem).getAsJsonObject();
                                     Type type = Type.valueOf(object.get("id").getAsString());
@@ -197,6 +200,10 @@ public class ChestPeeker {
                 matrices.translate((float)(currentBlock.getX() - camX) + 0.5, (float)(currentBlock.getY() - camY) + 0.4F, (float)(currentBlock.getZ() - camZ) + 0.5);
                 matrices.multiplyPositionMatrix((new Matrix4f()).rotation(camera.getRotation()));
                 float size = 0.02f;
+                int howBig = Math.max(widest,texts.size() * 9);
+                if(howBig > 190) {
+                    size = Math.max(0.02f - (howBig - 190) * 0.0001f,0.01f);
+                }
                 matrices.scale(-size, -size, size);
                 float x = (float)(-widest) / 2.0F;
 //                width -= 0 / size;
