@@ -5,7 +5,7 @@ import net.minecraft.text.TextColor;
 import java.util.HashMap;
 import java.util.Map;
 
-import dev.dfonline.codeclient.hypercube.actiondump.Argument.Type;
+import dev.dfonline.codeclient.hypercube.actiondump.Icon.Type;
 
 public class Variable {
     public ValueType type;

@@ -5,7 +5,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
@@ -30,6 +32,7 @@ public class Icon {
     public String loadedItem;
     public Integer tags;
     public Argument[] arguments;
+    public ReturnValue[] returnValues;
 
     /**
      * Gets the pure name, without any color codes.
@@ -64,7 +67,7 @@ public class Icon {
                 int i = 0;
                 if(arg.text != null) addToLore(lore, arg.text);
                 if(arg.description != null && description.length != 0) for (String line: arg.description) {
-                    Argument.Type type = Argument.Type.valueOf(arg.type);
+                    Type type = Type.valueOf(arg.type);
                     if(i == 0) {
                         MutableText text = Text.empty().formatted(Formatting.GRAY);
                         MutableText typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color));
@@ -98,6 +101,24 @@ public class Icon {
                 lore.add(Utility.nbtify(Text.literal("*Optional").formatted(Formatting.GRAY)));
             }
         }
+        if(returnValues != null && returnValues.length != 0) {
+            addToLore(lore,"");
+            addToLore(lore,"Returns Value:");
+            for (ReturnValue returnValue: returnValues) {
+                if(returnValue.text != null) addToLore(lore,returnValue.text);
+                else {
+                    lore.add(Utility.nbtify(Text.empty().append(Text.literal(returnValue.type.display).setStyle(Style.EMPTY.withColor(returnValue.type.color))).append(Text.literal(" - ").formatted(Formatting.DARK_GRAY)).append(Text.literal(returnValue.description[0]).formatted(Formatting.GRAY))));
+                    boolean first = true;
+                    for (String description: returnValue.description) {
+                        if(first) {
+                            first = false;
+                            continue;
+                        }
+                        addToLore(lore,"§7" + description);
+                    }
+                }
+            }
+        }
         if(additionalInfo != null && additionalInfo.length != 0) {
             addToLore(lore,"");
             addToLore(lore,"§9Additional Info:");
@@ -125,22 +146,56 @@ public class Icon {
 
         if(head != null) {
             NbtCompound SkullOwner = new NbtCompound();
-                NbtIntArray Id = new NbtIntArray(List.of(0,0,0,0));
-                SkullOwner.put("Id",Id);
-                SkullOwner.putString("Name","DF-HEAD");
-                NbtCompound Properties = new NbtCompound();
-                    NbtList textures = new NbtList();
-                        NbtCompound texture = new NbtCompound();
-                            texture.putString("Value",head);
-                    textures.add(texture);
-                    Properties.put("textures",textures);
-                SkullOwner.put("Properties",Properties);
+            NbtIntArray Id = new NbtIntArray(List.of(0,0,0,0));
+            SkullOwner.put("Id",Id);
+            SkullOwner.putString("Name","DF-HEAD");
+            NbtCompound Properties = new NbtCompound();
+                NbtList textures = new NbtList();
+                    NbtCompound texture = new NbtCompound();
+                        texture.putString("Value",head);
+                textures.add(texture);
+                Properties.put("textures",textures);
+            SkullOwner.put("Properties",Properties);
             nbt.put("SkullOwner",SkullOwner);
         }
 
         item.setNbt(nbt);
         return item;
     }
+
+    private static TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
+    public enum Type {
+        TEXT(TextColor.fromFormatting(Formatting.AQUA), "Text"),
+        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text"),
+        NUMBER(TextColor.fromFormatting(Formatting.RED), "§cNumber"),
+        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "§aLocation"),
+        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector"),
+        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound"),
+        PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect"),
+        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect"),
+        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable"),
+        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value"),
+        ITEM(GOLD, "Item"),
+        BLOCK(GOLD, "Block"),
+        ENTITY_TYPE(GOLD, "Entity Type"),
+        SPAWN_EGG(GOLD, "Spawn Egg"),
+        VEHICLE(GOLD, "Vehicle"),
+        PROJECTILE(GOLD, "Projectile"),
+        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag"),
+        LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List"),
+        DICT(TextColor.fromRgb(0x55AAFF), "Dictionary"),
+        NONE(TextColor.fromRgb(0x808080), "None"),
+        ;
+
+        public final TextColor color;
+        public final String display;
+        Type(TextColor color, String display) {
+            this.color = color;
+            this.display = display;
+        }
+    }
+
+    record ReturnValue(Type type, String[] description, String text) {}
 
     private void addToLore(NbtList lore, String text) {
         lore.add(Utility.nbtify(Utility.textFromString(text)));
