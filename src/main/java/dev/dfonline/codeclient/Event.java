@@ -41,7 +41,7 @@ public class Event {
                 if(content.equals("» You are now in build mode.")) {
                     updateLocation(new Build());
                 }
-                if(content.startsWith("» Joined game: ") && content.endsWith(".")) {
+                if(content.startsWith("» Joined game: ")) {
                     updateLocation(new Play());
                 }
                 step = Sequence.WAIT_FOR_CLEAR;
