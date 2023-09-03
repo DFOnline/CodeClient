@@ -29,7 +29,6 @@ public class Event {
         if(packet instanceof OverlayMessageS2CPacket overlay) {
             if (step == Sequence.WAIT_FOR_MESSAGE && overlay.getMessage().getString().startsWith("DiamondFire - ")) {
                 updateLocation(new Spawn());
-                step = Sequence.WAIT_FOR_CLEAR;
             }
         }
         if(packet instanceof GameMessageS2CPacket message) {
@@ -44,7 +43,6 @@ public class Event {
                 if(content.startsWith("» Joined game: ")) {
                     updateLocation(new Play());
                 }
-                step = Sequence.WAIT_FOR_CLEAR;
             }
         }
         if(packet instanceof GameJoinS2CPacket) {
@@ -69,6 +67,7 @@ public class Event {
             CodeClient.LOGGER.info("Switched location: " + location.name());
         }
         else CodeClient.LOGGER.info("Changed location: " + location.name());
+        step = Sequence.WAIT_FOR_CLEAR;
     }
 
     private enum Sequence {
