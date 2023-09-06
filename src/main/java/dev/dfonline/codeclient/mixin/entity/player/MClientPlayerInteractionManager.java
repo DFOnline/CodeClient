@@ -137,12 +137,11 @@ public abstract class MClientPlayerInteractionManager {
     private void attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         if(!Config.getConfig().CustomBlockBreaking) return;
         if(CodeClient.location instanceof Dev dev) {
+            if(Utility.isGlitchStick(CodeClient.MC.player.getMainHandStack())) return;
             if(!dev.isInDev(pos)) return;
             if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
             if(breakPos == null) {
-                cancelBlockBreaking();
-                cir.setReturnValue(true);
                 return;
             }
             this.breakingBlock = true;
@@ -157,6 +156,7 @@ public abstract class MClientPlayerInteractionManager {
     private void updateBlockBreakingProgress(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         if(!Config.getConfig().CustomBlockBreaking) return;
         if (CodeClient.location instanceof Dev dev) {
+            if(Utility.isGlitchStick(CodeClient.MC.player.getMainHandStack())) return;
             if (!dev.isInDev(pos)) return;
             if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
             cir.cancel();

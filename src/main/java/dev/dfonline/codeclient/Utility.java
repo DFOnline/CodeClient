@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -142,5 +143,13 @@ public class Utility {
         }
         return output;
     }
-}
 
+    public static boolean isGlitchStick(ItemStack item) {
+        if(item == null) return false;
+        NbtCompound nbt = item.getNbt();
+        if(nbt == null) return false;
+        if(nbt.isEmpty()) return false;
+        if(Objects.equals(nbt.getCompound("PublicBukkitValues").getString("hypercube:item_instance"), "")) return false;
+        return Objects.equals(nbt.getCompound("display").getString("Name"), "{\"italic\":false,\"color\":\"red\",\"text\":\"Glitch Stick\"}");
+    }
+}
