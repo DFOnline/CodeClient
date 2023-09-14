@@ -1,10 +1,10 @@
 package dev.dfonline.codeclient.mixin.render.hud;
 
 import dev.dfonline.codeclient.OverlayManager;
+import dev.dfonline.codeclient.dev.ChestPeeker;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,15 +18,28 @@ import java.util.List;
 public abstract class MInGameHud {
     @Shadow public abstract TextRenderer getTextRenderer();
 
+    @Shadow private int scaledHeight;
+
+    @Shadow private int scaledWidth;
+
     @Inject(method = "render", at = @At("HEAD"))
     private void onRender(DrawContext context, float tickDelta, CallbackInfo ci) {
-        if(OverlayManager.getOverlayText().size() == 0) return;
         TextRenderer textRenderer = getTextRenderer();
-        int index = 0;
+
         List<Text> overlay = List.copyOf(OverlayManager.getOverlayText());
-        for (Text text : overlay){
-            context.drawTextWithShadow(textRenderer, text, 30, 30 + (index * 9), -1);
-            index++;
+        if(!overlay.isEmpty()) {
+            int index = 0;
+            for (Text text : overlay) {
+                context.drawTextWithShadow(textRenderer, text, 30, 30 + (index * 9), -1);
+                index++;
+            }
+        }
+        List<Text> peeker = ChestPeeker.getOverlayText();
+        if(peeker != null && !peeker.isEmpty()) {
+            int x = (scaledWidth / 2);
+            int yOrig = (scaledHeight / 2) - 4;
+            context.drawTooltip(textRenderer,peeker,x,yOrig);
+
         }
     }
 }

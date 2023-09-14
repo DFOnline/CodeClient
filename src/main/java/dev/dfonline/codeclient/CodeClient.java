@@ -127,7 +127,6 @@ public class CodeClient implements ModInitializer {
     public static void onRender(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         Debug.render(matrices, vertexConsumers);
         RecentChestInsert.render(matrices, vertexConsumers, cameraX, cameraY, cameraZ);
-        ChestPeeker.render(matrices,vertexConsumers);
     }
 
     /**

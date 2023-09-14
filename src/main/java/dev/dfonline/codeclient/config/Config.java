@@ -371,7 +371,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Show I On Line Scope"))
-                                .description(OptionDescription.of(Text.literal("In variable icons use I for line variables.")))
+                                .description(OptionDescription.of(Text.literal("Whenever LINE is shortened, shorten it to I.")))
                                 .binding(
                                         false,
                                         () -> UseIForLineScope,

@@ -7,12 +7,6 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -31,9 +25,9 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ChestPeeker {
@@ -100,8 +94,8 @@ public class ChestPeeker {
         return false;
     }
 
-    public static void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers) {
-        if(!Config.getConfig().ChestPeeker) return;
+    public static List<Text> getOverlayText() {
+        if(!Config.getConfig().ChestPeeker) return null;
         if (CodeClient.location instanceof Dev && currentBlock != null && items != null) {
             ArrayList<Text> texts = new ArrayList<>();
             if(items.isEmpty()) {
@@ -133,7 +127,7 @@ public class ChestPeeker {
                                     text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
                                     if (type == Type.var) {
                                         Scope scope = Scope.valueOf(data.get("scope").getAsString());
-                                        text.append(scope.shortName).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
+                                        text.append(scope == Scope.line & Config.getConfig().UseIForLineScope ? "I" : scope.shortName       ).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
                                     }
                                     if (type == Type.num || type == Type.txt || type == Type.comp || type == Type.var || type == Type.g_val || type == Type.pn_el) {
                                         text.append(item.getName());
@@ -183,47 +177,9 @@ public class ChestPeeker {
                     }
                 }
             }
-
-            TextRenderer textRenderer = CodeClient.MC.textRenderer;
-            int widest = 0;
-            for (Text text: texts) {
-                int width = textRenderer.getWidth(text);
-                if(width > widest) widest = width;
-            }
-
-            Camera camera = CodeClient.MC.gameRenderer.getCamera();
-            if (camera.isReady() && CodeClient.MC.getEntityRenderDispatcher().gameOptions != null) {
-                double camX = camera.getPos().x;
-                double camY = camera.getPos().y;
-                double camZ = camera.getPos().z;
-                matrices.push();
-                matrices.translate((float)(currentBlock.getX() - camX) + 0.5, (float)(currentBlock.getY() - camY) + 0.4F, (float)(currentBlock.getZ() - camZ) + 0.5);
-                matrices.multiplyPositionMatrix((new Matrix4f()).rotation(camera.getRotation()));
-                float size = 0.02f;
-                int howBig = Math.max(widest,texts.size() * 9);
-                if(howBig > 190) {
-                    size = Math.max(0.02f - (howBig - 190) * 0.0001f,0.01f);
-                }
-                matrices.scale(-size, -size, size);
-                float x = (float)(-widest) / 2.0F;
-//                width -= 0 / size;
-                float y = texts.size() * -4.5F;
-                    Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-                    matrix4f.translate(x,y,0F);
-                    VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getTextBackgroundSeeThrough());
-                    int color = 0x88_00_00_00;
-                    vertexConsumer.vertex(matrix4f, -1.0F, -1.0F, 0.0F).color(color).light(15728880).next();
-                    vertexConsumer.vertex(matrix4f, -1.0F, (float)texts.size() * 9, 0.0F).color(color).light(15728880).next();
-                    vertexConsumer.vertex(matrix4f, (float)widest, (float)texts.size() * 9, 0.0F).color(color).light(15728880).next();
-                    vertexConsumer.vertex(matrix4f, (float)widest, -1.0F, 0.0F).color(color).light(15728880).next();
-                    matrix4f.translate(-x,-y,0);
-                for (Text text: texts) {
-                    textRenderer.draw(text, x, y, 0xFFFFFF, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, 0, 15728880);
-                    y += textRenderer.fontHeight;
-                }
-                matrices.pop();
-            }
+            return texts;
         }
+        return null;
     }
 
     enum Type {
