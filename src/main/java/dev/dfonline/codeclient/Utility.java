@@ -29,6 +29,25 @@ import java.util.zip.GZIPOutputStream;
 
 public class Utility {
     /**
+     * Get the slot id to be used with a creative packet, from a local slot id.
+     */
+    public static int getRemoteSlot(int slot) {
+        if(0 <= slot && slot <= 8) { // this is for the hotbar, which is after the inventory in packets.
+            return slot + 36;
+        }
+        else return slot;
+    }
+
+    /**
+     * Be lazy, send your whole inventory!
+     */
+    public static void sendInventory() {
+        for (int i = 0; i <= 35; i++) {
+            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(getRemoteSlot(i), CodeClient.MC.player.getInventory().getStack(i)));
+        }
+    }
+
+    /**
      * Ensure the player is holding an item, by holding and setting the first slot.
      * @param template Any item
      */

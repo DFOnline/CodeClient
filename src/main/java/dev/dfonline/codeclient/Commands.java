@@ -54,7 +54,6 @@ public class Commands {
 
         dispatcher.register(literal("fixcc").executes(context -> {
             CodeClient.currentAction = new None();
-            if(CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.BASIC);
             CodeClient.location = null;
             BuildClip.disableClipping();
             SocketHandler.setConnection(null);

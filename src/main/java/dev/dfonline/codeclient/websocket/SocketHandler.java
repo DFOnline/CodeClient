@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import com.google.gson.JsonObject;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.impl.ClearPlot;
 import dev.dfonline.codeclient.action.impl.GetPlotSize;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
@@ -14,6 +16,8 @@ import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.StringNbtReader;
 import org.java_websocket.WebSocket;
 
 public class SocketHandler {
@@ -60,8 +64,9 @@ public class SocketHandler {
         String[] arguments = message.split(" ");
         Action topAction = getTopAction();
         if(arguments[0] == null) return;
+        String content = arguments.length > 1 ? message.substring(arguments[0].length() + 1) : "";
         if(topAction != null && arguments.length > 1 && Objects.equals(topAction.name, arguments[0])) {
-            topAction.message(connection,message.substring(arguments[0].length() + 1));
+            topAction.message(connection,content);
             return;
         }
         switch (arguments[0]) {
@@ -76,6 +81,15 @@ public class SocketHandler {
             }
             case "place" -> {
                 SocketHandler.actionQueue.add(new Place());
+            }
+            case "inv" -> {
+                SocketHandler.actionQueue.add(new SendInventory());
+            }
+            case "setinv" -> {
+                SocketHandler.actionQueue.add(new SetInventory(content));
+            }
+            case "give" -> {
+                SocketHandler.actionQueue.add(new Give(content));
             }
             case "swap" -> {
                 response.addProperty("status","error");
@@ -94,12 +108,12 @@ public class SocketHandler {
     }
 
     private static Action getTopAction() {
-        if(actionQueue.size() == 0) return null;
+        if(actionQueue.isEmpty()) return null;
         return actionQueue.get(actionQueue.size() - 1);
     }
 
     private static void next() {
-        if(actionQueue.size() == 0) return;
+        if(actionQueue.isEmpty()) return;
         Action firstAction = actionQueue.get(0);
         if(firstAction == null) return;
         if(firstAction.active) {
@@ -225,5 +239,91 @@ public class SocketHandler {
             template.setNbt(nbt);
             templates.add(template);
         }
+    }
+    private static class SendInventory extends SocketHandler.Action {
+        SendInventory() {
+            super("inv");
+        }
+
+        @Override
+        public void set(WebSocket responder) {}
+
+        @Override
+        public void start(WebSocket responder) {
+            NbtCompound nbt = new NbtCompound();
+            CodeClient.MC.player.writeNbt(nbt);
+            responder.send(String.valueOf(nbt.get("Inventory")));
+            next();
+        }
+
+        @Override
+        public void message(WebSocket responder, String message) {}
+    }
+    private static class SetInventory extends SocketHandler.Action {
+        private final String content;
+
+        SetInventory(String content) {
+            super("setinv");
+            this.content = content;
+        }
+
+        @Override
+        public void set(WebSocket responder) {}
+
+        @Override
+        public void start(WebSocket responder) {
+            if(!CodeClient.MC.player.isCreative()) {
+                responder.send("not creative mode");
+                next();
+                return;
+            }
+            try {
+                NbtCompound nbt = new NbtCompound();
+                CodeClient.MC.player.writeNbt(nbt);
+                nbt.put("Inventory",StringNbtReader.parse("{Inventory:" + content + "}").getList("Inventory", NbtElement.COMPOUND_TYPE));
+                CodeClient.MC.player.readNbt(nbt);
+                Utility.sendInventory();
+            } catch (CommandSyntaxException e) {
+                responder.send("invalid nbt");
+            }
+            finally {
+                next();
+            }
+        }
+
+        @Override
+        public void message(WebSocket responder, String message) {}
+    }
+    private static class Give extends SocketHandler.Action {
+        private final String content;
+
+        Give(String content) {
+            super("give");
+            this.content = content;
+        }
+
+        @Override
+        public void set(WebSocket responder) {}
+
+        @Override
+        public void start(WebSocket responder) {
+            if(!CodeClient.MC.player.isCreative()) {
+                responder.send("not creative mode");
+                next();
+                return;
+            }
+            try {
+                CodeClient.MC.player.giveItemStack(ItemStack.fromNbt(StringNbtReader.parse(content)));
+                Utility.sendInventory();
+            } catch (CommandSyntaxException e) {
+                responder.send("invalid nbt");
+            }
+            finally {
+                next();
+            }
+        }
+
+        @Override
+        public void message(WebSocket responder, String message) {}
     }
 }
