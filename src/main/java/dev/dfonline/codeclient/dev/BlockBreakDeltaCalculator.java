@@ -19,6 +19,7 @@ public class BlockBreakDeltaCalculator {
      * Only invoked when a codeblock is broken.
      */
     public static void breakBlock(BlockPos pos) {
+        if(pos == null) return;
         oldBlocks.addBlock(pos);
     }
 

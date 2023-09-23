@@ -67,7 +67,7 @@ public class InteractionManager {
                 RecentChestInsert.setLastChest(pos);
             }
             BlockPos breakPos = isBlockBreakable(pos);
-            BlockBreakDeltaCalculator.breakBlock(pos);
+            if(breakPos != null) BlockBreakDeltaCalculator.breakBlock(pos);
             if(Config.getConfig().CustomBlockInteractions) {
                 if(breakPos != null) {
                     breakCodeBlock(breakPos);
