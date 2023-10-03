@@ -15,8 +15,10 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.world.BlockEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -77,6 +79,12 @@ public class ChestPeeker {
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         if(!Config.getConfig().ChestPeeker) return false;
         if(CodeClient.location instanceof Dev) {
+            if(packet instanceof BlockEventS2CPacket block) {
+                if(!currentBlock.equals(block.getPos())) return false;
+                if(block.getType() != 1) return false;
+                if(block.getData() != 0) return false;
+                invalidate();
+            }
             if(!shouldClearChest) return false;
             if(packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
@@ -180,6 +188,12 @@ public class ChestPeeker {
             return texts;
         }
         return null;
+    }
+
+    public static void invalidate() {
+        items = null;
+        shouldClearChest = true;
+        currentBlock = null;
     }
 
     enum Type {

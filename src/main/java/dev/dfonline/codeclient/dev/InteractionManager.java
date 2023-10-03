@@ -63,8 +63,11 @@ public class InteractionManager {
     public static boolean onBreakBlock(BlockPos pos) {
         if(CodeClient.location instanceof Dev plot) {
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
-            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST && (!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir) && Config.getConfig().RecentChestInsert) {
-                RecentChestInsert.setLastChest(pos);
+            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
+                ChestPeeker.invalidate();
+                if((!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir) && Config.getConfig().RecentChestInsert) {
+                    RecentChestInsert.setLastChest(pos);
+                }
             }
             BlockPos breakPos = isBlockBreakable(pos);
             if(breakPos != null) BlockBreakDeltaCalculator.breakBlock(pos);
