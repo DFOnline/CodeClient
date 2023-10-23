@@ -18,7 +18,6 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.registry.Registries;
-import net.minecraft.server.world.BlockEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -38,6 +37,7 @@ public class ChestPeeker {
     private static boolean shouldClearChest = false;
 
     public static void tick() {
+        if(CodeClient.MC.world == null) return;
         if(!Config.getConfig().ChestPeeker) return;
         if(CodeClient.location instanceof Dev dev) {
             if(CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
@@ -77,10 +77,11 @@ public class ChestPeeker {
      * @return true to cancel packet.
      */
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+        if(CodeClient.MC.getNetworkHandler() == null) return false;
         if(!Config.getConfig().ChestPeeker) return false;
         if(CodeClient.location instanceof Dev) {
             if(packet instanceof BlockEventS2CPacket block) {
-                if(!currentBlock.equals(block.getPos())) return false;
+                if(!Objects.equals(currentBlock, block.getPos())) return false;
                 if(block.getType() != 1) return false;
                 if(block.getData() != 0) return false;
                 invalidate();
