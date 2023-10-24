@@ -56,7 +56,7 @@ public class BuildClip {
                 if(!CodeClient.clipBind.isPressed()) finishClipping();
             }
         }
-        else if(clipping) {
+        else if(clipping || waitForTP) {
             disableClipping();
         }
 
@@ -133,5 +133,6 @@ public class BuildClip {
 
     public static void disableClipping() {
         clipping = false;
+        waitForTP = false;
     }
 }
