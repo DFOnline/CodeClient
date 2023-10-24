@@ -16,6 +16,8 @@ public abstract class Plot extends Location {
 
     protected Size size;
 
+    public Vec3d devPos;
+
     public void setOrigin(int x, int z) {
         this.originX = x;
         this.originZ = z;
@@ -30,6 +32,7 @@ public abstract class Plot extends Location {
         if(plot.hasBuild != null) this.hasBuild = plot.hasBuild;
         if(plot.hasDev != null) this.hasDev = plot.hasDev;
         if(plot.size != null) this.size = plot.size;
+        if(plot.devPos != null) this.devPos = plot.devPos;
     }
 
     public void setSize(Size size) {
