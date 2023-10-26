@@ -82,6 +82,20 @@ public class CodeClient implements ModInitializer {
     }
 
     /**
+     * This needs to be true for NoClip to work.
+     * Whilst this should be the first source to check if NoClip is on, keep in mind there is NoClip#isIgnoringWalls
+     * Useful for fallback checks and preventing noclip packet spam screwing you over.
+     */
+    public static boolean noClipOn() {
+        if(MC.player == null) return false;
+        if(!Config.getConfig().NoClipEnabled) return false;
+        if(!(location instanceof Dev)) return false;
+        if(!(currentAction instanceof None)) return false;
+        if(!MC.player.getAbilities().creativeMode) return false;
+        return true;
+    }
+
+    /**
      * All outgoing packet events and debugging.
      * @return If the packet shouldn't be sent. True to not send.
      * @param <T> ClientToServer

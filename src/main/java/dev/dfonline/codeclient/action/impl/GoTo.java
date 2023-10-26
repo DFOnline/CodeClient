@@ -8,10 +8,12 @@ import dev.dfonline.codeclient.hypercube.item.Location;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
@@ -33,12 +35,24 @@ public class GoTo extends Action {
     public void init() {
         active = true;
         if(CodeClient.MC.player == null) return;
-        if(CodeClient.location instanceof Dev dev && dev.isInArea(dev.devPos)) {
-            locationItem = new Location(dev.getPos().relativize(dev.devPos)).setRotation(CodeClient.MC.player.getPitch(), CodeClient.MC.player.getYaw()).toItemStack();
+        if(CodeClient.location instanceof Dev dev && dev.isInArea(target)) {
+            locationItem = new Location(dev.getPos().relativize(target)).setRotation(CodeClient.MC.player.getPitch(), CodeClient.MC.player.getYaw()).toItemStack();
             locationItemTeleport();
+        }
+    }
+
+    @Override
+    public boolean onReceivePacket(Packet<?> packet) {
+        if(locationItem == null) return super.onReceivePacket(packet);
+        if(packet instanceof PlayerPositionLookS2CPacket tp) {
+            if(CodeClient.MC.getNetworkHandler() == null || CodeClient.MC.player == null) return false;
+            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(tp.getTeleportId()));
+            CodeClient.MC.player.setPosition(target);
             active = false;
             callback();
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -60,11 +74,11 @@ public class GoTo extends Action {
 
     private void locationItemTeleport() {
         ClientPlayerEntity player = CodeClient.MC.player;
-        if(player == null) return;
+        ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
+        if(player == null || net == null) return;
         ItemStack handItem = player.getMainHandStack();
         Utility.sendHandItem(locationItem);
         boolean sneaky = !player.isSneaking();
-        ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
         if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
@@ -93,12 +107,10 @@ public class GoTo extends Action {
         Vec3d pos = CodeClient.MC.player.getPos();
 
         Vec3d offset = pos.relativize(target);
-        double maxLength = 100;
+        double maxLength = 50;
         double distance = offset.length();
         Vec3d jump = distance > maxLength ? pos.add(offset.normalize().multiply(maxLength)) : target;
         if(distance > 10) {
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
