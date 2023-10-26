@@ -2,11 +2,18 @@ package dev.dfonline.codeclient.action.impl;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.hypercube.item.Location;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class GoTo extends Action {
     public final Vec3d target;
+    /**
+     * If not null, we are using a location item to teleport.
+     */
+    private ItemStack locationItem;
     private boolean active;
     private int buffer = 0;
 
@@ -18,6 +25,7 @@ public class GoTo extends Action {
     @Override
     public void init() {
         active = true;
+        if(CodeClient.location instanceof Dev dev) locationItem = new Location(dev.getPos().relativize(CodeClient.MC.player.getPos())).toItemStack();
     }
 
     @Override

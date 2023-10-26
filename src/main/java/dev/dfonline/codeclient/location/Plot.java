@@ -22,6 +22,9 @@ public abstract class Plot extends Location {
         this.originX = x;
         this.originZ = z;
     }
+    public Vec3d getPos() {
+        return new Vec3d(originX,0,originZ);
+    }
 
     public void copyValuesFrom(Plot plot) {
         if(plot.id != null) this.id = plot.id;
