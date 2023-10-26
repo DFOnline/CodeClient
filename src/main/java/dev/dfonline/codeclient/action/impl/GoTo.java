@@ -1,11 +1,18 @@
 package dev.dfonline.codeclient.action.impl;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.hypercube.item.Location;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 public class GoTo extends Action {
@@ -25,7 +32,13 @@ public class GoTo extends Action {
     @Override
     public void init() {
         active = true;
-        if(CodeClient.location instanceof Dev dev) locationItem = new Location(dev.getPos().relativize(CodeClient.MC.player.getPos())).toItemStack();
+        if(CodeClient.MC.player == null) return;
+        if(CodeClient.location instanceof Dev dev && dev.isInArea(dev.devPos)) {
+            locationItem = new Location(dev.getPos().relativize(dev.devPos)).setRotation(CodeClient.MC.player.getPitch(), CodeClient.MC.player.getYaw()).toItemStack();
+            locationItemTeleport();
+            active = false;
+            callback();
+        }
     }
 
     @Override
@@ -34,14 +47,39 @@ public class GoTo extends Action {
             callback();
             return;
         }
-        int bufferStop = 1;
-        int bufferReset = 2;
 
+        CodeClient.MC.player.setVelocity(0,0,0);
         if(CodeClient.MC.player.getPos().equals(target)) {
             active = false;
             callback();
             return;
         }
+        if(locationItem != null) return;
+        hackTowards();
+    }
+
+    private void locationItemTeleport() {
+        ClientPlayerEntity player = CodeClient.MC.player;
+        if(player == null) return;
+        ItemStack handItem = player.getMainHandStack();
+        Utility.sendHandItem(locationItem);
+        boolean sneaky = !player.isSneaking();
+        ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
+        if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
+        net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
+        if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+        Utility.sendHandItem(handItem);
+    }
+
+    /**
+     * Use hacky movement packets.
+     */
+    private void hackTowards() {
+        if(CodeClient.MC.player == null || CodeClient.MC.getNetworkHandler() == null) return;
+
+        int bufferStop = 1;
+        int bufferReset = 2;
 
         buffer++;
         if(buffer > bufferStop) {
@@ -71,6 +109,5 @@ public class GoTo extends Action {
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
         }
         CodeClient.MC.player.setPos(jump.x, jump.y, jump.z);
-        CodeClient.MC.player.setVelocity(0,0,0);
     }
 }

@@ -16,6 +16,9 @@ public abstract class Plot extends Location {
 
     protected Size size;
 
+    /**
+     * The position the player was at before they were teleported, in any scenario but plot borders.
+     */
     public Vec3d devPos;
 
     public void setOrigin(int x, int z) {

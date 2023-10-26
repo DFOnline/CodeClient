@@ -30,6 +30,16 @@ public class Location {
         throw new NotImplementedException("Unimplemented!");
     }
 
+    /**
+     * Mutates the location.
+     * @return The mutated location with the rotation.
+     */
+    public Location setRotation(double pitch, double yaw) {
+        this.pitch = pitch;
+        this.yaw = yaw;
+        return this;
+    }
+
     public ItemStack toItemStack() {
         ItemStack location = Items.PAPER.getDefaultStack();
         NbtCompound compound = new NbtCompound();

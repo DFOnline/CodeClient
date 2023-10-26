@@ -109,6 +109,7 @@ public class Commands {
             if(CodeClient.location instanceof Creator plot) {
                 if(plot.devPos == null) {
                     Utility.sendMessage("There is no position to go back to!", ChatType.FAIL);
+                    return 1;
                 }
                 if(!(CodeClient.currentAction instanceof None)) {
                     Utility.sendMessage("CodeClient is currently busy, try again in a moment.",ChatType.FAIL);
