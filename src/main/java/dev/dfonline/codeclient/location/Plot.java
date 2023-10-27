@@ -48,6 +48,10 @@ public abstract class Plot extends Location {
     public Size getSize() {
         return size;
     }
+    public Size assumeSize() {
+        if(size == null) return Size.MASSIVE;
+        else return size;
+    }
 
     public Integer getX() {
         return originX;
@@ -58,8 +62,6 @@ public abstract class Plot extends Location {
     }
 
     public Boolean isInPlot(BlockPos pos) {
-        if(size == null) return null;
-
         return isInArea(pos.toCenterPos()) || isInDev(pos.toCenterPos());
     }
 
@@ -67,7 +69,7 @@ public abstract class Plot extends Location {
      * The play or build area.
      */
     public Boolean isInArea(Vec3d pos) {
-        if(size == null) return null;
+        Size size = assumeSize();
 
         double x = pos.getX();
         double z = pos.getZ();
@@ -82,7 +84,7 @@ public abstract class Plot extends Location {
         return isInDev(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
     }
     public Boolean isInDev(Vec3d pos) {
-        if(originX == null || originZ == null) return null;
+        Size size = assumeSize();
 
         int x = (int) pos.getX();
         int z = (int) pos.getZ();

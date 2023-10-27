@@ -93,7 +93,7 @@ public class GoTo extends Action {
         if(CodeClient.MC.player == null || CodeClient.MC.getNetworkHandler() == null) return;
 
         int bufferStop = 1;
-        int bufferReset = 2;
+        int bufferReset = 0;
 
         buffer++;
         if(buffer > bufferStop) {
@@ -111,8 +111,6 @@ public class GoTo extends Action {
         double distance = offset.length();
         Vec3d jump = distance > maxLength ? pos.add(offset.normalize().multiply(maxLength)) : target;
         if(distance > 10) {
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
