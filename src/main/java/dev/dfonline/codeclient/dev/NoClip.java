@@ -1,7 +1,6 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -17,7 +16,7 @@ public class NoClip {
     public static LineType display = null;
 
     public static boolean isIgnoringWalls() {
-        return Config.getConfig().NoClipEnabled && isInDevSpace();
+        return CodeClient.noClipOn() && isInDevSpace();
     }
 
     public static boolean isInDevSpace() {

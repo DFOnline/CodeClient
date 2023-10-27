@@ -2,10 +2,14 @@ package dev.dfonline.codeclient;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.dfonline.codeclient.action.None;
-import dev.dfonline.codeclient.action.impl.*;
-import dev.dfonline.codeclient.dev.BuildClip;
-import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
+import dev.dfonline.codeclient.action.impl.GetActionDump;
+import dev.dfonline.codeclient.action.impl.GetPlotSize;
+import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.BuildClip;
+import dev.dfonline.codeclient.dev.LastPos;
+import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
+import dev.dfonline.codeclient.location.Creator;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.SocketHandler;
@@ -13,7 +17,6 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 import java.nio.file.Path;
 
@@ -102,7 +105,27 @@ public class Commands {
             return 0;
         }));
 
-
+        dispatcher.register(literal("back").executes(context -> {
+            if(CodeClient.location instanceof Creator plot) {
+                if(plot.devPos == null) {
+                    Utility.sendMessage("There is no position to go back to!", ChatType.FAIL);
+                    return 1;
+                }
+                if(!(CodeClient.currentAction instanceof None)) {
+                    Utility.sendMessage("CodeClient is currently busy, try again in a moment.",ChatType.FAIL);
+                    return 1;
+                }
+                if(LastPos.tpBack()) return 0;
+                else {
+                    Utility.sendMessage("An error occurred whilst trying to go back.",ChatType.FAIL);
+                    return 1;
+                }
+            }
+            else {
+                Utility.sendMessage("You must be in dev or build mode to do this!",ChatType.FAIL);
+                return 1;
+            }
+        }));
 
         dispatcher.register(literal("getspawn").executes(context -> {
             if(!(CodeClient.location instanceof Dev)) return 1;

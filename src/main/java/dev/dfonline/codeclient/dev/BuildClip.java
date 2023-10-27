@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.dev;
 import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.hypercube.item.Location;
 import dev.dfonline.codeclient.location.Build;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -107,14 +108,8 @@ public class BuildClip {
             abilities.flying = wasFlying;
             waitForTP = true;
 
-            ItemStack location = Items.PAPER.getDefaultStack();
-            NbtCompound compound = new NbtCompound();
-            NbtCompound publicBukkitValues = new NbtCompound();
-            Vec3d plotPos = new Vec3d(plot.getX(), 0, plot.getZ());
-            Vec3d pos = plotPos.relativize(player.getPos());
-            publicBukkitValues.put("hypercube:varitem", NbtString.of("{\"id\":\"loc\",\"data\":{\"isBlock\":false,\"loc\":{\"x\":%.1f,\"y\":%.1f,\"z\":%.1f,\"pitch\":%.1f,\"yaw\":%.1f}}}".formatted(pos.x, pos.y, pos.z, player.getPitch(), player.getYaw())));
-            compound.put("PublicBukkitValues", publicBukkitValues);
-            location.setNbt(compound);
+            Vec3d pos = plot.getPos().relativize(player.getPos());
+            ItemStack location = new Location(pos.x, pos.y, pos.z, player.getPitch(), player.getYaw()).toItemStack();
 
             ItemStack lastItem = player.getStackInHand(Hand.MAIN_HAND);
             Utility.sendHandItem(location);
