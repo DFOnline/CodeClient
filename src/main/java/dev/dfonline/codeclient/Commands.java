@@ -2,9 +2,7 @@ package dev.dfonline.codeclient;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.dfonline.codeclient.action.None;
-import dev.dfonline.codeclient.action.impl.GetActionDump;
-import dev.dfonline.codeclient.action.impl.GetPlotSize;
-import dev.dfonline.codeclient.action.impl.MoveToSpawn;
+import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.BuildClip;
 import dev.dfonline.codeclient.dev.LastPos;
@@ -148,19 +146,20 @@ public class Commands {
 //            return 0;
 //        }));
 //        dispatcher.register(literal("placetemplate").executes(context -> {
-//            CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+//            CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> {
+//                Utility.sendMessage("Done!", ChatType.SUCCESS);
+//                CodeClient.currentAction = new None();
+//            });
 //            CodeClient.currentAction.init();
 //            return 0;
 //        }));
-
+//
 //        dispatcher.register(literal("codeforme").executes(context -> {
 //            if(!(CodeClient.location instanceof Dev)) return 1;
 //            CodeClient.currentAction = new ClearPlot(() -> {
-//                CodeClient.currentAction = new MoveToSpawn(() -> {
-//                    CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> {
-//                        Utility.sendMessage("Done!", ChatType.SUCCESS);
-//                    });
-//                    CodeClient.currentAction.init();
+//                CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> {
+//                    CodeClient.currentAction = new None();
+//                    Utility.sendMessage("Done!", ChatType.SUCCESS);
 //                });
 //                CodeClient.currentAction.init();
 //            });

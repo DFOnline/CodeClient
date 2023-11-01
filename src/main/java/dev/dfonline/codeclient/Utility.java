@@ -49,13 +49,13 @@ public class Utility {
 
     /**
      * Ensure the player is holding an item, by holding and setting the first slot.
-     * @param template Any item
+     * @param item Any item
      */
-    public static void makeHolding(ItemStack template) {
+    public static void makeHolding(ItemStack item) {
         PlayerInventory inv = CodeClient.MC.player.getInventory();
-        Utility.sendHandItem(template);
+        Utility.sendHandItem(item);
         inv.selectedSlot = 0;
-        inv.setStack(0, template);
+        inv.setStack(0, item);
     }
 
     public static void sendHandItem(ItemStack item) {
