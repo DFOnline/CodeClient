@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static dev.dfonline.codeclient.CodeClient.MC;
 
 @Mixin(ClientPlayerEntity.class)
-public class MClientPlayerEntity {
+public abstract class MClientPlayerEntity {
     @Shadow @Final public ClientPlayNetworkHandler networkHandler;
 
     private boolean lastSneaking = false;
@@ -38,7 +38,29 @@ public class MClientPlayerEntity {
             if (NoClip.isIgnoringWalls()) {
                 ci.cancel();
                 Vec3d pos = NoClip.handleSeverPosition();
-                this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, player.getYaw(), player.getPitch(), false));
+                boolean idle = NoClip.timesSinceMoved++ > 40;
+                if(idle) NoClip.timesSinceMoved = 0;
+                float yaw = player.getYaw();
+                float pitch = player.getPitch();
+                boolean rotation = pitch != NoClip.lastPitch || yaw != NoClip.lastYaw;
+                boolean position = !pos.equals(NoClip.lastPos) || idle;
+                if(position || rotation) {
+                    if(position) {
+                        NoClip.timesSinceMoved = 0;
+                        if(rotation) {
+                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, yaw, pitch, false));
+                        }
+                        else {
+                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false));
+                        }
+                    }
+                    else {
+                        this.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false));
+                    }
+                }
+                NoClip.lastPos = pos;
+                NoClip.lastYaw = yaw;
+                NoClip.lastPitch = pitch;
             }
             boolean sneaking = player.isSneaking();
             if (sneaking != this.lastSneaking) {

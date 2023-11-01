@@ -14,6 +14,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class NoClip {
     public static LineType display = null;
+    public static Vec3d lastPos = null;
+    public static float lastYaw = 0;
+    public static float lastPitch = 0;
+    public static int timesSinceMoved = 0;
 
     public static boolean isIgnoringWalls() {
         return CodeClient.noClipOn() && isInDevSpace();
