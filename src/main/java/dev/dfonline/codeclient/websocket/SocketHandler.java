@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.ClearPlot;
 import dev.dfonline.codeclient.action.impl.GetPlotSize;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
@@ -216,6 +217,7 @@ public class SocketHandler {
         public void start(WebSocket responder) {
             if(!ready) return;
             CodeClient.currentAction = new PlaceTemplates(templates, () -> {
+                CodeClient.currentAction = new None();
                 if(responder.isOpen()) responder.send("place done");
                 next();
             });
@@ -229,6 +231,7 @@ public class SocketHandler {
                 if(Objects.equals(actionQueue.get(0), this)) {
                     this.start(responder);
                 }
+                return;
             }
 
             ItemStack template = new ItemStack(Items.ENDER_CHEST);
