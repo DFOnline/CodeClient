@@ -41,7 +41,7 @@ public class Config {
     public boolean HighlightChestsWithAir = false;
     public int HighlightChestDuration = 10;
     public boolean UseIForLineScope = false;
-    public boolean CustomBlockBreaking = true;
+    public boolean CustomBlockBreaking = false;
     public boolean ChestPeeker = true;
 
     private void save() {
@@ -226,7 +226,7 @@ public class Config {
                                         .name(Text.literal("Custom Block Breaking"))
                                         .description(OptionDescription.of(Text.literal("Keep codeblocks safe from accidental breaking."),Text.literal("They will have the survival breaking animation."),Text.literal("Breaking multiple will temporarily increase the speed.")))
                                         .binding(
-                                                true,
+                                                false,
                                                 () -> CustomBlockBreaking,
                                                 opt -> CustomBlockBreaking = opt
                                         )
