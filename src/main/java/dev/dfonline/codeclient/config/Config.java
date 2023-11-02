@@ -43,6 +43,8 @@ public class Config {
     public boolean UseIForLineScope = false;
     public boolean CustomBlockBreaking = false;
     public boolean ChestPeeker = true;
+    public int ChestPeekerX = 0;
+    public int ChestPeekerY = -4;
 
     private void save() {
         try {
@@ -73,6 +75,8 @@ public class Config {
             object.addProperty("UseIForLineScope",UseIForLineScope);
             object.addProperty("CustomBlockBreaking",CustomBlockBreaking);
             object.addProperty("ChestPeeker",ChestPeeker);
+            object.addProperty("ChestPeekerX",ChestPeekerX);
+            object.addProperty("ChestPeekerY",ChestPeekerY);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -388,6 +392,26 @@ public class Config {
                                         opt -> ChestPeeker = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(int.class)
+                                .name(Text.literal("Preview X Offset"))
+                                .description(OptionDescription.of(Text.literal("How far horizontally the preview popup is")))
+                                .binding(
+                                        0,
+                                        () -> ChestPeekerX,
+                                        opt -> ChestPeekerX = opt
+                                )
+                                .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500,500))
+                                .build())
+                        .option(Option.createBuilder(int.class)
+                                .name(Text.literal("Preview Y Offset"))
+                                .description(OptionDescription.of(Text.literal("How far vertically the preview popup is")))
+                                .binding(
+                                        -4,
+                                        () -> ChestPeekerY,
+                                        opt -> ChestPeekerY = opt
+                                )
+                                .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500,500))
                                 .build())
                         .build())
                 .category(ConfigCategory.createBuilder()

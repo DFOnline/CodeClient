@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin.render.hud;
 
 import dev.dfonline.codeclient.OverlayManager;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.ChestPeeker;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -36,8 +37,8 @@ public abstract class MInGameHud {
         }
         List<Text> peeker = ChestPeeker.getOverlayText();
         if(peeker != null && !peeker.isEmpty()) {
-            int x = (scaledWidth / 2);
-            int yOrig = (scaledHeight / 2) - 4;
+            int x = (scaledWidth / 2) + Config.getConfig().ChestPeekerX;
+            int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;
             context.drawTooltip(textRenderer,peeker,x,yOrig);
 
         }
