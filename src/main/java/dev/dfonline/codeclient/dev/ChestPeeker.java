@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -105,6 +106,12 @@ public class ChestPeeker {
 
     public static List<Text> getOverlayText() {
         if(!Config.getConfig().ChestPeeker) return null;
+        if(CodeClient.MC.crosshairTarget instanceof BlockHitResult block) { // TODO: this shouldn't be in ChestPeeker
+            if(CodeClient.MC.world.getBlockEntity(block.getBlockPos()) instanceof SignBlockEntity sign) {
+                Text name = sign.getFrontText().getMessage(1,false);
+                if(CodeClient.MC.textRenderer.getWidth(name) > 90) return List.of(name);
+            }
+        }
         if (CodeClient.location instanceof Dev && currentBlock != null && items != null) {
             ArrayList<Text> texts = new ArrayList<>();
             if(items.isEmpty()) {
