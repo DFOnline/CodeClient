@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.dev;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
@@ -13,6 +14,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityDimensions;
@@ -47,6 +49,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class InteractionManager {
+    private static final List<Block> validBlocks = List.of(Blocks.LAPIS_BLOCK, Blocks.LAPIS_ORE, Blocks.EMERALD_BLOCK, Blocks.EMERALD_ORE, Blocks.DIAMOND_BLOCK, Blocks.GOLD_BLOCK);
+
     /**
      * Assuming pos is in a codespace.
      * @param pos The targeted pos.
@@ -70,7 +74,12 @@ public class InteractionManager {
                 }
             }
             BlockPos breakPos = isBlockBreakable(pos);
-            if(breakPos != null) BlockBreakDeltaCalculator.breakBlock(pos);
+            if(breakPos != null) {
+                if(Config.getConfig().ReportBrokenBlock && validBlocks.contains(CodeClient.MC.world.getBlockState(breakPos).getBlock()) && CodeClient.MC.world.getBlockEntity(breakPos.west()) instanceof SignBlockEntity sign) {
+                    if(!sign.getFrontText().getMessage(1,false).equals(Text.empty())) Utility.sendMessage(Text.empty().formatted(Formatting.AQUA).append(Text.literal("You just broke ")).append(Text.empty().formatted(Formatting.WHITE).append(sign.getFrontText().getMessage(1,false))).append(Text.literal(".")), ChatType.INFO);
+                }
+                BlockBreakDeltaCalculator.breakBlock(pos);
+            }
             if(Config.getConfig().CustomBlockInteractions) {
                 if(breakPos != null) {
                     breakCodeBlock(breakPos);

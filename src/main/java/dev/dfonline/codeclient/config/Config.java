@@ -45,6 +45,7 @@ public class Config {
     public boolean ChestPeeker = true;
     public int ChestPeekerX = 0;
     public int ChestPeekerY = -4;
+    public boolean ReportBrokenBlock = true;
 
     private void save() {
         try {
@@ -77,6 +78,7 @@ public class Config {
             object.addProperty("ChestPeeker",ChestPeeker);
             object.addProperty("ChestPeekerX",ChestPeekerX);
             object.addProperty("ChestPeekerY",ChestPeekerY);
+            object.addProperty("ReportBrokenBlock",ReportBrokenBlock);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -261,20 +263,32 @@ public class Config {
                                         )
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
-                                .option(Option.createBuilder(float.class)
-                                        .name(Text.literal("Reach Distance"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("Extend your reach distance, moving you forward if you can't reach."))
-                                                .build())
+//                                .option(Option.createBuilder(float.class)
+//                                        .name(Text.literal("Reach Distance"))
+//                                        .description(OptionDescription.createBuilder()
+//                                                .text(Text.literal("Extend your reach distance, moving you forward if you can't reach."))
+//                                                .build())
+//                                        .binding(
+//                                                5f,
+//                                                () -> ReachDistance,
+//                                                opt -> ReachDistance = opt
+//                                        )
+//                                        .controller(opt -> FloatSliderControllerBuilder.create(opt)
+//                                                .range(5f, 10f)
+//                                                .step(0.1f))
+//                                        .available(false)
+//                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Report Broken Blocks"))
+                                        .description(
+                                                OptionDescription.of(Text.literal("Get a message on breaking a block telling you what it did."),
+                                                Text.literal("Only works for Player Event, Entity Event, Function, Call Function, Process, and Start Process")))
                                         .binding(
-                                                5f,
-                                                () -> ReachDistance,
-                                                opt -> ReachDistance = opt
+                                                true,
+                                                () -> ReportBrokenBlock,
+                                                opt -> ReportBrokenBlock = opt
                                         )
-                                        .controller(opt -> FloatSliderControllerBuilder.create(opt)
-                                                .range(5f, 10f)
-                                                .step(0.1f))
-                                        .available(false)
+                                        .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(LayerInteractionMode.class)
                                         .name(Text.literal("Layer Interaction"))
