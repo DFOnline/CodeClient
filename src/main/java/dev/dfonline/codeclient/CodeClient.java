@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
+import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.location.Spawn;

@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.dev;
+package dev.dfonline.codeclient.dev.overlay;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -7,7 +7,6 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -36,8 +35,14 @@ public class ChestPeeker {
     private static BlockPos currentBlock = null;
     private static NbtList items = null;
     private static boolean shouldClearChest = false;
+    private static int timeOut = 0;
 
     public static void tick() {
+        if(timeOut > 0) {
+            timeOut--;
+            return;
+        }
+        if(CodeClient.MC.currentScreen != null) return;
         if(CodeClient.MC.world == null) return;
         if(!Config.getConfig().ChestPeeker) return;
         if(CodeClient.location instanceof Dev dev) {
@@ -63,7 +68,7 @@ public class ChestPeeker {
                     bet.putInt("y", pos.getY());
                     bet.putInt("z", pos.getZ());
                     item.setSubNbt("BlockEntityTag", bet);
-                    item.setCustomName(Text.literal("if you see this the chest broke a little."));
+                    item.setCustomName(Text.literal("CodeClient chest peeker internal"));
                     CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
                     CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1, item));
                     return;
@@ -78,6 +83,7 @@ public class ChestPeeker {
      * @return true to cancel packet.
      */
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+        if(CodeClient.MC.currentScreen != null) return false;
         if(CodeClient.MC.getNetworkHandler() == null) return false;
         if(!Config.getConfig().ChestPeeker) return false;
         if(CodeClient.location instanceof Dev) {
@@ -89,15 +95,15 @@ public class ChestPeeker {
             }
             if(!shouldClearChest) return false;
             if(packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
-                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
                 if(slot.getSlot() != 1) return false;
+                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
+                shouldClearChest = false;
                 NbtCompound nbt = slot.getItemStack().getNbt();
                 if(nbt == null) return false;
                 NbtCompound bet = nbt.getCompound("BlockEntityTag");
                 if(bet == null) return false;
                 if(!Objects.equals(bet.getString("id"), "minecraft:chest")) return false;
                 if(currentBlock != null) items = bet.getList("Items", NbtElement.COMPOUND_TYPE);
-                shouldClearChest = false;
                 return true;
             }
         }
@@ -106,12 +112,6 @@ public class ChestPeeker {
 
     public static List<Text> getOverlayText() {
         if(!Config.getConfig().ChestPeeker) return null;
-        if(CodeClient.MC.crosshairTarget instanceof BlockHitResult block) { // TODO: this shouldn't be in ChestPeeker
-            if(CodeClient.MC.world.getBlockEntity(block.getBlockPos()) instanceof SignBlockEntity sign) {
-                Text name = sign.getFrontText().getMessage(1,false);
-                if(CodeClient.MC.textRenderer.getWidth(name) > 90) return List.of(name);
-            }
-        }
         if (CodeClient.location instanceof Dev && currentBlock != null && items != null) {
             ArrayList<Text> texts = new ArrayList<>();
             if(items.isEmpty()) {
@@ -202,6 +202,7 @@ public class ChestPeeker {
         items = null;
         shouldClearChest = true;
         currentBlock = null;
+        timeOut = 10;
     }
 
     enum Type {

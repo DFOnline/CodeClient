@@ -2,7 +2,8 @@ package dev.dfonline.codeclient.mixin.render.hud;
 
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.ChestPeeker;
+import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
+import dev.dfonline.codeclient.dev.overlay.SignPeeker;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -36,6 +37,7 @@ public abstract class MInGameHud {
             }
         }
         List<Text> peeker = ChestPeeker.getOverlayText();
+        if(peeker == null) peeker = SignPeeker.getOverlayText();
         if(peeker != null && !peeker.isEmpty()) {
             int x = (scaledWidth / 2) + Config.getConfig().ChestPeekerX;
             int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;

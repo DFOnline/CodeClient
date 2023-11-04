@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.switcher.ScopeSwitcher;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -205,6 +206,7 @@ public class InteractionManager {
 
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
         if(CodeClient.location instanceof Dev plot) {
+            ChestPeeker.invalidate();
             BlockPos pos = hitResult.getBlockPos();
             if(plot.isInDev(pos) && pos.getY() % 5 == 4) { // Is a code space level (glass)
                 if(hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
