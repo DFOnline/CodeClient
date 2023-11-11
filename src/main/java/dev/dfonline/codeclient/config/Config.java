@@ -46,6 +46,7 @@ public class Config {
     public int ChestPeekerX = 0;
     public int ChestPeekerY = -4;
     public boolean ReportBrokenBlock = true;
+    public boolean ScopeSwitcher = true;
 
     private void save() {
         try {
@@ -279,10 +280,20 @@ public class Config {
 //                                        .available(false)
 //                                        .build())
                                 .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Scope Switcher"))
+                                        .description(OptionDescription.of(Text.literal("Right click variables to change their scope with a custom UI.")))
+                                        .binding(
+                                                true,
+                                                () -> ScopeSwitcher,
+                                                opt -> ScopeSwitcher = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
                                         .name(Text.literal("Report Broken Blocks"))
                                         .description(
                                                 OptionDescription.of(Text.literal("Get a message on breaking a block telling you what it did."),
-                                                Text.literal("Only works for Player Event, Entity Event, Function, Call Function, Process, and Start Process")))
+                                                        Text.literal("Only works for Player Event, Entity Event, Function, Call Function, Process, and Start Process.")))
                                         .binding(
                                                 true,
                                                 () -> ReportBrokenBlock,
