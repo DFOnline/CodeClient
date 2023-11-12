@@ -47,6 +47,8 @@ public class Config {
     public int ChestPeekerY = -4;
     public boolean ReportBrokenBlock = true;
     public boolean ScopeSwitcher = true;
+    public float UpAngle = 50;
+    public float DownAngle = 50;
 
     private void save() {
         try {
@@ -80,6 +82,9 @@ public class Config {
             object.addProperty("ChestPeekerX",ChestPeekerX);
             object.addProperty("ChestPeekerY",ChestPeekerY);
             object.addProperty("ReportBrokenBlock",ReportBrokenBlock);
+            object.addProperty("ScopeSwitcher",ScopeSwitcher);
+            object.addProperty("UpAngle",UpAngle);
+            object.addProperty("DownAngle",DownAngle);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -197,6 +202,25 @@ public class Config {
                                         .controller(opt -> IntegerSliderControllerBuilder.create(opt)
                                                 .range(0, 30)
                                                 .step(1))
+                                        .build())
+                                .option(Option.createBuilder(float.class)
+                                        .name(Text.literal("Angle to go up"))
+                                        .description(OptionDescription.of(Text.literal("When facing up, within this angle, jumping will take you up a layer.")))
+                                        .binding(
+                                                50F,
+                                                () -> UpAngle,
+                                                opt -> UpAngle = opt
+                                        )
+                                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
+                                        .build())
+                                .option(Option.createBuilder(float.class)
+                                        .name(Text.literal("Angle to go down"))
+                                        .description(OptionDescription.of(Text.literal("When facing down, within this angle, crouching will take you down a layer")))
+                                        .binding(50F,
+                                                () -> DownAngle,
+                                                opt -> DownAngle = opt
+                                        )
+                                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
                                         .build())
 //                                .option(Option.createBuilder(boolean.class)
 //                                        .name(Text.literal("Air Control"))
