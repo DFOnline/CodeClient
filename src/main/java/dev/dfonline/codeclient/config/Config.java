@@ -49,6 +49,8 @@ public class Config {
     public boolean ScopeSwitcher = true;
     public float UpAngle = 50;
     public float DownAngle = 50;
+    public boolean TeleportUp = false;
+    public boolean TeleportDown = false;
 
     private void save() {
         try {
@@ -85,6 +87,8 @@ public class Config {
             object.addProperty("ScopeSwitcher",ScopeSwitcher);
             object.addProperty("UpAngle",UpAngle);
             object.addProperty("DownAngle",DownAngle);
+            object.addProperty("TeleportUp",TeleportUp);
+            object.addProperty("TeleportDown",TeleportDown);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -221,6 +225,26 @@ public class Config {
                                                 opt -> DownAngle = opt
                                         )
                                         .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Teleport Up"))
+                                        .description(OptionDescription.of(Text.literal("If when facing up")))
+                                        .binding(
+                                                false,
+                                                () -> TeleportUp,
+                                                opt -> TeleportUp = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Teleport Down"))
+                                        .description(OptionDescription.of(Text.literal("Teleport Down when using")))
+                                        .binding(
+                                                false,
+                                                () -> TeleportDown,
+                                                opt -> TeleportDown = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
                                         .build())
 //                                .option(Option.createBuilder(boolean.class)
 //                                        .name(Text.literal("Air Control"))
