@@ -1,6 +1,8 @@
 package dev.dfonline.codeclient;
 
 import com.google.gson.JsonObject;
+import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -15,14 +17,12 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -56,6 +56,13 @@ public class Utility {
         Utility.sendHandItem(item);
         inv.selectedSlot = 0;
         inv.setStack(0, item);
+    }
+
+    public PlaceTemplates createSwapper(List<ItemStack> templates, Action.Callback callback) {
+        HashMap<BlockPos, ItemStack> map = new HashMap<>();
+        for (ItemStack item: templates) {
+        }
+        return new PlaceTemplates(map, callback);
     }
 
     public static void sendHandItem(ItemStack item) {

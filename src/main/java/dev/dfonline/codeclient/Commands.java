@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.config.Config;
@@ -17,7 +18,10 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 
 import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class Commands {
@@ -166,5 +170,16 @@ public class Commands {
 //            CodeClient.currentAction.init();
 //            return 0;
 //        }));
+
+        dispatcher.register(literal("scanfor").then(argument("name", StringArgumentType.greedyString()).executes(context -> {
+            if(CodeClient.location instanceof Dev dev) {
+                Pattern pattern = Pattern.compile(context.getArgument("name", String.class), Pattern.CASE_INSENSITIVE);
+                dev.scanForSigns(pattern);
+                Utility.sendMessage("Scan results: ");
+                return 0;
+            }
+            Utility.sendMessage("Couldn't scan.", ChatType.FAIL);
+            return 1;
+        })));
     }
 }

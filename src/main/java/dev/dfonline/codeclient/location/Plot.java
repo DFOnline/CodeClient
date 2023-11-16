@@ -1,7 +1,20 @@
 package dev.dfonline.codeclient.location;
 
+import dev.dfonline.codeclient.CodeClient;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class Plot extends Location {
     protected Integer id;
@@ -93,6 +106,39 @@ public abstract class Plot extends Location {
         boolean inZ = (z >= originZ) && (z <= originZ + (size != null ? size.size : 300));
 
         return inX && inZ;
+    }
+
+    /**
+     * Searches code space for all codeblocks which match the scan argument.
+     * Checks both top and second sign.
+     * Returns null if the plot origin is unknown or world is null.
+     */
+    @Nullable
+    public List<BlockPos> scanForSigns(Pattern name, Pattern scan) {
+        if (CodeClient.MC.world == null || originX == null || originZ == null) return null;
+        ArrayList<BlockPos> signs = new ArrayList<>();
+        for (int y = 50; y < 255; y += 5) {
+            int xEnd = originX + 1;
+            for (int x = originX - 20; x < xEnd; x++) {
+                int zEnd = originZ + assumeSize().size;
+                for(int z = originZ; z < zEnd; z++) {
+                    BlockPos pos = new BlockPos(x,y,z);
+                    BlockEntity block = CodeClient.MC.world.getBlockEntity(pos);
+                    if (block instanceof SignBlockEntity sign) {
+                        SignText text = sign.getFrontText();
+                        Matcher nameMatch = name.matcher(text.getMessage(0,false).getString());
+                        if(nameMatch.matches()) continue;
+                        Matcher scanMatch = scan.matcher(text.getMessage(1,false).getString());
+                        if(scanMatch.matches()) signs.add(pos);
+                    }
+                }
+            }
+            return signs;
+        }
+        return null;
+    }
+    public List<BlockPos> scanForSigns(Pattern scan) {
+        return scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"),scan);
     }
 
     public enum Size {
