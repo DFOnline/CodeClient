@@ -18,6 +18,7 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -174,12 +175,28 @@ public class Commands {
         dispatcher.register(literal("scanfor").then(argument("name", StringArgumentType.greedyString()).executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
                 Pattern pattern = Pattern.compile(context.getArgument("name", String.class), Pattern.CASE_INSENSITIVE);
-                dev.scanForSigns(pattern);
+                var scan = dev.scanForSigns(pattern);
                 Utility.sendMessage("Scan results: ");
+                for (var res: scan.entrySet()) {
+                    Utility.sendMessage("- " + res.getKey() + ": " + res.getValue().getMessage(1,false).getString());
+                }
                 return 0;
             }
             Utility.sendMessage("Couldn't scan.", ChatType.FAIL);
-            return 1;
+            return -1;
         })));
+        dispatcher.register(literal("swapininv").executes(context -> {
+            if(CodeClient.location instanceof Dev) {
+                PlaceTemplates action = Utility.createSwapper(Utility.TemplatesInInventory(), () -> {
+                    CodeClient.currentAction = new None();
+                    Utility.sendMessage("Done!", ChatType.SUCCESS);
+                });
+                if(action == null) return -2;
+//                CodeClient.currentAction = action;
+//                CodeClient.currentAction.init();
+                return 0;
+            }
+            return -1;
+        }));
     }
 }

@@ -1,8 +1,15 @@
 package dev.dfonline.codeclient;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
+import dev.dfonline.codeclient.hypercube.template.Template;
+import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
+import dev.dfonline.codeclient.location.Dev;
+import io.netty.util.internal.ObjectUtil;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -18,6 +25,7 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -58,11 +66,40 @@ public class Utility {
         inv.setStack(0, item);
     }
 
-    public PlaceTemplates createSwapper(List<ItemStack> templates, Action.Callback callback) {
-        HashMap<BlockPos, ItemStack> map = new HashMap<>();
-        for (ItemStack item: templates) {
+    public static PlaceTemplates createSwapper(List<ItemStack> templates, Action.Callback callback) {
+        if(CodeClient.location instanceof Dev dev) {
+            HashMap<BlockPos, ItemStack> map = new HashMap<>();
+            var scan = dev.scanForSigns(Pattern.compile(".*"));
+            for (ItemStack item : templates) {
+                if (!item.hasNbt()) continue;
+                NbtCompound nbt = item.getNbt();
+                if (nbt == null) continue;
+                if (!nbt.contains("PublicBukkitValues")) continue;
+                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
+                if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
+                String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
+                try {
+                    Template template = Template.parse64(JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString());
+                    if(template.blocks.isEmpty()) continue;
+                    TemplateBlock block = template.blocks.get(0);
+                    if(block.block == null) continue;
+                    TemplateBlock.Block blockName = TemplateBlock.Block.valueOf(block.block.toUpperCase());
+                    String name = ObjectUtils.firstNonNull(block.action, block.data);
+                    for (Map.Entry<BlockPos, SignText> sign: scan.entrySet()) { // Loop through scanned signs
+                        SignText text = sign.getValue();                        // ↓ If the blockName and name match
+                        if(text.getMessage(0,false).getString().equals(blockName.name) && text.getMessage(1,false).getString().equals(name)) {
+                            map.put(sign.getKey().east(), item);                // Put it into map
+                            break;                                              // break out :D
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    CodeClient.LOGGER.warn(e.getMessage());
+                }
+            }
+            return new PlaceTemplates(map, callback);
         }
-        return new PlaceTemplates(map, callback);
+        return null;
     }
 
     public static void sendHandItem(ItemStack item) {

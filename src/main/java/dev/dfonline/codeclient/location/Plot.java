@@ -12,6 +12,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,10 +115,10 @@ public abstract class Plot extends Location {
      * Returns null if the plot origin is unknown or world is null.
      */
     @Nullable
-    public List<BlockPos> scanForSigns(Pattern name, Pattern scan) {
+    public HashMap<BlockPos,SignText> scanForSigns(Pattern name, Pattern scan) {
         if (CodeClient.MC.world == null || originX == null || originZ == null) return null;
-        ArrayList<BlockPos> signs = new ArrayList<>();
-        for (int y = 50; y < 255; y += 5) {
+        HashMap<BlockPos,SignText> signs = new HashMap<>();
+        for (int y = 50; y < 255; y+=5) {
             int xEnd = originX + 1;
             for (int x = originX - 20; x < xEnd; x++) {
                 int zEnd = originZ + assumeSize().size;
@@ -127,17 +128,16 @@ public abstract class Plot extends Location {
                     if (block instanceof SignBlockEntity sign) {
                         SignText text = sign.getFrontText();
                         Matcher nameMatch = name.matcher(text.getMessage(0,false).getString());
-                        if(nameMatch.matches()) continue;
+                        if(!nameMatch.matches()) continue;
                         Matcher scanMatch = scan.matcher(text.getMessage(1,false).getString());
-                        if(scanMatch.matches()) signs.add(pos);
+                        if(scanMatch.matches()) signs.put(pos,text);
                     }
                 }
             }
-            return signs;
         }
-        return null;
+        return signs;
     }
-    public List<BlockPos> scanForSigns(Pattern scan) {
+    public HashMap<BlockPos,SignText> scanForSigns(Pattern scan) {
         return scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"),scan);
     }
 
