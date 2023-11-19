@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.BuildClip;
 import dev.dfonline.codeclient.dev.LastPos;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
+import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.*;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -18,10 +19,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -188,7 +191,7 @@ public class Commands {
             }
             Utility.sendMessage("Couldn't scan.", ChatType.FAIL);
             return -1;
-        }).requires(Commands::devMode)));
+        })));
         dispatcher.register(literal("swapininv").executes(context -> {
             if(CodeClient.location instanceof Dev) {
                 PlaceTemplates action = Utility.createSwapper(Utility.templatesInInventory(), () -> {
@@ -201,7 +204,7 @@ public class Commands {
                 return 0;
             }
             return -1;
-        }).requires(Commands::devMode));
+        }));
         dispatcher.register(literal("placetemplates").executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
                 var map = new HashMap<BlockPos, ItemStack>();
@@ -218,7 +221,7 @@ public class Commands {
             }
             Utility.sendMessage("You must be in dev mode!",ChatType.FAIL);
             return -1;
-        }).requires(Commands::devMode));
+        }));
         dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests((context, builder) -> {
             try {
                 var possibilities = new ArrayList<String>();
@@ -227,7 +230,6 @@ public class Commands {
                 String currentPath = String.join("/", (Arrays.stream(path).toList().subList(0,path.length - 1)));
                 var list = Files.list(FileManager.templatesPath().resolve(currentPath));
                 for (var file: list.toList()) {
-                    CodeClient.LOGGER.info(currentPath.isEmpty() ? "" : currentPath + "/" + file.getFileName().toString() + "/");
                     if(Files.isDirectory(file)) possibilities.add((currentPath.isEmpty() ? "" : currentPath + "/") + file.getFileName().toString() + "/");
                 }
                 list.close();
@@ -236,11 +238,83 @@ public class Commands {
                 }
             } catch (IOException ignored) {}
             return CompletableFuture.completedFuture(builder.build());
-        }).requires(fabricClientCommandSource -> {
+        }).executes(context -> {
+            String data = Utility.templateDataItem(CodeClient.MC.player.getMainHandStack());
+            if(data == null) {
+                Utility.sendMessage("You need to hold a template to save.",ChatType.FAIL);
+                return 0;
+            }
 
-            return false;
+            String arg = context.getArgument("path",String.class);
+            String[] path = arg.split("/");
+            Path currentPath = FileManager.templatesPath();
+            // Create folders
+            for (String dir: Arrays.stream(path).toList().subList(0,path.length - 1)) {
+                currentPath = currentPath.resolve(dir);
+                if(Files.notExists(currentPath)) {
+                    try {
+                        Files.createDirectory(currentPath);
+                    }
+                    catch (Exception ignored) {
+                        Utility.sendMessage("Could not make a folder at " + currentPath);
+                    }
+                }
+                else if(!Files.isDirectory(currentPath)) {
+                    Utility.sendMessage(currentPath + " isn't a directory, can't put anything inside it!", ChatType.FAIL);
+                    return -1;
+                }
+            }
+            currentPath = currentPath.resolve(path[path.length - 1] + ".dft");
+            try {
+                Files.write(currentPath.resolve(currentPath), Base64.getDecoder().decode(data));
+                Utility.sendMessage("Saved " + currentPath);
+            }
+            catch (Exception e) {
+                Utility.sendMessage("Couldn't save the file to: " + currentPath, ChatType.FAIL);
+                CodeClient.LOGGER.error(e.getMessage());
+            }
+            return 0;
         })));
-        dispatcher.register(literal("load"));
+        dispatcher.register(literal("load").then(argument("path", StringArgumentType.greedyString()).suggests((context, builder) -> {
+            CodeClient.LOGGER.info("hi");
+            try {
+                var possibilities = new ArrayList<String>();
+
+                String[] path =  builder.getRemaining().split("/",-1);
+                String currentPath = String.join("/", (Arrays.stream(path).toList().subList(0,path.length - 1)));
+                var list = Files.list(FileManager.templatesPath().resolve(currentPath));
+                for (var file: list.toList()) {
+                    String s = currentPath.isEmpty() ? "" : currentPath + "/";
+                    if(Files.isDirectory(file)) possibilities.add(s + file.getFileName().toString() + "/");
+                    else if(file.getFileName().toString().endsWith(".dft")) {
+                        String name = file.getFileName().toString();
+                        possibilities.add(s + name.substring(0, name.length() - 4));
+                    }
+                }
+                list.close();
+                for (String possibility: possibilities) {
+                    if(possibility.contains(builder.getRemainingLowerCase())) builder.suggest(possibility,Text.literal("Folder"));
+                }
+            } catch (IOException ignored) {}
+            return CompletableFuture.completedFuture(builder.build());
+            }).executes(context -> {
+                String arg = context.getArgument("path",String.class);
+                Path path = FileManager.templatesPath().resolve(arg + ".dft");
+                if(Files.notExists(path)) {
+                    Utility.sendMessage("This template doesn't exist.", ChatType.FAIL);
+                    return -1;
+                }
+                try {
+                    byte[] data = Files.readAllBytes(path);
+                    Utility.sendMessage(new String(Base64.getEncoder().encode(data)));
+                }
+                catch (Exception e) {
+                    Utility.sendMessage("Couldn't read file.", ChatType.FAIL);
+                    return -2;
+                }
+                return 0;
+            }
+        )));
         dispatcher.register(literal("jumptofreespot").executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
                 CodeClient.currentAction = new GoTo(dev.findFreePlacePos().toCenterPos().add(0,-0.5,0), () -> {
@@ -252,27 +326,5 @@ public class Commands {
             }
             return -1;
         }));
-    }
-
-    public static boolean devMode(FabricClientCommandSource ignored) {
-        if(CodeClient.location instanceof Dev) {
-            return true;
-        }
-        else {
-            ignored.sendFeedback(Text.literal("You need to be in dev mode!"));
-            return false;
-        }
-    }
-    public static boolean buildMode(FabricClientCommandSource ignored) {
-        return CodeClient.location instanceof Build;
-    }
-    public static boolean creator(FabricClientCommandSource ignored) {
-        return CodeClient.location instanceof Creator;
-    }
-    public static boolean play(FabricClientCommandSource ignored) {
-        return CodeClient.location instanceof Play;
-    }
-    public static boolean plot(FabricClientCommandSource ignored) {
-        return CodeClient.location instanceof Plot;
     }
 }

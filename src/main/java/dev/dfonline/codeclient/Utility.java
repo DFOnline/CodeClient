@@ -64,6 +64,35 @@ public class Utility {
         inv.setStack(0, item);
     }
 
+    /**
+     * Gets the base64 template data from an item. Null if there is none.
+     */
+    public static String templateDataItem(ItemStack item) {
+        if (!item.hasNbt()) return null;
+        NbtCompound nbt = item.getNbt();
+        if (nbt == null) return null;
+        if (!nbt.contains("PublicBukkitValues")) return null;
+        NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
+        if (!publicBukkit.contains("hypercube:codetemplatedata")) return null;
+        String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
+        return JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString();
+    }
+
+    /**
+     * Get the parsed Template from an item. None is the is none.
+     */
+    public static Template templateItem(ItemStack item) {
+        String codeTemplateData = templateDataItem(item);
+        try {
+            return Template.parse64(codeTemplateData);
+        } catch (IOException ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * Doesn't add .swap(), that needs to be added yourself.
+     */
     public static PlaceTemplates createSwapper(List<ItemStack> templates, Action.Callback callback) {
         if(CodeClient.location instanceof Dev dev) {
             HashMap<BlockPos, ItemStack> map = new HashMap<>();
