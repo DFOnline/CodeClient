@@ -141,6 +141,28 @@ public abstract class Plot extends Location {
         return scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"),scan);
     }
 
+    public BlockPos findFreePlacePos() {
+        return findFreePlacePos(new BlockPos(originX-1,50,originZ));
+    }
+
+    public BlockPos findFreePlacePos(BlockPos origin) {
+        if(originX == null || CodeClient.MC.world == null) return null;
+        var world = CodeClient.MC.world;
+        final int z = origin.getZ();
+        int y = Math.min(origin.getY(),50);
+        int x = origin.getX();
+        while (y < 255) {
+            while (originX - x <= 18) {
+                x--;
+                BlockPos pos = new BlockPos(x,y,z);
+                if(world.getBlockState(pos.east()).isAir() && world.getBlockState(pos.west()).isAir()) return pos;
+            }
+            y+=5;
+            x = originX - 1;
+        }
+        return null;
+    }
+
     public enum Size {
         BASIC(50),
         LARGE(100),

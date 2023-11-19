@@ -8,18 +8,22 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.BuildClip;
 import dev.dfonline.codeclient.dev.LastPos;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
-import dev.dfonline.codeclient.location.Creator;
-import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.location.Plot;
+import dev.dfonline.codeclient.location.*;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.regex.Matcher;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
@@ -184,19 +188,91 @@ public class Commands {
             }
             Utility.sendMessage("Couldn't scan.", ChatType.FAIL);
             return -1;
-        })));
+        }).requires(Commands::devMode)));
         dispatcher.register(literal("swapininv").executes(context -> {
             if(CodeClient.location instanceof Dev) {
-                PlaceTemplates action = Utility.createSwapper(Utility.TemplatesInInventory(), () -> {
+                PlaceTemplates action = Utility.createSwapper(Utility.templatesInInventory(), () -> {
                     CodeClient.currentAction = new None();
                     Utility.sendMessage("Done!", ChatType.SUCCESS);
                 });
                 if(action == null) return -2;
-//                CodeClient.currentAction = action;
-//                CodeClient.currentAction.init();
+                CodeClient.currentAction = action.swap();
+                CodeClient.currentAction.init();
+                return 0;
+            }
+            return -1;
+        }).requires(Commands::devMode));
+        dispatcher.register(literal("placetemplates").executes(context -> {
+            if(CodeClient.location instanceof Dev dev) {
+                var map = new HashMap<BlockPos, ItemStack>();
+                BlockPos pos = dev.findFreePlacePos();
+                for (var template: Utility.templatesInInventory()) {
+                    map.put(pos, template);
+                    pos = dev.findFreePlacePos(pos.west(2));
+                }
+                CodeClient.currentAction = new PlaceTemplates(map, () -> {
+                    CodeClient.currentAction = new None();
+                    Utility.sendMessage("Done!", ChatType.SUCCESS);
+                });
+                return 0;
+            }
+            Utility.sendMessage("You must be in dev mode!",ChatType.FAIL);
+            return -1;
+        }).requires(Commands::devMode));
+        dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests((context, builder) -> {
+            try {
+                var possibilities = new ArrayList<String>();
+
+                String[] path =  builder.getRemaining().split("/",-1);
+                String currentPath = String.join("/", (Arrays.stream(path).toList().subList(0,path.length - 1)));
+                var list = Files.list(FileManager.templatesPath().resolve(currentPath));
+                for (var file: list.toList()) {
+                    CodeClient.LOGGER.info(currentPath.isEmpty() ? "" : currentPath + "/" + file.getFileName().toString() + "/");
+                    if(Files.isDirectory(file)) possibilities.add((currentPath.isEmpty() ? "" : currentPath + "/") + file.getFileName().toString() + "/");
+                }
+                list.close();
+                for (String possibility: possibilities) {
+                    if(possibility.contains(builder.getRemainingLowerCase())) builder.suggest(possibility,Text.literal("Folder"));
+                }
+            } catch (IOException ignored) {}
+            return CompletableFuture.completedFuture(builder.build());
+        }).requires(fabricClientCommandSource -> {
+
+            return false;
+        })));
+        dispatcher.register(literal("load"));
+        dispatcher.register(literal("jumptofreespot").executes(context -> {
+            if(CodeClient.location instanceof Dev dev) {
+                CodeClient.currentAction = new GoTo(dev.findFreePlacePos().toCenterPos().add(0,-0.5,0), () -> {
+                    CodeClient.currentAction = new None();
+                    Utility.sendMessage("Done!", ChatType.SUCCESS);
+                });
+                CodeClient.currentAction.init();
                 return 0;
             }
             return -1;
         }));
+    }
+
+    public static boolean devMode(FabricClientCommandSource ignored) {
+        if(CodeClient.location instanceof Dev) {
+            return true;
+        }
+        else {
+            ignored.sendFeedback(Text.literal("You need to be in dev mode!"));
+            return false;
+        }
+    }
+    public static boolean buildMode(FabricClientCommandSource ignored) {
+        return CodeClient.location instanceof Build;
+    }
+    public static boolean creator(FabricClientCommandSource ignored) {
+        return CodeClient.location instanceof Creator;
+    }
+    public static boolean play(FabricClientCommandSource ignored) {
+        return CodeClient.location instanceof Play;
+    }
+    public static boolean plot(FabricClientCommandSource ignored) {
+        return CodeClient.location instanceof Plot;
     }
 }

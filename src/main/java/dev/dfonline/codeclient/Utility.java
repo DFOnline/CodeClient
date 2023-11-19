@@ -1,6 +1,5 @@
 package dev.dfonline.codeclient;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.Action;
@@ -8,7 +7,6 @@ import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
 import dev.dfonline.codeclient.location.Dev;
-import io.netty.util.internal.ObjectUtil;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -70,6 +68,7 @@ public class Utility {
         if(CodeClient.location instanceof Dev dev) {
             HashMap<BlockPos, ItemStack> map = new HashMap<>();
             var scan = dev.scanForSigns(Pattern.compile(".*"));
+            ArrayList<ItemStack> leftOvers = new ArrayList<>(templates);
             for (ItemStack item : templates) {
                 if (!item.hasNbt()) continue;
                 NbtCompound nbt = item.getNbt();
@@ -89,12 +88,20 @@ public class Utility {
                         SignText text = sign.getValue();                        // ↓ If the blockName and name match
                         if(text.getMessage(0,false).getString().equals(blockName.name) && text.getMessage(1,false).getString().equals(name)) {
                             map.put(sign.getKey().east(), item);                // Put it into map
+                            leftOvers.remove(item);                             // Remove the template, so we can see if there's anything left over
                             break;                                              // break out :D
                         }
                     }
                 }
                 catch (Exception e) {
                     CodeClient.LOGGER.warn(e.getMessage());
+                }
+            }
+            if(!leftOvers.isEmpty()) {
+                BlockPos freePos = dev.findFreePlacePos();
+                for (var item : leftOvers) {
+                    map.put(freePos,item);
+                    freePos = dev.findFreePlacePos(freePos.west(2));
                 }
             }
             return new PlaceTemplates(map, callback);
@@ -109,7 +116,7 @@ public class Utility {
     /**
      * Gets all templates in the players inventory.
      */
-    public static List<ItemStack> TemplatesInInventory() {
+    public static List<ItemStack> templatesInInventory() {
         PlayerInventory inv = CodeClient.MC.player.getInventory();
         ArrayList<ItemStack> templates = new ArrayList<>();
         for (int i = 0; i < (27 + 9); i++) {

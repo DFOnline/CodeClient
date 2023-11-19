@@ -1,14 +1,18 @@
 package dev.dfonline.codeclient.action.impl;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Commands;
 import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.mixin.entity.player.ClientPlayerInteractionManagerAccessor;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
@@ -124,6 +128,15 @@ public class PlaceTemplates extends Action {
             if(cooldown == 0) {
                 if(operation instanceof TemplateToPlace template) {
                     Utility.makeHolding(template.template);
+                    if(shouldBeSwapping) {
+                        var player = CodeClient.MC.player;
+                        var net = CodeClient.MC.getNetworkHandler();
+                        boolean sneaky = !player.isSneaking();
+                        if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                        net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, template.pos, Direction.UP));
+                        net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, template.pos, Direction.UP));
+                        if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+                    }
                     BlockHitResult blockHitResult = new BlockHitResult(template.pos().add(0,1,0), Direction.UP, template.pos, false);
                     ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, blockHitResult, sequence));
                     template.setOpen(false);
