@@ -2,13 +2,15 @@ package dev.dfonline.codeclient;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.BuildClip;
 import dev.dfonline.codeclient.dev.LastPos;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
-import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.*;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -19,13 +21,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
@@ -222,23 +220,7 @@ public class Commands {
             Utility.sendMessage("You must be in dev mode!",ChatType.FAIL);
             return -1;
         }));
-        dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests((context, builder) -> {
-            try {
-                var possibilities = new ArrayList<String>();
-
-                String[] path =  builder.getRemaining().split("/",-1);
-                String currentPath = String.join("/", (Arrays.stream(path).toList().subList(0,path.length - 1)));
-                var list = Files.list(FileManager.templatesPath().resolve(currentPath));
-                for (var file: list.toList()) {
-                    if(Files.isDirectory(file)) possibilities.add((currentPath.isEmpty() ? "" : currentPath + "/") + file.getFileName().toString() + "/");
-                }
-                list.close();
-                for (String possibility: possibilities) {
-                    if(possibility.contains(builder.getRemainingLowerCase())) builder.suggest(possibility,Text.literal("Folder"));
-                }
-            } catch (IOException ignored) {}
-            return CompletableFuture.completedFuture(builder.build());
-        }).executes(context -> {
+        dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             String data = Utility.templateDataItem(CodeClient.MC.player.getMainHandStack());
             if(data == null) {
                 Utility.sendMessage("You need to hold a template to save.",ChatType.FAIL);
@@ -275,29 +257,7 @@ public class Commands {
             }
             return 0;
         })));
-        dispatcher.register(literal("load").then(argument("path", StringArgumentType.greedyString()).suggests((context, builder) -> {
-            CodeClient.LOGGER.info("hi");
-            try {
-                var possibilities = new ArrayList<String>();
-
-                String[] path =  builder.getRemaining().split("/",-1);
-                String currentPath = String.join("/", (Arrays.stream(path).toList().subList(0,path.length - 1)));
-                var list = Files.list(FileManager.templatesPath().resolve(currentPath));
-                for (var file: list.toList()) {
-                    String s = currentPath.isEmpty() ? "" : currentPath + "/";
-                    if(Files.isDirectory(file)) possibilities.add(s + file.getFileName().toString() + "/");
-                    else if(file.getFileName().toString().endsWith(".dft")) {
-                        String name = file.getFileName().toString();
-                        possibilities.add(s + name.substring(0, name.length() - 4));
-                    }
-                }
-                list.close();
-                for (String possibility: possibilities) {
-                    if(possibility.contains(builder.getRemainingLowerCase())) builder.suggest(possibility,Text.literal("Folder"));
-                }
-            } catch (IOException ignored) {}
-            return CompletableFuture.completedFuture(builder.build());
-            }).executes(context -> {
+        dispatcher.register(literal("load").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
                 String arg = context.getArgument("path",String.class);
                 Path path = FileManager.templatesPath().resolve(arg + ".dft");
                 if(Files.notExists(path)) {
@@ -306,7 +266,7 @@ public class Commands {
                 }
                 try {
                     byte[] data = Files.readAllBytes(path);
-                    Utility.sendMessage(new String(Base64.getEncoder().encode(data)));
+                    CodeClient.MC.player.giveItemStack(Utility.makeTemplate(new String(Base64.getEncoder().encode(data))));
                 }
                 catch (Exception e) {
                     Utility.sendMessage("Couldn't read file.", ChatType.FAIL);
@@ -315,6 +275,14 @@ public class Commands {
                 return 0;
             }
         )));
+        dispatcher.register(literal("swap").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+            try {
+                getAllTemplates(FileManager.templatesPath().resolve(context.getArgument("path",String.class)));
+            } catch (IOException e) {
+                Utility.sendMessage("Failed to open files.",ChatType.FAIL);
+            }
+            return 0;
+        })));
         dispatcher.register(literal("jumptofreespot").executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
                 CodeClient.currentAction = new GoTo(dev.findFreePlacePos().toCenterPos().add(0,-0.5,0), () -> {
@@ -326,5 +294,46 @@ public class Commands {
             }
             return -1;
         }));
+    }
+
+    private static CompletableFuture<Suggestions> suggestTemplates(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {
+        CodeClient.LOGGER.info("hi");
+        try {
+            var possibilities = new ArrayList<String>();
+
+            String[] path =  builder.getRemaining().split("/",-1);
+            String currentPath = String.join("/", (Arrays.stream(path).toList().subList(0,path.length - 1)));
+            var list = Files.list(FileManager.templatesPath().resolve(currentPath));
+            for (var file: list.toList()) {
+                String s = currentPath.isEmpty() ? "" : currentPath + "/";
+                if(Files.isDirectory(file)) possibilities.add(s + file.getFileName().toString() + "/");
+                else if(file.getFileName().toString().endsWith(".dft")) {
+                    String name = file.getFileName().toString();
+                    possibilities.add(s + name.substring(0, name.length() - 4));
+                }
+            }
+            list.close();
+            for (String possibility: possibilities) {
+                if(possibility.contains(builder.getRemainingLowerCase())) builder.suggest(possibility,Text.literal("Folder"));
+            }
+        } catch (IOException ignored) {}
+        return CompletableFuture.completedFuture(builder.build());
+    }
+
+    private static List<String> getAllTemplates(Path path) throws IOException {
+        if(Files.notExists(path)) {
+            return null;
+        }
+        if(Files.isDirectory(path)) {
+            var list = new ArrayList<String>();
+            var files = Files.list(path);
+            for (var file: files.toList()) list.addAll(getAllTemplates(file));
+            files.close();
+            return list;
+        }
+        else {
+            byte[] data = Files.readAllBytes(path);
+            return Collections.singletonList(new String(Base64.getEncoder().encode(data)));
+        }
     }
 }

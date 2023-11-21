@@ -11,6 +11,7 @@ import net.minecraft.block.entity.SignText;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -76,6 +77,16 @@ public class Utility {
         if (!publicBukkit.contains("hypercube:codetemplatedata")) return null;
         String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
         return JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString();
+    }
+
+    public static ItemStack makeTemplate(String message) {
+        ItemStack template = new ItemStack(Items.ENDER_CHEST);
+        NbtCompound nbt = new NbtCompound();
+        NbtCompound PublicBukkitValues = new NbtCompound();
+        PublicBukkitValues.putString("hypercube:codetemplatedata","{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + message + "\"}");
+        nbt.put("PublicBukkitValues", PublicBukkitValues);
+        template.setNbt(nbt);
+        return template;
     }
 
     /**
