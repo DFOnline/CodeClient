@@ -219,7 +219,29 @@ public class Commands {
             }
             Utility.sendMessage("You must be in dev mode!",ChatType.FAIL);
             return -1;
-        }));
+        }).then(argument("path",StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+            try {
+                if (CodeClient.location instanceof Dev dev) {
+                    var map = new HashMap<BlockPos, ItemStack>();
+                    BlockPos pos = dev.findFreePlacePos();
+                    for (var template : Objects.requireNonNull(getAllTemplates(FileManager.templatesPath().resolve(context.getArgument("path", String.class))))) {
+                        map.put(pos, Utility.makeTemplate(template));
+                        pos = dev.findFreePlacePos(pos.west(2));
+                    }
+                    CodeClient.currentAction = new PlaceTemplates(map, () -> {
+                        CodeClient.currentAction = new None();
+                        Utility.sendMessage("Done!", ChatType.SUCCESS);
+                    });
+                    return 0;
+                }
+                Utility.sendMessage("You must be in dev mode!", ChatType.FAIL);
+                return -1;
+            }
+            catch (Exception e) {
+                Utility.sendMessage("Couldn't load templates.",ChatType.FAIL);
+                return -2;
+            }
+        })));
         dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             String data = Utility.templateDataItem(CodeClient.MC.player.getMainHandStack());
             if(data == null) {
@@ -267,19 +289,46 @@ public class Commands {
                 try {
                     byte[] data = Files.readAllBytes(path);
                     CodeClient.MC.player.giveItemStack(Utility.makeTemplate(new String(Base64.getEncoder().encode(data))));
+                    Utility.sendInventory();
                 }
                 catch (Exception e) {
                     Utility.sendMessage("Couldn't read file.", ChatType.FAIL);
                     return -2;
                 }
                 return 0;
-            }
-        )));
+            })));
         dispatcher.register(literal("swap").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             try {
-                getAllTemplates(FileManager.templatesPath().resolve(context.getArgument("path",String.class)));
+                 ArrayList<ItemStack> map = new ArrayList<>();
+                for (var template: Objects.requireNonNull(getAllTemplates(FileManager.templatesPath().resolve(context.getArgument("path", String.class))))) {
+                    map.add(Utility.makeTemplate(template));
+                }
+                CodeClient.currentAction = Utility.createSwapper(map, () -> {
+                    CodeClient.currentAction = new None();
+                    Utility.sendMessage("Done!", ChatType.SUCCESS);
+                }).swap();
+                CodeClient.currentAction.init();
             } catch (IOException e) {
                 Utility.sendMessage("Failed to open files.",ChatType.FAIL);
+            }
+            return 0;
+        })));
+        dispatcher.register(literal("delete").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+            Path path = FileManager.templatesPath().resolve(context.getArgument("path",String.class));
+            if(!path.startsWith(FileManager.templatesPath())) {
+                Utility.sendMessage("That is not in the templates directory.",ChatType.INFO);
+                return -2;
+            }
+            if(Files.notExists(path)) {
+                Utility.sendMessage("There is no file or folder there.",ChatType.FAIL);
+                return -1;
+            }
+            try {
+                Files.delete(path);
+                Utility.sendMessage("Deleted " + path + ".",ChatType.SUCCESS);
+            }
+            catch (Exception e) {
+                Utility.sendMessage("Couldn't delete the file or folder",ChatType.FAIL);
             }
             return 0;
         })));
@@ -297,7 +346,6 @@ public class Commands {
     }
 
     private static CompletableFuture<Suggestions> suggestTemplates(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {
-        CodeClient.LOGGER.info("hi");
         try {
             var possibilities = new ArrayList<String>();
 
@@ -322,6 +370,8 @@ public class Commands {
 
     private static List<String> getAllTemplates(Path path) throws IOException {
         if(Files.notExists(path)) {
+            Path asName = path.getParent().resolve(path.getFileName() + ".dft");
+            if(Files.exists(asName)) return getAllTemplates(asName);
             return null;
         }
         if(Files.isDirectory(path)) {

@@ -127,7 +127,6 @@ public class PlaceTemplates extends Action {
             }
             if(cooldown == 0) {
                 if(operation instanceof TemplateToPlace template) {
-                    Utility.makeHolding(template.template);
                     if(shouldBeSwapping) {
                         var player = CodeClient.MC.player;
                         var net = CodeClient.MC.getNetworkHandler();
@@ -137,6 +136,7 @@ public class PlaceTemplates extends Action {
                         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, template.pos, Direction.UP));
                         if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
                     }
+                    Utility.makeHolding(template.template);
                     BlockHitResult blockHitResult = new BlockHitResult(template.pos().add(0,1,0), Direction.UP, template.pos, false);
                     ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, blockHitResult, sequence));
                     template.setOpen(false);
