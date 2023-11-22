@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient;
 
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.*;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.listener.PacketListener;
@@ -68,6 +69,8 @@ public class Event {
         }
         else CodeClient.LOGGER.info("Changed location: " + location.name());
         step = Sequence.WAIT_FOR_CLEAR;
+        CodeClient.LOGGER.info("" + Config.getConfig().InvisibleBlocksInDev);
+        if (Config.getConfig().InvisibleBlocksInDev) CodeClient.shouldReload = true;
     }
 
     private enum Sequence {

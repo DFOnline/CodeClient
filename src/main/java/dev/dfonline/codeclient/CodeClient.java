@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -33,6 +34,8 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 
 public class CodeClient implements ModInitializer {
@@ -59,6 +62,7 @@ public class CodeClient implements ModInitializer {
     public static Action currentAction = new None();
     public static Location lastLocation = null;
     public static Location location = null;
+    public static boolean shouldReload = false;
 
     /**
      * For all recieving packet events and debugging.
@@ -139,6 +143,10 @@ public class CodeClient implements ModInitializer {
     public static void onRender(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         Debug.render(matrices, vertexConsumers);
         RecentChestInsert.render(matrices, vertexConsumers, cameraX, cameraY, cameraZ);
+        if(shouldReload) {
+            MC.worldRenderer.reload();
+            shouldReload = false;
+        }
     }
 
     /**
@@ -152,6 +160,8 @@ public class CodeClient implements ModInitializer {
     public void onInitialize() {
         MC = MinecraftClient.getInstance();
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(new Identifier(MOD_ID,"close"), client -> SocketHandler.stop());
 

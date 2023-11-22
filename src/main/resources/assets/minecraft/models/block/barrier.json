@@ -1,4 +1,5 @@
 {
+  "credit": "https://github.com/AmyMialeeMods/visiblebarriers",
   "parent": "minecraft:block/cube_all",
   "textures": {
     "all": "minecraft:item/barrier"

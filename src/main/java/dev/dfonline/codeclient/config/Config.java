@@ -435,16 +435,16 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Show Invisible Blocks"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Show blocks like barriers and other invisible blocks whilst building or coding."))
-                                        .build())
+                                .description(OptionDescription.of(Text.literal("Show blocks like barriers and other invisible blocks whilst building or coding."),
+                                        Text.literal("Laggy as of now")))
                                 .binding(
                                         false,
                                         () -> InvisibleBlocksInDev,
                                         opt -> InvisibleBlocksInDev = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
-                                .available(false)
+                                .available(true)
+                                .flag(OptionFlag.RELOAD_CHUNKS)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Show I On Line Scope"))
