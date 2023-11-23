@@ -21,6 +21,12 @@ public class FileManager {
         return path;
     }
 
+    public static Path templatesPath() {
+        Path path = CodeClient.MC.runDirectory.toPath().resolve(CodeClient.MOD_ID).resolve("templates");
+        path.toFile().mkdir();
+        return path;
+    }
+
     public static Path writeFile(String fileName, String content) throws IOException {
         return writeFile(fileName, content, true);
     }

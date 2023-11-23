@@ -234,13 +234,7 @@ public class SocketHandler {
                 return;
             }
 
-            ItemStack template = new ItemStack(Items.ENDER_CHEST);
-            NbtCompound nbt = new NbtCompound();
-            NbtCompound PublicBukkitValues = new NbtCompound();
-            PublicBukkitValues.putString("hypercube:codetemplatedata","{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + message + "\"}");
-            nbt.put("PublicBukkitValues", PublicBukkitValues);
-            template.setNbt(nbt);
-            templates.add(template);
+            templates.add(Utility.makeTemplate(message));
         }
     }
     private static class SendInventory extends SocketHandler.Action {
