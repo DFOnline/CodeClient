@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.config.Config;
@@ -18,7 +19,10 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.io.FileUtils;
+import oshi.util.FileUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,6 +35,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.arg
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class Commands {
+    public static Action confirm = null;
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("auth").executes(context -> {
             SocketHandler.setAuthorised(true);
@@ -70,11 +76,13 @@ public class Commands {
             SocketHandler.setConnection(null);
             ActionDump.clear();
             Config.clear();
+            confirm = null;
             return 0;
         }));
 
 
         dispatcher.register(literal("abort").executes(context -> {
+            confirm = null;
             CodeClient.currentAction = new None();
             return 0;
         }));
@@ -155,14 +163,6 @@ public class Commands {
 //            CodeClient.currentAction.init();
 //            return 0;
 //        }));
-//        dispatcher.register(literal("placetemplate").executes(context -> {
-//            CodeClient.currentAction = new PlaceTemplates(Utility.TemplatesInInventory(), () -> {
-//                Utility.sendMessage("Done!", ChatType.SUCCESS);
-//                CodeClient.currentAction = new None();
-//            });
-//            CodeClient.currentAction.init();
-//            return 0;
-//        }));
 //
 //        dispatcher.register(literal("codeforme").executes(context -> {
 //            if(!(CodeClient.location instanceof Dev)) return 1;
@@ -190,19 +190,19 @@ public class Commands {
             Utility.sendMessage("Couldn't scan.", ChatType.FAIL);
             return -1;
         })));
-        dispatcher.register(literal("swapininv").executes(context -> {
-            if(CodeClient.location instanceof Dev) {
-                PlaceTemplates action = Utility.createSwapper(Utility.templatesInInventory(), () -> {
-                    CodeClient.currentAction = new None();
-                    Utility.sendMessage("Done!", ChatType.SUCCESS);
-                });
-                if(action == null) return -2;
-                CodeClient.currentAction = action.swap();
-                CodeClient.currentAction.init();
-                return 0;
-            }
-            return -1;
-        }));
+//        dispatcher.register(literal("swapininv").executes(context -> {
+//            if(CodeClient.location instanceof Dev) {
+//                PlaceTemplates action = Utility.createSwapper(Utility.templatesInInventory(), () -> {
+//                    CodeClient.currentAction = new None();
+//                    Utility.sendMessage("Done!", ChatType.SUCCESS);
+//                });
+//                if(action == null) return -2;
+//                CodeClient.currentAction = action.swap();
+//                CodeClient.currentAction.init();
+//                return 0;
+//            }
+//            return -1;
+//        }));
         dispatcher.register(literal("placetemplates").executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
                 var map = new HashMap<BlockPos, ItemStack>();
@@ -288,7 +288,9 @@ public class Commands {
                 }
                 try {
                     byte[] data = Files.readAllBytes(path);
-                    CodeClient.MC.player.giveItemStack(Utility.makeTemplate(new String(Base64.getEncoder().encode(data))));
+                    ItemStack template = Utility.makeTemplate(new String(Base64.getEncoder().encode(data)));
+                    template.setCustomName(Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(path.getFileName())));
+                    CodeClient.MC.player.giveItemStack(template);
                     Utility.sendInventory();
                 }
                 catch (Exception e) {
@@ -303,11 +305,11 @@ public class Commands {
                 for (var template: Objects.requireNonNull(getAllTemplates(FileManager.templatesPath().resolve(context.getArgument("path", String.class))))) {
                     map.add(Utility.makeTemplate(template));
                 }
-                CodeClient.currentAction = Utility.createSwapper(map, () -> {
+                confirm = Utility.createSwapper(map, () -> {
                     CodeClient.currentAction = new None();
                     Utility.sendMessage("Done!", ChatType.SUCCESS);
                 }).swap();
-                CodeClient.currentAction.init();
+                Utility.sendMessage("Type /confirmcc to confirm this destructive action.",ChatType.INFO);
             } catch (IOException e) {
                 Utility.sendMessage("Failed to open files.",ChatType.FAIL);
             }
@@ -315,7 +317,9 @@ public class Commands {
         })));
         dispatcher.register(literal("delete").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             Path path = FileManager.templatesPath().resolve(context.getArgument("path",String.class));
-            if(!path.startsWith(FileManager.templatesPath())) {
+            Path dft = path.getParent().resolve(path.getFileName() + ".dft");
+            if(Files.notExists(path) && Files.exists(dft)) path = dft;
+            if(!path.toAbsolutePath().startsWith(FileManager.templatesPath().toAbsolutePath())) {
                 Utility.sendMessage("That is not in the templates directory.",ChatType.INFO);
                 return -2;
             }
@@ -324,7 +328,7 @@ public class Commands {
                 return -1;
             }
             try {
-                Files.delete(path);
+                FileUtils.forceDelete(path.toFile());
                 Utility.sendMessage("Deleted " + path + ".",ChatType.SUCCESS);
             }
             catch (Exception e) {
@@ -332,6 +336,8 @@ public class Commands {
             }
             return 0;
         })));
+
+
         dispatcher.register(literal("jumptofreespot").executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
                 CodeClient.currentAction = new GoTo(dev.findFreePlacePos().toCenterPos().add(0,-0.5,0), () -> {
@@ -342,6 +348,23 @@ public class Commands {
                 return 0;
             }
             return -1;
+        }));
+
+
+        dispatcher.register(literal("confirmcc").executes(context -> {
+            if(confirm == null) {
+                Utility.sendMessage("Nothing to confirm.",ChatType.INFO);
+                return 0;
+            }
+            if(!(CodeClient.currentAction instanceof None)) {
+                Utility.sendMessage("CodeClient is busy, you can use /abort to cancel this.",ChatType.FAIL);
+                return -1;
+            }
+            Utility.sendMessage("Confirmed.",ChatType.SUCCESS);
+            CodeClient.currentAction = confirm;
+            CodeClient.currentAction.init();
+            confirm = null;
+            return 1;
         }));
     }
 
