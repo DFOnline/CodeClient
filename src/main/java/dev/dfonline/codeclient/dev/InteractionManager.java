@@ -16,6 +16,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityDimensions;
@@ -222,8 +223,16 @@ public class InteractionManager {
         return hitResult;
     }
 
+    public static boolean shouldTeleportUp() {
+        if(CodeClient.location instanceof Dev dev) {
+            ClientPlayerEntity pl = CodeClient.MC.player;
+            return dev.isInDev(pl.getPos()) && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
+        }
+        return false;
+    }
+
     public static boolean onItemInteract(PlayerEntity player, Hand hand) {
-        if(player.isSneaking()) return false;
+        if(player.isSneaking() || !Config.getConfig().ScopeSwitcher) return false;
 
         ItemStack stack = player.getStackInHand(hand);
 

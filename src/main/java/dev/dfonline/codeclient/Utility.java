@@ -1,9 +1,17 @@
 package dev.dfonline.codeclient;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.action.impl.PlaceTemplates;
+import dev.dfonline.codeclient.hypercube.template.Template;
+import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
+import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -15,14 +23,13 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -58,6 +65,90 @@ public class Utility {
         inv.setStack(0, item);
     }
 
+    /**
+     * Gets the base64 template data from an item. Null if there is none.
+     */
+    public static String templateDataItem(ItemStack item) {
+        if (!item.hasNbt()) return null;
+        NbtCompound nbt = item.getNbt();
+        if (nbt == null) return null;
+        if (!nbt.contains("PublicBukkitValues")) return null;
+        NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
+        if (!publicBukkit.contains("hypercube:codetemplatedata")) return null;
+        String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
+        return JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString();
+    }
+
+    public static ItemStack makeTemplate(String message) {
+        ItemStack template = new ItemStack(Items.ENDER_CHEST);
+        NbtCompound nbt = new NbtCompound();
+        NbtCompound PublicBukkitValues = new NbtCompound();
+        PublicBukkitValues.putString("hypercube:codetemplatedata","{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + message + "\"}");
+        nbt.put("PublicBukkitValues", PublicBukkitValues);
+        template.setNbt(nbt);
+        return template;
+    }
+
+    /**
+     * Get the parsed Template from an item. None is the is none.
+     */
+    public static Template templateItem(ItemStack item) {
+        String codeTemplateData = templateDataItem(item);
+        try {
+            return Template.parse64(codeTemplateData);
+        } catch (IOException ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * Doesn't add .swap(), that needs to be added yourself.
+     */
+    public static PlaceTemplates createSwapper(List<ItemStack> templates, Action.Callback callback) {
+        if(CodeClient.location instanceof Dev dev) {
+            HashMap<BlockPos, ItemStack> map = new HashMap<>();
+            var scan = dev.scanForSigns(Pattern.compile(".*"));
+            ArrayList<ItemStack> leftOvers = new ArrayList<>(templates);
+            for (ItemStack item : templates) {
+                if (!item.hasNbt()) continue;
+                NbtCompound nbt = item.getNbt();
+                if (nbt == null) continue;
+                if (!nbt.contains("PublicBukkitValues")) continue;
+                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
+                if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
+                String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
+                try {
+                    Template template = Template.parse64(JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString());
+                    if(template.blocks.isEmpty()) continue;
+                    TemplateBlock block = template.blocks.get(0);
+                    if(block.block == null) continue;
+                    TemplateBlock.Block blockName = TemplateBlock.Block.valueOf(block.block.toUpperCase());
+                    String name = ObjectUtils.firstNonNull(block.action, block.data);
+                    for (Map.Entry<BlockPos, SignText> sign: scan.entrySet()) { // Loop through scanned signs
+                        SignText text = sign.getValue();                        // ↓ If the blockName and name match
+                        if(text.getMessage(0,false).getString().equals(blockName.name) && text.getMessage(1,false).getString().equals(name)) {
+                            map.put(sign.getKey().east(), item);                // Put it into map
+                            leftOvers.remove(item);                             // Remove the template, so we can see if there's anything left over
+                            break;                                              // break out :D
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    CodeClient.LOGGER.warn(e.getMessage());
+                }
+            }
+            if(!leftOvers.isEmpty()) {
+                BlockPos freePos = dev.findFreePlacePos();
+                for (var item : leftOvers) {
+                    map.put(freePos,item);
+                    freePos = dev.findFreePlacePos(freePos.west(2));
+                }
+            }
+            return new PlaceTemplates(map, callback);
+        }
+        return null;
+    }
+
     public static void sendHandItem(ItemStack item) {
         CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + CodeClient.MC.player.getInventory().selectedSlot, item));
     }
@@ -65,7 +156,7 @@ public class Utility {
     /**
      * Gets all templates in the players inventory.
      */
-    public static List<ItemStack> TemplatesInInventory() {
+    public static List<ItemStack> templatesInInventory() {
         PlayerInventory inv = CodeClient.MC.player.getInventory();
         ArrayList<ItemStack> templates = new ArrayList<>();
         for (int i = 0; i < (27 + 9); i++) {

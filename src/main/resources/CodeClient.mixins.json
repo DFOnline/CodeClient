@@ -25,11 +25,13 @@
     "world.block.MAbstractBlockState",
     "world.block.MBarrier",
     "world.block.MBlockItem",
-    "world.block.MSignBlockEntity"
+    "world.block.MSignBlockEntity",
+    "world.block.MBlockItem",
+    "world.block.MBarrierBlock",
+    "world.block.MLightBlock",
+    "world.block.MStructureVoidBlock"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-  ]
+  }
 }

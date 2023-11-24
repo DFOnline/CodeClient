@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -45,7 +46,7 @@ public class NoClip {
             if(x == plot.getX() - 22 && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
 
             player.setOnGround(false);
-            boolean wantsToFall = player.isSneaking() && (player.getPitch() > 40);
+            boolean wantsToFall = !Config.getConfig().TeleportDown && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle);
             if((y < nearestFloor && !wantsToFall && !player.getAbilities().flying) || y == 50) {
                 player.setVelocityClient(velocity.x, 0, velocity.z);
                 y = nearestFloor;

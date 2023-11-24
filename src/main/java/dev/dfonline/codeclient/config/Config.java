@@ -46,6 +46,11 @@ public class Config {
     public int ChestPeekerX = 0;
     public int ChestPeekerY = -4;
     public boolean ReportBrokenBlock = true;
+    public boolean ScopeSwitcher = true;
+    public float UpAngle = 50;
+    public float DownAngle = 50;
+    public boolean TeleportUp = false;
+    public boolean TeleportDown = false;
 
     private void save() {
         try {
@@ -79,6 +84,11 @@ public class Config {
             object.addProperty("ChestPeekerX",ChestPeekerX);
             object.addProperty("ChestPeekerY",ChestPeekerY);
             object.addProperty("ReportBrokenBlock",ReportBrokenBlock);
+            object.addProperty("ScopeSwitcher",ScopeSwitcher);
+            object.addProperty("UpAngle",UpAngle);
+            object.addProperty("DownAngle",DownAngle);
+            object.addProperty("TeleportUp",TeleportUp);
+            object.addProperty("TeleportDown",TeleportDown);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -197,6 +207,45 @@ public class Config {
                                                 .range(0, 30)
                                                 .step(1))
                                         .build())
+                                .option(Option.createBuilder(float.class)
+                                        .name(Text.literal("Angle to go up"))
+                                        .description(OptionDescription.of(Text.literal("When facing up, within this angle, jumping will take you up a layer.")))
+                                        .binding(
+                                                50F,
+                                                () -> UpAngle,
+                                                opt -> UpAngle = opt
+                                        )
+                                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
+                                        .build())
+                                .option(Option.createBuilder(float.class)
+                                        .name(Text.literal("Angle to go down"))
+                                        .description(OptionDescription.of(Text.literal("When facing down, within this angle, crouching will take you down a layer")))
+                                        .binding(50F,
+                                                () -> DownAngle,
+                                                opt -> DownAngle = opt
+                                        )
+                                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Teleport Up"))
+                                        .description(OptionDescription.of(Text.literal("If when facing up")))
+                                        .binding(
+                                                false,
+                                                () -> TeleportUp,
+                                                opt -> TeleportUp = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Teleport Down"))
+                                        .description(OptionDescription.of(Text.literal("Teleport Down when using")))
+                                        .binding(
+                                                false,
+                                                () -> TeleportDown,
+                                                opt -> TeleportDown = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
 //                                .option(Option.createBuilder(boolean.class)
 //                                        .name(Text.literal("Air Control"))
 //                                        .description(OptionDescription.createBuilder()
@@ -279,10 +328,20 @@ public class Config {
 //                                        .available(false)
 //                                        .build())
                                 .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Scope Switcher"))
+                                        .description(OptionDescription.of(Text.literal("Right click variables to change their scope with a custom UI.")))
+                                        .binding(
+                                                true,
+                                                () -> ScopeSwitcher,
+                                                opt -> ScopeSwitcher = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
                                         .name(Text.literal("Report Broken Blocks"))
                                         .description(
                                                 OptionDescription.of(Text.literal("Get a message on breaking a block telling you what it did."),
-                                                Text.literal("Only works for Player Event, Entity Event, Function, Call Function, Process, and Start Process")))
+                                                        Text.literal("Only works for Player Event, Entity Event, Function, Call Function, Process, and Start Process.")))
                                         .binding(
                                                 true,
                                                 () -> ReportBrokenBlock,
@@ -376,16 +435,16 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Show Invisible Blocks"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Show blocks like barriers and other invisible blocks whilst building or coding."))
-                                        .build())
+                                .description(OptionDescription.of(Text.literal("Show blocks like barriers and other invisible blocks whilst building or coding."),
+                                        Text.literal("Laggy as of now")))
                                 .binding(
                                         false,
                                         () -> InvisibleBlocksInDev,
                                         opt -> InvisibleBlocksInDev = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
-                                .available(false)
+                                .available(true)
+                                .flag(OptionFlag.RELOAD_CHUNKS)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Show I On Line Scope"))
