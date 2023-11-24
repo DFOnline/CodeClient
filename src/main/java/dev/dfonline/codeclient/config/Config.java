@@ -116,6 +116,7 @@ public class Config {
     public YetAnotherConfigLib getLibConfig() {
         return YetAnotherConfigLib.createBuilder()
                 .title(Text.literal("CodeClient Config"))
+                //<editor-fold desc="General">
                 .category(ConfigCategory.createBuilder()
                         .name(Text.literal("General"))
                         .tooltip(Text.literal("General always specific options for CodeClient"))
@@ -171,246 +172,6 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-                        .build())
-                .category(ConfigCategory.createBuilder()
-                        .name(Text.literal("Dev Mode"))
-                        .tooltip(Text.literal("Customize how you code."))
-                        .group(OptionGroup.createBuilder()
-                                .name(Text.literal("Navigation"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("How you move about."))
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("NoClip"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("If you can NoClip in the dev space."))
-                                                .build())
-                                        .binding(
-                                                true,
-                                                () -> NoClipEnabled,
-                                                option -> NoClipEnabled = option
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(int.class)
-                                        .name(Text.literal("AirStrafe Modifier"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("How much faster you go when jumping in dev space."))
-                                                .text(Text.literal("Your jump speed will be based of walking speed"))
-                                                .build())
-                                        .binding(
-                                                10,
-                                                () -> AirSpeed,
-                                                opt -> AirSpeed = opt
-                                        )
-                                        .controller(opt -> IntegerSliderControllerBuilder.create(opt)
-                                                .range(0, 30)
-                                                .step(1))
-                                        .build())
-                                .option(Option.createBuilder(float.class)
-                                        .name(Text.literal("Angle to go up"))
-                                        .description(OptionDescription.of(Text.literal("When facing up, within this angle, jumping will take you up a layer.")))
-                                        .binding(
-                                                50F,
-                                                () -> UpAngle,
-                                                opt -> UpAngle = opt
-                                        )
-                                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
-                                        .build())
-                                .option(Option.createBuilder(float.class)
-                                        .name(Text.literal("Angle to go down"))
-                                        .description(OptionDescription.of(Text.literal("When facing down, within this angle, crouching will take you down a layer")))
-                                        .binding(50F,
-                                                () -> DownAngle,
-                                                opt -> DownAngle = opt
-                                        )
-                                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Teleport Up"))
-                                        .description(OptionDescription.of(Text.literal("If when facing up")))
-                                        .binding(
-                                                false,
-                                                () -> TeleportUp,
-                                                opt -> TeleportUp = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Teleport Down"))
-                                        .description(OptionDescription.of(Text.literal("Teleport Down when using")))
-                                        .binding(
-                                                false,
-                                                () -> TeleportDown,
-                                                opt -> TeleportDown = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-//                                .option(Option.createBuilder(boolean.class)
-//                                        .name(Text.literal("Air Control"))
-//                                        .description(OptionDescription.createBuilder()
-//                                                .text(Text.literal("Gives you the same control in air as walking."))
-//                                                .build())
-//                                        .binding(
-//                                                false,
-//                                                () -> AirControl,
-//                                                opt -> AirControl = opt
-//                                        )
-//                                        .controller(TickBoxController::new)
-//                                        .build())
-                                .build())
-                        .group(OptionGroup.createBuilder()
-                                .name(Text.literal("Interaction"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Customize how you actually interact with code, placing and breaking code blocks."))
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Custom Block Interactions"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("Hides the local block when placing, and hides a codeblock on breaking."))
-                                                .text(Text.literal("This can allow faster placing of blocks."))
-                                                .build())
-                                        .binding(
-                                                true,
-                                                () -> CustomBlockInteractions,
-                                                opt -> CustomBlockInteractions = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Custom Block Breaking"))
-                                        .description(OptionDescription.of(Text.literal("Keep codeblocks safe from accidental breaking."),Text.literal("They will have the survival breaking animation."),Text.literal("Breaking multiple will temporarily increase the speed.")))
-                                        .binding(
-                                                false,
-                                                () -> CustomBlockBreaking,
-                                                opt -> CustomBlockBreaking = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Custom Tag Interaction"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("Toggle \"faster\" block tags, with interactions client handled."))
-                                                .build())
-                                        .binding(
-                                                false,
-                                                () -> CustomTagInteraction,
-                                                opt -> CustomTagInteraction = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Place on Air"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("Allows you to place on air where codespaces would go."))
-                                                .text(Text.literal("This will interfere with other players who don't have this mod, such as helpers!").formatted(Formatting.YELLOW,Formatting.BOLD))
-                                                .build())
-                                        .binding(
-                                                false,
-                                                () -> PlaceOnAir,
-                                                opt -> PlaceOnAir = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-//                                .option(Option.createBuilder(float.class)
-//                                        .name(Text.literal("Reach Distance"))
-//                                        .description(OptionDescription.createBuilder()
-//                                                .text(Text.literal("Extend your reach distance, moving you forward if you can't reach."))
-//                                                .build())
-//                                        .binding(
-//                                                5f,
-//                                                () -> ReachDistance,
-//                                                opt -> ReachDistance = opt
-//                                        )
-//                                        .controller(opt -> FloatSliderControllerBuilder.create(opt)
-//                                                .range(5f, 10f)
-//                                                .step(0.1f))
-//                                        .available(false)
-//                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Scope Switcher"))
-                                        .description(OptionDescription.of(Text.literal("Right click variables to change their scope with a custom UI.")))
-                                        .binding(
-                                                true,
-                                                () -> ScopeSwitcher,
-                                                opt -> ScopeSwitcher = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(boolean.class)
-                                        .name(Text.literal("Report Broken Blocks"))
-                                        .description(
-                                                OptionDescription.of(Text.literal("Get a message on breaking a block telling you what it did."),
-                                                        Text.literal("Only works for Player Event, Entity Event, Function, Call Function, Process, and Start Process.")))
-                                        .binding(
-                                                true,
-                                                () -> ReportBrokenBlock,
-                                                opt -> ReportBrokenBlock = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(LayerInteractionMode.class)
-                                        .name(Text.literal("Layer Interaction"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("Controls how you interact with code layers, including ones that don't exist."))
-                                                .text(Text.of(CodeLayerInteractionMode.description))
-                                                .build())
-                                        .binding(
-                                                LayerInteractionMode.AUTO,
-                                                () -> CodeLayerInteractionMode,
-                                                opt -> CodeLayerInteractionMode = opt
-                                        )
-                                        .controller(nodeOption -> () -> new EnumController<>(nodeOption, LayerInteractionMode.class))
-                                        .build())
-                                .build())
-                        .group(OptionGroup.createBuilder()
-                                .name(Text.literal("Chest Highlighting"))
-                                .description(OptionDescription.of(Text.literal("How punching chests should highlight them. For tracking items you insert via punching.")))
-                                .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.literal("Highlight Recent Inserted Chest"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("Highlights the chest you inserted (left-clicked) an item into"))
-                                                .build())
-                                        .binding(
-                                                true,
-                                                () -> RecentChestInsert,
-                                                opt -> RecentChestInsert = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.literal("Highlight With Empty Hand"))
-                                        .description(OptionDescription.of(Text.literal("If punching a chest with an empty hand should highlight it.")))
-                                        .binding(
-                                                false,
-                                                () -> HighlightChestsWithAir,
-                                                opt -> HighlightChestsWithAir = opt
-                                        )
-                                        .controller(TickBoxControllerBuilder::create)
-                                        .build())
-                                .option(Option.createBuilder(int.class)
-                                        .name(Text.literal("Highlight Duration"))
-                                        .description(OptionDescription.of(Text.literal("How long the highlight should show."),Text.literal("The last second will fade out.")))
-                                        .binding(
-                                                10,
-                                                () -> HighlightChestDuration,
-                                                opt -> HighlightChestDuration = opt
-                                        )
-                                        .controller(integerOption -> new IntegerFieldControllerBuilderImpl(integerOption).min(1))
-                                        .build())
-                                .option(Option.createBuilder(Color.class)
-                                        .name(Text.literal("Recent Inserted Chest Highlight Color"))
-                                        .description(OptionDescription.createBuilder()
-                                                .text(Text.literal("Color of chest highlight"))
-                                                .build())
-                                        .binding(
-                                                new Color(0.2F, 1.0F, 1.0F),
-                                                () -> new Color(ChestHighlightColor),
-                                                opt -> ChestHighlightColor = opt.getRGB()
-                                        )
-                                        .controller(ColorControllerBuilder::create)
-                                        .build())
-                                .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Auto Focus Search"))
                                 .description(OptionDescription.of(Text.literal("When opening the Code Palette (").append(Text.keybind("key.codeclient.actionpallete")).append(") automatically select the search bar."),Text.literal("This is disabled because it interferes with navigation binds.")))
@@ -433,6 +194,258 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
+                        //<editor-fold desc="AutoJoin">
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.literal("AutoJoin"))
+                                .description(OptionDescription.of(Text.literal("If and where to auto join.")))
+                                .collapsed(true)
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Enabled"))
+                                        .description(OptionDescription.createBuilder()
+                                                .text(Text.literal("If CodeClient should automatically connect you to DF."))
+                                                .build())
+                                        .binding(
+                                                false,
+                                                () -> AutoJoin,
+                                                opt -> AutoJoin = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(Node.class)
+                                        .name(Text.literal("Node"))
+                                        .description(OptionDescription.createBuilder()
+                                                .text(Text.literal("Enable the above option."))
+                                                .build())
+                                        .binding(
+                                                Node.None,
+                                                () -> AutoNode,
+                                                opt -> AutoNode = opt
+                                        )
+                                        .controller(nodeOption -> () -> new EnumController<>(nodeOption, Node.class))
+//                                .available(AutoJoin)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Auto Join Plot"))
+                                        .description(OptionDescription.createBuilder()
+                                                .text(Text.literal("When you connect, automatically run /join."))
+                                                .text(Text.literal("If you want a plot on beta, make sure you set the node."))
+                                                .build())
+                                        .binding(
+                                                false,
+                                                () -> AutoJoinPlot,
+                                                opt -> AutoJoinPlot = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(int.class)
+                                        .name(Text.literal("Plot ID"))
+                                        .description(OptionDescription.createBuilder()
+                                                .text(Text.literal("Enable the above option."))
+                                                .build())
+                                        .binding(
+                                                0,
+                                                () -> AutoJoinPlotId,
+                                                opt -> AutoJoinPlotId = opt
+                                        )
+                                        .controller(IntegerFieldControllerBuilder::create)
+                                        .build())
+                                .build())
+                        //</editor-fold>
+                        .build())
+                //</editor-fold>
+                //<editor-fold desc="Navigation">
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.literal("Navigation"))
+                        .tooltip(Text.literal("How you move about in the codespace and the likes."))
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("NoClip"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("If you can NoClip in the dev space."))
+                                        .build())
+                                .binding(
+                                        true,
+                                        () -> NoClipEnabled,
+                                        option -> NoClipEnabled = option
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(int.class)
+                                .name(Text.literal("AirStrafe Modifier"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("How much faster you go when jumping in dev space."))
+                                        .text(Text.literal("Your jump speed will be based of walking speed"))
+                                        .build())
+                                .binding(
+                                        10,
+                                        () -> AirSpeed,
+                                        opt -> AirSpeed = opt
+                                )
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                        .range(0, 30)
+                                        .step(1))
+                                .build())
+                        .option(Option.createBuilder(float.class)
+                                .name(Text.literal("Angle to go up"))
+                                .description(OptionDescription.of(Text.literal("When facing up, within this angle, jumping will take you up a layer.")))
+                                .binding(
+                                        50F,
+                                        () -> UpAngle,
+                                        opt -> UpAngle = opt
+                                )
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
+                                .build())
+                        .option(Option.createBuilder(float.class)
+                                .name(Text.literal("Angle to go down"))
+                                .description(OptionDescription.of(Text.literal("When facing down, within this angle, crouching will take you down a layer")))
+                                .binding(50F,
+                                        () -> DownAngle,
+                                        opt -> DownAngle = opt
+                                )
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Teleport Up"))
+                                .description(OptionDescription.of(Text.literal("If when facing up")))
+                                .binding(
+                                        false,
+                                        () -> TeleportUp,
+                                        opt -> TeleportUp = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Teleport Down"))
+                                .description(OptionDescription.of(Text.literal("Teleport Down when using")))
+                                .binding(
+                                        false,
+                                        () -> TeleportDown,
+                                        opt -> TeleportDown = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+//                                .option(Option.createBuilder(boolean.class)
+//                                        .name(Text.literal("Air Control"))
+//                                        .description(OptionDescription.createBuilder()
+//                                                .text(Text.literal("Gives you the same control in air as walking."))
+//                                                .build())
+//                                        .binding(
+//                                                false,
+//                                                () -> AirControl,
+//                                                opt -> AirControl = opt
+//                                        )
+//                                        .controller(TickBoxController::new)
+//                                        .build())
+                        .build())
+                //</editor-fold>
+                //<editor-fold desc="Interaction">
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.literal("Interaction"))
+                        .tooltip(Text.literal("Customize how you actually interact with code, placing and breaking code blocks."))
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Custom Block Interactions"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("Hides the local block when placing, and hides a codeblock on breaking."))
+                                        .text(Text.literal("This can allow faster placing of blocks."))
+                                        .build())
+                                .binding(
+                                        true,
+                                        () -> CustomBlockInteractions,
+                                        opt -> CustomBlockInteractions = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Custom Block Breaking"))
+                                .description(OptionDescription.of(Text.literal("Keep codeblocks safe from accidental breaking."),Text.literal("They will have the survival breaking animation."),Text.literal("Breaking multiple will temporarily increase the speed.")))
+                                .binding(
+                                        false,
+                                        () -> CustomBlockBreaking,
+                                        opt -> CustomBlockBreaking = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Custom Tag Interaction"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("Toggle \"faster\" block tags, with interactions client handled."))
+                                        .build())
+                                .binding(
+                                        false,
+                                        () -> CustomTagInteraction,
+                                        opt -> CustomTagInteraction = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Place on Air"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("Allows you to place on air where codespaces would go."))
+                                        .text(Text.literal("This will interfere with other players who don't have this mod, such as helpers!").formatted(Formatting.YELLOW,Formatting.BOLD))
+                                        .build())
+                                .binding(
+                                        false,
+                                        () -> PlaceOnAir,
+                                        opt -> PlaceOnAir = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+//                                .option(Option.createBuilder(float.class)
+//                                        .name(Text.literal("Reach Distance"))
+//                                        .description(OptionDescription.createBuilder()
+//                                                .text(Text.literal("Extend your reach distance, moving you forward if you can't reach."))
+//                                                .build())
+//                                        .binding(
+//                                                5f,
+//                                                () -> ReachDistance,
+//                                                opt -> ReachDistance = opt
+//                                        )
+//                                        .controller(opt -> FloatSliderControllerBuilder.create(opt)
+//                                                .range(5f, 10f)
+//                                                .step(0.1f))
+//                                        .available(false)
+//                                        .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Scope Switcher"))
+                                .description(OptionDescription.of(Text.literal("Right click variables to change their scope with a custom UI.")))
+                                .binding(
+                                        true,
+                                        () -> ScopeSwitcher,
+                                        opt -> ScopeSwitcher = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.literal("Report Broken Blocks"))
+                                .description(
+                                        OptionDescription.of(Text.literal("Get a message on breaking a block telling you what it did."),
+                                                Text.literal("Only works for Player Event, Entity Event, Function, Call Function, Process, and Start Process.")))
+                                .binding(
+                                        true,
+                                        () -> ReportBrokenBlock,
+                                        opt -> ReportBrokenBlock = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(LayerInteractionMode.class)
+                                .name(Text.literal("Layer Interaction"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("Controls how you interact with code layers, including ones that don't exist."))
+                                        .text(Text.of(CodeLayerInteractionMode.description))
+                                        .build())
+                                .binding(
+                                        LayerInteractionMode.AUTO,
+                                        () -> CodeLayerInteractionMode,
+                                        opt -> CodeLayerInteractionMode = opt
+                                )
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, LayerInteractionMode.class))
+                                .build())
+                        .build())
+                //</editor-fold>
+                //<editor-fold desc="Visual">
+                .category(ConfigCategory.createBuilder()
+                        .name(Text.literal("Visual"))
+                        .tooltip(Text.literal("Purely visual elements of CodeClient, which can help in coding with information."))
+                        //<editor-fold desc="Ungrouped">
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Show Invisible Blocks"))
                                 .description(OptionDescription.of(Text.literal("Show blocks like barriers and other invisible blocks whilst building or coding."),
@@ -456,91 +469,99 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-                        .option(Option.createBuilder(Boolean.class)
-                                .name(Text.literal("Preview Chest Contents"))
-                                .description(OptionDescription.of(Text.literal("Show a popup with with item info when looking at a chest.")))
-                                .binding(
-                                        true,
-                                        () -> ChestPeeker,
-                                        opt -> ChestPeeker = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
+                        //</editor-fold>
+                        //<editor-fold desc="Chest Preview">
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.literal("Chest Preview"))
+                                .description(OptionDescription.of(Text.literal("An overlay showing the items from inside a chest.")))
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.literal("Preview Chest Contents"))
+                                        .description(OptionDescription.of(Text.literal("Show a popup with with item info when looking at a chest.")))
+                                        .binding(
+                                                true,
+                                                () -> ChestPeeker,
+                                                opt -> ChestPeeker = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(int.class)
+                                        .name(Text.literal("Preview X Offset"))
+                                        .description(OptionDescription.of(Text.literal("How far horizontally the preview popup is")))
+                                        .binding(
+                                                0,
+                                                () -> ChestPeekerX,
+                                                opt -> ChestPeekerX = opt
+                                        )
+                                        .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500,500))
+                                        .build())
+                                .option(Option.createBuilder(int.class)
+                                        .name(Text.literal("Preview Y Offset"))
+                                        .description(OptionDescription.of(Text.literal("How far vertically the preview popup is")))
+                                        .binding(
+                                                -4,
+                                                () -> ChestPeekerY,
+                                                opt -> ChestPeekerY = opt
+                                        )
+                                        .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500,500))
+                                        .build())
                                 .build())
-                        .option(Option.createBuilder(int.class)
-                                .name(Text.literal("Preview X Offset"))
-                                .description(OptionDescription.of(Text.literal("How far horizontally the preview popup is")))
-                                .binding(
-                                        0,
-                                        () -> ChestPeekerX,
-                                        opt -> ChestPeekerX = opt
-                                )
-                                .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500,500))
-                                .build())
-                        .option(Option.createBuilder(int.class)
-                                .name(Text.literal("Preview Y Offset"))
-                                .description(OptionDescription.of(Text.literal("How far vertically the preview popup is")))
-                                .binding(
-                                        -4,
-                                        () -> ChestPeekerY,
-                                        opt -> ChestPeekerY = opt
-                                )
-                                .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500,500))
-                                .build())
+                        //</editor-fold>
+                        //<editor-fold desc="Chest Highlight">
+                                .group(OptionGroup.createBuilder()
+                                        .name(Text.literal("Chest Highlight"))
+                                        .description(OptionDescription.of(
+                                                Text.literal("A highlight for inserting items into chests"),
+                                                Text.literal("Helpful with finding where you where, or accidentally punching chests.")))
+                                        .option(Option.createBuilder(Boolean.class)
+                                                .name(Text.literal("Highlight Recent Inserted Chest"))
+                                                .description(OptionDescription.createBuilder()
+                                                        .text(Text.literal("Highlights the chest you inserted (via punching with an item) an item into"))
+                                                        .build())
+                                                .binding(
+                                                        true,
+                                                        () -> RecentChestInsert,
+                                                        opt -> RecentChestInsert = opt
+                                                )
+                                                .controller(TickBoxControllerBuilder::create)
+                                                .build())
+                                        .option(Option.createBuilder(Boolean.class)
+                                                .name(Text.literal("Highlight With Empty Hand"))
+                                                .description(OptionDescription.of(Text.literal("If punching a chest with an empty hand should highlight it.")))
+                                                .binding(
+                                                        false,
+                                                        () -> HighlightChestsWithAir,
+                                                        opt -> HighlightChestsWithAir = opt
+                                                )
+                                                .controller(TickBoxControllerBuilder::create)
+                                                .build())
+                                        .option(Option.createBuilder(int.class)
+                                                .name(Text.literal("Highlight Duration"))
+                                                .description(OptionDescription.of(Text.literal("How long the highlight should show."),Text.literal("The last second will fade out.")))
+                                                .binding(
+                                                        10,
+                                                        () -> HighlightChestDuration,
+                                                        opt -> HighlightChestDuration = opt
+                                                )
+                                                .controller(integerOption -> new IntegerFieldControllerBuilderImpl(integerOption).min(1))
+                                                .build())
+                                        .option(Option.createBuilder(Color.class)
+                                                .name(Text.literal("Recent Inserted Chest Highlight Color"))
+                                                .description(OptionDescription.createBuilder()
+                                                        .text(Text.literal("Color of chest highlight"))
+                                                        .build())
+                                                .binding(
+                                                        new Color(0.2F, 1.0F, 1.0F),
+                                                        () -> new Color(ChestHighlightColor),
+                                                        opt -> ChestHighlightColor = opt.getRGB()
+                                                )
+                                                .controller(ColorControllerBuilder::create)
+                                                .build())
+                                        .build())
+                        //</editor-fold>
+                        //<editor-fold desc="Sign Colors">
+                        //</editor-fold>
                         .build())
-                .category(ConfigCategory.createBuilder()
-                        .name(Text.literal("AutoJoin"))
-                        .tooltip(Text.literal("If and where to auto join."))
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Enabled"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("If CodeClient should automatically connect you to DF."))
-                                        .build())
-                                .binding(
-                                        false,
-                                        () -> AutoJoin,
-                                        opt -> AutoJoin = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
-                        .option(Option.createBuilder(Node.class)
-                                .name(Text.literal("Node"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Enable the above option."))
-                                        .build())
-                                .binding(
-                                        Node.None,
-                                        () -> AutoNode,
-                                        opt -> AutoNode = opt
-                                )
-                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Node.class))
-//                                .available(AutoJoin)
-                                .build())
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Auto Join Plot"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("When you connect, automatically run /join."))
-                                        .text(Text.literal("If you want a plot on beta, make sure you set the node."))
-                                        .build())
-                                .binding(
-                                        false,
-                                        () -> AutoJoinPlot,
-                                        opt -> AutoJoinPlot = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
-                        .option(Option.createBuilder(int.class)
-                                .name(Text.literal("Plot ID"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Enable the above option."))
-                                        .build())
-                                .binding(
-                                        0,
-                                        () -> AutoJoinPlotId,
-                                        opt -> AutoJoinPlotId = opt
-                                )
-                                .controller(IntegerFieldControllerBuilder::create)
-                                .build())
-                        .build())
+                //</editor-fold>
                 .save(this::save)
                 .build();
     }
