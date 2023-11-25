@@ -51,6 +51,12 @@ public class Config {
     public float DownAngle = 50;
     public boolean TeleportUp = false;
     public boolean TeleportDown = false;
+    public int Line1Color = 0xAAAAAA;
+    public int Line2Color = 0xC5C5C5;
+    public int Line3Color = 0xAAFFAA;
+    public boolean UseSelectionColor = true;
+    public int Line4Color = 0xFF8800;
+    public boolean SignPeeker = true;
 
     private void save() {
         try {
@@ -89,6 +95,12 @@ public class Config {
             object.addProperty("DownAngle",DownAngle);
             object.addProperty("TeleportUp",TeleportUp);
             object.addProperty("TeleportDown",TeleportDown);
+            object.addProperty("Line1Color",Line1Color);
+            object.addProperty("Line2Color",Line2Color);
+            object.addProperty("Line3Color",Line3Color);
+            object.addProperty("UseSelectionColor",UseSelectionColor);
+            object.addProperty("Line4Color",Line4Color);
+            object.addProperty("SignPeeker",SignPeeker);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -469,6 +481,15 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.literal("Show sign text from behind"))
+                                .description(OptionDescription.of(Text.literal("Show the text on a sign when looking at a codeblock from behind in a popup.")))
+                                .binding(
+                                        true,
+                                        () -> SignPeeker,
+                                        opt -> SignPeeker = opt
+                                )
+                                .build())
                         //</editor-fold>
                         //<editor-fold desc="Chest Preview">
                         .group(OptionGroup.createBuilder()
@@ -559,6 +580,60 @@ public class Config {
                                         .build())
                         //</editor-fold>
                         //<editor-fold desc="Sign Colors">
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.literal("Sign Colors"))
+                                .description(OptionDescription.of(Text.literal("Override the color of text on the signs in the dev space."),Text.literal("Using #000000 (pure black) has no effect and disable disable it.")))
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.literal("Line 1"))
+                                        .description(OptionDescription.of(Text.literal("The top line on a sign."),Text.literal("Tells you what block it is, such as PLAYER ACTION")))
+                                        .binding(
+                                                new Color(0xAAAAAA),
+                                                () -> new Color(Line1Color),
+                                                opt -> Line1Color = opt.getRGB()
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.literal("Line 2"))
+                                        .description(OptionDescription.of(Text.literal("The second line on a sign."),Text.literal("Tells you the action or data, such as SendMessage")))
+                                        .binding(
+                                                new Color(0xC5C5C5),
+                                                () -> new Color(Line2Color),
+                                                opt -> Line2Color = opt.getRGB()
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.literal("Line 3"))
+                                        .description(OptionDescription.of(Text.literal("The third line on a sign."),Text.literal("Tells you either the selection or SubAction")))
+                                        .binding(
+                                                new Color(0xAAFFAA),
+                                                () -> new Color(Line3Color),
+                                                opt -> Line3Color = opt.getRGB()
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(boolean.class)
+                                        .name(Text.literal("Use custom colors for selection"))
+                                        .description(OptionDescription.of(Text.literal("Use the selection's color (or a readable similar one) for the color")))
+                                        .binding(
+                                                true,
+                                                () -> UseSelectionColor,
+                                                opt -> UseSelectionColor = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.literal("Line 4"))
+                                        .description(OptionDescription.of(Text.literal("The bottom line on a sign."),Text.literal("Only tells you if it is inverted: NOT")))
+                                        .binding(
+                                                new Color(0xFF8800),
+                                                () -> new Color(Line4Color),
+                                                opt -> Line4Color = opt.getRGB()
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build())
+                                .build())
                         //</editor-fold>
                         .build())
                 //</editor-fold>

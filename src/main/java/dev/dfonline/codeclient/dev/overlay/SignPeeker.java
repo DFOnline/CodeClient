@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev.overlay;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.entity.SignBlockEntity;
@@ -13,8 +14,8 @@ import net.minecraft.util.math.BlockPos;
 import java.util.List;
 
 public class SignPeeker {
-    public static List<Text> getOverlayText() { // TODO: config
-        if(!(CodeClient.location instanceof Dev)) return null;
+    public static List<Text> getOverlayText() {
+        if (!Config.getConfig().SignPeeker || !(CodeClient.location instanceof Dev)) return null;
         if(CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
             BlockPos pos = InteractionManager.isBlockBreakable(block.getBlockPos());
             if(pos == null || CodeClient.MC.world == null) return null;
