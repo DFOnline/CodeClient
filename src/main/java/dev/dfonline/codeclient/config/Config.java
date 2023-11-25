@@ -489,6 +489,7 @@ public class Config {
                                         () -> SignPeeker,
                                         opt -> SignPeeker = opt
                                 )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         //</editor-fold>
                         //<editor-fold desc="Chest Preview">
