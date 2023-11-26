@@ -13,7 +13,7 @@
     "entity.player.MClientPlayerInteractionManager",
     "entity.player.MPlayerEntity",
     "network.MClientConnection",
-    "network.MClientPlayNetworkHandler",
+    "network.MClientCommonPlayNetworkHandler",
     "render.MChunkRendererRegion",
     "render.MDebugRenderer",
     "render.hud.MDrawContext",

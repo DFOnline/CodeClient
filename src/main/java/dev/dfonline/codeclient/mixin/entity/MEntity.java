@@ -37,10 +37,10 @@ public abstract class MEntity {
         }
     }
 
-    @Inject(method = "wouldPoseNotCollide", at = @At("HEAD"), cancellable = true)
-    private void wouldPoseNotCollide(EntityPose pose, CallbackInfoReturnable<Boolean> cir) {
-        if(NoClip.isIgnoringWalls() && this.getId() == CodeClient.MC.player.getId()) {
-            cir.setReturnValue(true);
-        }
-    }
+//    @Inject(method = "wouldPoseNotCollide", at = @At("HEAD"), cancellable = true)
+//    private void wouldPoseNotCollide(EntityPose pose, CallbackInfoReturnable<Boolean> cir) {
+//        if(NoClip.isIgnoringWalls() && this.getId() == CodeClient.MC.player.getId()) {
+//            cir.setReturnValue(true);
+//        }
+//    }
 }

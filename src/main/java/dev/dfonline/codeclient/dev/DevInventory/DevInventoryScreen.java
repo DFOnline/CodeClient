@@ -72,14 +72,14 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
     public void handledScreenTick() {
         super.handledScreenTick();
-        if (this.searchBox != null) {
-            this.searchBox.tick();
-        }
+//        if (this.searchBox != null) {
+//            this.searchBox.tick();
+//        }
     }
 
     protected void onMouseClick(@Nullable Slot slot, int slotId, int button, SlotActionType actionType) {
         if(slot == null) return;
-        this.searchBox.setCursorToEnd();
+        this.searchBox.setCursorToEnd(false);
         this.searchBox.setSelectionEnd(0);
 
         if(slot == this.deleteItemSlot) {
@@ -129,7 +129,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         setSelectedTab(6);
         if(Config.getConfig().FocusSearch)
         searchBox.setFocused(true);
-        searchBox.setCursorToEnd();
+        searchBox.setCursorToEnd(false);
         searchBox.setSelectionEnd(0);
         this.client.player.playerScreenHandler.removeListener(this.listener);
         this.listener = new CreativeInventoryListener(this.client);
@@ -276,7 +276,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context);
+        this.renderBackground(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
 
         Integer hoveredGroup = getGroupFromMouse(mouseX,mouseY);
@@ -348,7 +348,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             if(CodeClient.MC.options.chatKey.matchesKey(keyCode,scanCode) || CodeClient.editBind.matchesKey(keyCode,scanCode)) {
                 if(keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
                 searchBox.setFocused(true);
-                searchBox.setCursorToEnd();
+                searchBox.setCursorToEnd(false);
                 searchBox.setSelectionEnd(0);
                 ignoreNextKey = true;
                 return true;
@@ -387,7 +387,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             else context.drawTexture(TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
         }
         else {
-            if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(context, this.x + 88, this.y + 45, 20, (float)(this.x + 88 - mouseX), (float)(this.y + 45 - 30 - mouseY), this.client.player);
+            if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(context, this.x + 73, this.y + 6, this.x + 105, this.y + 49, 20, 0.0625F, (float)mouseX, (float)mouseY, this.client.player);
         }
 
     }

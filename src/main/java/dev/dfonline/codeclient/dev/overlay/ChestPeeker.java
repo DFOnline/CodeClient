@@ -98,7 +98,7 @@ public class ChestPeeker {
                 if(slot.getSlot() != 1) return false;
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
                 shouldClearChest = false;
-                NbtCompound nbt = slot.getItemStack().getNbt();
+                NbtCompound nbt = slot.getStack().getNbt();
                 if(nbt == null) return false;
                 NbtCompound bet = nbt.getCompound("BlockEntityTag");
                 if(bet == null) return false;
