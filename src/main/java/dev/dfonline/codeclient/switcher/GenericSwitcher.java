@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.GameModeSelectionScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -22,6 +23,8 @@ import java.util.List;
  */
 public abstract class GenericSwitcher extends Screen {
     private static final Identifier TEXTURE = new Identifier("textures/gui/container/gamemode_switcher.png");
+    private static final Identifier SLOT_TEXTURE = new Identifier("gamemode_switcher/slot");
+    private static final Identifier SELECTED_TEXTURE = new Identifier("gamemode_switcher/selection");
     private final List<SelectableButtonWidget> buttons = new ArrayList<>();
     private boolean usingMouseToSelect = false;
     protected boolean hasClicked = false;
@@ -95,9 +98,14 @@ public abstract class GenericSwitcher extends Screen {
                 if(button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
             }
             button.selected = this.selected == i;
+            context.drawGuiTexture(SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
+            if(button.selected) context.drawGuiTexture(SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
             button.render(context, mouseX, mouseY, delta);
             ++i;
         }
+    }
+
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
     }
 
     @Override
