@@ -4,6 +4,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.NoClip;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,5 +31,10 @@ public abstract class MPlayerEntity {
             CodeClient.MC.player.setPosition(move);
             ci.cancel();
         }
+    }
+
+    @Inject(method = "canChangeIntoPose", at = @At("HEAD"), cancellable = true)
+    private void canChangeIntoPose(EntityPose pose, CallbackInfoReturnable<Boolean> cir) {
+        if(NoClip.isIgnoringWalls()) cir.setReturnValue(true);
     }
 }
