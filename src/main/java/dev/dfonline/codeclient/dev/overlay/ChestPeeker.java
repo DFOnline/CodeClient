@@ -93,17 +93,19 @@ public class ChestPeeker {
                 if(block.getData() != 0) return false;
                 invalidate();
             }
-            if(!shouldClearChest) return false;
             if(packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
-                if(slot.getSlot() != 1) return false;
-                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1,ItemStack.EMPTY));
-                shouldClearChest = false;
-                NbtCompound nbt = slot.getStack().getNbt();
+                var nbt = slot.getStack().getNbt();
                 if(nbt == null) return false;
-                NbtCompound bet = nbt.getCompound("BlockEntityTag");
+                var display = nbt.getCompound("display");
+                if(display == null || !display.contains("Name",NbtElement.STRING_TYPE)) return false;
+                String name = display.getString("Name");
+                if(Objects.equals(name, ") {\"text\":\"CodeClient chest peeker internal\"}")) return false;
+                var bet = nbt.getCompound("BlockEntityTag");
                 if(bet == null) return false;
                 if(!Objects.equals(bet.getString("id"), "minecraft:chest")) return false;
                 if(currentBlock != null) items = bet.getList("Items", NbtElement.COMPOUND_TYPE);
+                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(),ItemStack.EMPTY));
+                shouldClearChest = false;
                 return true;
             }
         }
