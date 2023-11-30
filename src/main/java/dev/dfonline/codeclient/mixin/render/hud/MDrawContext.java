@@ -35,18 +35,35 @@ public abstract class MDrawContext {
         NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
         if(varItem == null) return;
         JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
-        if(!var.get("id").getAsString().equals("var")) return;
         JsonObject data = var.get("data").getAsJsonObject();
-        String scopeName = data.get("scope").getAsString();
-
+        Text text = null;
+        switch (var.get("id").getAsString()) {
+            case "var": {
+                try {
+                    Scope scope = Scope.valueOf(data.get("scope").getAsString());
+                    text = Text.literal((Config.getConfig().UseIForLineScope && scope == Scope.line) ? "I" : scope.shortName).setStyle(Style.EMPTY.withColor(scope.color));
+                }
+                catch (Exception ignored) {
+                    text = Text.literal("?").formatted(Formatting.DARK_RED);
+                }
+                break;
+            }
+            case "num": {
+                String name = data.get("name").getAsString();
+                if(textRenderer.getWidth(Text.of(name)) > 16) {
+                    var avail = textRenderer.trimToWidth(name,16-2);
+                    text = Text.literal(avail).formatted(Formatting.RED).append(Text.literal(".".repeat((16-textRenderer.getWidth(Text.of(avail))) / 2)).formatted(Formatting.WHITE));
+                }
+                else text = Text.literal(name).formatted(Formatting.RED);
+                break;
+            }
+            default: {
+                return;
+            }
+        }
+        if(text == null) return;
         this.matrices.translate(0.0F, 0.0F, 200.0F);
-        try {
-            Scope scope = Scope.valueOf(scopeName);
-            this.drawText(textRenderer,Text.literal((Config.getConfig().UseIForLineScope && scope == Scope.line) ? "I" : scope.shortName).setStyle(Style.EMPTY.withColor(scope.color)),x,y,0xFFFFFF,true);
-        }
-        catch (Exception ignored) {
-            this.drawText(textRenderer,Text.literal("?").formatted(Formatting.RED),x,y,0xFFFFFF,true);
-        }
+        this.drawText(textRenderer,text,x,y,0xFFFFFF,true);
         matrices.translate(0.0F, 0.0F, -200.0F);
     }
 }
