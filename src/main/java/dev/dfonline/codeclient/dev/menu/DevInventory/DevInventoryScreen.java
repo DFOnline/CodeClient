@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.dev.DevInventory;
+package dev.dfonline.codeclient.dev.menu.DevInventory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import static dev.dfonline.codeclient.dev.DevInventory.DevInventoryGroup.*;
+import static dev.dfonline.codeclient.dev.menu.DevInventory.DevInventoryGroup.*;
 
 @Environment(EnvType.CLIENT)
 public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler> {
@@ -419,9 +419,11 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         context.drawItem(itemStack, originX, originY);
 //        this.itemRenderer.zOffset = 0.0F;
     }
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if(!GROUPS[selectedTab].hasSearchBar()) return false;
-        this.scrollPosition -= amount;
+        this.scrollPosition -= verticalAmount;
         if(scrollPosition < 0) scrollPosition = 0;
         if((scrollPosition * 9) > scrollHeight) scrollPosition = (double) scrollHeight / 9;
 
