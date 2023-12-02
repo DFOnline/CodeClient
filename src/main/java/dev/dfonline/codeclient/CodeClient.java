@@ -4,9 +4,12 @@ import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.*;
+import dev.dfonline.codeclient.dev.BuildClip;
 import dev.dfonline.codeclient.dev.Debug.Debug;
-import dev.dfonline.codeclient.dev.DevInventory.DevInventoryScreen;
+import dev.dfonline.codeclient.dev.LastPos;
+import dev.dfonline.codeclient.dev.NoClip;
+import dev.dfonline.codeclient.dev.RecentChestInsert;
+import dev.dfonline.codeclient.dev.menu.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
@@ -17,7 +20,6 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -35,8 +37,6 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 
 public class CodeClient implements ModInitializer {

@@ -382,7 +382,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if(itemGroup.hasSearchBar()) this.searchBox.render(context, mouseX, mouseY, delta);
         if (itemGroup != INVENTORY) {
             int scrollbarX = this.x + 175;
-            int scrollbarY = this.y + 18 ;
+            int scrollbarY = this.y + 18;
             if(scrollHeight == 0) context.drawTexture(TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15);
             else context.drawTexture(TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
         }
