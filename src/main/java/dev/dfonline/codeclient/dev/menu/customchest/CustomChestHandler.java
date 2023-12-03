@@ -6,7 +6,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -15,6 +14,11 @@ import net.minecraft.screen.slot.Slot;
 public class CustomChestHandler extends ScreenHandler {
     private final Inventory inventory;
     private static final int Size = 9*3;
+    public final CustomChestNumbers numbers = CustomChestNumbers.getSize();
+
+    public static CustomChestNumbers getSize() {
+       return CustomChestNumbers.SMALL;
+    }
 
     public CustomChestHandler(int syncId) {
         this(syncId, CodeClient.MC.player.getInventory(), new SimpleInventory(Size));
@@ -42,12 +46,12 @@ public class CustomChestHandler extends ScreenHandler {
     private void addPlayerInventory(PlayerInventory playerInventory) {
         for(int row = 0; row < 3; ++row) {
             for(int column = 0; column < 9; ++column) {
-                this.addSlot(new Slot(playerInventory, column + row * 9 + 9, 8 + column * 18, 109+25 + row * 18));
+                this.addSlot(new Slot(playerInventory, column + row * 9 + 9, numbers.INVENTORY_X + column * 18, numbers.INVENTORY_Y + row * 18));
             }
         }
 
         for(int slot = 0; slot < 9; ++slot) {
-            this.addSlot(new Slot(playerInventory, slot, 8 + slot * 18, 167+25));
+            this.addSlot(new Slot(playerInventory, slot, numbers.INVENTORY_X + slot * 18, numbers.INVENTORY_Y + 58));
         }
     }
 

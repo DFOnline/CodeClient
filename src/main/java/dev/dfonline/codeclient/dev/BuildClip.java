@@ -109,7 +109,7 @@ public class BuildClip {
             waitForTP = true;
 
             Vec3d pos = plot.getPos().relativize(player.getPos());
-            ItemStack location = new Location(pos.x, pos.y, pos.z, player.getPitch(), player.getYaw()).toItemStack();
+            ItemStack location = new Location(pos.x, pos.y, pos.z, player.getPitch(), player.getYaw()).toStack();
 
             ItemStack lastItem = player.getStackInHand(Hand.MAIN_HAND);
             Utility.sendHandItem(location);

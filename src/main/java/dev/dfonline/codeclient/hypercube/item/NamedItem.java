@@ -1,18 +1,15 @@
 package dev.dfonline.codeclient.hypercube.item;
 
+import com.google.gson.JsonObject;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class NamedItem extends VarItem {
     private String name;
 
-    public NamedItem(ItemStack item) throws Exception {
-        super(item);
+    public NamedItem(Item material, JsonObject var) {
+        super(material, var);
         this.name = this.data.get("name").getAsString();
-    }
-
-    @Override
-    public ItemStack toStack() {
-        return super.toStack();
     }
 
     public String getName() {

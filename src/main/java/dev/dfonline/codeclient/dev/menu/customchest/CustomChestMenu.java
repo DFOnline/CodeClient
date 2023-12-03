@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.hypercube.item.NamedItem;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
+import dev.dfonline.codeclient.hypercube.item.VarItems;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -18,28 +19,25 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class CustomChestMenu extends HandledScreen<CustomChestHandler> implements ScreenHandlerProvider<CustomChestHandler> {
-    private static final Identifier TEXTURE = new Identifier(CodeClient.MOD_ID,"textures/gui/container/custom_chest/background.png");
-    private static final int MENU_WIDTH = 176;
-    private static final int MENU_HEIGHT = 216;
-    private static final int TEXTURE_WIDTH = 202;
-    private static final int TEXTURE_HEIGHT = 229;
+
+    private final CustomChestNumbers Size;
     private double scroll = 0;
-    private ArrayList<Widget> widgets = new ArrayList<>(6);
-    private ArrayList<VarItem> varItems = new ArrayList<>(6);
+    private final ArrayList<Widget> widgets = new ArrayList<>();
+    private final ArrayList<VarItem> varItems = new ArrayList<>();
 
     public CustomChestMenu(CustomChestHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
+        Size = handler.numbers;
         this.titleY = 4;
         this.playerInventoryTitleY = 123;
-        this.backgroundHeight = MENU_HEIGHT;
-        this.backgroundWidth = MENU_WIDTH;
+        this.backgroundHeight = Size.MENU_HEIGHT;
+        this.backgroundWidth = Size.MENU_WIDTH;
     }
 
     @Override
@@ -58,11 +56,11 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 drawable.render(context, mouseX, mouseY, delta);
             }
         }
-        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + 6);
+        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
-            final int x = 8;
-            final int y = i * 18 - 11 + 25;
+            final int x = Size.SLOT_X;
+            final int y = i * 18 + Size.SLOT_Y;
             context.drawItem(slot.getStack(),x,y);
             context.drawItemInSlot(textRenderer,slot.getStack(),x,y);
             int relX = mouseX - this.x;
@@ -86,39 +84,40 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     private void update(int previousScroll) {
         Integer focused = null;
-        for (int i = 0, widgetsSize = widgets.size(); i < widgetsSize; i++) {
+        for (int i = 0; i < widgets.size(); i++) {
             var widget = widgets.get(i);
             if (widget instanceof ClickableWidget clickable) {
                 if (clickable.isFocused()) focused = (i + previousScroll) - (int) scroll;
             }
         }
         widgets.clear();
-        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + 6);
+        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             Slot slot = subList.get(i);
             if(!slot.hasStack()) continue;
             ItemStack stack = slot.getStack();
-            final int x = 25;
-            final int y = i * 18 - 11 + 25;
-            try {
-                NamedItem namedItem = new NamedItem(stack);
-                TextFieldWidget widget = new TextFieldWidget(textRenderer,x,y,128,16,Text.of(namedItem.getName()));
-                widget.setText(namedItem.getName());
+            final int x = Size.WIDGET_X;
+            final int y = i * 18 + Size.SLOT_Y;
+            VarItem varItem = (VarItems.parse(stack));
+            varItems.add(varItem);
+            if(i >= Size.WIDGETS) continue;
+            if(varItem instanceof NamedItem named) {
+                TextFieldWidget widget = new TextFieldWidget(textRenderer,x,y,128,16,Text.of(named.getName()));
+                widget.setText(named.getName());
                 widget.setFocused(Objects.equals(i,focused));
                 widgets.add(widget);
-                varItems.add(namedItem);
+                varItems.add(named);
+                continue;
             }
-            catch (Exception e) {
-                widgets.add(new TextWidget(x + 3,y,122,16,stack.getName(),textRenderer).alignLeft());
-                varItems.add(null);
-            }
+
+            widgets.add(new TextWidget(x + 3,y,Size.WIDGET_WIDTH,16,stack.getName(),textRenderer).alignLeft());
         }
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         double prev = scroll;
-        scroll = Math.min(Math.max(0, scroll - verticalAmount), 21);
+        scroll = Math.min(Math.max(0, scroll - verticalAmount), 27 - Size.WIDGETS);
         update((int) prev);
         return true;
     }
@@ -230,18 +229,27 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         context.getMatrices().push();
         RenderSystem.enableBlend();
-        int centerX = this.width / 2 - (MENU_WIDTH / 2);
-        int centerY = this.height / 2 - (MENU_HEIGHT / 2);
-        context.drawTexture(TEXTURE, centerX, centerY, 0.0F, 0.0F, MENU_WIDTH, MENU_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        int centerX = this.width / 2 - (Size.MENU_WIDTH / 2);
+        int centerY = this.height / 2 - (Size.MENU_HEIGHT / 2);
+        context.drawTexture(Size.TEXTURE, centerX, centerY, 0.0F, 0.0F, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
 
         boolean disabled = false;
-        float scrollProgress = (float) scroll /  21;
-        context.drawTexture(TEXTURE,centerX+MENU_WIDTH - 20, (int) (centerY + 14 + scrollProgress * 91), MENU_WIDTH + (disabled ? 14 : 2),0,12, MENU_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        float scrollProgress = (float) scroll / (27 - Size.WIDGETS);
+        context.drawTexture(Size.TEXTURE,
+                centerX + Size.SCROLL_POS_X,
+                (int) (centerY + Size.SCROLL_POS_Y + scrollProgress * (Size.SCROLL_ROOM - Size.SCROLL_HEIGHT)),
+                (disabled ? Size.MENU_WIDTH + Size.SCROLL_WIDTH : Size.MENU_WIDTH),
+                0,
+                Size.SCROLL_WIDTH,
+                Size.SCROLL_HEIGHT,
+                Size.TEXTURE_WIDTH,
+                Size.TEXTURE_HEIGHT
+        );
         context.getMatrices().pop();
     }
 
     @Override
     protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
-        super.drawForeground(context, mouseX, mouseY);
+//        super.drawForeground(context, mouseX, mouseY);
     }
 }

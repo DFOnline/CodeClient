@@ -36,7 +36,7 @@ public class GoTo extends Action {
         active = true;
         if(CodeClient.MC.player == null) return;
         if(CodeClient.location instanceof Dev dev && dev.isInArea(target)) {
-            locationItem = new Location(dev.getPos().relativize(target)).setRotation(CodeClient.MC.player.getPitch(), CodeClient.MC.player.getYaw()).toItemStack();
+            locationItem = new Location(dev.getPos().relativize(target)).setRotation(CodeClient.MC.player.getPitch(), CodeClient.MC.player.getYaw()).toStack();
             locationItemTeleport();
         }
     }

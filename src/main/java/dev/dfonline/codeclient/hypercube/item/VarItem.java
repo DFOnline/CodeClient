@@ -13,8 +13,7 @@ public abstract class VarItem {
     protected JsonObject data;
     protected Item material;
 
-    public VarItem(ItemStack item) throws Exception {
-        material = item.getItem();
+    public static JsonObject prefetch(ItemStack item) throws Exception {
         if (!item.hasNbt()) throw new Exception("Item has no nbt.");
         NbtCompound nbt = item.getNbt();
         if (nbt == null) throw new Exception("NBT is null.");
@@ -22,17 +21,26 @@ public abstract class VarItem {
         NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
         if (!publicBukkit.contains("hypercube:varitem", NbtElement.STRING_TYPE)) throw new Exception("Item has no hypercube:varitem");
         String varitem = publicBukkit.getString("hypercube:varitem");
-        JsonObject var = JsonParser.parseString(varitem).getAsJsonObject();
+        return JsonParser.parseString(varitem).getAsJsonObject();
+
+    }
+    public VarItem(ItemStack item) throws Exception {
+        this(item.getItem(), prefetch(item));
+    }
+
+    public VarItem(Item material, JsonObject var) {
+        this.material = material;
         id = var.get("id").getAsString();
         data = var.get("data").getAsJsonObject();
     }
 
+
     public ItemStack toStack() {
         var pbv = new NbtCompound();
-        var varitem = new JsonObject();
-        varitem.addProperty("id",id);
-        varitem.add("data",data);
-        pbv.put("hypercube:varitem", NbtString.of(varitem.toString()));
+        var varItem = new JsonObject();
+        varItem.addProperty("id",id);
+        varItem.add("data",data);
+        pbv.put("hypercube:varitem", NbtString.of(varItem.toString()));
         ItemStack item = material.getDefaultStack();
         item.setSubNbt("PublicBukkitValues",pbv);
         return item;
