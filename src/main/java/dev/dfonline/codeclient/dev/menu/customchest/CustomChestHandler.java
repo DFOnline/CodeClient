@@ -46,12 +46,12 @@ public class CustomChestHandler extends ScreenHandler {
     private void addPlayerInventory(PlayerInventory playerInventory) {
         for(int row = 0; row < 3; ++row) {
             for(int column = 0; column < 9; ++column) {
-                this.addSlot(new Slot(playerInventory, column + row * 9 + 9, numbers.INVENTORY_X + column * 18, numbers.INVENTORY_Y + row * 18));
+                this.addSlot(new Slot(playerInventory, column + row * 9 + 9, 1 + numbers.INVENTORY_X + column * 18, 1 + numbers.INVENTORY_Y + row * 18));
             }
         }
 
         for(int slot = 0; slot < 9; ++slot) {
-            this.addSlot(new Slot(playerInventory, slot, numbers.INVENTORY_X + slot * 18, numbers.INVENTORY_Y + 58));
+            this.addSlot(new Slot(playerInventory, slot, numbers.INVENTORY_X + 1 + slot * 18, numbers.INVENTORY_Y + 59));
         }
     }
 

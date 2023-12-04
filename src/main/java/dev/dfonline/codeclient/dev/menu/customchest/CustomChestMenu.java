@@ -19,6 +19,7 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,20 +60,25 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
-            final int x = Size.SLOT_X;
-            final int y = i * 18 + Size.SLOT_Y;
-            context.drawItem(slot.getStack(),x,y);
-            context.drawItemInSlot(textRenderer,slot.getStack(),x,y);
-            int relX = mouseX - this.x;
-            int relY = mouseY - this.y;
-            if(
-                       relX > x
-                    && relX < x+18
-                    && relY > y
-                    && relY < y+18
-            ) {
-                drawSlotHighlight(context, x, y, -10);
-                focusedSlot = slot;
+            final int x = Size.SLOT_X + 1;
+            final int y = i * 18 + Size.SLOT_Y + 1;
+            if(i + scroll < 27) {
+                context.drawItem(slot.getStack(),x,y);
+                context.drawItemInSlot(textRenderer,slot.getStack(),x,y);
+                int relX = mouseX - this.x;
+                int relY = mouseY - this.y;
+                if(
+                           relX > x
+                        && relX < x+18
+                        && relY > y
+                        && relY < y+18
+                ) {
+                    drawSlotHighlight(context, x, y, -10);
+                    focusedSlot = slot;
+                }
+            }
+            else {
+                context.drawTexture(Size.TEXTURE, x-1,y-1,Size.DISABLED_X,0,18,18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
             }
         }
 
@@ -124,7 +130,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + 6);
+        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS,27));
         for (Widget widget : widgets) {
             if (widget instanceof ClickableWidget clickable) {
                 clickable.setFocused(clickable.isMouseOver(mouseX - this.x, mouseY - this.y));
@@ -160,7 +166,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     private void setItems() {
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + 6);
         if(widgets == null) return;
-        for (int i = 0; i < widgets.size(); i++) {
+        for (int i = 0; i < widgets.size() && i < subList.size() && i < varItems.size(); i++) {
             Slot slot = subList.get(i);
             VarItem item = varItems.get(i);
             Widget widget = widgets.get(i);
@@ -179,6 +185,23 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        int prev = (int) scroll;
+        if(keyCode == GLFW.GLFW_KEY_END) {
+            scroll = 27 - Size.WIDGETS;
+            update(prev);
+        }
+        if(keyCode == GLFW.GLFW_KEY_HOME) {
+            scroll = 0;
+            update(prev);
+        }
+        if(keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+            scroll = Math.min(27 - Size.WIDGETS, scroll + Size.WIDGETS);
+            update(prev);
+        }
+        if(keyCode == GLFW.GLFW_KEY_PAGE_UP) {
+            scroll = Math.max(0, scroll - Size.WIDGETS);
+            update(prev);
+        }
         for (Widget widget : widgets) {
             if (widget instanceof ClickableWidget clickable) {
                 if(clickable.isFocused()) {

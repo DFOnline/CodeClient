@@ -51,10 +51,10 @@ public class CustomChestNumbers {
         SCROLL_POS_X = scrollPosX;
         SCROLL_POS_Y = scrollPosY;
         SCROLL_ROOM = scrollRoom;
-        SLOT_X = slotX+1; // Slots need just a little moving.
-        SLOT_Y = slotY+1;
-        INVENTORY_X = inventoryX+1;
-        INVENTORY_Y = inventoryY+1;
+        SLOT_X = slotX; // Slots need just a little moving.
+        SLOT_Y = slotY;
+        INVENTORY_X = inventoryX;
+        INVENTORY_Y = inventoryY;
         DISABLED_X = disabledX;
     }
 
@@ -75,8 +75,8 @@ public class CustomChestNumbers {
             12,
             15,
             156,
-            12,
-            110,
+            13,
+            108,
             7,
             13,
             7,
