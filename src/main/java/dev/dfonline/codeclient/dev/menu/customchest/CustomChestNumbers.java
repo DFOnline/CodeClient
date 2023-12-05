@@ -70,7 +70,7 @@ public class CustomChestNumbers {
             229,
             6,
             6,
-            156,
+            128,
             25,
             12,
             15,

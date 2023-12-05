@@ -2,13 +2,10 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.util.math.Vec3d;
-import org.apache.commons.lang3.NotImplementedException;
 
+// TODO: Locations have a sub tag for the actual pos, this doesn't work.
 public class Location extends VarItem {
     private double x = 0;
     private double y = 0;

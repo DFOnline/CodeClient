@@ -2,7 +2,6 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.hypercube.item.NamedItem;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import net.minecraft.client.gui.DrawContext;
@@ -10,7 +9,6 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
@@ -23,7 +21,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CustomChestMenu extends HandledScreen<CustomChestHandler> implements ScreenHandlerProvider<CustomChestHandler> {
 
@@ -97,6 +94,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             }
         }
         widgets.clear();
+        varItems.clear();
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             Slot slot = subList.get(i);
@@ -107,12 +105,14 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             VarItem varItem = (VarItems.parse(stack));
             varItems.add(varItem);
             if(i >= Size.WIDGETS) continue;
-            if(varItem instanceof NamedItem named) {
-                TextFieldWidget widget = new TextFieldWidget(textRenderer,x,y,128,16,Text.of(named.getName()));
-                widget.setText(named.getName());
-                widget.setFocused(Objects.equals(i,focused));
+            if(varItem != null) {
+//                TextFieldWidget widget = new TextFieldWidget(textRenderer,x,y,Size.WIDGET_WIDTH,18,Text.of(named.getName()));
+//                widget.setMaxLength(10_000);
+//                widget.setText(named.getName());
+//                widget.setFocused(Objects.equals(i,focused));
+                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.id), varItem);
                 widgets.add(widget);
-                varItems.add(named);
+                varItems.add(varItem);
                 continue;
             }
 
@@ -134,6 +134,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         for (Widget widget : widgets) {
             if (widget instanceof ClickableWidget clickable) {
                 clickable.setFocused(clickable.isMouseOver(mouseX - this.x, mouseY - this.y));
+                clickable.mouseClicked(mouseX - this.x,mouseY - this.y,button);
             }
         }
         for (int i = 0; i < subList.size(); i++) {
@@ -163,37 +164,30 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private void setItems() {
-        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + 6);
-        if(widgets == null) return;
-        for (int i = 0; i < widgets.size() && i < subList.size() && i < varItems.size(); i++) {
-            Slot slot = subList.get(i);
+    private void updateItems() {
+        for (int i = 0; i < varItems.size(); i++) {
             VarItem item = varItems.get(i);
-            Widget widget = widgets.get(i);
-            if(widget == null || slot == null || item == null) continue;
-            if (widget instanceof ClickableWidget) {
-                if (item instanceof NamedItem named && widget instanceof TextFieldWidget text) {
-                    named.setName(text.getText());
-                    slot.setStack(named.toStack());
-                    super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
-                    CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, named.toStack()));
-                    super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
-                }
-            }
+            if(item != null) updateItem(i);
+        }
+    }
+
+    private void updateItem(int scrollRelativeSlot) {
+        if(CodeClient.MC.getNetworkHandler() == null) return;
+        if(scrollRelativeSlot + scroll > 27) return;
+        Slot slot = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.WIDGETS).get(scrollRelativeSlot);
+        if(scrollRelativeSlot > widgets.size()) return;
+        Widget widget = widgets.get(scrollRelativeSlot);
+        if(widget instanceof CustomChestField<?> field) {
+            VarItem item = field.item;
+            super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
+            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, item.toStack()));
+            super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
         }
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         int prev = (int) scroll;
-        if(keyCode == GLFW.GLFW_KEY_END) {
-            scroll = 27 - Size.WIDGETS;
-            update(prev);
-        }
-        if(keyCode == GLFW.GLFW_KEY_HOME) {
-            scroll = 0;
-            update(prev);
-        }
         if(keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
             scroll = Math.min(27 - Size.WIDGETS, scroll + Size.WIDGETS);
             update(prev);
@@ -202,25 +196,55 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             scroll = Math.max(0, scroll - Size.WIDGETS);
             update(prev);
         }
-        for (Widget widget : widgets) {
+        if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            for (int i = 0; i < widgets.size(); i++) {
+                Widget widget = widgets.get(i);
+                if (widget instanceof ClickableWidget clickable) {
+                    if (clickable.isFocused()) {
+                        clickable.setFocused(false);
+                        updateItem(i);
+                        return true;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < widgets.size(); i++) {
+            Widget widget = widgets.get(i);
             if (widget instanceof ClickableWidget clickable) {
-                if(clickable.isFocused()) {
+                if (clickable.isFocused()) {
                     clickable.keyPressed(keyCode, scanCode, modifiers);
-//                    setItems();
+                    updateItem(i);
                     return true;
                 }
             }
+        }
+        if(keyCode == GLFW.GLFW_KEY_END) {
+            scroll = 27 - Size.WIDGETS;
+            update(prev);
+        }
+        if(keyCode == GLFW.GLFW_KEY_HOME) {
+            scroll = 0;
+            update(prev);
+        }
+        if(keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.forwardKey.matchesKey(keyCode,scanCode)) {
+            scroll = Math.max(0,scroll - 1);
+            update(prev);
+        }
+        if(keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.backKey.matchesKey(keyCode,scanCode)) {
+            scroll = Math.min(27 - Size.WIDGETS, scroll + 1);
+            update(prev);
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        for (Widget widget : widgets) {
+        for (int i = 0; i < widgets.size(); i++) {
+            Widget widget = widgets.get(i);
             if (widget instanceof ClickableWidget clickable) {
-                if(clickable.isFocused()) {
+                if (clickable.isFocused()) {
                     clickable.keyReleased(keyCode, scanCode, modifiers);
-                    setItems();
+                    updateItem(i);
                     return true;
                 }
             }
@@ -230,11 +254,12 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean charTyped(char chr, int modifiers) {
-        for (Widget widget : widgets) {
+        for (int i = 0; i < widgets.size(); i++) {
+            Widget widget = widgets.get(i);
             if (widget instanceof ClickableWidget clickable) {
-                if(clickable.isFocused()) {
+                if (clickable.isFocused()) {
                     clickable.charTyped(chr, modifiers);
-//                    setItems();
+                    updateItem(i);
                     return true;
                 }
             }

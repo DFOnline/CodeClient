@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.hypercube.item;
 import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 
 public class NamedItem extends VarItem {
     private String name;
@@ -19,5 +20,11 @@ public class NamedItem extends VarItem {
     public void setName(String name) {
         this.data.addProperty("name",name);
         this.name = name;
+    }
+
+    @Override
+    public ItemStack toStack() {
+        ItemStack stack = super.toStack();
+        return stack.setCustomName(Text.literal(name));
     }
 }
