@@ -1,12 +1,13 @@
 package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
+import dev.dfonline.codeclient.CodeClient;
 import net.minecraft.item.Item;
 
 public class Vector extends VarItem {
-    private double x;
-    private double y;
-    private double z;
+    private Double x;
+    private Double y;
+    private Double z;
 
     public Vector(Item material, JsonObject var) {
         super(material, var);
@@ -15,28 +16,37 @@ public class Vector extends VarItem {
         this.z = data.get("z").getAsDouble();
     }
 
-    // This was written with three different cursors and xyz on the clipboard, it was actually loads of fun writing 3 functions at a time.
     public double getX() {
         return this.x;
     }
-    public void setX(double x) {
-        this.data.addProperty("x",x);
+    public void setX(Double x) {
         this.x = x;
+        CodeClient.LOGGER.info(String.valueOf(x));
+        this.data.addProperty("x",x);
     }
 
     public double getY() {
         return this.y;
     }
-    public void setY(double y) {
-        this.data.addProperty("x",y);
+    public void setY(Double y) {
         this.y = y;
+        this.data.addProperty("x",y);
     }
 
     public double getZ() {
         return this.z;
     }
-    public void setZ(double z) {
-        this.data.addProperty("x",z);
+    public void setZ(Double z) {
         this.z = z;
+        this.data.addProperty("x",z);
+    }
+
+    public void setCoords(Double x, Double y, Double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.data.addProperty("x",x);
+        this.data.addProperty("y",y);
+        this.data.addProperty("z",z);
     }
 }

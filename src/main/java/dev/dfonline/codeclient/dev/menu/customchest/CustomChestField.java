@@ -41,9 +41,9 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             Double[] values = {vec.getX(), vec.getY(), vec.getZ()};
             int textboxWidth = width / 3;
             for (int i = 0; i < 3; i++) {
-                var field = new TextFieldWidget(textRender,x + (textboxWidth * i),y,textboxWidth,height,Text.literal(""));
+                var field = new NumberFieldWidget(textRender,x + (textboxWidth * i),y,textboxWidth,height,Text.literal(""));
                 field.setMaxLength(10);
-                field.setText(values[i].toString());
+                field.setNumber(values[i]);
                 widgets.add(field);
             }
         }
@@ -51,9 +51,10 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             Double[] values = {loc.getX(), loc.getY(), loc.getZ(), loc.getPitch(), loc.getYaw()};
             int textboxWidth = width / 5;
             for (int i = 0; i < 5; i++) {
-                var field = new TextFieldWidget(textRender,x + (textboxWidth * i),y,textboxWidth,height,Text.literal(""));
+                var field = new NumberFieldWidget(textRender,x + (textboxWidth * i),y,textboxWidth,height,Text.literal(""));
                 field.setMaxLength(10);
-                field.setText(values[i].toString());
+                field.setNumber(values[i]);
+                field.setCursorToStart(false);
                 widgets.add(field);
             }
         }
@@ -68,6 +69,11 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             if(named instanceof Variable variable) {
                 CodeClient.LOGGER.info(variable.getScope().longName); // Problem for later
             }
+        }
+        if(item instanceof Vector vec) {
+            if (widgets.get(0) instanceof NumberFieldWidget num1 && widgets.get(1) instanceof NumberFieldWidget num2 && widgets.get(2) instanceof NumberFieldWidget num3)
+                vec.setCoords(num1.getNumber(), num2.getNumber(), num3.getNumber());
+            this.item = (ItemType) vec;
         }
     }
 
@@ -92,6 +98,9 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
         return true;
 //        return super.mouseClicked(mouseX, mouseY, button);
     }
+
+
+
 
     @Override
     public void onClick(double mouseX, double mouseY) {
@@ -119,6 +128,12 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        for (var widget: widgets) {
+            if(widget instanceof ClickableWidget click && click.isMouseOver(mouseX,mouseY) && click.mouseScrolled(mouseX,mouseY,horizontalAmount,verticalAmount)) {
+                updateItem();
+                return true;
+            }
+        }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 

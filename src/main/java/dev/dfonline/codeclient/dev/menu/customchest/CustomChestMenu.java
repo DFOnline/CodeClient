@@ -6,9 +6,11 @@ import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
@@ -121,7 +123,16 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        for (int i = 0; i < widgets.size(); i++) {
+            var widget = widgets.get(i);
+            if (widget instanceof ClickableWidget click
+                    && click.isMouseOver(mouseX - this.x, mouseY - this.y)
+                    && click.mouseScrolled(mouseX - this.x, mouseY - this.y, horizontalAmount, verticalAmount)) {
+                updateItem(i);
+                return true;
+            }
+        }
         double prev = scroll;
         scroll = Math.min(Math.max(0, scroll - verticalAmount), 27 - Size.WIDGETS);
         update((int) prev);
