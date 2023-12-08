@@ -6,16 +6,16 @@ import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerListener;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
@@ -30,6 +30,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     private double scroll = 0;
     private final ArrayList<Widget> widgets = new ArrayList<>();
     private final ArrayList<VarItem> varItems = new ArrayList<>();
+    private boolean update = true;
 
     public CustomChestMenu(CustomChestHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -38,12 +39,30 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         this.playerInventoryTitleY = 123;
         this.backgroundHeight = Size.MENU_HEIGHT;
         this.backgroundWidth = Size.MENU_WIDTH;
+        this.handler.addListener(new ScreenHandlerListener() {
+            public void onSlotUpdate(ScreenHandler handler, int slotId, ItemStack stack) {
+                update = true;
+            }
+
+            public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
+                update = true;
+            }
+        });
     }
 
     @Override
     protected void init() {
+        update = true;
         super.init();
-        update((int) scroll);
+    }
+
+    @Override
+    protected void handledScreenTick() {
+        if(update) {
+            update((int) scroll);
+            update = false;
+        }
+        super.handledScreenTick();
     }
 
     @Override

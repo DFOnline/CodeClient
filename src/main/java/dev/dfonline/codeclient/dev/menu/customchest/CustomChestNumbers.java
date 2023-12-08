@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import net.minecraft.util.Identifier;
 
 public class CustomChestNumbers {
@@ -51,7 +52,7 @@ public class CustomChestNumbers {
         SCROLL_POS_X = scrollPosX;
         SCROLL_POS_Y = scrollPosY;
         SCROLL_ROOM = scrollRoom;
-        SLOT_X = slotX; // Slots need just a little moving.
+        SLOT_X = slotX;
         SLOT_Y = slotY;
         INVENTORY_X = inventoryX;
         INVENTORY_Y = inventoryY;
@@ -59,7 +60,7 @@ public class CustomChestNumbers {
     }
 
     public static CustomChestNumbers getSize() {
-        return Math.random() > 0.5 ? CustomChestNumbers.SMALL : CustomChestNumbers.LARGE;
+        return Config.getConfig().CustomCodeChest.size;
     }
 
     public static final CustomChestNumbers SMALL = new CustomChestNumbers(

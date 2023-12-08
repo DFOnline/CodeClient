@@ -16,10 +16,6 @@ public class CustomChestHandler extends ScreenHandler {
     private static final int Size = 9*3;
     public final CustomChestNumbers numbers = CustomChestNumbers.getSize();
 
-    public static CustomChestNumbers getSize() {
-       return CustomChestNumbers.SMALL;
-    }
-
     public CustomChestHandler(int syncId) {
         this(syncId, CodeClient.MC.player.getInventory(), new SimpleInventory(Size));
     }

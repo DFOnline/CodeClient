@@ -3,6 +3,8 @@ package dev.dfonline.codeclient.config;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
+import dev.dfonline.codeclient.dev.menu.customchest.CustomChestHandler;
+import dev.dfonline.codeclient.dev.menu.customchest.CustomChestNumbers;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
@@ -57,6 +59,7 @@ public class Config {
     public boolean UseSelectionColor = true;
     public int Line4Color = 0xFF8800;
     public boolean SignPeeker = true;
+    public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
 
     private void save() {
         try {
@@ -388,6 +391,19 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
+                        .option(Option.createBuilder(CustomChestMenuType.class)
+                                .name(Text.literal("Custom Code Chest Menu"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.literal("Use a custom menu for chests, with value text boxes for quick editing."))
+                                        .text(Text.of(CustomCodeChest.description))
+                                        .build())
+                                .binding(
+                                        CustomChestMenuType.OFF,
+                                        () -> CustomCodeChest,
+                                        opt -> CustomCodeChest = opt
+                                )
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, CustomChestMenuType.class))
+                                .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Place on Air"))
                                 .description(OptionDescription.createBuilder()
@@ -677,6 +693,20 @@ public class Config {
         public final String description;
         LayerInteractionMode(String description) {
             this.description = description;
+        }
+    }
+
+    public enum CustomChestMenuType {
+        OFF("No changes.",null),
+        SMALL("A small menu with a few lines for editing code values", CustomChestNumbers.SMALL),
+        LARGE("A large menu with lots of lines for editing values, and extra slots showing values without editable lines.", CustomChestNumbers.LARGE);
+
+        public final String description;
+        public final CustomChestNumbers size;
+
+        CustomChestMenuType(String description, CustomChestNumbers size) {
+            this.description = description;
+            this.size = size;
         }
     }
 

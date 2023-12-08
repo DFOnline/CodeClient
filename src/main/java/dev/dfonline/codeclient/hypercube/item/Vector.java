@@ -2,7 +2,15 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class Vector extends VarItem {
     private Double x;
@@ -48,5 +56,19 @@ public class Vector extends VarItem {
         this.data.addProperty("x",x);
         this.data.addProperty("y",y);
         this.data.addProperty("z",z);
+    }
+
+    @Override
+    public ItemStack toStack() {
+        ItemStack stack = super.toStack();
+        stack.setCustomName(Text.literal("Vector").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.VECTOR.color)));
+        var display = stack.getSubNbt("display");
+        var lore = new NbtList();
+        lore.add(Utility.nbtify(Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x))));
+        lore.add(Utility.nbtify(Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y))));
+        lore.add(Utility.nbtify(Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))));
+        display.put("Lore",lore);
+        stack.setSubNbt("display",display);
+        return stack;
     }
 }

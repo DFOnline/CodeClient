@@ -52,6 +52,7 @@ import java.util.Objects;
 
 public class InteractionManager {
     private static final List<Block> validBlocks = List.of(Blocks.LAPIS_BLOCK, Blocks.LAPIS_ORE, Blocks.EMERALD_BLOCK, Blocks.EMERALD_ORE, Blocks.DIAMOND_BLOCK, Blocks.GOLD_BLOCK);
+    public static boolean isOpeningCodeChest = false;
 
     /**
      * Assuming pos is in a codespace.
@@ -209,10 +210,15 @@ public class InteractionManager {
         if(CodeClient.location instanceof Dev plot) {
             ChestPeeker.invalidate();
             BlockPos pos = hitResult.getBlockPos();
-            if(plot.isInDev(pos) && pos.getY() % 5 == 4) { // Is a code space level (glass)
-                if(hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
-                    if(CodeClient.MC.world.getBlockState(pos).isAir() && Config.getConfig().PlaceOnAir) return new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos().add(0,1,0),hitResult.isInsideBlock());
-                    if(Config.getConfig().CustomBlockInteractions) return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos(), hitResult.isInsideBlock());
+            if(plot.isInDev(pos)) {
+                if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
+                    isOpeningCodeChest = true;
+                }
+                if(pos.getY() % 5 == 4) { // Is a code space level (glass)
+                    if(hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
+                        if(CodeClient.MC.world.getBlockState(pos).isAir() && Config.getConfig().PlaceOnAir) return new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos().add(0,1,0),hitResult.isInsideBlock());
+                        if(Config.getConfig().CustomBlockInteractions) return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos(), hitResult.isInsideBlock());
+                    }
                 }
             }
             if(hitResult.getSide() == Direction.DOWN) {
