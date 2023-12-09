@@ -204,17 +204,14 @@ public class Commands {
 //            return -1;
 //        }));
         dispatcher.register(literal("placetemplates").executes(context -> {
-            if(CodeClient.location instanceof Dev dev) {
-                var map = new HashMap<BlockPos, ItemStack>();
-                BlockPos pos = dev.findFreePlacePos();
-                for (var template: Utility.templatesInInventory()) {
-                    map.put(pos, template);
-                    pos = dev.findFreePlacePos(pos.west(2));
-                }
-                CodeClient.currentAction = new PlaceTemplates(map, () -> {
+            if(CodeClient.location instanceof Dev) {
+                var action = Utility.createPlacer(Utility.templatesInInventory(), () -> {
                     CodeClient.currentAction = new None();
                     Utility.sendMessage("Done!", ChatType.SUCCESS);
                 });
+                if(action == null) return -1;
+                CodeClient.currentAction = action;
+                CodeClient.currentAction.init();
                 return 0;
             }
             Utility.sendMessage("You must be in dev mode!",ChatType.FAIL);

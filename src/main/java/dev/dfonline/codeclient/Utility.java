@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
@@ -145,6 +146,23 @@ public class Utility {
                 }
             }
             return new PlaceTemplates(map, callback);
+        }
+        return null;
+    }
+
+    /**
+     * A regular placer will always start from where code starts.
+     * This will use any free spaces instead.
+     */
+    public static PlaceTemplates createPlacer(List<ItemStack> templates, Action.Callback callback) {
+        if(CodeClient.location instanceof Dev dev) {
+            var map = new HashMap<BlockPos, ItemStack>();
+            BlockPos pos = dev.findFreePlacePos();
+            for (var template: templates) {
+                map.put(pos, template);
+                pos = dev.findFreePlacePos(pos.west(2));
+            }
+            CodeClient.currentAction = new PlaceTemplates(map, callback);
         }
         return null;
     }

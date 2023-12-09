@@ -216,11 +216,12 @@ public class SocketHandler {
         @Override
         public void start(WebSocket responder) {
             if(!ready) return;
-            CodeClient.currentAction = new PlaceTemplates(templates, () -> {
+            var placer = Utility.createPlacer(templates, () -> {
                 CodeClient.currentAction = new None();
                 if(responder.isOpen()) responder.send("place done");
-                next();
-            });
+                next();});
+            if(placer == null) return;
+            CodeClient.currentAction = placer;
             CodeClient.currentAction.init();
         }
 
