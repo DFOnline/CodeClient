@@ -144,12 +144,11 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        for (int i = 0; i < widgets.size(); i++) {
-            var widget = widgets.get(i);
-            if (widget instanceof ClickableWidget click
+        for (var widget: widgets.entrySet()) {
+            if (widget.getValue() instanceof ClickableWidget click
                     && click.isMouseOver(mouseX - this.x, mouseY - this.y)
                     && click.mouseScrolled(mouseX - this.x, mouseY - this.y, horizontalAmount, verticalAmount)) {
-                updateItem(i);
+                updateItem(widget.getKey());
                 return true;
             }
         }
@@ -196,9 +195,9 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     private void updateItems() {
-        for (int i = 0; i < varItems.size(); i++) {
-            VarItem item = varItems.get(i);
-            if(item != null) updateItem(i);
+        for (var i : widgets.keySet()) {
+            var item = varItems.get(i);
+            if (item != null) updateItem(i);
         }
     }
 
@@ -213,6 +212,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
             CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, item.toStack()));
             super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
+            super.onMouseClick(slot,54,0,SlotActionType.QUICK_CRAFT);
         }
     }
 

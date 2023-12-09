@@ -71,9 +71,29 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             }
         }
         if(item instanceof Vector vec) {
-            if (widgets.get(0) instanceof NumberFieldWidget num1 && widgets.get(1) instanceof NumberFieldWidget num2 && widgets.get(2) instanceof NumberFieldWidget num3)
+            if (widgets.get(0) instanceof NumberFieldWidget num1
+                    && widgets.get(1) instanceof NumberFieldWidget num2
+                    && widgets.get(2) instanceof NumberFieldWidget num3)
                 vec.setCoords(num1.getNumber(), num2.getNumber(), num3.getNumber());
             this.item = (ItemType) vec;
+        }
+        if(item instanceof Location loc) {
+            if(
+                        widgets.get(0) instanceof NumberFieldWidget num0
+                    && widgets.get(1) instanceof NumberFieldWidget num1
+                    && widgets.get(2) instanceof NumberFieldWidget num2
+                    && widgets.get(3) instanceof NumberFieldWidget num3
+                    && widgets.get(4) instanceof NumberFieldWidget num4
+            ) {
+                loc.setCoords(
+                        num0.getNumber(),
+                        num1.getNumber(),
+                        num2.getNumber(),
+                        num3.getNumber(),
+                        num4.getNumber()
+                );
+                this.item = (ItemType) loc;
+            }
         }
     }
 

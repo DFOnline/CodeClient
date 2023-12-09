@@ -1,8 +1,15 @@
 package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
+import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -114,5 +121,35 @@ public class Location extends VarItem {
         this.pitch = pitch;
         this.yaw = yaw;
         return this;
+    }
+
+    public void setCoords(double x, double y, double z, double pitch, double yaw) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.pitch = pitch;
+        this.yaw = yaw;
+        this.loc.addProperty("x",x);
+        this.loc.addProperty("y",y);
+        this.loc.addProperty("z",z);
+        this.loc.addProperty("pitch",pitch);
+        this.loc.addProperty("yaw",yaw);
+        data.add("loc",loc);
+    }
+
+    @Override
+    public ItemStack toStack() {
+        ItemStack stack = super.toStack();
+        stack.setCustomName(Text.literal("Location").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.LOCATION.color)));
+        var display = stack.getSubNbt("display");
+        var lore = new NbtList();
+        lore.add(Utility.nbtify(Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x))));
+        lore.add(Utility.nbtify(Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y))));
+        lore.add(Utility.nbtify(Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))));
+        lore.add(Utility.nbtify(Text.empty().append(Text.literal("p: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))));
+        lore.add(Utility.nbtify(Text.empty().append(Text.literal("y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))));
+        display.put("Lore",lore);
+        stack.setSubNbt("display",display);
+        return stack;
     }
 }
