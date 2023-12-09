@@ -22,13 +22,14 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CustomChestMenu extends HandledScreen<CustomChestHandler> implements ScreenHandlerProvider<CustomChestHandler> {
 
     private final CustomChestNumbers Size;
     private double scroll = 0;
-    private final ArrayList<Widget> widgets = new ArrayList<>();
+    private final HashMap<Integer,Widget> widgets = new HashMap<>();
     private final ArrayList<VarItem> varItems = new ArrayList<>();
     private boolean update = true;
 
@@ -70,7 +71,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         super.render(context, mouseX, mouseY, delta);
         context.getMatrices().push();
         context.getMatrices().translate(this.x, this.y, 0);
-        for (Widget widget : widgets) {
+        for (Widget widget : widgets.values()) {
             if (widget instanceof Drawable drawable) {
                 drawable.render(context, mouseX, mouseY, delta);
             }
@@ -132,12 +133,12 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 //                widget.setText(named.getName());
 //                widget.setFocused(Objects.equals(i,focused));
                 var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.id), varItem);
-                widgets.add(widget);
+                widgets.put(i,widget);
                 varItems.add(varItem);
                 continue;
             }
 
-            widgets.add(new TextWidget(x + 3,y,Size.WIDGET_WIDTH,16,stack.getName(),textRenderer).alignLeft());
+            widgets.put(i,new TextWidget(x + 3,y,Size.WIDGET_WIDTH,16,stack.getName(),textRenderer).alignLeft());
         }
     }
 
@@ -161,7 +162,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS,27));
-        for (Widget widget : widgets) {
+        for (Widget widget : widgets.values()) {
             if (widget instanceof ClickableWidget clickable) {
                 clickable.setFocused(clickable.isMouseOver(mouseX - this.x, mouseY - this.y));
                 clickable.mouseClicked(mouseX - this.x,mouseY - this.y,button);

@@ -104,6 +104,7 @@ public class Config {
             object.addProperty("UseSelectionColor",UseSelectionColor);
             object.addProperty("Line4Color",Line4Color);
             object.addProperty("SignPeeker",SignPeeker);
+            object.addProperty("CustomCodeChest",CustomCodeChest.name());
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -403,6 +404,7 @@ public class Config {
                                         opt -> CustomCodeChest = opt
                                 )
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CustomChestMenuType.class))
+                                .available(false)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Place on Air"))
