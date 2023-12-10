@@ -13,11 +13,21 @@ import java.util.zip.GZIPInputStream;
 public class Template {
     public ArrayList<TemplateBlock> blocks;
 
+    public int getLength() {
+        int length = 0;
+        for (var block: blocks) length += block.getLength();
+        return length;
+    }
+
     /**
      * Parse base64+gzip data
      */
-    public static Template parse64(String data) throws IOException {
-        return parse(Base64.getDecoder().decode(data));
+    public static Template parse64(String data) {
+        try {
+            return parse(Base64.getDecoder().decode(data));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

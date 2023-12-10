@@ -95,11 +95,7 @@ public class Utility {
      */
     public static Template templateItem(ItemStack item) {
         String codeTemplateData = templateDataItem(item);
-        try {
-            return Template.parse64(codeTemplateData);
-        } catch (IOException ignored) {
-            return null;
-        }
+        return Template.parse64(codeTemplateData);
     }
 
     /**
@@ -155,11 +151,27 @@ public class Utility {
      * This will use any free spaces instead.
      */
     public static PlaceTemplates createPlacer(List<ItemStack> templates, Action.Callback callback) {
+       return createPlacer(templates,callback,false);
+    }
+
+    /**
+     * A regular placer will always start from where code starts.
+     * This will use any free spaces instead.
+     */
+    public static PlaceTemplates createPlacer(List<ItemStack> templates, Action.Callback callback, boolean compacter) {
         if(CodeClient.location instanceof Dev dev) {
             var map = new HashMap<BlockPos, ItemStack>();
             BlockPos pos = dev.findFreePlacePos();
             for (var template: templates) {
                 map.put(pos, template);
+                if(compacter) {
+                    int size = Template.parse64(Utility.templateDataItem(template)).getLength();
+                    var newPos = pos.south(size);
+                    if(dev.isInDev(pos.south(size))) {
+                        pos = newPos;
+                        continue;
+                    }
+                }
                 pos = dev.findFreePlacePos(pos.west(2));
             }
             CodeClient.currentAction = new PlaceTemplates(map, callback);
