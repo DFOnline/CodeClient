@@ -1,6 +1,5 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
-import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.hypercube.item.*;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -8,9 +7,10 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.navigation.GuiNavigationPath;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
-import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,9 +27,11 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
         var widgets = new ArrayList<Drawable>();
         if(item instanceof NamedItem named) {
             int textboxWidth = width;
-            if(item instanceof Variable) {
+            if(item instanceof Variable var) { 
                 textboxWidth = textboxWidth - height;
-                widgets.add(new CheckboxWidget(x+textboxWidth,y,height,height,Text.literal(""),false));
+                var scopeWidget = new CyclingButtonWidget.Builder<Scope>(scope -> Text.literal(scope.getShortName()).setStyle(Style.EMPTY.withColor(scope.color))).values(Scope.unsaved, Scope.saved, Scope.local, Scope.line).omitKeyText().build(x+textboxWidth,y,height,height,Text.literal(""));
+                scopeWidget.setValue(var.getScope());
+                widgets.add(scopeWidget);
             }
             var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
             text.setMaxLength(10000);
@@ -66,8 +68,10 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             if(widgets.get(0) instanceof TextFieldWidget text) {
                 named.setName(text.getText());
             }
-            if(named instanceof Variable variable) {
-                CodeClient.LOGGER.info(variable.getScope().longName); // Problem for later
+            if(named instanceof Variable var) {
+                if(widgets.get(1) instanceof CyclingButtonWidget<?> cycle) {
+                    var.setScope((Scope) cycle.getValue());
+                }
             }
         }
         if(item instanceof Vector vec) {
@@ -114,26 +118,17 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        this.onClick(mouseX,mouseY);
-        return true;
-//        return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-
-
-
-    @Override
-    public void onClick(double mouseX, double mouseY) {
         for (var widget: widgets) {
             if(widget instanceof ClickableWidget clickable) {
                 if(clickable.isMouseOver(mouseX,mouseY)) {
                     clickable.setFocused(true);
-                    clickable.onClick(mouseX, mouseY);
+                    clickable.mouseClicked(mouseX, mouseY, button);
                 }
                 else clickable.setFocused(false);
             }
         }
         updateItem();
+        return true;
     }
 
     @Override
@@ -161,7 +156,6 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         for (var widget: widgets) {
             if(widget instanceof ClickableWidget click && click.isFocused()) {
-                updateItem();
                 return click.keyPressed(keyCode,scanCode,modifiers);
             }
         }

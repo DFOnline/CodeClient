@@ -161,10 +161,13 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS,27));
-        for (Widget widget : widgets.values()) {
-            if (widget instanceof ClickableWidget clickable) {
+        for (var entry : widgets.entrySet()) {
+            if (entry.getValue() instanceof ClickableWidget clickable) {
                 clickable.setFocused(clickable.isMouseOver(mouseX - this.x, mouseY - this.y));
-                clickable.mouseClicked(mouseX - this.x,mouseY - this.y,button);
+                if(clickable.mouseClicked(mouseX - this.x,mouseY - this.y,button)) {
+                    updateItem(entry.getKey());
+                    return true;
+                }
             }
         }
         for (int i = 0; i < subList.size(); i++) {
@@ -218,15 +221,6 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        int prev = (int) scroll;
-        if(keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
-            scroll = Math.min(27 - Size.WIDGETS, scroll + Size.WIDGETS);
-            update(prev);
-        }
-        if(keyCode == GLFW.GLFW_KEY_PAGE_UP) {
-            scroll = Math.max(0, scroll - Size.WIDGETS);
-            update(prev);
-        }
         if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
             for (int i = 0; i < widgets.size(); i++) {
                 Widget widget = widgets.get(i);
@@ -234,34 +228,51 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                     if (clickable.isFocused()) {
                         clickable.setFocused(false);
                         updateItem(i);
+                        return false;
+                    }
+                }
+            }
+        }
+        if(keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
+            for (int i = 0; i < widgets.size(); i++) {
+                Widget widget = widgets.get(i);
+                if (widget instanceof ClickableWidget clickable) {
+                    if (clickable.isFocused()) {
+                        clickable.keyPressed(keyCode, scanCode, modifiers);
+                        updateItem(i);
                         return true;
                     }
                 }
             }
         }
-        for (int i = 0; i < widgets.size(); i++) {
-            Widget widget = widgets.get(i);
-            if (widget instanceof ClickableWidget clickable) {
-                if (clickable.isFocused()) {
-                    clickable.keyPressed(keyCode, scanCode, modifiers);
-                    updateItem(i);
-                    return true;
-                }
-            }
-        }
-        if(keyCode == GLFW.GLFW_KEY_END) {
-            scroll = 27 - Size.WIDGETS;
+        boolean up = keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.forwardKey.matchesKey(keyCode,scanCode);
+        boolean down = keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.backKey.matchesKey(keyCode,scanCode);
+        boolean pageUp = keyCode == GLFW.GLFW_KEY_PAGE_DOWN || (up && hasShiftDown());
+        boolean pageDown = keyCode == GLFW.GLFW_KEY_PAGE_UP || (down && hasShiftDown());
+        boolean start = keyCode == GLFW.GLFW_KEY_HOME || (up && hasAltDown() && !pageUp);
+        boolean end = keyCode == GLFW.GLFW_KEY_END || (down && hasAltDown() && !pageDown);
+        int prev = (int) scroll;
+        if(pageDown) {
+            scroll = Math.min(27 - Size.WIDGETS, scroll + Size.WIDGETS);
             update(prev);
         }
-        if(keyCode == GLFW.GLFW_KEY_HOME) {
+        if(pageUp) {
+            scroll = Math.max(0, scroll - Size.WIDGETS);
+            update(prev);
+        }
+        if(start) {
             scroll = 0;
             update(prev);
         }
-        if(keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.forwardKey.matchesKey(keyCode,scanCode)) {
+        if(end) {
+            scroll = 27 - Size.WIDGETS;
+            update(prev);
+        }
+        if(up) {
             scroll = Math.max(0,scroll - 1);
             update(prev);
         }
-        if(keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.backKey.matchesKey(keyCode,scanCode)) {
+        if(down) {
             scroll = Math.min(27 - Size.WIDGETS, scroll + 1);
             update(prev);
         }

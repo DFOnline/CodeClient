@@ -1,8 +1,7 @@
 package dev.dfonline.codeclient.hypercube.item;
 
-import net.minecraft.text.Text;
+import dev.dfonline.codeclient.config.Config;
 import net.minecraft.text.TextColor;
-import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
 
 public enum Scope {
@@ -18,5 +17,9 @@ public enum Scope {
         this.color = color;
         this.longName = longName;
         this.shortName = shortName;
+    }
+
+    public String getShortName() {
+        return this == Scope.line & Config.getConfig().UseIForLineScope ? "I" : shortName;
     }
 }

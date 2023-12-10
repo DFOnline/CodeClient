@@ -33,12 +33,7 @@ public class NumberFieldWidget extends TextFieldWidget {
 
     @Override
     public void write(String text) {
-        super.write(text.replaceAll(regex,"")); // This uses {0,100} instead of * because java.
-        try {
-            number = Double.parseDouble(text);
-        }
-        catch (Exception ignored) {}
-//        this.setText(this.getText().replaceAll(regex,""));
+        super.write(text.replaceAll(regex,""));
     }
 
     @Override

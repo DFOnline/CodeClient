@@ -145,7 +145,7 @@ public class ChestPeeker {
                                     text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
                                     if (type == Type.var) {
                                         Scope scope = Scope.valueOf(data.get("scope").getAsString());
-                                        text.append(scope == Scope.line & Config.getConfig().UseIForLineScope ? "I" : scope.shortName       ).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
+                                        text.append(scope.getShortName()).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
                                     }
                                     if (type == Type.num || type == Type.txt || type == Type.comp || type == Type.var || type == Type.g_val || type == Type.pn_el) {
                                         text.append(item.getName());
