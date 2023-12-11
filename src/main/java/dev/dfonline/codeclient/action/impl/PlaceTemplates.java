@@ -15,6 +15,7 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -79,7 +80,9 @@ public class PlaceTemplates extends Action {
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if(packet instanceof OpenScreenS2CPacket) return true;
+        if(packet instanceof OpenScreenS2CPacket) {
+            return true;
+        }
         if(packet instanceof ChunkDeltaUpdateS2CPacket updates) {
             for (Operation template : templates) {
                 var block = new Object() {

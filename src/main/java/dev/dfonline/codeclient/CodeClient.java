@@ -124,8 +124,9 @@ public class CodeClient implements ModInitializer {
         ChestPeeker.tick();
         RecentChestInsert.tick();
 
-        if(location instanceof Dev) {
+        if(location instanceof Dev dev) {
             if(MC.player == null) return;
+            CodeClient.LOGGER.info(String.valueOf(dev.findFreePlacePos(MC.player.getBlockPos())));
             MC.player.getAbilities().allowFlying = true;
             if(NoClip.isIgnoringWalls()) MC.player.noClip = true;
             if(editBind.wasPressed()) {

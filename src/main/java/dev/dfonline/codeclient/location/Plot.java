@@ -95,7 +95,7 @@ public abstract class Plot extends Location {
     }
 
     public Boolean isInDev(BlockPos pos) {
-        return isInDev(new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+        return isInDev(new Vec3d(pos.getX() + 1, pos.getY(), pos.getZ()));
     }
     public Boolean isInDev(Vec3d pos) {
         Size size = assumeSize();
@@ -103,8 +103,8 @@ public abstract class Plot extends Location {
         int x = (int) pos.getX();
         int z = (int) pos.getZ();
 
-        boolean inX = (x < originX) && ((x >= originX - 19) || (pos.getY() >= 50) && (x >= originX - 20));
-        boolean inZ = (z >= originZ) && (z <= originZ + (size != null ? size.size : 300));
+        boolean inX = (x <= originX) && (x >= originX - 19);
+        boolean inZ = (z >= originZ) && (z <= originZ + size.size);
 
         return inX && inZ;
     }
@@ -145,15 +145,16 @@ public abstract class Plot extends Location {
         return findFreePlacePos(new BlockPos(originX-1,50,originZ));
     }
 
+    // FIXME: why on earth isn't x mattering
     public BlockPos findFreePlacePos(BlockPos origin) {
         if(originX == null || CodeClient.MC.world == null) return null;
         var world = CodeClient.MC.world;
-        final int z = origin.getZ();
+        final int z = this.getZ();
         int y = Math.min(origin.getY(),50);
         int x = origin.getX();
         while (y < 255) {
-            while (originX - x <= 18) {
-                x--;
+            while (this.getX() - x <= 18) {
+                x= x-1;
                 BlockPos pos = new BlockPos(x,y,z);
                 if(world.getBlockState(pos.east()).isAir() && world.getBlockState(pos.west()).isAir()) return pos;
             }

@@ -161,20 +161,31 @@ public class Utility {
     public static PlaceTemplates createPlacer(List<ItemStack> templates, Action.Callback callback, boolean compacter) {
         if(CodeClient.location instanceof Dev dev) {
             var map = new HashMap<BlockPos, ItemStack>();
-            BlockPos pos = dev.findFreePlacePos();
-            for (var template: templates) {
-                map.put(pos, template);
-                if(compacter) {
-                    int size = Template.parse64(Utility.templateDataItem(template)).getLength();
-                    var newPos = pos.south(size);
-                    if(dev.isInDev(pos.south(size))) {
-                        pos = newPos;
-                        continue;
-                    }
+            compacter = false;
+            if(!compacter) {
+                BlockPos lastPos = dev.findFreePlacePos();
+                for (var template: templates) {
+                    map.put(lastPos, template);
+                    lastPos = dev.findFreePlacePos(lastPos.west(2));
                 }
-                pos = dev.findFreePlacePos(pos.west(2));
             }
-            CodeClient.currentAction = new PlaceTemplates(map, callback);
+            else {
+                BlockPos nextPos = dev.findFreePlacePos();
+                for (var template: templates) {
+                    int size = Template.parse64(Utility.templateDataItem(template)).getLength();
+                    var placePos = nextPos;
+                    var templateEndPos = placePos.south(size);
+                    if(dev.isInDev(templateEndPos)) {
+                        nextPos = templateEndPos;
+                    }
+                    else {
+                        placePos = dev.findFreePlacePos(placePos.west(2));
+                        nextPos = placePos.south(size);
+                    }
+                    map.put(placePos,template);
+                }
+            }
+            return new PlaceTemplates(map, callback);
         }
         return null;
     }
