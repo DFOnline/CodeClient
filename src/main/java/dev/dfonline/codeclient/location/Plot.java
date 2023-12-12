@@ -145,17 +145,15 @@ public abstract class Plot extends Location {
         return findFreePlacePos(new BlockPos(originX-1,50,originZ));
     }
 
-    // FIXME: why on earth isn't x mattering
     public BlockPos findFreePlacePos(BlockPos origin) {
         if(originX == null || CodeClient.MC.world == null) return null;
         var world = CodeClient.MC.world;
-        final int z = this.getZ();
-        int y = Math.min(origin.getY(),50);
+        int y = Math.max(origin.getY(),50);
         int x = origin.getX();
         while (y < 255) {
-            while (this.getX() - x <= 18) {
-                x= x-1;
-                BlockPos pos = new BlockPos(x,y,z);
+            while (originX - x <= 18) {
+                x--;
+                BlockPos pos = new BlockPos(x,y,originZ);
                 if(world.getBlockState(pos.east()).isAir() && world.getBlockState(pos.west()).isAir()) return pos;
             }
             y+=5;

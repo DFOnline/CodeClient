@@ -337,7 +337,7 @@ public class Commands {
 
         dispatcher.register(literal("jumptofreespot").executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
-                CodeClient.currentAction = new GoTo(dev.findFreePlacePos().toCenterPos().add(0,-0.5,0), () -> {
+                CodeClient.currentAction = new GoTo(dev.findFreePlacePos(CodeClient.MC.player.getBlockPos()).toCenterPos().add(0,-0.5,0), () -> {
                     CodeClient.currentAction = new None();
                     Utility.sendMessage("Done!", ChatType.SUCCESS);
                 });

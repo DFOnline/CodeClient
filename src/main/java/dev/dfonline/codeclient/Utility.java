@@ -161,7 +161,6 @@ public class Utility {
     public static PlaceTemplates createPlacer(List<ItemStack> templates, Action.Callback callback, boolean compacter) {
         if(CodeClient.location instanceof Dev dev) {
             var map = new HashMap<BlockPos, ItemStack>();
-            compacter = false;
             if(!compacter) {
                 BlockPos lastPos = dev.findFreePlacePos();
                 for (var template: templates) {

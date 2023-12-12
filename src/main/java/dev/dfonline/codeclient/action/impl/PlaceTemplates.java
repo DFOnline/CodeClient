@@ -1,21 +1,17 @@
 package dev.dfonline.codeclient.action.impl;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.Commands;
-import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.mixin.entity.player.ClientPlayerInteractionManagerAccessor;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -26,12 +22,10 @@ import net.minecraft.util.math.Vec3d;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
 
 public class PlaceTemplates extends Action {
     public static final int rowSize = 6;
-    private final ArrayList<Operation> templates;
+    private final ArrayList<Operation> operations;
     private int cooldown = 0;
     private ItemStack recoverMainHand;
     private GoTo goTo = null;
@@ -49,7 +43,7 @@ public class PlaceTemplates extends Action {
                 Vec3d pos = new Vec3d(plot.getX(), 50, plot.getZ()).add((2 + (row * 3)) * -1, level * 5, 0);
                 templatesToPlace.add(new TemplateToPlace(pos, template));
             }
-            this.templates = templatesToPlace;
+            this.operations = templatesToPlace;
         }
         else {
             throw new IllegalStateException("Player must be in dev mode.");
@@ -61,7 +55,7 @@ public class PlaceTemplates extends Action {
         for (var template: templates.entrySet()) {
             templatesToPlace.add(new TemplateToPlace(template.getKey(), template.getValue()));
         }
-        this.templates = templatesToPlace;
+        this.operations = templatesToPlace;
     }
 
     /**
@@ -84,20 +78,20 @@ public class PlaceTemplates extends Action {
             return true;
         }
         if(packet instanceof ChunkDeltaUpdateS2CPacket updates) {
-            for (Operation template : templates) {
+            for (Operation operation : operations) {
                 var block = new Object() {
                     boolean isTemplate = false;
                     BlockState state = null;
                 };
                 updates.visitUpdates((blockPos, blockState) -> {
-                    if (template.pos.equals(blockPos)) {
+                    if (operation.pos.equals(blockPos)) {
                         block.isTemplate = true;
                         block.state = blockState;
                     }
                 });
-                if (template instanceof TemplateToPlace) {
+                if (operation instanceof TemplateToPlace) {
                     if (!block.isTemplate) continue;
-                    template.setComplete();
+                    operation.setComplete();
                 }
             }
         }
@@ -108,7 +102,7 @@ public class PlaceTemplates extends Action {
     public void onTick() {
         if(CodeClient.MC.interactionManager == null) return;
         if(CodeClient.location instanceof Dev) {
-            if(templates.size() == 0) {
+            if(operations.isEmpty()) {
                 callback();
                 return;
             }
@@ -116,41 +110,53 @@ public class PlaceTemplates extends Action {
                 goTo.onTick();
             }
             if(cooldown > 0) cooldown--;
-            Operation operation = templates.stream().filter(Operation::isOpen).findFirst().orElse(null);
-            if(operation == null) {
-                templates.removeIf(Operation::isComplete);
-                for(Operation close : templates) close.setOpen(!close.isComplete());
-                return;
-            }
-            if(operation.pos().distanceTo(CodeClient.MC.player.getEyePos()) > 5.8) {
-                goTo = new GoTo(operation.pos().add(-2, 0.5, 0), () -> this.goTo = null);
-                goTo.init();
-                cooldown = 2;
-                return;
-            }
-            if(cooldown == 0) {
-                if(operation instanceof TemplateToPlace template) {
-                    if(shouldBeSwapping) {
-                        var player = CodeClient.MC.player;
-                        var net = CodeClient.MC.getNetworkHandler();
-                        boolean sneaky = !player.isSneaking();
-                        if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-                        net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, template.pos, Direction.UP));
-                        net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, template.pos, Direction.UP));
-                        if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            Operation closestOperation;
+            for (Operation operation: operations) {
+                if(operation.isComplete()) {
+                    operations.remove(operation);
+                }
+                if(operation.isOpen())
+                // If all operations are not open
+//                operation.setOpen(!operation.isComplete());
+                if (!(operation.pos().distanceTo(CodeClient.MC.player.getEyePos()) > 5.8)) {
+                    if (cooldown == 0) {
+                        if (operation instanceof TemplateToPlace template) {
+                            if (shouldBeSwapping) {
+                                var player = CodeClient.MC.player;
+                                var net = CodeClient.MC.getNetworkHandler();
+                                boolean sneaky = !player.isSneaking();
+                                if (sneaky)
+                                    net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                                net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, template.pos, Direction.UP));
+                                net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, template.pos, Direction.UP));
+                                if (sneaky)
+                                    net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+                            }
+                            Utility.makeHolding(template.template);
+                            BlockHitResult blockHitResult = new BlockHitResult(template.pos().add(0, 1, 0), Direction.UP, template.pos, false);
+                            ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, blockHitResult, sequence));
+                            template.setOpen(false);
+                        }
                     }
-                    Utility.makeHolding(template.template);
-                    BlockHitResult blockHitResult = new BlockHitResult(template.pos().add(0,1,0), Direction.UP, template.pos, false);
-                    ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, blockHitResult, sequence));
-                    template.setOpen(false);
+                    return;
                 }
             }
+            goTo = new GoTo(closestOperation.pos().add(-2, 0.5, 0), () -> this.goTo = null);
+            goTo.init();
+            cooldown = 2;
+            return;
         }
     }
 
     private static abstract class Operation {
         protected final BlockPos pos;
+        /**
+         * If this operation can be acted on, and needs to be completed.
+         */
         private boolean open = true;
+        /**
+         * Whether this operation is complete and can be dismissed.
+         */
         private boolean complete = false;
 
         public Operation(BlockPos pos) {
@@ -170,11 +176,14 @@ public class PlaceTemplates extends Action {
         public boolean isOpen() {
             return open;
         }
+
+        /**
+         * Mark for dismissing. Doesn't need to be used again.
+         */
         public void setComplete() {
             this.open = false;
             this.complete = true;
         }
-
         public boolean isComplete() {
             return complete;
         }
