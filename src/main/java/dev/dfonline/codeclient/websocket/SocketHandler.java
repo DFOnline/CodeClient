@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.websocket;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import com.google.gson.JsonObject;
@@ -79,7 +80,12 @@ public class SocketHandler {
             case "inv" -> SocketHandler.actionQueue.add(new SendInventory());
             case "setinv" -> SocketHandler.actionQueue.add(new SetInventory(content));
             case "give" -> SocketHandler.actionQueue.add(new Give(content));
+            case "mode" -> SocketHandler.actionQueue.add(new Mode(content));
             default -> connection.send("invalid");
+        }
+        topAction = getTopAction();
+        if(topAction != null && arguments.length > 1 && Objects.equals(topAction.name, arguments[0])) {
+            topAction.message(connection,content);
         }
         Action firstAction = actionQueue.get(0);
         if(firstAction == null) return;
@@ -199,7 +205,7 @@ public class SocketHandler {
             SWAP((ArrayList<ItemStack> templates, WebSocket responder) -> Utility.createSwapper(templates, () -> {
                 CodeClient.currentAction = new None();
                 if(responder.isOpen()) responder.send("place done");
-                next();})),
+                next();}).swap()),
             ;
 
             public final CreatePlacer createPlacer;
@@ -329,6 +335,31 @@ public class SocketHandler {
             }
         }
 
+        @Override
+        public void message(WebSocket responder, String message) {}
+    }
+    private static class Mode extends SocketHandler.Action {
+        private static final List<String> commands = List.of("play","build","code","dev");
+        private final String command;
+
+        Mode(String command) {
+            super("mode");
+            this.command = commands.contains(command) ? command : "";
+        }
+
+        @Override
+        public void set(WebSocket responder) {
+
+        }
+        @Override
+        public void start(WebSocket responder) {
+            if (CodeClient.location instanceof Plot && !command.isEmpty()) {
+                CodeClient.MC.getNetworkHandler().sendCommand(command);
+            } else {
+                responder.send(CodeClient.location.name());
+            }
+            next();
+        }
         @Override
         public void message(WebSocket responder, String message) {}
     }
