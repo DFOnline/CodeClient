@@ -110,15 +110,11 @@ public class PlaceTemplates extends Action {
                 goTo.onTick();
             }
             if(cooldown > 0) cooldown--;
-            Operation closestOperation;
-            for (Operation operation: operations) {
-                if(operation.isComplete()) {
-                    operations.remove(operation);
-                }
-                if(operation.isOpen())
-                // If all operations are not open
-//                operation.setOpen(!operation.isComplete());
-                if (!(operation.pos().distanceTo(CodeClient.MC.player.getEyePos()) > 5.8)) {
+            Operation closestOperation = null;
+            operations.removeIf(Operation::isComplete);
+            for (Operation operation: operations.stream().toList()) {
+                double distanceToCurrentOperation = (operation.pos().distanceTo(CodeClient.MC.player.getEyePos()));
+                if (distanceToCurrentOperation <= 5.8 && operation.isOpen() && !operation.isComplete()) {
                     if (cooldown == 0) {
                         if (operation instanceof TemplateToPlace template) {
                             if (shouldBeSwapping) {
@@ -140,10 +136,20 @@ public class PlaceTemplates extends Action {
                     }
                     return;
                 }
+                if((closestOperation == null) || (distanceToCurrentOperation < closestOperation.pos().distanceTo(CodeClient.MC.player.getEyePos()))) {
+                    closestOperation = operation;
+                }
             }
-            goTo = new GoTo(closestOperation.pos().add(-2, 0.5, 0), () -> this.goTo = null);
-            goTo.init();
-            cooldown = 2;
+            if(closestOperation == null) {
+                for (Operation operation: operations) {
+                    operation.setOpen(!operation.isComplete());
+                }
+            }
+            else {
+                goTo = new GoTo(closestOperation.pos().add(-2, 0.5, 0), () -> this.goTo = null);
+                goTo.init();
+                cooldown = 2;
+            }
             return;
         }
     }

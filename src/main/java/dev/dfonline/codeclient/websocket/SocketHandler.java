@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.ClearPlot;
 import dev.dfonline.codeclient.action.impl.GetPlotSize;
@@ -71,36 +72,14 @@ public class SocketHandler {
             return;
         }
         switch (arguments[0]) {
-            case "clear" -> {
-                SocketHandler.actionQueue.add(new Clear());
-            }
-            case "spawn" -> {
-                SocketHandler.actionQueue.add(new Spawn());
-            }
-            case "size" -> {
-                SocketHandler.actionQueue.add(new Size());
-            }
-            case "place" -> {
-                SocketHandler.actionQueue.add(new Place());
-            }
-            case "inv" -> {
-                SocketHandler.actionQueue.add(new SendInventory());
-            }
-            case "setinv" -> {
-                SocketHandler.actionQueue.add(new SetInventory(content));
-            }
-            case "give" -> {
-                SocketHandler.actionQueue.add(new Give(content));
-            }
-            case "swap" -> {
-                response.addProperty("status","error");
-                response.addProperty("error","swap");
-                response.addProperty("message","Not implemented.");
-                connection.send(response.toString());
-            }
-            default -> {
-                connection.send("invalid");
-            }
+            case "clear" -> SocketHandler.actionQueue.add(new Clear());
+            case "spawn" -> SocketHandler.actionQueue.add(new Spawn());
+            case "size" -> SocketHandler.actionQueue.add(new Size());
+            case "place" -> SocketHandler.actionQueue.add(new Place());
+            case "inv" -> SocketHandler.actionQueue.add(new SendInventory());
+            case "setinv" -> SocketHandler.actionQueue.add(new SetInventory(content));
+            case "give" -> SocketHandler.actionQueue.add(new Give(content));
+            default -> connection.send("invalid");
         }
         Action firstAction = actionQueue.get(0);
         if(firstAction == null) return;
@@ -204,7 +183,32 @@ public class SocketHandler {
         public void message(WebSocket responder, String message) {}
     }
     private static class Place extends SocketHandler.Action {
+        private interface CreatePlacer {
+            PlaceTemplates run(ArrayList<ItemStack> templates, WebSocket responder);
+        }
+
+        private enum Method {
+            DEFAULT((ArrayList<ItemStack> templates, WebSocket responder) -> Utility.createPlacer(templates, () -> {
+                CodeClient.currentAction = new None();
+                if(responder.isOpen()) responder.send("place done");
+                next();})),
+            COMPACT((ArrayList<ItemStack> templates, WebSocket responder) -> Utility.createPlacer(templates, () -> {
+                CodeClient.currentAction = new None();
+                if(responder.isOpen()) responder.send("place done");
+                next();},true)),
+            SWAP((ArrayList<ItemStack> templates, WebSocket responder) -> Utility.createSwapper(templates, () -> {
+                CodeClient.currentAction = new None();
+                if(responder.isOpen()) responder.send("place done");
+                next();})),
+            ;
+
+            public final CreatePlacer createPlacer;
+            Method(CreatePlacer createPlacer) {
+                this.createPlacer = createPlacer;
+            }
+        }
         private final ArrayList<ItemStack> templates = new ArrayList<>();
+        private Method method = Method.DEFAULT;
         public boolean ready = false;
 
         Place() {
@@ -216,10 +220,7 @@ public class SocketHandler {
         @Override
         public void start(WebSocket responder) {
             if(!ready) return;
-            var placer = Utility.createPlacer(templates, () -> {
-                CodeClient.currentAction = new None();
-                if(responder.isOpen()) responder.send("place done");
-                next();});
+            var placer = method.createPlacer.run(templates,responder);
             if(placer == null) return;
             CodeClient.currentAction = placer;
             CodeClient.currentAction.init();
@@ -227,6 +228,14 @@ public class SocketHandler {
 
         @Override
         public void message(WebSocket responder, String message) {
+            if(message.equals("compact")) {
+                this.method = Method.COMPACT;
+                return;
+            }
+            if(message.equals("swap")) {
+                this.method = Method.SWAP;
+                return;
+            }
             if(message.equals("go")) {
                 this.ready = true;
                 if(Objects.equals(actionQueue.get(0), this)) {
@@ -234,7 +243,6 @@ public class SocketHandler {
                 }
                 return;
             }
-
             templates.add(Utility.makeTemplate(message));
         }
     }
