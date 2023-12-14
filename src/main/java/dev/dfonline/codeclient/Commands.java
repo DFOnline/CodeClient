@@ -208,7 +208,7 @@ public class Commands {
                 var action = Utility.createPlacer(Utility.templatesInInventory(), () -> {
                     CodeClient.currentAction = new None();
                     Utility.sendMessage("Done!", ChatType.SUCCESS);
-                },true);
+                });
                 if(action == null) return -1;
                 CodeClient.currentAction = action;
                 CodeClient.currentAction.init();
