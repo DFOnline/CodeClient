@@ -10,7 +10,7 @@ public enum Target {
     Damager(Formatting.RED, true, true),
     Shooter(Formatting.YELLOW, true, true),
     Victim(Formatting.BLUE, true, true),
-    AllPlayers(Formatting.AQUA, true, true),
+    AllPlayers(Formatting.AQUA, true, false),
     Projectile(Formatting.YELLOW, false, true),
     LastEntity(Formatting.AQUA, false, true);
 

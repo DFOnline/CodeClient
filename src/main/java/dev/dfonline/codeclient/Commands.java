@@ -22,7 +22,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.io.FileUtils;
-import oshi.util.FileUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;

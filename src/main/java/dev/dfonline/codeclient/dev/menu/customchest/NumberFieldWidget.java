@@ -7,10 +7,14 @@ import org.intellij.lang.annotations.RegExp;
 
 public class NumberFieldWidget extends TextFieldWidget {
     private double number = 0;
-    private static final @RegExp String regex = "(?<!^)-|[^\\d-.]";
+    private @RegExp String regex = "(?<!^)-|[^\\d-.]";
 
     public NumberFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, Text text) {
         super(textRenderer, x, y, width, height, text);
+    }
+    public NumberFieldWidget integer() {
+        this.regex = "(?<!^)-|[^\\d-]";
+        return this;
     }
 
     @Override

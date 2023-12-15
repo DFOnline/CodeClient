@@ -62,13 +62,12 @@ public class Vector extends VarItem {
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
         stack.setCustomName(Text.literal("Vector").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.VECTOR.color)));
-        var display = stack.getSubNbt("display");
-        var lore = new NbtList();
-        lore.add(Utility.nbtify(Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x))));
-        lore.add(Utility.nbtify(Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y))));
-        lore.add(Utility.nbtify(Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))));
-        display.put("Lore",lore);
-        stack.setSubNbt("display",display);
+        Utility.addLore(
+                stack,
+                Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x)),
+                Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y)),
+                Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))
+        );
         return stack;
     }
 }

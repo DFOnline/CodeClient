@@ -73,7 +73,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         context.getMatrices().translate(this.x, this.y, 0);
         for (Widget widget : widgets.values()) {
             if (widget instanceof Drawable drawable) {
-                drawable.render(context, mouseX, mouseY, delta);
+                drawable.render(context, mouseX - this.x, mouseY - this.y, delta);
             }
         }
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
@@ -132,7 +132,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 //                widget.setMaxLength(10_000);
 //                widget.setText(named.getName());
 //                widget.setFocused(Objects.equals(i,focused));
-                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.id), varItem);
+                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.id), varItem, this.handler);
                 widgets.put(i,widget);
                 varItems.add(varItem);
                 continue;
@@ -161,15 +161,6 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS,27));
-        for (var entry : widgets.entrySet()) {
-            if (entry.getValue() instanceof ClickableWidget clickable) {
-                clickable.setFocused(clickable.isMouseOver(mouseX - this.x, mouseY - this.y));
-                if(clickable.mouseClicked(mouseX - this.x,mouseY - this.y,button)) {
-                    updateItem(entry.getKey());
-                    return true;
-                }
-            }
-        }
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
             final int x = 8;
@@ -192,6 +183,16 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 }
                 this.onMouseClick(slot, slot.id, button, SlotActionType.PICKUP);
                 return true;
+            }
+        }
+        for (var entry : widgets.entrySet()) {
+            if (entry.getValue() instanceof ClickableWidget clickable) {
+                boolean mouseOver = clickable.isMouseOver(mouseX - this.x, mouseY - this.y);
+                clickable.setFocused(mouseOver);
+                if(mouseOver && clickable.mouseClicked(mouseX - this.x,mouseY - this.y,button)) {
+                    updateItem(entry.getKey());
+                    return true;
+                }
             }
         }
         return super.mouseClicked(mouseX, mouseY, button);

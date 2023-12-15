@@ -14,6 +14,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.sound.SoundCategory;
@@ -187,6 +188,14 @@ public class Utility {
             return new PlaceTemplates(map, callback);
         }
         return null;
+    }
+
+    public static void addLore(ItemStack stack, Text ...lore) {
+        var display = stack.getSubNbt("display");
+        var loreList = new NbtList();
+        for (Text line: lore) loreList.add(Utility.nbtify(Text.empty().append(line)));
+        display.put("Lore",loreList);
+        stack.setSubNbt("display",display);
     }
 
     public static void sendHandItem(ItemStack item) {

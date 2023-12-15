@@ -1,17 +1,21 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
+import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.item.*;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.navigation.GuiNavigationPath;
+import net.minecraft.client.gui.screen.ButtonTextures;
+import net.minecraft.client.gui.screen.GameModeSelectionScreen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.*;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -21,7 +25,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
     private final List<Drawable> widgets;
     public ItemType item;
 
-    public CustomChestField(TextRenderer textRender, int x, int y, int width, int height, Text message, ItemType item) {
+    public CustomChestField(TextRenderer textRender, int x, int y, int width, int height, Text message, ItemType item, ScreenHandler handler) {
         super(x, y, width, height, message);
         this.item = item;
         var widgets = new ArrayList<Drawable>();
@@ -33,11 +37,38 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
                 scopeWidget.setValue(var.getScope());
                 widgets.add(scopeWidget);
             }
+            if(item instanceof Parameter parameter) {
+                textboxWidth = textboxWidth - 18;
+
+                widgets.add(new FakeSlot(x+textboxWidth,y,Text.literal("Paramater Data"), handler));
+            }
             var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
             text.setMaxLength(10000);
             text.setText(named.getName());
             text.setFocused(false);
             widgets.add(0,text);
+        }
+        if(item instanceof GameValue value) {
+            int targetWidth = 60;
+            int textboxWidth = width - targetWidth;
+
+            var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
+            text.setMaxLength(10000);
+            text.setText(value.getType());
+            widgets.add(text);
+
+            var scopeWidget = new CyclingButtonWidget.Builder<Target>(target -> Text.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color))).values(
+                    Target.Selection,
+                    Target.Default,
+                    Target.Killer,
+                    Target.Damager,
+                    Target.Victim,
+                    Target.Shooter,
+                    Target.Projectile,
+                    Target.LastEntity
+            ).omitKeyText().build(x+textboxWidth,y,targetWidth,height,Text.literal(""));
+            scopeWidget.setValue(value.getTarget());
+            widgets.add(scopeWidget);
         }
         if(item instanceof Vector vec) {
             Double[] values = {vec.getX(), vec.getY(), vec.getZ()};
@@ -60,6 +91,34 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
                 widgets.add(field);
             }
         }
+        if(item instanceof Potion pot) {
+            int durationWidth = 30;
+            int potencyWidth = 30;
+            int textboxWidth = width - durationWidth - potencyWidth;
+            var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
+            text.setText(pot.getPotion());
+            widgets.add(text);
+            var potency = new NumberFieldWidget(textRender,x+durationWidth,y,potencyWidth,height,Text.empty()).integer();
+            potency.setNumber(pot.getAmplifier());
+            widgets.add(potency);
+            var duration = new TextFieldWidget(textRender,x+durationWidth+potencyWidth,y,durationWidth,height,Text.empty());
+            duration.setText(String.valueOf(pot.getDuration()));
+            widgets.add(duration);
+        }
+        if(item instanceof Sound sound) {
+            int volumeWidth = 20;
+            int pitchWidth = 20;
+            int textboxWidth = width - volumeWidth - pitchWidth;
+            var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
+            text.setText(sound.getSound());
+            widgets.add(text);
+            var volume = new NumberFieldWidget(textRender,x+textboxWidth,y,volumeWidth,height,Text.empty());
+            volume.setNumber(sound.getVolume());
+            widgets.add(volume);
+            var pitch = new NumberFieldWidget(textRender,x+textboxWidth+volumeWidth,y,pitchWidth,height,Text.empty());
+            pitch.setNumber(sound.getPitch());
+            widgets.add(pitch);
+        }
         this.widgets = widgets;
     }
 
@@ -74,6 +133,14 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
                 }
             }
         }
+        if(item instanceof GameValue value) {
+            if(widgets.get(0) instanceof TextFieldWidget text) {
+                value.setType(text.getText());
+            }
+            if(widgets.get(1) instanceof CyclingButtonWidget<?> cycle) {
+                value.setTarget((Target) cycle.getValue());
+            }
+        }
         if(item instanceof Vector vec) {
             if (widgets.get(0) instanceof NumberFieldWidget num1
                     && widgets.get(1) instanceof NumberFieldWidget num2
@@ -83,7 +150,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
         }
         if(item instanceof Location loc) {
             if(
-                        widgets.get(0) instanceof NumberFieldWidget num0
+                       widgets.get(0) instanceof NumberFieldWidget num0
                     && widgets.get(1) instanceof NumberFieldWidget num1
                     && widgets.get(2) instanceof NumberFieldWidget num2
                     && widgets.get(3) instanceof NumberFieldWidget num3
