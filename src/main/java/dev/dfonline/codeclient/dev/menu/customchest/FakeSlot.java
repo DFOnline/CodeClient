@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
 import dev.dfonline.codeclient.CodeClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -36,15 +37,18 @@ public class FakeSlot extends ClickableWidget {
         context.drawItem(item,this.getX() + 1,this.getY() + 1);
         if(this.isMouseOver(mouseX,mouseY)) {
             HandledScreen.drawSlotHighlight(context,this.getX() + 1,this.getY() + 1,-1000);
+            context.drawItemTooltip(CodeClient.MC.textRenderer,item,mouseX,mouseY);
         }
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if(this.isMouseOver(mouseX,mouseY) && ((!this.item.isEmpty()) || (!this.handler.getCursorStack().isEmpty()))) {
+            this.handler.disableSyncing();
             var swap = this.item.copy();
             this.item = this.handler.getCursorStack().copyWithCount(1);
             this.handler.setCursorStack(swap);
+            this.handler.enableSyncing();
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);

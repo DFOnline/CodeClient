@@ -50,4 +50,12 @@ public abstract class VarItem {
     public JsonObject getData() {
         return data;
     }
+
+    public JsonObject getVar() {
+        // This is probably the best approach tbh instead of updating data constantly
+        var var = new JsonObject();
+        var.addProperty("id",id);
+        var.add("data",data);
+        return var;
+    }
 }

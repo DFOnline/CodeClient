@@ -98,10 +98,10 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
             text.setText(pot.getPotion());
             widgets.add(text);
-            var potency = new NumberFieldWidget(textRender,x+durationWidth,y,potencyWidth,height,Text.empty()).integer();
-            potency.setNumber(pot.getAmplifier());
+            var potency = new NumberFieldWidget(textRender,x+textboxWidth,y,potencyWidth,height,Text.empty()).integer();
+            potency.setNumber(pot.getAmplifier() + 1);
             widgets.add(potency);
-            var duration = new TextFieldWidget(textRender,x+durationWidth+potencyWidth,y,durationWidth,height,Text.empty());
+            var duration = new TextFieldWidget(textRender,x+textboxWidth+potencyWidth,y,durationWidth,height,Text.empty());
             duration.setText(String.valueOf(pot.getDuration()));
             widgets.add(duration);
         }
@@ -118,6 +118,14 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             var pitch = new NumberFieldWidget(textRender,x+textboxWidth+volumeWidth,y,pitchWidth,height,Text.empty());
             pitch.setNumber(sound.getPitch());
             widgets.add(pitch);
+        }
+        if(item instanceof BlockTag tag) {
+            int slotSize = 18;
+            int textboxWidth = width - slotSize;
+            widgets.add(new CyclingButtonWidget.Builder<>(Text::literal).values("A", "B", "C").build(x,y,textboxWidth,height,Text.empty()));
+            var varItem = new FakeSlot(x + textboxWidth, y, Text.empty(), handler);
+            if(tag.getVariable() != null) varItem.item = tag.getVariable().toStack();
+            widgets.add(varItem);
         }
         this.widgets = widgets;
     }

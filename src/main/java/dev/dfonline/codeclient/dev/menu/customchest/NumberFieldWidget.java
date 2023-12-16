@@ -8,12 +8,14 @@ import org.intellij.lang.annotations.RegExp;
 public class NumberFieldWidget extends TextFieldWidget {
     private double number = 0;
     private @RegExp String regex = "(?<!^)-|[^\\d-.]";
+    private boolean isInt = false;
 
     public NumberFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, Text text) {
         super(textRenderer, x, y, width, height, text);
     }
     public NumberFieldWidget integer() {
         this.regex = "(?<!^)-|[^\\d-]";
+        this.isInt = true;
         return this;
     }
 
@@ -27,13 +29,14 @@ public class NumberFieldWidget extends TextFieldWidget {
     }
 
     public void setNumber(double number) {
-        this.setText("%.2f".formatted(number));
+        this.setText((isInt? "%.0f" : "%.2f").formatted(number));
         this.number = number;
     }
 
     public double getNumber() {
         return number;
     }
+    public int getInt() {return (int) number;}
 
     @Override
     public void write(String text) {

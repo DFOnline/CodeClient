@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
+import java.util.Objects;
 
 @Mixin(InGameHud.class)
 public abstract class MInGameHud {
@@ -32,16 +33,21 @@ public abstract class MInGameHud {
         if(!overlay.isEmpty()) {
             int index = 0;
             for (Text text : overlay) {
-                context.drawTextWithShadow(textRenderer, text, 30, 30 + (index * 9), -1);
+                context.drawTextWithShadow(textRenderer, Objects.requireNonNullElseGet(text, () -> Text.literal("NULL")), 30, 30 + (index * 9), -1);
                 index++;
             }
         }
-        List<Text> peeker = ChestPeeker.getOverlayText();
-        if(peeker == null) peeker = SignPeeker.getOverlayText();
-        if(peeker != null && !peeker.isEmpty()) {
-            int x = (scaledWidth / 2) + Config.getConfig().ChestPeekerX;
-            int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;
-            context.drawTooltip(textRenderer,peeker,x,yOrig);
+        int x = (scaledWidth / 2) + Config.getConfig().ChestPeekerX;
+        int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;
+        try {
+            List<Text> peeker = ChestPeeker.getOverlayText();
+            if(peeker == null) peeker = SignPeeker.getOverlayText();
+            if(peeker != null && !peeker.isEmpty()) {
+                context.drawTooltip(textRenderer,peeker,x,yOrig);
+
+            }
+        } catch (Exception ignored) {
+            context.drawTooltip(textRenderer,Text.literal("An error occurred"),x,yOrig);
 
         }
     }
