@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
+import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
 import dev.dfonline.codeclient.location.Dev;
@@ -14,6 +15,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -27,6 +29,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -310,5 +313,25 @@ public class Utility {
         if(nbt.isEmpty()) return false;
         if(Objects.equals(nbt.getCompound("PublicBukkitValues").getString("hypercube:item_instance"), "")) return false;
         return Objects.equals(nbt.getCompound("display").getString("Name"), "{\"italic\":false,\"color\":\"red\",\"text\":\"Glitch Stick\"}");
+    }
+
+    public static HashMap<Integer, String> getBlockTagLines(ItemStack item) {
+        NbtCompound display = item.getSubNbt("display");
+        NbtList lore = (NbtList) display.get("Lore");
+        if(lore == null) throw new NullPointerException("Can't get lore.");
+
+        HashMap<Integer, String> options = new HashMap<>();
+
+        for (int index = lore.size() - 1; index >= 0; index--) {
+            NbtElement element = lore.get(index);
+            Text text = Text.Serializer.fromJson(element.asString());
+            var data = text.getString();
+            if(data.isBlank() || data.equals("Default Value:")) {
+                break;
+            }
+            options.put(index, data.replaceAll("» ",""));
+        }
+
+        return options;
     }
 }

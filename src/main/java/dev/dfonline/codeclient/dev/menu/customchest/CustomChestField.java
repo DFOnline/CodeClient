@@ -1,21 +1,21 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
-import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.item.*;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.navigation.GuiNavigationPath;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.GameModeSelectionScreen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.*;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
     private final List<Drawable> widgets;
     public ItemType item;
 
-    public CustomChestField(TextRenderer textRender, int x, int y, int width, int height, Text message, ItemType item, ScreenHandler handler) {
+    public CustomChestField(TextRenderer textRender, int x, int y, int width, int height, Text message, ItemStack stack, ItemType item, ScreenHandler handler) {
         super(x, y, width, height, message);
         this.item = item;
         var widgets = new ArrayList<Drawable>();
@@ -37,11 +37,11 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
                 scopeWidget.setValue(var.getScope());
                 widgets.add(scopeWidget);
             }
-            if(item instanceof Parameter parameter) {
-                textboxWidth = textboxWidth - 18;
-
-                widgets.add(new FakeSlot(x+textboxWidth,y,Text.literal("Paramater Data"), handler));
-            }
+//            if(item instanceof Parameter parameter) {
+//                textboxWidth = textboxWidth - 18;
+//
+//                widgets.add(new FakeSlot(x+textboxWidth,y,Text.literal("Paramater Data"), handler));
+//            }
             var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
             text.setMaxLength(10000);
             text.setText(named.getName());
@@ -92,40 +92,52 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             }
         }
         if(item instanceof Potion pot) {
-            int durationWidth = 30;
-            int potencyWidth = 30;
+            int durationWidth = 45;
+            int potencyWidth = 32;
             int textboxWidth = width - durationWidth - potencyWidth;
             var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
             text.setText(pot.getPotion());
             widgets.add(text);
-            var potency = new NumberFieldWidget(textRender,x+textboxWidth,y,potencyWidth,height,Text.empty()).integer();
+            var potency = new NumberFieldWidget(textRender,x+textboxWidth,y,potencyWidth,height,Text.empty()).integer().min(-255).max(255);
             potency.setNumber(pot.getAmplifier() + 1);
             widgets.add(potency);
             var duration = new TextFieldWidget(textRender,x+textboxWidth+potencyWidth,y,durationWidth,height,Text.empty());
-            duration.setText(String.valueOf(pot.getDuration()));
+            duration.setText(pot.duration().replaceAll(" ticks",""));
             widgets.add(duration);
         }
         if(item instanceof Sound sound) {
-            int volumeWidth = 20;
-            int pitchWidth = 20;
+            int volumeWidth = 30;
+            int pitchWidth = 30;
             int textboxWidth = width - volumeWidth - pitchWidth;
             var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
             text.setText(sound.getSound());
             widgets.add(text);
-            var volume = new NumberFieldWidget(textRender,x+textboxWidth,y,volumeWidth,height,Text.empty());
+            var volume = new NumberFieldWidget(textRender,x+textboxWidth,y,volumeWidth,height,Text.empty()).min(0);
             volume.setNumber(sound.getVolume());
             widgets.add(volume);
-            var pitch = new NumberFieldWidget(textRender,x+textboxWidth+volumeWidth,y,pitchWidth,height,Text.empty());
+            var pitch = new NumberFieldWidget(textRender,x+textboxWidth+volumeWidth,y,pitchWidth,height,Text.empty()).min(0).max(2);
             pitch.setNumber(sound.getPitch());
             widgets.add(pitch);
         }
         if(item instanceof BlockTag tag) {
-            int slotSize = 18;
-            int textboxWidth = width - slotSize;
-            widgets.add(new CyclingButtonWidget.Builder<>(Text::literal).values("A", "B", "C").build(x,y,textboxWidth,height,Text.empty()));
-            var varItem = new FakeSlot(x + textboxWidth, y, Text.empty(), handler);
-            if(tag.getVariable() != null) varItem.item = tag.getVariable().toStack();
-            widgets.add(varItem);
+//            int slotSize = 18;
+//            int textboxWidth = width - slotSize;
+//            try {
+//                var lines = Utility.getBlockTagLines(stack).values();
+//                var builder = new CyclingButtonWidget.Builder<>(Text::literal).values(lines);
+//                for (var line: lines) {
+//                    if(textRender.getWidth(ScreenTexts.composeGenericOptionText(Text.literal(tag.getTag()),Text.literal(line))) > width - 10) {
+//                        builder.omitKeyText();
+//                        break;
+//                    }
+//                }
+//                widgets.add(builder.build(x,y,textboxWidth,height,Text.literal(tag.getTag())));
+//            }
+//            catch (Exception ignored) {}
+//            var varItem = new FakeSlot(x + textboxWidth, y, Text.empty(), handler);
+//            if(tag.getVariable() != null) varItem.item = tag.getVariable().toStack();
+//            widgets.add(varItem);
+            widgets.add(new TextWidget(x,y,width,height,ScreenTexts.composeGenericOptionText(Text.literal(tag.getTag()),Text.literal(tag.getOption())),textRender).alignCenter());
         }
         this.widgets = widgets;
     }
@@ -172,6 +184,28 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
                         num4.getNumber()
                 );
                 this.item = (ItemType) loc;
+            }
+        }
+        if(item instanceof Sound sound) {
+            if(widgets.get(0) instanceof TextFieldWidget text) sound.setSound(text.getText());
+            if(widgets.get(1) instanceof NumberFieldWidget num) sound.setVolume(num.getNumber());
+            if(widgets.get(2) instanceof NumberFieldWidget num) sound.setPitch(num.getNumber());
+        }
+        if(item instanceof Potion pot) {
+            if(widgets.get(0) instanceof TextFieldWidget text) pot.setPotion(text.getText());
+            if(widgets.get(1) instanceof NumberFieldWidget num) pot.setAmplifier(num.getInt() - 1);
+            if(widgets.get(2) instanceof TextFieldWidget text) {
+                String value = text.getText();
+                try {
+                    pot.setDuration(Integer.parseInt(value));
+                } catch (Exception ignored) {
+                    try {
+                        var values = value.split(":");
+                        pot.setDuration((Integer.parseInt(values[0]) * 60 + Integer.parseInt(values[1])) * 20);
+                    } catch (Exception ignored2) {
+                        pot.setDuration(1000000);
+                    }
+                }
             }
         }
     }

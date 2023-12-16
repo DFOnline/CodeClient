@@ -4,11 +4,16 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import org.intellij.lang.annotations.RegExp;
+import org.jetbrains.annotations.Nullable;
 
 public class NumberFieldWidget extends TextFieldWidget {
     private double number = 0;
     private @RegExp String regex = "(?<!^)-|[^\\d-.]";
     private boolean isInt = false;
+    @Nullable
+    public Double min = null;
+    @Nullable
+    public Double max = null;
 
     public NumberFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, Text text) {
         super(textRenderer, x, y, width, height, text);
@@ -18,19 +23,37 @@ public class NumberFieldWidget extends TextFieldWidget {
         this.isInt = true;
         return this;
     }
+    public NumberFieldWidget min(double min) {
+        this.min = min;
+        return this;
+    }
+    public NumberFieldWidget max(double max) {
+        this.max = max;
+        return this;
+    }
+
+    private void setValue(double number) {
+        if(min != null) {
+            number = Math.max(min,number);
+        }
+        if(max != null) {
+            number = Math.min(max,number);
+        }
+        this.number = number;
+    }
 
     @Override
     public void setText(String text) {
         try {
-            number = Double.parseDouble(text);
+            setValue(Double.parseDouble(text));
         }
         catch (Exception ignored) {}
         super.setText(text);
     }
 
     public void setNumber(double number) {
-        this.setText((isInt? "%.0f" : "%.2f").formatted(number));
-        this.number = number;
+        setValue(number);
+        this.setText((isInt? "%.0f" : "%.2f").formatted(this.number));
     }
 
     public double getNumber() {

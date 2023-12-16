@@ -132,6 +132,7 @@ public class InteractionManager {
                     Integer selectedIndex = null;
                     List<String> options = new ArrayList<>();
 
+                    // TODO: Utility.getBlockTagLines
                     for (NbtElement element : lore) {
                         Text text = Text.Serializer.fromJson(element.asString());
                         if(text == null) return false;

@@ -2,8 +2,11 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -13,6 +16,7 @@ import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerListener;
@@ -132,7 +136,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 //                widget.setMaxLength(10_000);
 //                widget.setText(named.getName());
 //                widget.setFocused(Objects.equals(i,focused));
-                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.id), varItem, this.handler);
+                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.id), stack, varItem, this.handler);
                 widgets.put(i,widget);
                 varItems.add(varItem);
                 continue;
@@ -213,10 +217,15 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         Widget widget = widgets.get(scrollRelativeSlot);
         if(widget instanceof CustomChestField<?> field) {
             VarItem item = field.item;
-            super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
-            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, item.toStack()));
-            super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
-            super.onMouseClick(slot,54,0,SlotActionType.QUICK_CRAFT);
+            if(item instanceof BlockTag) {
+                Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
+                CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.nextRevision(), slot.getIndex(), 0, SlotActionType.PICKUP, item.toStack(), int2ObjectMap));
+            } else {
+                super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
+                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, item.toStack()));
+                super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
+                super.onMouseClick(slot,54,0,SlotActionType.QUICK_CRAFT);
+            }
         }
     }
 

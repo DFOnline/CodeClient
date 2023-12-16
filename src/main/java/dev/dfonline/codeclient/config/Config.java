@@ -397,6 +397,7 @@ public class Config {
                                 .description(OptionDescription.createBuilder()
                                         .text(Text.literal("Use a custom menu for chests, with value text boxes for quick editing."))
                                         .text(Text.of(CustomCodeChest.description))
+                                        .text(Text.literal("THIS IS IN BETA!").formatted(Formatting.YELLOW,Formatting.BOLD))
                                         .build())
                                 .binding(
                                         CustomChestMenuType.OFF,
@@ -404,7 +405,6 @@ public class Config {
                                         opt -> CustomCodeChest = opt
                                 )
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CustomChestMenuType.class))
-                                .available(false)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Place on Air"))
