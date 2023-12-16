@@ -53,6 +53,7 @@ public class Action implements Searchable {
 
         JsonObject template = new JsonObject();
         JsonArray blocks = new JsonArray();
+        // TODO: brackets for IFs
         JsonObject action = new JsonObject();
         action.addProperty("id","block");
         action.addProperty("block", getCodeBlock().identifier);

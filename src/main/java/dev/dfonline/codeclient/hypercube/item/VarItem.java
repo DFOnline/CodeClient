@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtString;
 public abstract class VarItem {
     public final String id;
     protected JsonObject data;
+    // TODO: make it abstract and final, it's that's even possible, and be decided by whatever implements it. This does also mean implementing each named item
     protected Item material;
 
     public static JsonObject prefetch(ItemStack item) throws Exception {
