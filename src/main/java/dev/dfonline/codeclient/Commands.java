@@ -202,7 +202,7 @@ public class Commands {
 //            }
 //            return -1;
 //        }));
-        dispatcher.register(literal("placetemplates").executes(context -> {
+        dispatcher.register(literal("templateplacer").executes(context -> {
             if(CodeClient.location instanceof Dev) {
                 var action = Utility.createPlacer(Utility.templatesInInventory(), () -> {
                     CodeClient.currentAction = new None();
