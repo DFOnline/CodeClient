@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin.world.block;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.Dev;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 public class MBlock {
     @Inject(method = "getPickStack", at = @At("HEAD"), cancellable = true)
     private void getPickStack(BlockView world, BlockPos pos, BlockState state, CallbackInfoReturnable<ItemStack> cir) {
+        if(!Config.getConfig().PickAction) return;
         if(CodeClient.location instanceof Dev dev) {
             if(!dev.isInDev(pos)) return;
             var breakable = InteractionManager.isBlockBreakable(pos);

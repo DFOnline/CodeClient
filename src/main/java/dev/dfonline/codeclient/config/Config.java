@@ -10,6 +10,9 @@ import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -60,6 +63,7 @@ public class Config {
     public int Line4Color = 0xFF8800;
     public boolean SignPeeker = true;
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
+    public boolean PickAction = true;
 
     private void save() {
         try {
@@ -105,6 +109,7 @@ public class Config {
             object.addProperty("Line4Color",Line4Color);
             object.addProperty("SignPeeker",SignPeeker);
             object.addProperty("CustomCodeChest",CustomCodeChest.name());
+            object.addProperty("PickAction",PickAction);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -468,6 +473,16 @@ public class Config {
                                         opt -> CodeLayerInteractionMode = opt
                                 )
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, LayerInteractionMode.class))
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.literal("Pick Block Action"))
+                                .description(OptionDescription.of(Text.literal("Replaces pick block with the action"),Text.literal("Requires actiondump.").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,"https://github.com/DFOnline/CodeClient/wiki/actiondump")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,Text.literal("Click to open link."))).withUnderline(true).withColor(Formatting.AQUA))))
+                                .binding(
+                                        true,
+                                        () -> PickAction,
+                                        opt -> PickAction = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .build())
                 //</editor-fold>
