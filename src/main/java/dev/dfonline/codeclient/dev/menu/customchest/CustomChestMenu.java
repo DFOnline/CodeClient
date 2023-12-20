@@ -257,8 +257,8 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         }
         boolean up = keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.forwardKey.matchesKey(keyCode,scanCode);
         boolean down = keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.backKey.matchesKey(keyCode,scanCode);
-        boolean pageUp = keyCode == GLFW.GLFW_KEY_PAGE_DOWN || (up && hasShiftDown());
-        boolean pageDown = keyCode == GLFW.GLFW_KEY_PAGE_UP || (down && hasShiftDown());
+        boolean pageUp = keyCode == GLFW.GLFW_KEY_PAGE_UP || (up && hasShiftDown());
+        boolean pageDown = keyCode == GLFW.GLFW_KEY_PAGE_DOWN || (down && hasShiftDown());
         boolean start = keyCode == GLFW.GLFW_KEY_HOME || (up && hasAltDown() && !pageUp);
         boolean end = keyCode == GLFW.GLFW_KEY_END || (down && hasAltDown() && !pageDown);
         int prev = (int) scroll;
