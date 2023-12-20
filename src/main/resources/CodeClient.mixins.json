@@ -27,7 +27,8 @@
     "world.block.MBlockItem",
     "world.block.MLightBlock",
     "world.block.MSignBlockEntity",
-    "world.block.MStructureVoidBlock"
+    "world.block.MStructureVoidBlock",
+    "world.block.MBlock"
   ],
   "injectors": {
     "defaultRequire": 1
