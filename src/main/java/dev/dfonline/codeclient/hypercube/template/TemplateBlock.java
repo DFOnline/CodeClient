@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.hypercube.template;
 
+import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -13,6 +14,10 @@ public class TemplateBlock {
      * "open" | "close"
      */
     @Nullable public String direct;
+    /**
+     * "norm" | "repeat"
+     */
+    @Nullable public String type;
     @Nullable public String block;
     @Nullable public String data;
     @Nullable public String action;
@@ -50,5 +55,11 @@ public class TemplateBlock {
         return id.equals("block")
                 ? Block.valueOf(block.toUpperCase()).hasStone ? 2 : 1
                 : Objects.equals(direct, "open") ? 1 : 2;
+    }
+
+    public JsonObject toJsonObject() {
+        var obj = new JsonObject();
+        obj.addProperty("id",id);
+        return obj;
     }
 }
