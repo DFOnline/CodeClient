@@ -14,6 +14,10 @@ public abstract class VarItem {
     // TODO: make it abstract and final, it's that's even possible, and be decided by whatever implements it. This does also mean implementing each named item
     protected Item material;
 
+    protected VarItem(String id) {
+        this.id = id;
+    }
+
     public static JsonObject prefetch(ItemStack item) throws Exception {
         if (!item.hasNbt()) throw new Exception("Item has no nbt.");
         NbtCompound nbt = item.getNbt();
@@ -55,7 +59,7 @@ public abstract class VarItem {
         // This is probably the best approach tbh instead of updating data constantly
         var var = new JsonObject();
         var.addProperty("id",id);
-        var.add("data",data);
+        var.add("data",getData());
         return var;
     }
 }

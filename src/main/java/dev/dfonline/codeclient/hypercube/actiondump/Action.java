@@ -4,19 +4,25 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.hypercube.item.BlockTag;
+import dev.dfonline.codeclient.hypercube.template.Argument;
 import dev.dfonline.codeclient.hypercube.template.Bracket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class Action implements Searchable {
     public String name;
     public String codeblockName;
+    public Tag[] tags;
     public String[] aliases;
     public Icon icon;
     public String[] subActionBlocks;
@@ -64,7 +70,15 @@ public class Action implements Searchable {
         action.addProperty("block", codeBlock.identifier);
         action.addProperty("action", name);
         JsonObject args = new JsonObject();
-        args.add("items",new JsonArray());
+        var items = new JsonArray();
+        for (var tag : this.tags) {
+            var defaultOption = Arrays.stream(tag.options).filter(tagOption -> tagOption.name.equals(tag.defaultOption)).findFirst();
+            if(defaultOption.isPresent()) {
+                var blockTag = new BlockTag(defaultOption.get().icon.material.toLowerCase(),tag.defaultOption,tag.name,name,getCodeBlock().identifier);
+                items.add(new Argument(blockTag,tag.slot).toJsonObject());
+            }
+        }
+        args.add("items",items);
         action.add("args",args);
         blocks.add(action);
         if (hasBrackets) {

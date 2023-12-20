@@ -3,6 +3,8 @@ package dev.dfonline.codeclient.hypercube.item;
 import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +34,22 @@ public class BlockTag extends VarItem {
      */
     @Nullable
     private Variable variable;
+
+    private static JsonObject makeVar(String option, String tag, String action, String block) {
+        var var = new JsonObject();
+        var.addProperty("id","bl_tag");
+        var data = new JsonObject();
+        data.addProperty("option",option);
+        data.addProperty("tag",tag);
+        data.addProperty("action",action);
+        data.addProperty("block",block);
+        var.add("data",data);
+        return var;
+    }
+
+    public BlockTag(String material, String option, String tag, String action, String block) {
+        this(Registries.ITEM.get(new Identifier("minecraft",material.toLowerCase())),makeVar(option, tag, action, block));
+    }
 
     public BlockTag(Item material, JsonObject var) {
         super(material, var);
