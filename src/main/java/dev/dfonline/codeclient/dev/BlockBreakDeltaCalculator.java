@@ -27,14 +27,15 @@ public class BlockBreakDeltaCalculator {
      * The insanity previously mentioned.
      */
     public static float calculateBlockDelta(BlockPos pos) {
-        AtomicReference<Float> speed = new AtomicReference<>(0F);
-        oldBlocks.getBlocks().forEach(recentBlock -> {
-            float age = (float) recentBlock.howLongAgo() / 1000;
-            float recency = Math.max(10.0F - age,0);
-            float score = recency / 100;
-            speed.updateAndGet(v -> (v + score));
-        });
-        return Math.max(speed.get(), 0.1F);
+        return 0.2F;
+//        AtomicReference<Float> speed = new AtomicReference<>(0F);
+//        oldBlocks.getBlocks().forEach(recentBlock -> {
+//            float age = (float) recentBlock.howLongAgo() / 1000;
+//            float recency = Math.max(10.0F - age,0);
+//            float score = recency / 100;
+//            speed.updateAndGet(v -> (v + score));
+//        });
+//        return Math.max(speed.get(), 0.1F);
     }
 
     private static class RecentBlocks {

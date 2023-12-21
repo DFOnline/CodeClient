@@ -25,6 +25,9 @@ public class GoTo extends Action {
     private ItemStack locationItem;
     private boolean active;
     private int buffer = 0;
+    private int lastTickPackets = 1;
+    private int thisTickPackets = 0;
+    boolean doNotSuppress = false;
 
     public GoTo(Vec3d target, Callback callback) {
         super(callback);
@@ -56,7 +59,17 @@ public class GoTo extends Action {
     }
 
     @Override
+    public boolean onSendPacket(Packet<?> packet) {
+        if(packet instanceof PlayerPositionLookS2CPacket pos) {
+            if(doNotSuppress) doNotSuppress = false;
+            else return true;
+        }
+        return super.onSendPacket(packet);
+    }
+
+    @Override
     public void onTick() {
+        thisTickPackets = 0;
         if(CodeClient.MC.player == null || CodeClient.MC.getNetworkHandler() == null) {
             callback();
             return;
@@ -70,6 +83,7 @@ public class GoTo extends Action {
         }
         if(locationItem != null) return;
         hackTowards();
+        lastTickPackets=thisTickPackets;
     }
 
     private void locationItemTeleport() {
@@ -111,13 +125,14 @@ public class GoTo extends Action {
         double distance = offset.length();
         Vec3d jump = distance > maxLength ? pos.add(offset.normalize().multiply(maxLength)) : target;
         if(distance > 10) {
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
-            CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
+            for (int i = 0; i < Math.min(lastTickPackets + 5,50); i++) {
+                thisTickPackets++;
+                this.doNotSuppress = true;
+                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
+            }
         }
+        thisTickPackets++;
+        this.doNotSuppress = true;
         CodeClient.MC.player.setPos(jump.x, jump.y, jump.z);
     }
 }

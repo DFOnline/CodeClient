@@ -13,7 +13,9 @@ import dev.dfonline.codeclient.dev.menu.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
+import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.location.Spawn;
+import dev.dfonline.codeclient.switcher.StateSwitcher;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -31,8 +33,10 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -80,7 +84,7 @@ public class CodeClient implements ModInitializer {
 
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.","");
 //        if(!List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
-        if((MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen) && packet instanceof CloseScreenS2CPacket) {
+        if((MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen || MC.currentScreen instanceof StateSwitcher) && packet instanceof CloseScreenS2CPacket) {
             return true;
         }
         return false;
@@ -110,6 +114,9 @@ public class CodeClient implements ModInitializer {
         if(BuildClip.onPacket(packet)) return true;
         Event.onSendPacket(packet);
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.","");
+        if(packet instanceof CommandExecutionC2SPacket commandExecutionC2SPacket) {
+            LOGGER.info(commandExecutionC2SPacket.command());
+        }
 //        LOGGER.info(name);
         return false;
     }
@@ -130,6 +137,12 @@ public class CodeClient implements ModInitializer {
             if(NoClip.isIgnoringWalls()) MC.player.noClip = true;
             if(editBind.wasPressed()) {
                 MC.setScreen(new DevInventoryScreen(MC.player));
+            }
+            if(dev.getSize() == null) {
+                var pos = new BlockPos(dev.getX() - 1,49,dev.getZ());
+                if(CodeClient.MC.world.getBlockState(pos.south(50)).isOf(Blocks.STONE)) dev.setSize(Plot.Size.BASIC);
+                if(CodeClient.MC.world.getBlockState(pos.south(100)).isOf(Blocks.STONE)) dev.setSize(Plot.Size.LARGE);
+                if(CodeClient.MC.world.getBlockState(pos.south(300)).isOf(Blocks.STONE)) dev.setSize(Plot.Size.MASSIVE);
             }
         }
         if(CodeClient.location instanceof Spawn spawn && spawn.consumeHasJustJoined()) {

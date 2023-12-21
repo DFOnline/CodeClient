@@ -15,7 +15,6 @@
     "entity.player.MPlayerEntity",
     "network.MClientCommonPlayNetworkHandler",
     "network.MClientConnection",
-    "render.MChunkRendererRegion",
     "render.MDebugRenderer",
     "render.hud.MDrawContext",
     "render.hud.MInGameHud",

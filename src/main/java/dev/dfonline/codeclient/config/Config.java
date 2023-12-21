@@ -377,7 +377,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Custom Block Breaking"))
-                                .description(OptionDescription.of(Text.literal("Keep codeblocks safe from accidental breaking."),Text.literal("They will have the survival breaking animation."),Text.literal("Breaking multiple will temporarily increase the speed.")))
+                                .description(OptionDescription.of(Text.literal("Keep codeblocks safe from accidental breaking."),Text.literal("They will have the survival breaking animation."),Text.literal("They will take 5 ticks to break (0.25 seconds)")))
                                 .binding(
                                         false,
                                         () -> CustomBlockBreaking,
