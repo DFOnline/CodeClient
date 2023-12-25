@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class Variable extends NamedItem {
     private Scope scope;
@@ -27,7 +28,7 @@ public class Variable extends NamedItem {
     @Override
     public ItemStack toStack() {
         var stack = super.toStack();
-        stack.setCustomName(Text.literal(getName()).setStyle(Style.EMPTY.withItalic(false)));
+        stack.setCustomName(Text.literal(getName()).setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
         Utility.addLore(stack, Text.literal(scope.longName).setStyle(Style.EMPTY.withColor(scope.color)));
         return stack;
     }

@@ -13,7 +13,8 @@ public class VarItems {
         try {
             var = VarItem.prefetch(item);
             return switch (var.get("id").getAsString()) {
-                case "txt", "num", "comp" -> new NamedItem(material, var);
+                case "txt", "comp" -> new NamedItem(material, var);
+                case "num" -> new Number(material, var);
                 case "var" -> new Variable(material, var);
                 case "loc" -> new Location(material, var);
                 case "vec" -> new Vector(material, var);
