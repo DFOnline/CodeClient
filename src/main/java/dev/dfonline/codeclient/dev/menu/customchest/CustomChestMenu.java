@@ -189,17 +189,18 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 return true;
             }
         }
+        boolean returnValue = false;
         for (var entry : widgets.entrySet()) {
             if (entry.getValue() instanceof ClickableWidget clickable) {
                 boolean mouseOver = clickable.isMouseOver(mouseX - this.x, mouseY - this.y);
                 clickable.setFocused(mouseOver);
                 if(mouseOver && clickable.mouseClicked(mouseX - this.x,mouseY - this.y,button)) {
-                    updateItem(entry.getKey());
-                    return true;
+//                    updateItem(entry.getKey());
+                    returnValue = true;
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return returnValue || super.mouseClicked(mouseX, mouseY, button);
     }
 
     private void updateItems() {

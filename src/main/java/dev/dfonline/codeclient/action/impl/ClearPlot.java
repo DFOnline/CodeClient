@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.action.impl;
 
+import dev.dfonline.codeclient.Callback;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.action.Action;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

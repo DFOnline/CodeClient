@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.action;
 
+import dev.dfonline.codeclient.Callback;
 import net.minecraft.network.packet.Packet;
 
 public abstract class Action {
@@ -22,9 +23,5 @@ public abstract class Action {
 
     protected void callback() {
         this.callback.run();
-    }
-
-    public interface Callback {
-        void run();
     }
 }

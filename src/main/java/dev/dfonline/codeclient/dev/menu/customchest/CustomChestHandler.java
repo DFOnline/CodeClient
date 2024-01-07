@@ -10,11 +10,18 @@ import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
+import org.jetbrains.annotations.NotNull;
 
 public class CustomChestHandler extends ScreenHandler {
     private final Inventory inventory;
     private static final int Size = 9*3;
     public final CustomChestNumbers numbers = CustomChestNumbers.getSize();
+    public @NotNull Callback callback = (int slot, int revision, ItemStack stack) -> {
+
+    };
+    public interface Callback {
+        void run(int slot, int revision, ItemStack stack);
+    }
 
     public CustomChestHandler(int syncId) {
         this(syncId, CodeClient.MC.player.getInventory(), new SimpleInventory(Size));
@@ -32,6 +39,12 @@ public class CustomChestHandler extends ScreenHandler {
         }
 
         addPlayerInventory(playerInventory);
+    }
+
+    @Override
+    public void setStackInSlot(int slot, int revision, ItemStack stack) {
+        super.setStackInSlot(slot, revision, stack);
+        this.callback.run(slot,revision,stack);
     }
 
     @Override

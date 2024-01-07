@@ -35,6 +35,8 @@ import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -75,6 +77,7 @@ public class CodeClient implements ModInitializer {
      * @param <T> Server2Client
      */
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+
         if(currentAction.onReceivePacket(packet)) return true;
         if(Debug.handlePacket(packet)) return true;
         if(BuildClip.handlePacket(packet)) return true;
@@ -125,6 +128,7 @@ public class CodeClient implements ModInitializer {
      * All tick events and debugging.
      */
     public static void onTick() {
+
         currentAction.onTick();
         Debug.tick();
         BuildClip.tick();

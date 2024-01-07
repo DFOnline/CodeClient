@@ -105,7 +105,7 @@ public class Utility {
     /**
      * Doesn't add .swap(), that needs to be added yourself.
      */
-    public static PlaceTemplates createSwapper(List<ItemStack> templates, Action.Callback callback) {
+    public static PlaceTemplates createSwapper(List<ItemStack> templates, Callback callback) {
         if(CodeClient.location instanceof Dev dev) {
             HashMap<BlockPos, ItemStack> map = new HashMap<>();
             var scan = dev.scanForSigns(Pattern.compile(".*"));
@@ -154,7 +154,7 @@ public class Utility {
      * A regular placer will always start from where code starts.
      * This will use any free spaces instead.
      */
-    public static PlaceTemplates createPlacer(List<ItemStack> templates, Action.Callback callback) {
+    public static PlaceTemplates createPlacer(List<ItemStack> templates, Callback callback) {
        return createPlacer(templates,callback,false);
     }
 
@@ -162,7 +162,7 @@ public class Utility {
      * A regular placer will always start from where code starts.
      * This will use any free spaces instead.
      */
-    public static PlaceTemplates createPlacer(List<ItemStack> templates, Action.Callback callback, boolean compacter) {
+    public static PlaceTemplates createPlacer(List<ItemStack> templates, Callback callback, boolean compacter) {
         if(CodeClient.location instanceof Dev dev) {
             var map = new HashMap<BlockPos, ItemStack>();
             if(!compacter) {
