@@ -167,7 +167,7 @@ public class ChestPeeker {
                                         ).fillStyle(Style.EMPTY.withColor(Type.vec.color)));
                                     }
                                     if (type == Type.snd) {
-                                        text.append(Text.Serializer.fromJson(lore.getString(0)));
+                                        text.append(Text.Serialization.fromJson(lore.getString(0)));
                                         text.append(Text.literal(" P: ").formatted(Formatting.GRAY));
                                         text.append(Text.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
                                         text.append(Text.literal(" V: ").formatted(Formatting.GRAY));
@@ -175,10 +175,10 @@ public class ChestPeeker {
                                     }
                                     if (type == Type.part) {
                                         text.append(Text.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
-                                        text.append(Text.Serializer.fromJson(lore.getString(0)));
+                                        text.append(Text.Serialization.fromJson(lore.getString(0)));
                                     }
                                     if (type == Type.pot) {
-                                        text.append(Text.Serializer.fromJson(lore.getString(0)));
+                                        text.append(Text.Serialization.fromJson(lore.getString(0)));
                                         text.append(Text.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
                                         int dur = data.get("dur").getAsInt();
                                         text.append(dur >= 1000000 ? "Infinite" : dur % 20 == 0 ? "%d:%02d".formatted((dur / 1200), (dur / 20) % 60) : (dur + "ticks"));

@@ -134,7 +134,7 @@ public class InteractionManager {
 
                     // TODO: Utility.getBlockTagLines
                     for (NbtElement element : lore) {
-                        Text text = Text.Serializer.fromJson(element.asString());
+                        Text text = Text.Serialization.fromJson(element.asString());
                         if(text == null) return false;
                         TextColor color = text.getStyle().getColor();
                         if (color == null) {

@@ -2,8 +2,8 @@ package dev.dfonline.codeclient.mixin.render.hud;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
-import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import org.spongepowered.asm.mixin.Mixin;

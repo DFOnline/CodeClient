@@ -268,7 +268,7 @@ public class Utility {
      * @return Usable in lore and as a name in nbt.
      */
     public static NbtString nbtify(Text text) {
-        JsonObject json = Text.Serializer.toJsonTree(text).getAsJsonObject();
+        JsonObject json = Text.Serialization.toJsonTree(text).getAsJsonObject();
 
         if(!json.has("color")) json.addProperty("color","white");
         if(!json.has("italic")) json.addProperty("italic",false);
@@ -324,7 +324,7 @@ public class Utility {
 
         for (int index = lore.size() - 1; index >= 0; index--) {
             NbtElement element = lore.get(index);
-            Text text = Text.Serializer.fromJson(element.asString());
+            Text text = Text.Serialization.fromJson(element.asString());
             var data = text.getString();
             if(data.isBlank() || data.equals("Default Value:")) {
                 break;

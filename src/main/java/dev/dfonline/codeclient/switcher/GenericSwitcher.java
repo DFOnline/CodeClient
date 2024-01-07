@@ -178,7 +178,7 @@ public abstract class GenericSwitcher extends Screen {
         }
 
         @Override
-        public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+        public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             context.getMatrices().push();
             context.getMatrices().translate((float)this.getX(), (float)this.getY(), 0.0F);
             context.drawTexture(TEXTURE,0, 0, 0.0F, 75.0F, 26, 26, 128, 128);

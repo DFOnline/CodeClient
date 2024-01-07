@@ -219,7 +219,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
     }
 
     @Override
-    protected void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         for (var widget: widgets) {
             widget.render(context, mouseX, mouseY, delta);
         }

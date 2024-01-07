@@ -32,7 +32,7 @@ public class FakeSlot extends ClickableWidget {
     }
 
     @Override
-    protected void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         context.drawTexture(TEXTURE,this.getX(),this.getY(),0,0,this.width,this.height,18,18);
         context.drawItem(item,this.getX() + 1,this.getY() + 1);
         if(this.isMouseOver(mouseX,mouseY)) {
