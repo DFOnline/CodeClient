@@ -3,14 +3,19 @@
   "id": "codeclient",
   "version": "${version}",
   "name": "CodeClient",
-  "description": "Read and write DiamondFire code from external apps",
+  "description": "A DiamondFire utility client for advanced coding.",
   "authors": [
     "GeorgeRNG"
   ],
   "contact": {
-    "website": "https://github.com/DFOnline/CodeClient",
-    "repo": "https://github.com/DFOnline/CodeClient"
+    "homepage": "https://github.com/DFOnline/CodeClient",
+    "repo": "https://github.com/DFOnline/CodeClient",
+    "issues": "https://github.com/DFOnline/CodeClient/issues",
+    "sources": "https://github.com/DFOnline/CodeClient"
   },
+  "contributors": [
+    "RedVortex"
+  ],
   "license": "MIT",
   "icon": "assets/codeclient/icon.png",
   "environment": "client",
@@ -30,9 +35,12 @@
   ],
   "depends": {
     "fabricloader": ">=0.14.21",
-    "minecraft": "~1.20",
+    "minecraft": "1.20.4",
     "java": ">=17",
     "fabric-api": "*",
-    "yet_another_config_lib_v3": ">=3.0.1+1.20"
+    "yet_another_config_lib_v3": ">=3.1+1.20.4"
+  },
+  "recommends": {
+    "modmenu": "*"
   }
 }
