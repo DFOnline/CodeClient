@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.Action;
@@ -268,13 +269,17 @@ public class Utility {
      * @return Usable in lore and as a name in nbt.
      */
     public static NbtString nbtify(Text text) {
-        JsonObject json = Text.Serialization.toJsonTree(text).getAsJsonObject();
+        JsonElement json = Text.Serialization.toJsonTree(text);
+        if(json.isJsonObject()) {
+            JsonObject obj = (JsonObject) json;
 
-        if(!json.has("color")) json.addProperty("color","white");
-        if(!json.has("italic")) json.addProperty("italic",false);
-        if(!json.has("bold")) json.addProperty("bold",false);
+            if(!obj.has("color")) obj.addProperty("color","white");
+            if(!obj.has("italic")) obj.addProperty("italic",false);
+            if(!obj.has("bold")) obj.addProperty("bold",false);
 
-        return NbtString.of(json.toString());
+            return NbtString.of(obj.toString());
+        }
+        else return NbtString.of(json.toString());
     }
 
     /**

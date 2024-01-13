@@ -97,7 +97,7 @@ public class Icon {
                 lore.add(Utility.nbtify(Text.literal("# ").formatted(Formatting.DARK_AQUA).append(Text.literal(tags + " Tag" + (tags != 1 ? "s" : "")).formatted(Formatting.GRAY))));
             }
             if(hasOptional) {
-                lore.add(Utility.nbtify(Text.empty()));
+                lore.add(Utility.nbtify(Text.literal("")));
                 lore.add(Utility.nbtify(Text.literal("*Optional").formatted(Formatting.GRAY)));
             }
         }
@@ -201,7 +201,7 @@ public class Icon {
         lore.add(Utility.nbtify(Utility.textFromString(text)));
     }
 
-    private class Color {
+    public static class Color {
         int red;
         int green;
         int blue;
