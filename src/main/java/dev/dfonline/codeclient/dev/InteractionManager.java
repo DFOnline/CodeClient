@@ -231,9 +231,9 @@ public class InteractionManager {
     }
 
     public static boolean shouldTeleportUp() {
-        if(CodeClient.location instanceof Dev dev) {
+        if(CodeClient.location instanceof Dev) {
             ClientPlayerEntity pl = CodeClient.MC.player;
-            return dev.isInDev(pl.getPos()) && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
+            return NoClip.isInDevSpace() && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
         }
         return false;
     }

@@ -25,7 +25,7 @@ public class NoClip {
     }
 
     public static boolean isInDevSpace() {
-        return CodeClient.location instanceof Dev plot && plot.getX() != null && CodeClient.MC.player.getX() <= plot.getX();
+        return CodeClient.location instanceof Dev plot && plot.getX() != null && CodeClient.MC.player.getX() <= plot.getX() && CodeClient.MC.player.getY() >= 50 && CodeClient.MC.player.getY() < 256;
     }
 
     public static Vec3d handleClientPosition(Vec3d movement) {
