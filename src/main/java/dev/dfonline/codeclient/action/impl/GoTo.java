@@ -29,6 +29,7 @@ public class GoTo extends Action {
     private int lastTickPackets = 1;
     private int thisTickPackets = 0;
     boolean doNotSuppress = false;
+    boolean complete = false;
 
     public GoTo(Vec3d target, Callback callback) {
         super(callback);
@@ -79,6 +80,7 @@ public class GoTo extends Action {
         CodeClient.MC.player.setVelocity(0,0,0);
         if(CodeClient.MC.player.getPos().equals(target)) {
             active = false;
+            complete = true;
             callback();
             return;
         }
