@@ -121,27 +121,27 @@ public class Commands {
             return 0;
         }));
 
-        dispatcher.register(literal("back").executes(context -> {
-            if(CodeClient.location instanceof Creator plot) {
-                if(plot.devPos == null) {
-                    Utility.sendMessage("There is no position to go back to!", ChatType.FAIL);
-                    return 1;
-                }
-                if(!(CodeClient.currentAction instanceof None)) {
-                    Utility.sendMessage("CodeClient is currently busy, try again in a moment.",ChatType.FAIL);
-                    return 1;
-                }
-                if(LastPos.tpBack()) return 0;
-                else {
-                    Utility.sendMessage("An error occurred whilst trying to go back.",ChatType.FAIL);
-                    return 1;
-                }
-            }
-            else {
-                Utility.sendMessage("You must be in dev or build mode to do this!",ChatType.FAIL);
-                return 1;
-            }
-        }));
+//        dispatcher.register(literal("back").executes(context -> {
+//            if(CodeClient.location instanceof Creator plot) {
+//                if(plot.devPos == null) {
+//                    Utility.sendMessage("There is no position to go back to!", ChatType.FAIL);
+//                    return 1;
+//                }
+//                if(!(CodeClient.currentAction instanceof None)) {
+//                    Utility.sendMessage("CodeClient is currently busy, try again in a moment.",ChatType.FAIL);
+//                    return 1;
+//                }
+//                if(LastPos.tpBack()) return 0;
+//                else {
+//                    Utility.sendMessage("An error occurred whilst trying to go back.",ChatType.FAIL);
+//                    return 1;
+//                }
+//            }
+//            else {
+//                Utility.sendMessage("You must be in dev or build mode to do this!",ChatType.FAIL);
+//                return 1;
+//            }
+//        }));
 
         dispatcher.register(literal("getspawn").executes(context -> {
             if(!(CodeClient.location instanceof Dev)) return 1;
