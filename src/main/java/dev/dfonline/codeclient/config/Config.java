@@ -195,7 +195,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Auto Focus Search"))
-                                .description(OptionDescription.of(Text.literal("When opening the Code Palette (").append(Text.keybind("key.codeclient.actionpallete")).append(") automatically select the search bar."),Text.literal("This is disabled because it interferes with navigation binds.")))
+                                .description(OptionDescription.of(Text.literal("When opening the Code Palette (").append(Text.keybind("key.codeclient.codepalette")).append(") automatically select the search bar."),Text.literal("This is disabled because it interferes with navigation binds.")))
                                 .binding(
                                         false,
                                         () -> FocusSearch,
