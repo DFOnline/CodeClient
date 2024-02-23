@@ -242,22 +242,25 @@ public class Utility {
     }
 
     public static void sendMessage(String message, ChatType type) {
-        sendMessage(Text.of(message), type);
+        sendMessage(Text.literal(message), type);
     }
     public static void sendMessage(String message) {
-        sendMessage(Text.of(message), ChatType.INFO);
+        sendMessage(Text.literal(message), ChatType.INFO);
     }
-    public static void sendMessage(Text message) {
+    public static void sendMessage(MutableText message) {
         sendMessage(message, ChatType.INFO);
     }
 
-    public static void sendMessage(Text message, @Nullable ChatType type) {
+    public static void sendMessage(MutableText message, @Nullable ChatType type) {
         ClientPlayerEntity player = CodeClient.MC.player;
         if (player == null) return;
         if (type == null) {
             player.sendMessage(message, false);
         } else {
-            player.sendMessage(Text.literal(type.getString() + " ").append(message).setStyle(Style.EMPTY.withColor(type.getTrailing())), false);
+            player.sendMessage(Text.empty()
+                    .append(type.getText())
+                    .append(Text.literal(" "))
+                    .append(message.formatted(Formatting.RESET, type.getTrailing())), false);
             if (type == ChatType.FAIL) {
                 player.playSound(SoundEvent.of(new Identifier("minecraft:block.note_block.didgeridoo")), SoundCategory.PLAYERS, 2, 0);
             }
