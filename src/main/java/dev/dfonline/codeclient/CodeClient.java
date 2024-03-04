@@ -34,13 +34,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import org.apache.commons.logging.Log;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -144,12 +141,14 @@ public class CodeClient implements ModInitializer {
             if(editBind.wasPressed()) {
                 MC.setScreen(new DevInventoryScreen(MC.player));
             }
+            var pos = new BlockPos(dev.getX() - 1,49,dev.getZ());
             if(dev.getSize() == null) {
-                var pos = new BlockPos(dev.getX() - 1,49,dev.getZ());
+                // TODO wait for plugin messages, or make a fix now.
                 if(CodeClient.MC.world.getBlockState(pos.south(50)).isOf(Blocks.STONE)) dev.setSize(Plot.Size.BASIC);
                 if(CodeClient.MC.world.getBlockState(pos.south(100)).isOf(Blocks.STONE)) dev.setSize(Plot.Size.LARGE);
                 if(CodeClient.MC.world.getBlockState(pos.south(300)).isOf(Blocks.STONE)) dev.setSize(Plot.Size.MASSIVE);
             }
+            dev.setHasUnderground(!CodeClient.MC.world.getBlockState(pos).isOf(Blocks.STONE));
         }
         if(CodeClient.location instanceof Spawn spawn && spawn.consumeHasJustJoined()) {
             if(autoJoin == AutoJoin.PLOT) {

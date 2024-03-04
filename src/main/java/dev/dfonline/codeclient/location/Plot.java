@@ -25,6 +25,8 @@ public abstract class Plot extends Location {
     protected Integer originX;
     protected Integer originZ;
 
+    protected boolean hasUnderground = false;
+
     protected Boolean hasBuild;
     protected Boolean hasDev;
 
@@ -59,6 +61,10 @@ public abstract class Plot extends Location {
         this.size = size;
     }
 
+    public void setHasUnderground(boolean hasUnderground) {
+        this.hasUnderground = hasUnderground;
+    }
+
     public Size getSize() {
         return size;
     }
@@ -73,6 +79,9 @@ public abstract class Plot extends Location {
 
     public Integer getZ() {
         return originZ;
+    }
+    public int getFloorY() {
+        return hasUnderground ? 5 : 50;
     }
 
     public Boolean isInPlot(BlockPos pos) {
@@ -116,9 +125,9 @@ public abstract class Plot extends Location {
      */
     @Nullable
     public HashMap<BlockPos,SignText> scanForSigns(Pattern name, Pattern scan) {
-        if (CodeClient.MC.world == null || originX == null || originZ == null) return null;
+        if (CodeClient.MC.world == null || originX == null || originZ == null || !(CodeClient.location instanceof Plot)) return null;
         HashMap<BlockPos,SignText> signs = new HashMap<>();
-        for (int y = 50; y < 255; y+=5) {
+        for (int y = ((Plot) CodeClient.location).getFloorY(); y < 255; y+=5) {
             int xEnd = originX + 1;
             for (int x = originX - 20; x < xEnd; x++) {
                 int zEnd = originZ + assumeSize().size;
@@ -142,13 +151,13 @@ public abstract class Plot extends Location {
     }
 
     public BlockPos findFreePlacePos() {
-        return findFreePlacePos(new BlockPos(originX-1,50,originZ));
+        return findFreePlacePos(new BlockPos(originX-1,5,originZ));
     }
 
     public BlockPos findFreePlacePos(BlockPos origin) {
         if(originX == null || CodeClient.MC.world == null) return null;
         var world = CodeClient.MC.world;
-        int y = Math.max(origin.getY(),50);
+        int y = Math.max(origin.getY(),5);
         int x = origin.getX();
         while (y < 255) {
             while (originX - x <= 18) {

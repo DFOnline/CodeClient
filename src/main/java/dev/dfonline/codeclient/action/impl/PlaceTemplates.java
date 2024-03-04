@@ -41,7 +41,7 @@ public class PlaceTemplates extends Action {
                 int row = i % rowSize;
                 int level = i / rowSize;
                 i++;
-                Vec3d pos = new Vec3d(plot.getX(), 50, plot.getZ()).add((2 + (row * 3)) * -1, level * 5, 0);
+                Vec3d pos = new Vec3d(plot.getX(), plot.getFloorY(), plot.getZ()).add((2 + (row * 3)) * -1, level * 5, 0);
                 templatesToPlace.add(new TemplateToPlace(pos, template));
             }
             this.operations = templatesToPlace;

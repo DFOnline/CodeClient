@@ -39,13 +39,13 @@ public abstract class MClientPlayerEntity {
 
     @Inject(method = "sendMovementPackets", at = @At("HEAD"), cancellable = true)
     private void sendMovementPackets(CallbackInfo ci) {
-        if(CodeClient.location instanceof Dev) {
+        if(CodeClient.location instanceof Dev plot) {
             if (CodeClient.currentAction instanceof MoveToSpawn mts) if (mts.moveModifier()) ci.cancel();
             ClientPlayerEntity player = MC.player;
             if (NoClip.isIgnoringWalls()) {
                 if(Config.getConfig().TeleportDown && player.getY() % 5 == 0 && !lastSneaking && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle)) {
                     Vec3d move = CodeClient.MC.player.getPos().add(0, -5, 0);
-                    if(move.y < 50) move = new Vec3d(move.x,50,move.z);
+                    if(move.y < plot.getFloorY()) move = new Vec3d(move.x,plot.getFloorY(),move.z);
                     if ((!NoClip.isIgnoringWalls()) && NoClip.isInsideWall(move)) move = move.add(0, 2, 0);
                     CodeClient.MC.player.setPosition(move);
                 }

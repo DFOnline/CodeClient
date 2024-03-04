@@ -25,7 +25,7 @@ public class NoClip {
     }
 
     public static boolean isInDevSpace() {
-        return CodeClient.location instanceof Dev plot && plot.getX() != null && CodeClient.MC.player.getX() <= plot.getX() && CodeClient.MC.player.getY() >= 50 && CodeClient.MC.player.getY() < 256;
+        return CodeClient.location instanceof Dev plot && plot.getX() != null && CodeClient.MC.player.getX() <= plot.getX() && CodeClient.MC.player.getY() >= plot.getFloorY() && CodeClient.MC.player.getY() < 256;
     }
 
     public static Vec3d handleClientPosition(Vec3d movement) {
@@ -36,7 +36,7 @@ public class NoClip {
             Vec3d velocity = player.getVelocity();
 
             double x = Math.max(player.getX() + movement.x * 1.3, plot.getX() - 22);
-            double y = Math.max(player.getY() + movement.y * 1, 50);
+            double y = Math.max(player.getY() + movement.y * 1, plot.getFloorY());
             double z = Math.max(player.getZ() + movement.z * 1.3, plot.getZ() - 2);
             if(plot.getSize() != null) {
                 z = Math.min(z, plot.getZ() + plot.getSize().size + 3);
@@ -47,7 +47,7 @@ public class NoClip {
 
             player.setOnGround(false);
             boolean wantsToFall = !Config.getConfig().TeleportDown && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle);
-            if((y < nearestFloor && !wantsToFall && !player.getAbilities().flying) || y == 50) {
+            if((y < nearestFloor && !wantsToFall && !player.getAbilities().flying) || y == plot.getFloorY()) {
                 player.setVelocityClient(velocity.x, 0, velocity.z);
                 y = nearestFloor;
                 player.setOnGround(true);

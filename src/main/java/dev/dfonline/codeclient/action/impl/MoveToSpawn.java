@@ -44,7 +44,7 @@ public class MoveToSpawn extends Action {
 
     public boolean moveModifier() {
         Dev plot = (Dev) CodeClient.location;
-        Vec3d location = new Vec3d(plot.getX(), 50, plot.getZ());
+        Vec3d location = new Vec3d(plot.getX(), plot.getFloorY(), plot.getZ());
         if(currentStep == Step.MOVE_TO_CORNER) {
             if(player.getPos().distanceTo(location) == 0) {
                 currentStep = Step.DONE;
