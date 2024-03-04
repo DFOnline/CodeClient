@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.BuildClip;
+import dev.dfonline.codeclient.dev.BuildPhaser;
 import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.dev.LastPos;
 import dev.dfonline.codeclient.dev.NoClip;
@@ -71,7 +71,7 @@ public class CodeClient implements ModInitializer {
     public static boolean shouldReload = false;
 
     /**
-     * For all recieving packet events and debugging.
+     * For all receiving packet events and debugging.
      * @return If the packet should be cancelled and not acted on. True to ignore.
      * @param <T> Server2Client
      */
@@ -79,7 +79,7 @@ public class CodeClient implements ModInitializer {
 
         if(currentAction.onReceivePacket(packet)) return true;
         if(Debug.handlePacket(packet)) return true;
-        if(BuildClip.handlePacket(packet)) return true;
+        if(BuildPhaser.handlePacket(packet)) return true;
         if(ChestPeeker.handlePacket(packet)) return true;
         Event.handlePacket(packet);
         LastPos.handlePacket(packet);
@@ -113,7 +113,7 @@ public class CodeClient implements ModInitializer {
      */
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
         if(CodeClient.currentAction.onSendPacket(packet)) return true;
-        if(BuildClip.onPacket(packet)) return true;
+        if(BuildPhaser.onPacket(packet)) return true;
         Event.onSendPacket(packet);
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.","");
         if(packet instanceof CommandExecutionC2SPacket commandExecutionC2SPacket) {
@@ -130,7 +130,7 @@ public class CodeClient implements ModInitializer {
 
         currentAction.onTick();
         Debug.tick();
-        BuildClip.tick();
+        BuildPhaser.tick();
         ChestPeeker.tick();
         RecentChestInsert.tick();
 
@@ -195,8 +195,7 @@ public class CodeClient implements ModInitializer {
             autoJoin = AutoJoin.GAME;
         }
 
-        editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.codeclient.actionpallete",
+        editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.codepalette",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_Y,
                 "category.codeclient.dev"

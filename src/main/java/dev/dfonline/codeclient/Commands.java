@@ -9,8 +9,7 @@ import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.BuildClip;
-import dev.dfonline.codeclient.dev.LastPos;
+import dev.dfonline.codeclient.dev.BuildPhaser;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.*;
@@ -72,7 +71,7 @@ public class Commands {
         dispatcher.register(literal("fixcc").executes(context -> {
             CodeClient.currentAction = new None();
             CodeClient.location = null;
-            BuildClip.disableClipping();
+            BuildPhaser.disableClipping();
             SocketHandler.setConnection(null);
             ActionDump.clear();
             Config.clear();
