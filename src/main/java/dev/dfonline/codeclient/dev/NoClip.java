@@ -19,6 +19,7 @@ public class NoClip {
     public static float lastYaw = 0;
     public static float lastPitch = 0;
     public static int timesSinceMoved = 0;
+    public static final double PLAYER_FREEDOM = 0.621;
 
     public static boolean isIgnoringWalls() {
         return CodeClient.noClipOn() && isInDevSpace();
@@ -66,12 +67,12 @@ public class NoClip {
         if(CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
 
-            double z = Math.max(player.getZ(), plot.getZ());
+            double z = Math.max(player.getZ(), plot.getZ() + PLAYER_FREEDOM);
             if(plot.getSize() != null) {
-                z = Math.min(z, plot.getZ() + plot.getSize().size + 0.999);
+                z = Math.min(z, plot.getZ() + plot.getSize().size + PLAYER_FREEDOM);
             }
 
-            Vec3d pos = new Vec3d(Math.max(player.getX(), plot.getX() - 20),
+            Vec3d pos = new Vec3d(Math.max(player.getX(), plot.getX() - (20 - PLAYER_FREEDOM)),
                     player.getY(),
                     z);
 
