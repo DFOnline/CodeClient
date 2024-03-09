@@ -32,9 +32,4 @@ public abstract class MPlayerEntity {
             ci.cancel();
         }
     }
-
-    @Inject(method = "canChangeIntoPose", at = @At("HEAD"), cancellable = true)
-    private void canChangeIntoPose(EntityPose pose, CallbackInfoReturnable<Boolean> cir) {
-        if(NoClip.isIgnoringWalls()) cir.setReturnValue(true);
-    }
 }

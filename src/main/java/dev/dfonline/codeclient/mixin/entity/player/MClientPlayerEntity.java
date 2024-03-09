@@ -84,21 +84,6 @@ public abstract class MClientPlayerEntity {
         }
     }
 
-    @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
-    private void onPushOutOfBlocks(double x, double z, CallbackInfo ci) {
-        if(NoClip.isIgnoringWalls()) ci.cancel();
-    }
-
-    @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
-    private void slowDown(CallbackInfoReturnable<Boolean> cir) {
-        if(NoClip.isIgnoringWalls()) cir.setReturnValue(false);
-    }
-
-    @Inject(method = "shouldAutoJump", at = @At("HEAD"), cancellable = true)
-    private void autoJump(CallbackInfoReturnable<Boolean> cir) {
-        if(NoClip.isIgnoringWalls()) cir.setReturnValue(false);
-    }
-
     @Redirect(method = "tickMovement", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerAbilities;allowFlying:Z", opcode = Opcodes.GETFIELD))
     private boolean canFly(PlayerAbilities instance) {
         if(InteractionManager.shouldTeleportUp()) return false;

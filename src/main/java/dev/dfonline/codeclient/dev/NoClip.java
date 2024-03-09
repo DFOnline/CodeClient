@@ -77,7 +77,9 @@ public class NoClip {
         double floor = plot.getFloorY();
         if(!wantsToFall) floor = Math.max(floor,Math.floor(instance.getY() / 5) * 5);
         y = Math.max(y, floor - instance.getY());
-        if(instance.getY() + y == floor) instance.setOnGround(true);
+        if(instance.getY() + y == floor) {
+            instance.onLanding();
+        }
 
         return new Vec3d(x,y,z);
     }
