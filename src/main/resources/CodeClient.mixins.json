@@ -23,13 +23,16 @@
     "world.MWorldRenderer",
     "world.block.MAbstractBlockState",
     "world.block.MBarrierBlock",
+    "world.block.MBlock",
     "world.block.MBlockItem",
     "world.block.MLightBlock",
     "world.block.MSignBlockEntity",
-    "world.block.MStructureVoidBlock",
-    "world.block.MBlock"
+    "world.block.MStructureVoidBlock"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "world.block.MBlockCollisionSpliterator"
+  ]
 }

@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -20,6 +21,8 @@ public class NoClip {
     public static float lastPitch = 0;
     public static int timesSinceMoved = 0;
     public static final double PLAYER_FREEDOM = 0.621;
+    public static int FREEDOM = 2;
+
 
     public static boolean isIgnoringWalls() {
         return CodeClient.noClipOn() && isInDevSpace();
@@ -57,6 +60,26 @@ public class NoClip {
             return new Vec3d(x, Math.min(y,256), z);
         }
         return null;
+    }
+
+    public static Vec3d adjustMovementForCollisions(Entity instance, Vec3d movement, Dev plot) {
+        var x = movement.x;
+        var y = movement.y;
+        var z = movement.z;
+
+        x = Math.max(x, plot.getX() - (20 + FREEDOM) - instance.getX());
+        z = Math.max(z, plot.getZ() - FREEDOM - instance.getZ());
+        if(plot.getSize() != null) {
+            z = Math.min(z, plot.getZ() + plot.getSize().size + FREEDOM + 1 - instance.getZ());
+        }
+
+        boolean wantsToFall = !Config.getConfig().TeleportDown && instance.isSneaking() && (instance.getPitch() >= 90 - Config.getConfig().DownAngle);
+        double floor = plot.getFloorY();
+        if(!wantsToFall) floor = Math.max(floor,Math.floor(instance.getY() / 5) * 5);
+        y = Math.max(y, floor - instance.getY());
+        if(instance.getY() + y == floor) instance.setOnGround(true);
+
+        return new Vec3d(x,y,z);
     }
 
     public static float getJumpHeight() {
