@@ -322,7 +322,22 @@ public class InteractionManager {
         if(CodeClient.MC != null && CodeClient.MC.player != null && CodeClient.location instanceof Dev plot) {
             Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
             Boolean isInDev = plot.isInDev(pos);
-            boolean isLevel = isInDev != null && isInDev && pos.getY() % 5 == 4;
+            if(isInDev == null) return null;
+            if(!isInDev) {
+                var player = CodeClient.MC.player;
+                boolean playerIsOutside = player.getEyeY() < 50
+                        && ((player.getX() <= plot.getX() - 20)
+                        || player.getZ() <= (plot.getZ())
+                        || (player.getZ() >= plot.getZ() + plot.assumeSize().size)
+                );
+                if(!playerIsOutside) return null;
+                boolean blockIsOutside = pos.getY() < 50
+                        && (pos.getX() < plot.getX()) && (pos.getX() >= plot.getX() - 22)
+                        && (pos.getZ() >= (plot.getZ() - 2)) && (pos.getZ() <= plot.getZ() + plot.assumeSize().size + 2);
+                if(blockIsOutside) return VoxelShapes.empty();
+                return null;
+            }
+            boolean isLevel = pos.getY() % 5 == 4;
             boolean noClipAllowsBlock = Config.getConfig().NoClipEnabled || world.getBlockState(pos).isAir();
             boolean hideCodeSpace =
                     pos.getY() >= plot.getFloorY() &&
