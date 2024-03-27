@@ -73,12 +73,14 @@ public class NoClip {
             z = Math.min(z, plot.getZ() + plot.getSize().size + FREEDOM + 1 - instance.getZ());
         }
 
-        boolean wantsToFall = !Config.getConfig().TeleportDown && instance.isSneaking() && (instance.getPitch() >= 90 - Config.getConfig().DownAngle);
-        double floor = plot.getFloorY();
-        if(!wantsToFall) floor = Math.max(floor,Math.floor(instance.getY() / 5) * 5);
-        y = Math.max(y, floor - instance.getY());
-        if(instance.getY() + y == floor) {
-            instance.onLanding();
+        if(!CodeClient.MC.player.getAbilities().flying) {
+            boolean wantsToFall = !Config.getConfig().TeleportDown && instance.isSneaking() && (instance.getPitch() >= 90 - Config.getConfig().DownAngle);
+            double floor = plot.getFloorY();
+            if(!wantsToFall) floor = Math.max(floor,Math.floor(instance.getY() / 5) * 5);
+            y = Math.max(y, floor - instance.getY());
+            if(instance.getY() + y == floor) {
+                instance.onLanding();
+            }
         }
 
         return new Vec3d(x,y,z);
