@@ -46,6 +46,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             text.setMaxLength(10000);
             text.setText(named.getName());
             text.setFocused(false);
+            text.setCursorToStart(false);
             widgets.add(0,text);
         }
         if(item instanceof GameValue value) {
@@ -77,6 +78,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
                 var field = new NumberFieldWidget(textRender,x + (textboxWidth * i),y,textboxWidth,height,Text.literal(""));
                 field.setMaxLength(10);
                 field.setNumber(values[i]);
+                field.setCursorToStart(false);
                 widgets.add(field);
             }
         }
@@ -88,6 +90,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
                 field.setMaxLength(10);
                 field.setNumber(values[i]);
                 field.setCursorToStart(false);
+                field.setCursorToStart(false);
                 widgets.add(field);
             }
         }
@@ -97,12 +100,15 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             int textboxWidth = width - durationWidth - potencyWidth;
             var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
             text.setText(pot.getPotion());
+            text.setCursorToStart(false);
             widgets.add(text);
             var potency = new NumberFieldWidget(textRender,x+textboxWidth,y,potencyWidth,height,Text.empty()).integer().min(-255).max(255);
             potency.setNumber(pot.getAmplifier() + 1);
+            potency.setCursorToStart(false);
             widgets.add(potency);
             var duration = new TextFieldWidget(textRender,x+textboxWidth+potencyWidth,y,durationWidth,height,Text.empty());
             duration.setText(pot.duration().replaceAll(" ticks",""));
+            duration.setCursorToStart(false);
             widgets.add(duration);
         }
         if(item instanceof Sound sound) {
@@ -111,12 +117,15 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             int textboxWidth = width - volumeWidth - pitchWidth;
             var text = new TextFieldWidget(textRender,x,y,textboxWidth,height,Text.literal(""));
             text.setText(sound.getSound());
+            text.setCursorToStart(false);
             widgets.add(text);
             var volume = new NumberFieldWidget(textRender,x+textboxWidth,y,volumeWidth,height,Text.empty()).min(0);
             volume.setNumber(sound.getVolume());
+            volume.setCursorToStart(false);
             widgets.add(volume);
             var pitch = new NumberFieldWidget(textRender,x+textboxWidth+volumeWidth,y,pitchWidth,height,Text.empty()).min(0).max(2);
             pitch.setNumber(sound.getPitch());
+            pitch.setCursorToStart(false);
             widgets.add(pitch);
         }
         if(item instanceof BlockTag tag) {
