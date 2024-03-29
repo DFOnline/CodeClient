@@ -57,6 +57,7 @@ public class ScanPlot extends Action {
             if(template == null) return false;
             scanList.add(Template.parse64(data));
             waitForResponse = false;
+            progress += 1;
             net.sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
             return true;
         }
@@ -65,6 +66,12 @@ public class ScanPlot extends Action {
 
     @Override
     public void onTick() {
+        if(progress == blocks.size()) {
+            if(!waitForResponse) {
+                callback();
+            }
+            return;
+        }
         var net = CodeClient.MC.getNetworkHandler();
         var player = CodeClient.MC.player;
         var inter = CodeClient.MC.interactionManager;
@@ -77,14 +84,7 @@ public class ScanPlot extends Action {
                     inter.interactBlock(player, Hand.MAIN_HAND, new BlockHitResult(current.toCenterPos(), Direction.UP, current,false));
                     if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
                     waitForResponse = true;
-                    progress += 1;
                     goTo = null;
-                }
-                if(progress == blocks.size()) {
-                    if(!waitForResponse) {
-                        callback();
-                    }
-                    return;
                 }
                 goTo = new GoTo(blocks.get(progress).toCenterPos().add(goToOffset), () -> {});
                 goTo.init();
