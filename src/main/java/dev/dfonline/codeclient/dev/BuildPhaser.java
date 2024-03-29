@@ -49,6 +49,12 @@ public class BuildPhaser {
 //            CodeClient.LOGGER.info("dev and X");
             if(!clipping && CodeClient.clipBind.isPressed() && plot.getX() != null) startClipping();
             if(clipping) {
+                var player = CodeClient.MC.player;
+                player.setPos(
+                        Math.min(Math.max(player.getX(),plot.getX() - 20),plot.getX() + plot.assumeSize().size + 1),
+                        player.getY(),
+                        Math.min(Math.max(player.getZ(),plot.getZ()),plot.getZ() + plot.assumeSize().size + 1)
+                );
                 allowPacket = true;
                 CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false));
                 CodeClient.MC.player.getAbilities().flying = true;
