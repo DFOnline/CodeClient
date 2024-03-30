@@ -176,23 +176,77 @@ public class Commands {
 //            return 0;
 //        }));
 
-        dispatcher.register(literal("scanplot").executes(context -> {
-            if(CodeClient.location instanceof Dev) {
-                var scan = new ArrayList<Template>();
-                CodeClient.currentAction = new ScanPlot(() -> {
-                    CodeClient.currentAction = new None();
-                    Utility.sendMessage("Done!", ChatType.SUCCESS);
-                    Utility.sendMessage("Results:", ChatType.INFO);
-                    for (Template template : scan) {
-                        Utility.sendMessage(String.valueOf(template.blocks.size()));
+        dispatcher.register(literal("scanplot")//.executes(context -> {
+//            if(CodeClient.location instanceof Dev) {
+//                var scan = new ArrayList<Template>();
+//                CodeClient.currentAction = new ScanPlot(() -> {
+//                    CodeClient.currentAction = new None();
+//                    Utility.sendMessage("Done!", ChatType.SUCCESS);
+//                    Utility.sendMessage("Results:", ChatType.INFO);
+//                    for (Template template : scan) {
+//                        Utility.sendMessage(String.valueOf(template.blocks.size()));
+//                    }
+//
+//                },scan);
+//                CodeClient.currentAction.init();
+//                return 0;
+//            }
+//            else {
+//                Utility.sendMessage("You must be in dev mode!", ChatType.FAIL);
+//                return 1;
+//            }
+//        })
+            .then(argument("folder",StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+                if(CodeClient.location instanceof Dev) {
+                    String arg = context.getArgument("folder",String.class);
+                    String[] path = arg.split("/");
+
+                    Path currentPath = FileManager.templatesPath();
+                    for (String dir: path) {
+                        currentPath = currentPath.resolve(dir);
+                        if(Files.notExists(currentPath)) {
+                            try {
+                                Files.createDirectory(currentPath);
+                            }
+                            catch (Exception ignored) {
+                                Utility.sendMessage("Could not make a folder at " + currentPath);
+                            }
+                        }
+                        else if(!Files.isDirectory(currentPath)) {
+                            Utility.sendMessage(currentPath + " isn't a directory, can't put anything inside it!", ChatType.FAIL);
+                            return -1;
+                        }
                     }
 
-                },scan);
-                CodeClient.currentAction.init();
-                return 0;
-            }
-            else return 1;
-        }));
+                    Utility.sendMessage("Scanning plot. Use /abort to abort.",ChatType.INFO);
+                    var scan = new ArrayList<Template>();
+                    Path finalCurrentPath = currentPath;
+                    CodeClient.currentAction = new ScanPlot(() -> {
+                        CodeClient.currentAction = new None();
+                        Utility.sendMessage("Done!", ChatType.SUCCESS);
+                        for (Template template : scan) {
+                            var first = template.blocks.get(0);
+                            String name = Objects.requireNonNullElse(first.action != null ? first.action : first.data,"unknown");
+                            var filePath = finalCurrentPath.resolve(name + ".dft");
+                            try {
+                                Files.write(filePath,template.compress());
+                            }
+                            catch (Exception ignored) {
+                                Utility.sendMessage("Couldn't save " + filePath + "...", ChatType.FAIL);
+                            }
+                            Utility.sendMessage(String.valueOf(template.blocks.size()));
+                        }
+
+                    },scan);
+                    CodeClient.currentAction.init();
+                    return 0;
+                }
+                else {
+                    Utility.sendMessage("You must be in dev mode!", ChatType.FAIL);
+                    return 1;
+                }
+            }))
+        );
         dispatcher.register(literal("scanfor").then(argument("name", StringArgumentType.greedyString()).executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
                 Pattern pattern = Pattern.compile(context.getArgument("name", String.class), Pattern.CASE_INSENSITIVE);
@@ -282,6 +336,7 @@ public class Commands {
                 }
             }
             currentPath = currentPath.resolve(path[path.length - 1] + ".dft");
+            // Write file
             try {
                 Files.write(currentPath.resolve(currentPath), Base64.getDecoder().decode(data));
                 Utility.sendMessage("Saved " + currentPath);
@@ -293,6 +348,7 @@ public class Commands {
             return 0;
         })));
         dispatcher.register(literal("load").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+            if(CodeClient.MC.player.isCreative()) {
                 String arg = context.getArgument("path",String.class);
                 Path path = FileManager.templatesPath().resolve(arg + ".dft");
                 if(Files.notExists(path)) {
@@ -311,6 +367,9 @@ public class Commands {
                     return -2;
                 }
                 return 0;
+            }
+            Utility.sendMessage("You must be in creative mode!",ChatType.FAIL);
+            return -1;
             })));
         dispatcher.register(literal("swap").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             try {

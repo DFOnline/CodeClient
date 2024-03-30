@@ -5,10 +5,10 @@ import dev.dfonline.codeclient.CodeClient;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class Template {
     public ArrayList<TemplateBlock> blocks;
@@ -17,6 +17,10 @@ public class Template {
         int length = 0;
         for (var block: blocks) length += block.getLength();
         return length;
+    }
+
+    public byte[] compress() throws IOException {
+        return compress(CodeClient.gson.toJson(this));
     }
 
     /**
@@ -57,5 +61,12 @@ public class Template {
 
             return bos.toByteArray();
         }
+    }
+    private static byte[] compress(String uncompressedString) throws IOException {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipStream = new GZIPOutputStream(byteStream)) {
+            gzipStream.write(uncompressedString.getBytes());
+        }
+        return byteStream.toByteArray();
     }
 }
