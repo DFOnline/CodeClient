@@ -26,10 +26,9 @@ public class ScanPlot extends Action {
     private List<BlockPos> blocks = null;
     private Action step = null;
     private static final Vec3d goToOffset = new Vec3d(0, 1.5, 0);
-    private Integer progress = 0;
-    private final ArrayList<Template> scanList;
+    private final ArrayList<ItemStack> scanList;
 
-    public ScanPlot(Callback callback, ArrayList<Template> scanList) {
+    public ScanPlot(Callback callback, ArrayList<ItemStack> scanList) {
         super(callback);
         this.scanList = scanList;
         if (!(CodeClient.location instanceof Dev)) {
@@ -61,23 +60,26 @@ public class ScanPlot extends Action {
 //        }
     }
 
+    private void next(int progress) {
+        if(progress >= blocks.size()) {
+            callback();
+            return;
+        }
+        step = new GoTo(blocks.get(progress).toCenterPos().add(goToOffset), () -> {
+            this.step = new pickUpBlock(blocks.get(progress),() -> {
+                CodeClient.LOGGER.info("picked up block");
+                next(progress + 1);
+            });
+            this.step.init();
+        });
+        step.init();
+    }
+
     @Override
     public void onTick() {
         if (step != null) step.onTick();
         else {
-            if(progress >= blocks.size()) {
-                callback();
-                return;
-            }
-            step = new GoTo(blocks.get(progress).toCenterPos().add(goToOffset), () -> {
-                this.step = new pickUpBlock(blocks.get(progress),() -> {
-                    CodeClient.LOGGER.info("picked up block");
-                    step = null;
-                    progress+=1;
-                });
-                this.step.init();
-            });
-            step.init();
+            next(0);
         }
     }
 
@@ -109,7 +111,7 @@ public class ScanPlot extends Action {
                 var data = Utility.templateDataItem(slot.getStack());
                 var template = Template.parse64(data);
                 if (template == null) return false;
-                scanList.add(Template.parse64(data));
+                scanList.add(slot.getStack());
                 net.sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
                 this.callback();
                 return true;

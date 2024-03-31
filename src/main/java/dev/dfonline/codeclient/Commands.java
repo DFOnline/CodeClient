@@ -218,18 +218,31 @@ public class Commands {
                         }
                     }
 
+                    try {
+                        if(Files.list(currentPath).findFirst().isPresent()) {
+                            Utility.sendMessage("Please use an empty directory to save into.",ChatType.FAIL);
+                            return -1;
+                        }
+                    }
+                    catch (Exception ignored) {
+                        Utility.sendMessage("An error occurred when reading the directory.",ChatType.FAIL);
+                    }
+
                     Utility.sendMessage("Scanning plot. Use /abort to abort.",ChatType.INFO);
-                    var scan = new ArrayList<Template>();
+                    var scan = new ArrayList<ItemStack>();
                     Path finalCurrentPath = currentPath;
                     CodeClient.currentAction = new ScanPlot(() -> {
                         CodeClient.currentAction = new None();
                         Utility.sendMessage("Done!", ChatType.SUCCESS);
-                        for (Template template : scan) {
+                        for (ItemStack item : scan) {
+                            String data = Utility.templateDataItem(item);
+                            var template = Template.parse64(data);
+                            if(template == null) continue;
                             var first = template.blocks.get(0);
                             String name = Objects.requireNonNullElse(first.action != null ? first.action : first.data,"unknown");
                             var filePath = finalCurrentPath.resolve(name + ".dft");
                             try {
-                                Files.write(filePath,template.compress());
+                                Files.write(filePath,Base64.getDecoder().decode(data));
                             }
                             catch (Exception ignored) {
                                 Utility.sendMessage("Couldn't save " + filePath + "...", ChatType.FAIL);

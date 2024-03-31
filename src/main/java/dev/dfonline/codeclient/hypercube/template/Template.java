@@ -19,10 +19,6 @@ public class Template {
         return length;
     }
 
-    public byte[] compress() throws IOException {
-        return compress(CodeClient.gson.toJson(this));
-    }
-
     /**
      * Parse base64+gzip data
      */
@@ -61,12 +57,5 @@ public class Template {
 
             return bos.toByteArray();
         }
-    }
-    private static byte[] compress(String uncompressedString) throws IOException {
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        try (GZIPOutputStream gzipStream = new GZIPOutputStream(byteStream)) {
-            gzipStream.write(uncompressedString.getBytes());
-        }
-        return byteStream.toByteArray();
     }
 }
