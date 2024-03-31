@@ -95,6 +95,7 @@ public class ScanPlot extends Action {
         @Override
         public void init() {
             var net = CodeClient.MC.getNetworkHandler();
+            Utility.makeHolding(ItemStack.EMPTY);
             var player = CodeClient.MC.player;
             var inter = CodeClient.MC.interactionManager;
             boolean sneaky = !player.isSneaking();
