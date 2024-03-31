@@ -18,6 +18,8 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -196,7 +198,7 @@ public class Commands {
 //                return 1;
 //            }
 //        })
-            .then(argument("folder",StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+            .then(argument("folder",StringArgumentType.greedyString()).suggests(Commands::suggestDirectories).executes(context -> {
                 if(CodeClient.location instanceof Dev) {
                     String arg = context.getArgument("folder",String.class);
                     String[] path = arg.split("/");
@@ -218,14 +220,31 @@ public class Commands {
                         }
                     }
 
+                    boolean invalid = false;
                     try {
-                        if(Files.list(currentPath).findFirst().isPresent()) {
-                            Utility.sendMessage("Please use an empty directory to save into.",ChatType.FAIL);
-                            return -1;
+                        for (var file : Files.list(currentPath).toList()) {
+                            invalid = true;
+                            if(file.getFileName().toString().equals(".git")) {
+                                Utility.sendMessage(
+                                        Text.empty()
+                                                .append("This is a git tracked directory.")
+                                                .append(Text.literal("\n"))
+                                                .append(Text.literal("Click to open it in file explorer").fillStyle(
+                                                        Style.EMPTY
+                                                                .withColor(Formatting.AQUA)
+                                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE,currentPath.toAbsolutePath().toString()))
+                                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,Text.literal(currentPath.toAbsolutePath().toString())))))
+                                        ,ChatType.INFO);
+                                invalid = false; break;
+                            }
                         }
                     }
                     catch (Exception ignored) {
                         Utility.sendMessage("An error occurred when reading the directory.",ChatType.FAIL);
+                    }
+                    if(invalid) {
+                        Utility.sendMessage("Please use an empty directory to save into.");
+                        return -1;
                     }
 
                     Utility.sendMessage("Scanning plot. Use /abort to abort.",ChatType.INFO);
@@ -247,7 +266,6 @@ public class Commands {
                             catch (Exception ignored) {
                                 Utility.sendMessage("Couldn't save " + filePath + "...", ChatType.FAIL);
                             }
-                            Utility.sendMessage(String.valueOf(template.blocks.size()));
                         }
 
                     },scan);
@@ -453,7 +471,13 @@ public class Commands {
         }));
     }
 
+    private static CompletableFuture<Suggestions> suggestDirectories(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {
+        return suggestTemplates(context,builder,false);
+    }
     private static CompletableFuture<Suggestions> suggestTemplates(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {
+        return suggestTemplates(context,builder,true);
+    }
+    private static CompletableFuture<Suggestions> suggestTemplates(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder, boolean suggestFiles) {
         try {
             var possibilities = new ArrayList<String>();
 
@@ -461,16 +485,17 @@ public class Commands {
             String currentPath = String.join("/", (Arrays.stream(path).toList().subList(0,path.length - 1)));
             var list = Files.list(FileManager.templatesPath().resolve(currentPath));
             for (var file: list.toList()) {
+                if(file.getFileName().toString().equals(".git")) continue;
                 String s = currentPath.isEmpty() ? "" : currentPath + "/";
                 if(Files.isDirectory(file)) possibilities.add(s + file.getFileName().toString() + "/");
                 else if(file.getFileName().toString().endsWith(".dft")) {
                     String name = file.getFileName().toString();
-                    possibilities.add(s + name.substring(0, name.length() - 4));
+                    if(suggestFiles) possibilities.add(s + name.substring(0, name.length() - 4));
                 }
             }
             list.close();
             for (String possibility: possibilities) {
-                if(possibility.contains(builder.getRemainingLowerCase())) builder.suggest(possibility,Text.literal("Folder"));
+                if(possibility.toLowerCase().contains(builder.getRemainingLowerCase())) builder.suggest(possibility,Text.literal("Folder"));
             }
         } catch (IOException ignored) {}
         return CompletableFuture.completedFuture(builder.build());
