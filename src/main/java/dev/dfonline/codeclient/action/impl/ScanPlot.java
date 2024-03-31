@@ -67,7 +67,6 @@ public class ScanPlot extends Action {
         }
         step = new GoTo(blocks.get(progress).toCenterPos().add(goToOffset), () -> {
             this.step = new pickUpBlock(blocks.get(progress),() -> {
-                CodeClient.LOGGER.info("picked up block");
                 next(progress + 1);
             });
             this.step.init();
@@ -77,6 +76,7 @@ public class ScanPlot extends Action {
 
     @Override
     public void onTick() {
+        if(blocks == null) return;
         if (step != null) step.onTick();
         else {
             next(0);

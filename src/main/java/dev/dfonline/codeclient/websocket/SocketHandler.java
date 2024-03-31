@@ -1,27 +1,22 @@
 package dev.dfonline.codeclient.websocket;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
-import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
-import dev.dfonline.codeclient.action.impl.ClearPlot;
-import dev.dfonline.codeclient.action.impl.GetPlotSize;
-import dev.dfonline.codeclient.action.impl.MoveToSpawn;
-import dev.dfonline.codeclient.action.impl.PlaceTemplates;
+import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.StringNbtReader;
 import org.java_websocket.WebSocket;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class SocketHandler {
     public static final int PORT = 31375;
@@ -76,6 +71,7 @@ public class SocketHandler {
             case "clear" -> SocketHandler.actionQueue.add(new Clear());
             case "spawn" -> SocketHandler.actionQueue.add(new Spawn());
             case "size" -> SocketHandler.actionQueue.add(new Size());
+            case "scan" -> SocketHandler.actionQueue.add(new Scan());
             case "place" -> SocketHandler.actionQueue.add(new Place());
             case "inv" -> SocketHandler.actionQueue.add(new SendInventory());
             case "setinv" -> SocketHandler.actionQueue.add(new SetInventory(content));
@@ -187,6 +183,37 @@ public class SocketHandler {
 
         @Override
         public void message(WebSocket responder, String message) {}
+    }
+    private static class Scan extends SocketHandler.Action {
+        Scan() {
+            super("scan");
+        }
+
+        @Override
+        public void set(WebSocket responder) {
+
+        }
+        @Override
+        public void start(WebSocket responder) {
+            ArrayList<ItemStack> items = new ArrayList<>();
+            CodeClient.currentAction = new ScanPlot(() -> {
+                var builder = new StringBuilder();
+                for (var item: items) {
+                    var data = Utility.templateDataItem(item);
+                    if(data == null) continue;
+                    builder.append(data).append("\n");
+                }
+                builder.deleteCharAt(builder.length() - 1);
+                responder.send(builder.toString());
+                CodeClient.currentAction = new None();
+                next();
+            },items);
+            CodeClient.currentAction.init();
+        }
+        @Override
+        public void message(WebSocket responder, String message) {
+
+        }
     }
     private static class Place extends SocketHandler.Action {
         private interface CreatePlacer {
