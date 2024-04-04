@@ -340,7 +340,7 @@ public class Commands {
                 return -2;
             }
         })));
-        dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+        dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestDirectories).executes(context -> {
             String data = Utility.templateDataItem(CodeClient.MC.player.getMainHandStack());
             if(data == null) {
                 Utility.sendMessage("You need to hold a template to save.",ChatType.FAIL);
@@ -389,7 +389,7 @@ public class Commands {
                 try {
                     byte[] data = Files.readAllBytes(path);
                     ItemStack template = Utility.makeTemplate(new String(Base64.getEncoder().encode(data)));
-                    template.setCustomName(Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(path.getFileName())));
+                    template.setCustomName(Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(FileManager.templatesPath().relativize(path))));
                     CodeClient.MC.player.giveItemStack(template);
                     Utility.sendInventory();
                 }

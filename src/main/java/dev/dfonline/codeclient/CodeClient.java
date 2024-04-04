@@ -116,9 +116,6 @@ public class CodeClient implements ModInitializer {
         if(BuildPhaser.onPacket(packet)) return true;
         Event.onSendPacket(packet);
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.","");
-        if(packet instanceof CommandExecutionC2SPacket commandExecutionC2SPacket) {
-            LOGGER.info(commandExecutionC2SPacket.command());
-        }
 //        LOGGER.info(name);
         return false;
     }

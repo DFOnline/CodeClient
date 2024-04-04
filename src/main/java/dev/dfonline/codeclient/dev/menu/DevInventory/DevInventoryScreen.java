@@ -282,7 +282,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         Integer hoveredGroup = getGroupFromMouse(mouseX,mouseY);
         if(hoveredGroup != null) {
             DevInventoryGroup group = GROUPS[hoveredGroup];
-            if(group != CODE_VAULT || GROUPS[selectedTab] == CODE_VAULT) context.drawTooltip(textRenderer, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
+            context.drawTooltip(textRenderer, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
         }
 
         if (this.deleteItemSlot != null && this.isPointWithinBounds(this.deleteItemSlot.x, this.deleteItemSlot.y, 16, 16, mouseX, mouseY)) {
@@ -364,9 +364,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         for(DevInventoryGroup group : DevInventoryGroup.GROUPS) {
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, TEXTURE);
-            if (group.getIndex() != selectedTab && group != CODE_VAULT) {
-                this.renderTabIcon(context, group);
-            }
+            this.renderTabIcon(context, group);
         }
 
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);

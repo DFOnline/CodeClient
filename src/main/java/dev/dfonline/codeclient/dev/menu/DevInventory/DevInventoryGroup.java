@@ -1,12 +1,19 @@
 package dev.dfonline.codeclient.dev.menu.DevInventory;
 
+import dev.dfonline.codeclient.FileManager;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.actiondump.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class DevInventoryGroup {
@@ -111,7 +118,7 @@ public class DevInventoryGroup {
     public static final DevInventoryGroup POTIONS = new DevInventoryGroup("potion", "Potions", Items.DRAGON_BREATH.getDefaultStack(), false);
     public static final DevInventoryGroup GAME_VALUES = new DevInventoryGroup("game_value", "Game Values", Items.NAME_TAG.getDefaultStack(), false);
     public static final DevInventoryGroup OTHERS = new DevInventoryGroup("others", "Other Items", Items.IRON_INGOT.getDefaultStack(), false).disableSearch();
-    public static final DevInventoryGroup CODE_VAULT = new DevInventoryGroup("code_vault", "Code Vault", Items.ENDER_CHEST.getDefaultStack(), false);
+    public static final DevInventoryGroup SAVED_TEMPLATES = new DevInventoryGroup("saved_templates", "Saved Templates", Items.ENDER_CHEST.getDefaultStack(), false);
     public static final DevInventoryGroup INVENTORY = new DevInventoryGroup("inventory", "Inventory", Items.CHEST.getDefaultStack(), false).disableSearch();
 
     interface ItemsProvider {
@@ -211,6 +218,18 @@ public class DevInventoryGroup {
             POTIONS.useCategory(actionDump.potions);
             PARTICLES.useCategory(actionDump.particles);
 
+            SAVED_TEMPLATES.setItemsProvider(query -> {
+                ArrayList<Searchable> items = new ArrayList<>();
+                if(query == null) query = "";
+                query = query.toLowerCase();
+                for (Searchable template: readTemplates(FileManager.templatesPath())) {
+                    for (String term : template.getTerms()) if(term.toLowerCase().contains(query)) {
+                        items.add(template);
+                        break;
+                    }
+                }
+                return items;
+            });
             SEARCH.setItemsProvider(query -> {
                 ArrayList<Searchable> items = new ArrayList<>();
                 if(query == null) query = "";
@@ -245,5 +264,27 @@ public class DevInventoryGroup {
         }
         catch (Exception ignored) {
         }
+    }
+
+    static private ArrayList<Searchable> readTemplates(Path path) {
+        return readTemplates(path,path);
+    }
+    static private ArrayList<Searchable> readTemplates(Path path, Path root) {
+        var list = new ArrayList<Searchable>();
+        try {
+            var dir = Files.list(path);
+            for (var file : dir.toList()) {
+                if(Files.isDirectory(file)) list.addAll(readTemplates(file,root));
+                if(file.getFileName().toString().endsWith(".dft")) {
+                    byte[] data = Files.readAllBytes(file);
+                    ItemStack template = Utility.makeTemplate(new String(Base64.getEncoder().encode(data)));
+                    template.setCustomName(Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(root.relativize(file))));
+                    list.add(new Searchable.StaticSearchable(template));
+                }
+            }
+            dir.close();
+        } catch (IOException ignored) {
+        }
+        return list;
     }
 }
