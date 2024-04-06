@@ -16,21 +16,23 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 public class ScanPlot extends Action {
     private List<BlockPos> blocks = null;
+    private HashMap<BlockPos, ItemStack> scanned = null;
     private Action step = null;
     private static final Vec3d goToOffset = new Vec3d(0, 1.5, 0);
-    private final ArrayList<ItemStack> scanList;
+    private final ArrayList<ItemStack> returnList;
 
     public ScanPlot(Callback callback, ArrayList<ItemStack> scanList) {
         super(callback);
-        this.scanList = scanList;
+        this.returnList = scanList;
         if (!(CodeClient.location instanceof Dev)) {
             throw new IllegalStateException("Player must be in dev mode.");
         }
@@ -40,6 +42,7 @@ public class ScanPlot extends Action {
     public void init() {
         if (CodeClient.location instanceof Dev plot) {
             blocks = plot.scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"), Pattern.compile(".*")).keySet().stream().toList();
+            scanned = new HashMap<>(blocks.size());
         }
     }
 
@@ -60,14 +63,37 @@ public class ScanPlot extends Action {
 //        }
     }
 
-    private void next(int progress) {
-        if(progress >= blocks.size()) {
+    @Nullable
+    private BlockPos findNextBlock() {
+        var player = CodeClient.MC.player.getPos();
+        BlockPos nearest = null;
+        for (BlockPos pos: blocks) {
+            if(nearest == null || pos.isWithinDistance(player,nearest.toCenterPos().distanceTo(player))) {
+                CodeClient.LOGGER.info(String.valueOf(scanned.containsKey(nearest)));
+                if(scanned.containsKey(pos) && scanned.get(pos) != null) {
+                    continue;
+                }
+                nearest = pos;
+            }
+        }
+        return nearest;
+    }
+
+    private void next() {
+        var block = findNextBlock();
+        if(block == null) {
+            returnList.clear();
+            returnList.addAll(scanned.values());
             callback();
             return;
         }
-        step = new GoTo(blocks.get(progress).toCenterPos().add(goToOffset), () -> {
-            this.step = new pickUpBlock(blocks.get(progress),() -> {
-                next(progress + 1);
+        CodeClient.LOGGER.info("Going to " + block);
+        step = new GoTo(block.toCenterPos().add(goToOffset), () -> {
+            CodeClient.LOGGER.info("Reached " + block + ", now picking up.");
+            this.step = new PickUpBlock(block,() -> {
+                CodeClient.LOGGER.info("Callback on " + block);
+                this.step = null;
+//                next(progress + 1);
             });
             this.step.init();
         });
@@ -79,15 +105,17 @@ public class ScanPlot extends Action {
         if(blocks == null) return;
         if (step != null) step.onTick();
         else {
-            next(0);
+            CodeClient.LOGGER.info("Step was null.");
+            next();
         }
     }
 
 
-    private class pickUpBlock extends Action {
+    private class PickUpBlock extends Action {
         private BlockPos pos;
+        private Integer ticks = 0;
 
-        public pickUpBlock(BlockPos pos, Callback callback) {
+        public PickUpBlock(BlockPos pos, Callback callback) {
             super(callback);
             this.pos = pos;
         }
@@ -99,10 +127,10 @@ public class ScanPlot extends Action {
             var player = CodeClient.MC.player;
             var inter = CodeClient.MC.interactionManager;
             boolean sneaky = !player.isSneaking();
+            CodeClient.LOGGER.info("Send interact for " + this.pos);
             if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             inter.interactBlock(player, Hand.MAIN_HAND, new BlockHitResult(this.pos.toCenterPos(), Direction.UP, this.pos, false));
-            if (sneaky)
-                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
 
         @Override
@@ -112,14 +140,26 @@ public class ScanPlot extends Action {
                 var data = Utility.templateDataItem(slot.getStack());
                 var template = Template.parse64(data);
                 if (template == null) return false;
-                scanList.add(slot.getStack());
+                scanned.put(pos,slot.getStack());
+                CodeClient.LOGGER.info("Got item for " + this.pos);
                 net.sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
                 this.callback();
                 return true;
             }
             return super.onReceivePacket(packet);
         }
-//        if(progress == blocks.size()) {
+
+        @Override
+        public void onTick() {
+            ticks += 1;
+            if(ticks == 10) {
+                CodeClient.LOGGER.info("Took too long to pick up " + this.pos + "; retrying.");
+                ticks = 0;
+                init();
+            }
+        }
+
+        //        if(progress == blocks.size()) {
 //            if(!waitForResponse) {
 //                callback();
 //            }
