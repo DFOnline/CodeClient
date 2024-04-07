@@ -69,7 +69,6 @@ public class ScanPlot extends Action {
         BlockPos nearest = null;
         for (BlockPos pos: blocks) {
             if(nearest == null || pos.isWithinDistance(player,nearest.toCenterPos().distanceTo(player))) {
-                CodeClient.LOGGER.info(String.valueOf(scanned.containsKey(nearest)));
                 if(scanned.containsKey(pos) && scanned.get(pos) != null) {
                     continue;
                 }
@@ -87,11 +86,8 @@ public class ScanPlot extends Action {
             callback();
             return;
         }
-        CodeClient.LOGGER.info("Going to " + block);
         step = new GoTo(block.toCenterPos().add(goToOffset), () -> {
-            CodeClient.LOGGER.info("Reached " + block + ", now picking up.");
             this.step = new PickUpBlock(block,() -> {
-                CodeClient.LOGGER.info("Callback on " + block);
                 this.step = null;
 //                next(progress + 1);
             });
@@ -105,7 +101,6 @@ public class ScanPlot extends Action {
         if(blocks == null) return;
         if (step != null) step.onTick();
         else {
-            CodeClient.LOGGER.info("Step was null.");
             next();
         }
     }
@@ -127,7 +122,6 @@ public class ScanPlot extends Action {
             var player = CodeClient.MC.player;
             var inter = CodeClient.MC.interactionManager;
             boolean sneaky = !player.isSneaking();
-            CodeClient.LOGGER.info("Send interact for " + this.pos);
             if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             inter.interactBlock(player, Hand.MAIN_HAND, new BlockHitResult(this.pos.toCenterPos(), Direction.UP, this.pos, false));
             if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
@@ -141,7 +135,6 @@ public class ScanPlot extends Action {
                 var template = Template.parse64(data);
                 if (template == null) return false;
                 scanned.put(pos,slot.getStack());
-                CodeClient.LOGGER.info("Got item for " + this.pos);
                 net.sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
                 this.callback();
                 return true;
@@ -153,7 +146,6 @@ public class ScanPlot extends Action {
         public void onTick() {
             ticks += 1;
             if(ticks == 10) {
-                CodeClient.LOGGER.info("Took too long to pick up " + this.pos + "; retrying.");
                 ticks = 0;
                 init();
             }
