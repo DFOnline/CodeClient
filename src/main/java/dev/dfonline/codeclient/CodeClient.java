@@ -11,6 +11,7 @@ import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.dev.RecentChestInsert;
 import dev.dfonline.codeclient.dev.menu.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
+import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.location.Plot;
@@ -21,7 +22,9 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -76,7 +79,6 @@ public class CodeClient implements ModInitializer {
      * @param <T> Server2Client
      */
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
-
         if(currentAction.onReceivePacket(packet)) return true;
         if(Debug.handlePacket(packet)) return true;
         if(BuildPhaser.handlePacket(packet)) return true;
@@ -166,6 +168,26 @@ public class CodeClient implements ModInitializer {
     }
 
     /**
+     * Remove all state from being on DF.
+     */
+    public static void clean() {
+        CodeClient.currentAction = new None();
+        CodeClient.location = null;
+        BuildPhaser.disableClipping();
+        Commands.confirm = null;
+    }
+
+    /**
+     * As much as possible, set CodeClient to it's startup state.
+     */
+    public static void reset() {
+        clean();
+        SocketHandler.setConnection(null);
+        ActionDump.clear();
+        Config.clear();
+    }
+
+    /**
      * Registers barriers as visible.
      * Starts the API.
      * Sets up auto join if enabled.
@@ -174,6 +196,10 @@ public class CodeClient implements ModInitializer {
      */
     @Override
     public void onInitialize() {
+        ClientTickEvents.START_CLIENT_TICK.register(client -> {
+            if(MC.player == null || MC.world == null) clean();
+        });
+
         MC = MinecraftClient.getInstance();
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());

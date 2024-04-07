@@ -71,13 +71,7 @@ public class Commands {
 
 
         dispatcher.register(literal("fixcc").executes(context -> {
-            CodeClient.currentAction = new None();
-            CodeClient.location = null;
-            BuildPhaser.disableClipping();
-            SocketHandler.setConnection(null);
-            ActionDump.clear();
-            Config.clear();
-            confirm = null;
+            CodeClient.reset();
             return 0;
         }));
 
