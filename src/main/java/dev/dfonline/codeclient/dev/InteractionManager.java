@@ -79,7 +79,8 @@ public class InteractionManager {
             BlockPos breakPos = isBlockBreakable(pos);
             if(breakPos != null) {
                 if(Config.getConfig().ReportBrokenBlock && validBlocks.contains(CodeClient.MC.world.getBlockState(breakPos).getBlock()) && CodeClient.MC.world.getBlockEntity(breakPos.west()) instanceof SignBlockEntity sign) {
-                    if(!sign.getFrontText().getMessage(1,false).equals(Text.empty())) Utility.sendMessage(Text.empty().formatted(Formatting.AQUA).append(Text.literal("You just broke ")).append(Text.empty().formatted(Formatting.WHITE).append(sign.getFrontText().getMessage(1,false))).append(Text.literal(".")), ChatType.INFO);
+                    if(!sign.getFrontText().getMessage(1,false).equals(Text.empty()))
+                        Utility.sendMessage(Text.translatable("codeclient.interaction.broke",Text.empty().formatted(Formatting.WHITE).append(sign.getFrontText().getMessage(1,false))).formatted(Formatting.AQUA), ChatType.INFO);
                 }
                 BlockBreakDeltaCalculator.breakBlock(pos);
             }

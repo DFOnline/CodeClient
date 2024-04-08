@@ -20,6 +20,7 @@ import net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -44,7 +45,7 @@ public class BuildPhaser {
 
         if(CodeClient.location instanceof Dev plot) {
             if(plot.getX() == null) {
-                if(CodeClient.clipBind.wasPressed()) Utility.sendMessage(CodeClient.MOD_NAME + " doesn't know the plot origin location.");
+                if(CodeClient.clipBind.wasPressed()) Utility.sendMessage(Text.translatable("codeclient.phaser.plot_origin"));
             }
 //            CodeClient.LOGGER.info("dev and X");
             if(!clipping && CodeClient.clipBind.isPressed() && plot.getX() != null) startClipping();
@@ -68,7 +69,13 @@ public class BuildPhaser {
         if(CodeClient.location instanceof Build) {
             if(CodeClient.clipBind.isPressed() && !dontSpamBuildWarn) {
                 dontSpamBuildWarn = true;
-                Utility.sendMessage(Text.literal("Cannot use phaser in build mode, since ").append(Text.literal("it uses locations items").setStyle(Text.empty().getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,"https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))).formatted(Formatting.AQUA,Formatting.UNDERLINE)).append(" to teleport."), ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.phaser.dev_mode1",
+                        Text.translatable("codeclient.phaser.dev_mode2")
+                                .setStyle(Text.empty().getStyle()
+                                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,"https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
+                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.link.open")))
+                                ).formatted(Formatting.AQUA,Formatting.UNDERLINE)),
+                    ChatType.FAIL);
             }
             if(dontSpamBuildWarn && !CodeClient.clipBind.isPressed()) dontSpamBuildWarn = false;
         }

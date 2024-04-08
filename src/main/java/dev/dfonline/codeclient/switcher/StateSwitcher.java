@@ -14,12 +14,12 @@ import java.util.Map;
 
 public class StateSwitcher extends GenericSwitcher {
     public StateSwitcher() {
-        super(Text.literal("Mode Switcher"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F4);
+        super(Text.translatable("codeclient.switcher.state"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F4);
     }
 
     @Override
     protected void init() {
-        footer = Text.literal("[ F4 ]").formatted(Formatting.AQUA).append(Text.literal(" Next").formatted(Formatting.WHITE));
+        footer = Text.translatable("codeclient.switcher.footer.next",Text.translatable("codeclient.switcher.footer.brackets","F4").formatted(Formatting.AQUA));
         selected = 0;
         if(CodeClient.lastLocation instanceof Plot) {
             if(CodeClient.lastLocation instanceof Play) selected = 0;

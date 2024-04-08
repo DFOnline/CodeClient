@@ -12,12 +12,12 @@ public class SpeedSwitcher extends GenericSwitcher {
     private static int lastSpeed = 3;
 
     public SpeedSwitcher() {
-        super(Text.literal("Speed Switcher"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F5);
+        super(Text.translatable("codeclient.switcher.speed"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F5);
     }
 
     @Override
     protected void init() {
-        footer = Text.literal("[ F5 ]").formatted(Formatting.AQUA).append(Text.literal(" Next").formatted(Formatting.WHITE));
+        footer = Text.translatable("codeclient.switcher.footer.next",Text.translatable("codeclient.switcher.footer.brackets","F5").formatted(Formatting.AQUA));
         selected = 0;
         // 0.05 is 100% on df. 1000% is 0.5.
         if(CodeClient.MC.player.getAbilities().getFlySpeed() == 0.05f) {

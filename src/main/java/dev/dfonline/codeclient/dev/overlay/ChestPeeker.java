@@ -117,10 +117,10 @@ public class ChestPeeker {
         if (CodeClient.location instanceof Dev && currentBlock != null && items != null) {
             ArrayList<Text> texts = new ArrayList<>();
             if(items.isEmpty()) {
-                texts.add(Text.literal("Empty").formatted(Formatting.GOLD));
+                texts.add(Text.translatable("codeclient.peeker.empty").formatted(Formatting.GOLD));
             }
             else {
-                texts.add(Text.literal("Contents").formatted(Formatting.GOLD));
+                texts.add(Text.translatable("codeclient.peeker.contents").formatted(Formatting.GOLD));
                 for (NbtElement itemData : items) {
                     if (itemData instanceof NbtCompound compound) {
                         ItemStack item = Registries.ITEM.get(Identifier.tryParse(compound.getString("id"))).getDefaultStack();

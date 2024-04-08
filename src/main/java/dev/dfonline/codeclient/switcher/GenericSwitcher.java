@@ -30,7 +30,7 @@ public abstract class GenericSwitcher extends Screen {
     private Integer lastMouseX;
     private Integer lastMouseY;
     protected Integer selected;
-    protected Text footer = Text.literal("No Footer");
+    protected Text footer = Text.translatable("codeclient.switcher.footer");
 
     /**
      * Key to hold down, generally F3.
@@ -85,7 +85,7 @@ public abstract class GenericSwitcher extends Screen {
         }
 
         Option selected = getSelected();
-        Text selectedText = selected != null ? selected.text : Text.literal("Select");
+        Text selectedText = selected != null ? selected.text : Text.translatable("codeclient.switcher.select");
 
         context.drawCenteredTextWithShadow(this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, 0xFFFFFF);
         context.drawCenteredTextWithShadow(this.textRenderer, footer, this.width / 2, this.height / 2 + 5, 0xFFFFFF);

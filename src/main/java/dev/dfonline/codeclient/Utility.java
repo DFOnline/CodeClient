@@ -71,6 +71,13 @@ public class Utility {
         inv.setStack(0, item);
     }
 
+    public static void debug(Object object) {
+        debug(Objects.toString(object));
+    }
+    public static void debug(String message) {
+        CodeClient.LOGGER.info("%%% DEBUG: " + message);
+    }
+
     /**
      * Gets the base64 template data from an item. Null if there is none.
      */
@@ -241,17 +248,24 @@ public class Utility {
         return new String(Base64.getEncoder().encode(obj.toByteArray()));
     }
 
+    /**
+     * @deprecated This uses literals, use translations when you can.
+     */
     public static void sendMessage(String message, ChatType type) {
         sendMessage(Text.literal(message), type);
     }
+
+    /**
+     * @deprecated This uses literals, use translations when you can.
+     */
     public static void sendMessage(String message) {
         sendMessage(Text.literal(message), ChatType.INFO);
     }
-    public static void sendMessage(MutableText message) {
+    public static void sendMessage(Text message) {
         sendMessage(message, ChatType.INFO);
     }
 
-    public static void sendMessage(MutableText message, @Nullable ChatType type) {
+    public static void sendMessage(Text message, @Nullable ChatType type) {
         ClientPlayerEntity player = CodeClient.MC.player;
         if (player == null) return;
         if (type == null) {
@@ -260,7 +274,7 @@ public class Utility {
             player.sendMessage(Text.empty()
                     .append(type.getText())
                     .append(Text.literal(" "))
-                    .append(message.formatted(Formatting.RESET, type.getTrailing())), false);
+                    .append(Text.empty().formatted(Formatting.RESET, type.getTrailing()).append(message)), false);
             if (type == ChatType.FAIL) {
                 player.playSound(SoundEvent.of(new Identifier("minecraft:block.note_block.didgeridoo")), SoundCategory.PLAYERS, 2, 0);
             }

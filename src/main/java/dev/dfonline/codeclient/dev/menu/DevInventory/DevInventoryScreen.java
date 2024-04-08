@@ -113,8 +113,10 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         }
         catch (IOException | JsonParseException e) {
             CodeClient.LOGGER.error(e.getMessage());
-            Utility.sendMessage(Text.literal("Could not parse the ActionDump. Go to ").append(Text.literal("https://github.com/DFOnline/CodeClient/wiki/actiondump").formatted(Formatting.AQUA)).append(Text.literal(" to find out how to fix this."))
-                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump"))), ChatType.FAIL);
+            Utility.sendMessage(
+                Text.translatable("codeclient.parse_db",Text.literal("https://github.com/DFOnline/CodeClient/wiki/actiondump").formatted(Formatting.AQUA,Formatting.UNDERLINE))
+                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump"))),
+            ChatType.FAIL);
         }
 
         TextRenderer textRenderer = this.textRenderer;

@@ -2,5 +2,75 @@
   "category.codeclient.dev": "CodeClient",
 
   "key.codeclient.codepalette": "Code Palette",
-  "key.codeclient.phaser": "Phaser"
+  "key.codeclient.phaser": "Phaser",
+
+  "codeclient.parse_db": "Could not parse ActionDump. Go to %s to find out how to fix this.",
+
+  "codeclient.phaser.plot_origin": "CodeClient doesn't know the plot origin.",
+  "codeclient.phaser.dev_mode1": "You cannot use phaser in dev mode since %s to teleport.",
+  "codeclient.phaser.dev_mode2": "it uses location items",
+
+  "codeclient.peeker.empty": "Empty",
+  "codeclient.peeker.contents": "Contents",
+
+  "codeclient.switcher.footer": "No Footer",
+  "codeclient.switcher.footer.next": "%s Next",
+  "codeclient.switcher.footer.brackets": "[ %s ]",
+  "codeclient.switcher.select": "Select",
+  "codeclient.switcher.scope": "Scope",
+  "codeclient.switcher.scope.select": "%s Select",
+  "codeclient.switcher.speed": "Speed Switcher",
+  "codeclient.switcher.state": "Mode Switcher",
+
+  "codeclient.action.done": "Done!",
+  "codeclient.action.scanning": "Scanning plot...",
+  "codeclient.action.get_action_dump.error.could_not_start": "Couldn't start. Check that you are on node beta.",
+  "codeclient.action.get_action_dump.error.beta_broke": "There is a chance beta is broken and doesn't serve the Action Dump right now.",
+  "codeclient.action.get_action_dump.abort": "Type %s to hide this.",
+  "codeclient.action.get_action_dump.scanning.title": "GetActionDump:",
+  "codeclient.action.get_action_dump.scanning.size": "Size: %sb",
+  "codeclient.action.get_action_dump.scanning.lines": "Size: %s",
+  "codeclient.action.get_action_dump.scanning.time": "Size: %ss",
+  "codeclient.action.get_action_dump.scanning.complete": "Complete!",
+  "codeclient.action.get_action_dump.scanning.complete.file": "There will now be a file in your Minecraft directory",
+  "codeclient.action.get_action_dump.scanning.complete.save_error": "It will instead be printed in the console.",
+
+  "codeclient.action.scanfor.scan_result": "Scan results:",
+  "codeclient.action.scanfor.scan_fail": "Couldn't scan.",
+  "codeclient.action.abort": "Use /abort to abort.",
+  "codeclient.action.busy": "CodeClient is busy.",
+  "codeclient.action.confirmcc.use": "Type /confirmcc to confirm this destructive action.",
+  "codeclient.action.confirmcc.confirm": "Confirmed.",
+  "codeclient.action.confirmcc.nothing": "Nothing to confirm.",
+
+  "codeclient.warning.dev_mode": "You must be in dev mode!",
+  "codeclient.warning.creative_mode": "You must be in creative mode!",
+
+  "codeclient.files.template_fail": "Couldn't load templates.",
+  "codeclient.files.hold_template": "You need to hold a template to save.",
+  "codeclient.files.empty_dir": "Please use an empty folder to save into.",
+  "codeclient.files.saved": "Saved %s",
+  "codeclient.files.deleted": "Deleted %s",
+  "codeclient.files.error.not_dir": "%s is not a directory.",
+  "codeclient.files.error.write_file": "Couldn't save file to %s",
+  "codeclient.files.error.write_folder": "Couldn't make folder at %s",
+  "codeclient.files.error.read_file": "Couldn't read file at %s",
+  "codeclient.files.error.read_folder": "Couldn't read folder at %s",
+  "codeclient.files.error.cant_load": "Couldn't load file.",
+  "codeclient.files.error.cant_read": "Couldn't read file.",
+  "codeclient.files.error.cant_save": "Couldn't save file.",
+  "codeclient.files.error.cant_delete": "Couldn't delete the file or folder",
+  "codeclient.files.error.not_found": "Couldn't find file or folder there.",
+  "codeclient.files.git": "This is a git tracked directory",
+  "codeclient.files.open_native": "Click to open it in file explorer.",
+  "codeclient.files.not_in_templates": "That is not in the templates directory.",
+
+  "codeclient.api.connect": "An app connected to codeclient.",
+  "codeclient.api.run_auth": "Run /auth to authorize it.",
+  "codeclient.api.authorised": "The connecting app has now been authorized.",
+  "codeclient.api.warning": "Authorizing apps allows them to do anything to your plot code, such as clearing and writing code.",
+  "codeclient.api.remove": "You can remove the app by running /auth remove.",
+  "codeclient.api.removed": "The connected app is no longer authorized.",
+
+  "codeclient.interaction.broke": "You just broke %s."
 }

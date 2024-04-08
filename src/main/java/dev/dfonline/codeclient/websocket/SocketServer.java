@@ -20,8 +20,9 @@ public class SocketServer extends WebSocketServer {
         CodeClient.LOGGER.info("connection");
         SocketHandler.setConnection(conn);
         CodeClient.LOGGER.info(conn.getRemoteSocketAddress().toString() + " has just connected to the CodeClient API.");
-        Utility.sendMessage("An application has connected to CodeClient", ChatType.INFO);
-        Utility.sendMessage("Run §e/auth§b to allow it to§l freely modify your plot", ChatType.INFO);
+        Utility.sendMessage(Text.translatable("codeclient.api.connect"), ChatType.INFO);
+        Utility.sendMessage(Text.translatable("codeclient.api.run_auth"), ChatType.INFO);
+        Utility.sendMessage(Text.translatable("codeclient.api.warning"), ChatType.INFO);
     }
 
     @Override

@@ -8,11 +8,9 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
-import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.BuildPhaser;
-import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.template.Template;
-import dev.dfonline.codeclient.location.*;
+import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.font.TextRenderer;
@@ -37,19 +35,25 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class Commands {
     public static Action confirm = null;
+    private static final Text DONE = Text.translatable("gui.done");
+    private static void actionCallback() {
+        CodeClient.currentAction = new None();
+        Utility.sendMessage(DONE, ChatType.SUCCESS);
+    }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("auth").executes(context -> {
             SocketHandler.setAuthorised(true);
-            Utility.sendMessage("The connect app has been authorised,§l it can now do anything to your plot code.", ChatType.SUCCESS);
-            Utility.sendMessage("You can remove the app by running §e/auth remove", ChatType.INFO);
+            Utility.sendMessage(Text.translatable("codeclient.api.authorised")
+                    .append(Text.literal("\n")).append(Text.translatable("codeclient.api.warning").formatted(Formatting.BOLD))
+                    .append(Text.literal("\n")).append(Text.translatable("codeclient.api.remove"))
+            , ChatType.SUCCESS);
             return 0;
         }).then(literal("remove").executes(context -> {
             SocketHandler.setAuthorised(false);
-            Utility.sendMessage("The connected app is no longer authorised, which might break it.", ChatType.SUCCESS);
+            Utility.sendMessage(Text.translatable("codeclient.api.removed"), ChatType.SUCCESS);
             return 0;
         })).then(literal("disconnect").executes(context -> {
-            Utility.sendMessage("Not implemented.", ChatType.FAIL);
             SocketHandler.setConnection(null);
             return 0;
         })));
@@ -84,15 +88,15 @@ public class Commands {
 
 
         dispatcher.register(literal("getactiondump").executes(context -> {
-            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.NONE, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.NONE, () -> Utility.sendMessage(DONE, ChatType.SUCCESS));
             CodeClient.currentAction.init();
             return 0;
         }).then(literal("section").executes(context -> {
-            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.SECTION, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.SECTION, () -> Utility.sendMessage(DONE, ChatType.SUCCESS));
             CodeClient.currentAction.init();
             return 0;
         })).then(literal("ampersand").executes(context -> {
-            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.AMPERSAND, () -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+            CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.AMPERSAND, () -> Utility.sendMessage(DONE, ChatType.SUCCESS));
             CodeClient.currentAction.init();
             return 0;
         })));
@@ -107,10 +111,10 @@ public class Commands {
             String dataFinal = data.toString();
             try {
                 Path path = FileManager.writeFile("widthdump.txt",dataFinal);
-                Utility.sendMessage(Text.literal("Written to " + path).setStyle(Text.empty().getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toString()))),ChatType.SUCCESS);
+                Utility.sendMessage(Text.translatable("codeclient.files.saved",path).setStyle(Text.empty().getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toString()))));
             }
             catch (Exception ignored) {
-                Utility.sendMessage("Couldn't save to a file. It has been logged into the console.",ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.files.error.cant_save"),ChatType.FAIL);
                 CodeClient.LOGGER.info(dataFinal);
             }
             return 0;
@@ -140,16 +144,13 @@ public class Commands {
 
         dispatcher.register(literal("getspawn").executes(context -> {
             if(!(CodeClient.location instanceof Dev)) return 1;
-            CodeClient.currentAction = new MoveToSpawn(() -> Utility.sendMessage("Done!", ChatType.SUCCESS));
+            CodeClient.currentAction = new MoveToSpawn(Commands::actionCallback);
             CodeClient.currentAction.init();
             return 0;
         }));
         dispatcher.register(literal("getsize").executes(context -> {
             if(!(CodeClient.location instanceof Dev)) return 1;
-            CodeClient.currentAction = new GetPlotSize(() -> {
-                CodeClient.currentAction = new None();
-                Utility.sendMessage("Done!");
-            });
+            CodeClient.currentAction = new GetPlotSize(Commands::actionCallback);
             CodeClient.currentAction.init();
             return 0;
         }));
@@ -205,25 +206,26 @@ public class Commands {
                                 Files.createDirectory(currentPath);
                             }
                             catch (Exception ignored) {
-                                Utility.sendMessage("Could not make a folder at " + currentPath);
+                                Utility.sendMessage(Text.translatable("codeclient.files.error.write_folder",currentPath));
                             }
                         }
                         else if(!Files.isDirectory(currentPath)) {
-                            Utility.sendMessage(currentPath + " isn't a directory, can't put anything inside it!", ChatType.FAIL);
+                            Utility.sendMessage(Text.translatable("codeclient.files.error.not_dir",currentPath), ChatType.FAIL);
                             return -1;
                         }
                     }
 
                     boolean invalid = false;
                     try {
-                        for (var file : Files.list(currentPath).toList()) {
+                        var list = Files.list(currentPath);
+                        for (var file : list.toList()) {
                             invalid = true;
                             if(file.getFileName().toString().equals(".git")) {
                                 Utility.sendMessage(
                                         Text.empty()
-                                                .append("This is a git tracked directory.")
+                                                .append(Text.translatable("codeclient.files.git"))
                                                 .append(Text.literal("\n"))
-                                                .append(Text.literal("Click to open it in file explorer").fillStyle(
+                                                .append(Text.translatable("codeclient.files.open_native").fillStyle(
                                                         Style.EMPTY
                                                                 .withColor(Formatting.AQUA)
                                                                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE,currentPath.toAbsolutePath().toString()))
@@ -232,21 +234,21 @@ public class Commands {
                                 invalid = false; break;
                             }
                         }
+                        list.close();
                     }
                     catch (Exception ignored) {
-                        Utility.sendMessage("An error occurred when reading the directory.",ChatType.FAIL);
+                        Utility.sendMessage(Text.translatable("codeclient.files.error.read_folder"),ChatType.FAIL);
                     }
                     if(invalid) {
-                        Utility.sendMessage("Please use an empty directory to save into.");
+                        Utility.sendMessage(Text.translatable("codeclient.files.empty_dir"));
                         return -1;
                     }
 
-                    Utility.sendMessage("Scanning plot. Use /abort to abort.",ChatType.INFO);
+                    Utility.sendMessage(Text.translatable("codeclient.action.scanning").append(" ").append(Text.translatable("codeclient.action.abort")),ChatType.INFO);
                     var scan = new ArrayList<ItemStack>();
                     Path finalCurrentPath = currentPath;
                     CodeClient.currentAction = new ScanPlot(() -> {
-                        CodeClient.currentAction = new None();
-                        Utility.sendMessage("Done!", ChatType.SUCCESS);
+                        actionCallback();
                         for (ItemStack item : scan) {
                             String data = Utility.templateDataItem(item);
                             var template = Template.parse64(data);
@@ -258,7 +260,7 @@ public class Commands {
                                 Files.write(filePath,Base64.getDecoder().decode(data));
                             }
                             catch (Exception ignored) {
-                                Utility.sendMessage("Couldn't save " + filePath + "...", ChatType.FAIL);
+                                Utility.sendMessage(Text.translatable("codeclient.files.error.write_file",filePath),ChatType.FAIL);
                             }
                         }
 
@@ -267,7 +269,7 @@ public class Commands {
                     return 0;
                 }
                 else {
-                    Utility.sendMessage("You must be in dev mode!", ChatType.FAIL);
+                    Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
                     return 1;
                 }
             }))
@@ -276,13 +278,13 @@ public class Commands {
             if(CodeClient.location instanceof Dev dev) {
                 Pattern pattern = Pattern.compile(context.getArgument("name", String.class), Pattern.CASE_INSENSITIVE);
                 var scan = dev.scanForSigns(pattern);
-                Utility.sendMessage("Scan results: ");
+                Utility.sendMessage(Text.translatable("codeclient.action.scanfor.scan_result"));
                 for (var res: scan.entrySet()) {
                     Utility.sendMessage("- " + res.getKey() + ": " + res.getValue().getMessage(1,false).getString());
                 }
                 return 0;
             }
-            Utility.sendMessage("Couldn't scan.", ChatType.FAIL);
+            Utility.sendMessage(Text.translatable("codeclient.action.scanfor.scan_fail"), ChatType.FAIL);
             return -1;
         })));
 //        dispatcher.register(literal("swapininv").executes(context -> {
@@ -300,16 +302,13 @@ public class Commands {
 //        }));
         dispatcher.register(literal("templateplacer").executes(context -> {
             if(CodeClient.location instanceof Dev) {
-                var action = Utility.createPlacer(Utility.templatesInInventory(), () -> {
-                    CodeClient.currentAction = new None();
-                    Utility.sendMessage("Done!", ChatType.SUCCESS);
-                });
+                var action = Utility.createPlacer(Utility.templatesInInventory(), Commands::actionCallback);
                 if(action == null) return -1;
                 CodeClient.currentAction = action;
                 CodeClient.currentAction.init();
                 return 0;
             }
-            Utility.sendMessage("You must be in dev mode!",ChatType.FAIL);
+            Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"),ChatType.FAIL);
             return -1;
         }).then(argument("path",StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             try {
@@ -320,24 +319,21 @@ public class Commands {
                         map.put(pos, Utility.makeTemplate(template));
                         pos = dev.findFreePlacePos(pos.west(2));
                     }
-                    CodeClient.currentAction = new PlaceTemplates(map, () -> {
-                        CodeClient.currentAction = new None();
-                        Utility.sendMessage("Done!", ChatType.SUCCESS);
-                    });
+                    CodeClient.currentAction = new PlaceTemplates(map, Commands::actionCallback);
                     return 0;
                 }
-                Utility.sendMessage("You must be in dev mode!", ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
                 return -1;
             }
             catch (Exception e) {
-                Utility.sendMessage("Couldn't load templates.",ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.files.template_fail"),ChatType.FAIL);
                 return -2;
             }
         })));
         dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestDirectories).executes(context -> {
             String data = Utility.templateDataItem(CodeClient.MC.player.getMainHandStack());
             if(data == null) {
-                Utility.sendMessage("You need to hold a template to save.",ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.files.hold_template"),ChatType.FAIL);
                 return 0;
             }
 
@@ -352,11 +348,11 @@ public class Commands {
                         Files.createDirectory(currentPath);
                     }
                     catch (Exception ignored) {
-                        Utility.sendMessage("Could not make a folder at " + currentPath);
+                        Utility.sendMessage(Text.translatable("codeclient.files.error.write_folder",currentPath));
                     }
                 }
                 else if(!Files.isDirectory(currentPath)) {
-                    Utility.sendMessage(currentPath + " isn't a directory, can't put anything inside it!", ChatType.FAIL);
+                    Utility.sendMessage(Text.translatable("codeclient.files.error.not_dir",currentPath), ChatType.FAIL);
                     return -1;
                 }
             }
@@ -364,10 +360,10 @@ public class Commands {
             // Write file
             try {
                 Files.write(currentPath.resolve(currentPath), Base64.getDecoder().decode(data));
-                Utility.sendMessage("Saved " + currentPath);
+                Utility.sendMessage(Text.translatable("codeclient.files.saved",currentPath),ChatType.SUCCESS);
             }
             catch (Exception e) {
-                Utility.sendMessage("Couldn't save the file to: " + currentPath, ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.files.error.write_file",currentPath), ChatType.FAIL);
                 CodeClient.LOGGER.error(e.getMessage());
             }
             return 0;
@@ -377,7 +373,7 @@ public class Commands {
                 String arg = context.getArgument("path",String.class);
                 Path path = FileManager.templatesPath().resolve(arg + ".dft");
                 if(Files.notExists(path)) {
-                    Utility.sendMessage("This template doesn't exist.", ChatType.FAIL);
+                    Utility.sendMessage(Text.translatable("codeclient.files.error.cant_read"), ChatType.FAIL);
                     return -1;
                 }
                 try {
@@ -388,27 +384,25 @@ public class Commands {
                     Utility.sendInventory();
                 }
                 catch (Exception e) {
-                    Utility.sendMessage("Couldn't read file.", ChatType.FAIL);
+                    Utility.sendMessage(Text.translatable("codeclient.files.error.read_file",path), ChatType.FAIL);
                     return -2;
                 }
                 return 0;
             }
-            Utility.sendMessage("You must be in creative mode!",ChatType.FAIL);
+            Utility.sendMessage(Text.translatable("codeclient.warning.creative_mode"),ChatType.FAIL);
             return -1;
             })));
         dispatcher.register(literal("swap").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+            Path path = FileManager.templatesPath().resolve(context.getArgument("path", String.class));
             try {
                  ArrayList<ItemStack> map = new ArrayList<>();
-                for (var template: Objects.requireNonNull(getAllTemplates(FileManager.templatesPath().resolve(context.getArgument("path", String.class))))) {
+                for (var template: Objects.requireNonNull(getAllTemplates(path))) {
                     map.add(Utility.makeTemplate(template));
                 }
-                confirm = Utility.createSwapper(map, () -> {
-                    CodeClient.currentAction = new None();
-                    Utility.sendMessage("Done!", ChatType.SUCCESS);
-                }).swap();
-                Utility.sendMessage("Type /confirmcc to confirm this destructive action.",ChatType.INFO);
+                confirm = Utility.createSwapper(map, Commands::actionCallback).swap();
+                Utility.sendMessage(Text.translatable("codeclient.action.confirmcc.use"),ChatType.INFO);
             } catch (IOException e) {
-                Utility.sendMessage("Failed to open files.",ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.files.error.read_file",path),ChatType.FAIL);
             }
             return 0;
         })));
@@ -417,19 +411,19 @@ public class Commands {
             Path dft = path.getParent().resolve(path.getFileName() + ".dft");
             if(Files.notExists(path) && Files.exists(dft)) path = dft;
             if(!path.toAbsolutePath().startsWith(FileManager.templatesPath().toAbsolutePath())) {
-                Utility.sendMessage("That is not in the templates directory.",ChatType.INFO);
+                Utility.sendMessage(Text.translatable("codeclient.files.not_in_templates"),ChatType.INFO);
                 return -2;
             }
             if(Files.notExists(path)) {
-                Utility.sendMessage("There is no file or folder there.",ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.files.error.not_found"),ChatType.FAIL);
                 return -1;
             }
             try {
                 FileUtils.forceDelete(path.toFile());
-                Utility.sendMessage("Deleted " + path + ".",ChatType.SUCCESS);
+                Utility.sendMessage(Text.translatable("codeclient.files.deleted",path),ChatType.SUCCESS);
             }
             catch (Exception e) {
-                Utility.sendMessage("Couldn't delete the file or folder",ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.files.error.cant_delete"),ChatType.FAIL);
             }
             return 0;
         })));
@@ -437,10 +431,7 @@ public class Commands {
 
         dispatcher.register(literal("jumptofreespot").executes(context -> {
             if(CodeClient.location instanceof Dev dev) {
-                CodeClient.currentAction = new GoTo(dev.findFreePlacePos(CodeClient.MC.player.getBlockPos()).toCenterPos().add(0,-0.5,0), () -> {
-                    CodeClient.currentAction = new None();
-                    Utility.sendMessage("Done!", ChatType.SUCCESS);
-                });
+                CodeClient.currentAction = new GoTo(dev.findFreePlacePos(CodeClient.MC.player.getBlockPos()).toCenterPos().add(0,-0.5,0), Commands::actionCallback);
                 CodeClient.currentAction.init();
                 return 0;
             }
@@ -450,14 +441,14 @@ public class Commands {
 
         dispatcher.register(literal("confirmcc").executes(context -> {
             if(confirm == null) {
-                Utility.sendMessage("Nothing to confirm.",ChatType.INFO);
+                Utility.sendMessage(Text.translatable("codeclient.action.confirmcc.nothing"),ChatType.INFO);
                 return 0;
             }
             if(!(CodeClient.currentAction instanceof None)) {
-                Utility.sendMessage("CodeClient is busy, you can use /abort to cancel this.",ChatType.FAIL);
+                Utility.sendMessage(Text.translatable("codeclient.action.busy").append(" ").append(Text.translatable("codeclient.action.abort")),ChatType.FAIL);
                 return -1;
             }
-            Utility.sendMessage("Confirmed.",ChatType.SUCCESS);
+            Utility.sendMessage(Text.translatable("codeclient.action.confirmcc.confirm"),ChatType.SUCCESS);
             CodeClient.currentAction = confirm;
             CodeClient.currentAction.init();
             confirm = null;
@@ -471,7 +462,7 @@ public class Commands {
     private static CompletableFuture<Suggestions> suggestTemplates(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {
         return suggestTemplates(context,builder,true);
     }
-    private static CompletableFuture<Suggestions> suggestTemplates(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder, boolean suggestFiles) {
+    private static CompletableFuture<Suggestions> suggestTemplates(CommandContext<FabricClientCommandSource> ignored, SuggestionsBuilder builder, boolean suggestFiles) {
         try {
             var possibilities = new ArrayList<String>();
 
@@ -491,7 +482,7 @@ public class Commands {
             for (String possibility: possibilities) {
                 if(possibility.toLowerCase().contains(builder.getRemainingLowerCase())) builder.suggest(possibility,Text.literal("Folder"));
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored1) {}
         return CompletableFuture.completedFuture(builder.build());
     }
 

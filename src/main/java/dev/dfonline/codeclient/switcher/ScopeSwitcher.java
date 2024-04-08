@@ -5,7 +5,6 @@ import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.item.Scope;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -19,20 +18,19 @@ import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ScopeSwitcher extends GenericSwitcher {
     private String option;
 
     public ScopeSwitcher(String option) {
-        super(Text.literal("Scope"), -1, GLFW.GLFW_KEY_SPACE);
+        super(Text.translatable("codeclient.switcher.scope"), -1, GLFW.GLFW_KEY_SPACE);
         this.option = option;
     }
 
     @Override
     protected void init() {
-        footer = Text.literal("[ Click ]").formatted(Formatting.AQUA).append(Text.literal(" Select").formatted(Formatting.WHITE));
+        footer = Text.translatable("codeclient.switcher.scope.select",Text.translatable("codeclient.switcher.footer.brackets","Click").formatted(Formatting.AQUA)).formatted(Formatting.WHITE);
 
         selected = switch (option) {
             case "saved" -> 1;
