@@ -175,10 +175,11 @@ public class CodeClient implements ModInitializer {
         CodeClient.location = null;
         BuildPhaser.disableClipping();
         Commands.confirm = null;
+        Debug.clean();
     }
 
     /**
-     * As much as possible, set CodeClient to it's startup state.
+     * As much as possible, set CodeClient to its startup state.
      */
     public static void reset() {
         clean();
