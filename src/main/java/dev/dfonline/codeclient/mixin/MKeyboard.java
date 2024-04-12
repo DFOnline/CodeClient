@@ -24,14 +24,14 @@ public class MKeyboard {
 
     @Inject(method = "processF3", at = @At("HEAD"), cancellable = true)
     private void handleF3(int key, CallbackInfoReturnable<Boolean> cir) {
-        if(key == stateSwitcherKey) {
-            if(CodeClient.location instanceof Plot) {
+        if (key == stateSwitcherKey) {
+            if (CodeClient.location instanceof Plot) {
                 CodeClient.MC.setScreen(new StateSwitcher());
                 cir.setReturnValue(true);
             }
         }
-        if(key == speedSwitcherKey) {
-            if(CodeClient.location instanceof Creator) {
+        if (key == speedSwitcherKey) {
+            if (CodeClient.location instanceof Creator) {
                 CodeClient.MC.setScreen(new SpeedSwitcher());
                 cir.setReturnValue(true);
             }

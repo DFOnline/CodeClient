@@ -3,10 +3,7 @@ package dev.dfonline.codeclient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.dfonline.codeclient.action.Action;
-import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
-import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
 import dev.dfonline.codeclient.location.Dev;
@@ -23,14 +20,12 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.ObjectUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -45,10 +40,9 @@ public class Utility {
      * Get the slot id to be used with a creative packet, from a local slot id.
      */
     public static int getRemoteSlot(int slot) {
-        if(0 <= slot && slot <= 8) { // this is for the hotbar, which is after the inventory in packets.
+        if (0 <= slot && slot <= 8) { // this is for the hotbar, which is after the inventory in packets.
             return slot + 36;
-        }
-        else return slot;
+        } else return slot;
     }
 
     /**
@@ -62,6 +56,7 @@ public class Utility {
 
     /**
      * Ensure the player is holding an item, by holding and setting the first slot.
+     *
      * @param item Any item
      */
     public static void makeHolding(ItemStack item) {
@@ -74,6 +69,7 @@ public class Utility {
     public static void debug(Object object) {
         debug(Objects.toString(object));
     }
+
     public static void debug(String message) {
         CodeClient.LOGGER.info("%%% DEBUG: " + message);
     }
@@ -96,7 +92,7 @@ public class Utility {
         ItemStack template = new ItemStack(Items.ENDER_CHEST);
         NbtCompound nbt = new NbtCompound();
         NbtCompound PublicBukkitValues = new NbtCompound();
-        PublicBukkitValues.putString("hypercube:codetemplatedata","{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + message + "\"}");
+        PublicBukkitValues.putString("hypercube:codetemplatedata", "{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + message + "\"}");
         nbt.put("PublicBukkitValues", PublicBukkitValues);
         template.setNbt(nbt);
         return template;
@@ -114,7 +110,7 @@ public class Utility {
      * Doesn't add .swap(), that needs to be added yourself.
      */
     public static PlaceTemplates createSwapper(List<ItemStack> templates, Callback callback) {
-        if(CodeClient.location instanceof Dev dev) {
+        if (CodeClient.location instanceof Dev dev) {
             HashMap<BlockPos, ItemStack> map = new HashMap<>();
             var scan = dev.scanForSigns(Pattern.compile(".*"));
             ArrayList<ItemStack> leftOvers = new ArrayList<>(templates);
@@ -128,28 +124,27 @@ public class Utility {
                 String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
                 try {
                     Template template = Template.parse64(JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString());
-                    if(template.blocks.isEmpty()) continue;
+                    if (template.blocks.isEmpty()) continue;
                     TemplateBlock block = template.blocks.get(0);
-                    if(block.block == null) continue;
+                    if (block.block == null) continue;
                     TemplateBlock.Block blockName = TemplateBlock.Block.valueOf(block.block.toUpperCase());
                     String name = ObjectUtils.firstNonNull(block.action, block.data);
-                    for (Map.Entry<BlockPos, SignText> sign: scan.entrySet()) { // Loop through scanned signs
+                    for (Map.Entry<BlockPos, SignText> sign : scan.entrySet()) { // Loop through scanned signs
                         SignText text = sign.getValue();                        // ↓ If the blockName and name match
-                        if(text.getMessage(0,false).getString().equals(blockName.name) && text.getMessage(1,false).getString().equals(name)) {
+                        if (text.getMessage(0, false).getString().equals(blockName.name) && text.getMessage(1, false).getString().equals(name)) {
                             map.put(sign.getKey().east(), item);                // Put it into map
                             leftOvers.remove(item);                             // Remove the template, so we can see if there's anything left over
                             break;                                              // break out :D
                         }
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     CodeClient.LOGGER.warn(e.getMessage());
                 }
             }
-            if(!leftOvers.isEmpty()) {
+            if (!leftOvers.isEmpty()) {
                 BlockPos freePos = dev.findFreePlacePos();
                 for (var item : leftOvers) {
-                    map.put(freePos,item);
+                    map.put(freePos, item);
                     freePos = dev.findFreePlacePos(freePos.west(2));
                 }
             }
@@ -163,7 +158,7 @@ public class Utility {
      * This will use any free spaces instead.
      */
     public static PlaceTemplates createPlacer(List<ItemStack> templates, Callback callback) {
-       return createPlacer(templates,callback,false);
+        return createPlacer(templates, callback, false);
     }
 
     /**
@@ -171,29 +166,27 @@ public class Utility {
      * This will use any free spaces instead.
      */
     public static PlaceTemplates createPlacer(List<ItemStack> templates, Callback callback, boolean compacter) {
-        if(CodeClient.location instanceof Dev dev) {
+        if (CodeClient.location instanceof Dev dev) {
             var map = new HashMap<BlockPos, ItemStack>();
-            if(!compacter) {
+            if (!compacter) {
                 BlockPos lastPos = dev.findFreePlacePos();
-                for (var template: templates) {
+                for (var template : templates) {
                     map.put(lastPos, template);
                     lastPos = dev.findFreePlacePos(lastPos.west(2));
                 }
-            }
-            else {
+            } else {
                 BlockPos nextPos = dev.findFreePlacePos();
-                for (var template: templates) {
+                for (var template : templates) {
                     int size = Template.parse64(Utility.templateDataItem(template)).getLength();
                     var placePos = nextPos;
                     var templateEndPos = placePos.south(size);
-                    if(dev.isInDev(templateEndPos)) {
+                    if (dev.isInDev(templateEndPos)) {
                         nextPos = templateEndPos;
-                    }
-                    else {
+                    } else {
                         placePos = dev.findFreePlacePos(placePos.west(2));
                         nextPos = placePos.south(size);
                     }
-                    map.put(placePos,template);
+                    map.put(placePos, template);
                 }
             }
             return new PlaceTemplates(map, callback);
@@ -201,12 +194,12 @@ public class Utility {
         return null;
     }
 
-    public static void addLore(ItemStack stack, Text ...lore) {
+    public static void addLore(ItemStack stack, Text... lore) {
         var display = stack.getSubNbt("display");
         var loreList = new NbtList();
-        for (Text line: lore) loreList.add(Utility.nbtify(Text.empty().append(line)));
-        display.put("Lore",loreList);
-        stack.setSubNbt("display",display);
+        for (Text line : lore) loreList.add(Utility.nbtify(Text.empty().append(line)));
+        display.put("Lore", loreList);
+        stack.setSubNbt("display", display);
     }
 
     public static void sendHandItem(ItemStack item) {
@@ -237,6 +230,7 @@ public class Utility {
 
     /**
      * GZIPs and base64's data for use in templates.
+     *
      * @throws IOException If an I/O error happened with gzip
      */
     public static String compileTemplate(String data) throws IOException {
@@ -261,6 +255,7 @@ public class Utility {
     public static void sendMessage(String message) {
         sendMessage(Text.literal(message), ChatType.INFO);
     }
+
     public static void sendMessage(Text message) {
         sendMessage(message, ChatType.INFO);
     }
@@ -283,24 +278,25 @@ public class Utility {
 
     /**
      * Prepares a text object for use in an item's display tag
+     *
      * @return Usable in lore and as a name in nbt.
      */
     public static NbtString nbtify(Text text) {
         JsonElement json = Text.Serialization.toJsonTree(text);
-        if(json.isJsonObject()) {
+        if (json.isJsonObject()) {
             JsonObject obj = (JsonObject) json;
 
-            if(!obj.has("color")) obj.addProperty("color","white");
-            if(!obj.has("italic")) obj.addProperty("italic",false);
-            if(!obj.has("bold")) obj.addProperty("bold",false);
+            if (!obj.has("color")) obj.addProperty("color", "white");
+            if (!obj.has("italic")) obj.addProperty("italic", false);
+            if (!obj.has("bold")) obj.addProperty("bold", false);
 
             return NbtString.of(obj.toString());
-        }
-        else return NbtString.of(json.toString());
+        } else return NbtString.of(json.toString());
     }
 
     /**
      * Parses § formatted strings.
+     *
      * @param text § formatted string.
      * @return Text with all parsed text as siblings.
      */
@@ -311,15 +307,13 @@ public class Utility {
         Matcher m = Pattern.compile("§(([0-9a-kfmnolr])|x(§[0-9a-f]){6})|[^§]+").matcher(text);
         while (m.find()) {
             String data = m.group();
-            if(data.startsWith("§")) {
-                if(data.startsWith("§x")) {
-                    component = component.setStyle(component.getStyle().withColor(Integer.valueOf(data.replaceAll("§x|§",""), 16)));
-                }
-                else {
+            if (data.startsWith("§")) {
+                if (data.startsWith("§x")) {
+                    component = component.setStyle(component.getStyle().withColor(Integer.valueOf(data.replaceAll("§x|§", ""), 16)));
+                } else {
                     component = component.formatted(Formatting.byCode(data.charAt(1)));
                 }
-            }
-            else {
+            } else {
                 component.append(data);
                 output.append(component);
                 component = Text.empty().setStyle(component.getStyle());
@@ -329,18 +323,19 @@ public class Utility {
     }
 
     public static boolean isGlitchStick(ItemStack item) {
-        if(item == null) return false;
+        if (item == null) return false;
         NbtCompound nbt = item.getNbt();
-        if(nbt == null) return false;
-        if(nbt.isEmpty()) return false;
-        if(Objects.equals(nbt.getCompound("PublicBukkitValues").getString("hypercube:item_instance"), "")) return false;
+        if (nbt == null) return false;
+        if (nbt.isEmpty()) return false;
+        if (Objects.equals(nbt.getCompound("PublicBukkitValues").getString("hypercube:item_instance"), ""))
+            return false;
         return Objects.equals(nbt.getCompound("display").getString("Name"), "{\"italic\":false,\"color\":\"red\",\"text\":\"Glitch Stick\"}");
     }
 
     public static HashMap<Integer, String> getBlockTagLines(ItemStack item) {
         NbtCompound display = item.getSubNbt("display");
         NbtList lore = (NbtList) display.get("Lore");
-        if(lore == null) throw new NullPointerException("Can't get lore.");
+        if (lore == null) throw new NullPointerException("Can't get lore.");
 
         HashMap<Integer, String> options = new HashMap<>();
 
@@ -348,10 +343,10 @@ public class Utility {
             NbtElement element = lore.get(index);
             Text text = Text.Serialization.fromJson(element.asString());
             var data = text.getString();
-            if(data.isBlank() || data.equals("Default Value:")) {
+            if (data.isBlank() || data.equals("Default Value:")) {
                 break;
             }
-            options.put(index, data.replaceAll("» ",""));
+            options.put(index, data.replaceAll("» ", ""));
         }
 
         return options;

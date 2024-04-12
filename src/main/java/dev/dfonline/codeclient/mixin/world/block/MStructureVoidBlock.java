@@ -5,7 +5,6 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Creator;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.LightBlock;
 import net.minecraft.block.StructureVoidBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

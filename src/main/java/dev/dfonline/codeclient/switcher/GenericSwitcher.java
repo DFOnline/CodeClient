@@ -24,14 +24,6 @@ public abstract class GenericSwitcher extends Screen {
     private static final Identifier TEXTURE = new Identifier("textures/gui/container/gamemode_switcher.png");
     private static final Identifier SLOT_TEXTURE = new Identifier("gamemode_switcher/slot");
     private static final Identifier SELECTED_TEXTURE = new Identifier("gamemode_switcher/selection");
-    private final List<SelectableButtonWidget> buttons = new ArrayList<>();
-    private boolean usingMouseToSelect = false;
-    protected boolean hasClicked = false;
-    private Integer lastMouseX;
-    private Integer lastMouseY;
-    protected Integer selected;
-    protected Text footer = Text.translatable("codeclient.switcher.footer");
-
     /**
      * Key to hold down, generally F3.
      * The selected option will be run when this is released.
@@ -41,6 +33,13 @@ public abstract class GenericSwitcher extends Screen {
      * The key to open and select the next option.
      */
     public final int PRESS_KEY;
+    private final List<SelectableButtonWidget> buttons = new ArrayList<>();
+    protected boolean hasClicked = false;
+    protected Integer selected;
+    protected Text footer = Text.translatable("codeclient.switcher.footer");
+    private boolean usingMouseToSelect = false;
+    private Integer lastMouseX;
+    private Integer lastMouseY;
 
     protected GenericSwitcher(Text title, int holdKey, int pressKey) {
         super(title);
@@ -59,14 +58,14 @@ public abstract class GenericSwitcher extends Screen {
         int width = options.size() * 31 - 5;
         int i = 0;
         for (Option option : options) {
-            this.buttons.add(new SelectableButtonWidget(option,this.width / 2 - width / 2 + i * 31, this.height / 2 - 31));
+            this.buttons.add(new SelectableButtonWidget(option, this.width / 2 - width / 2 + i * 31, this.height / 2 - 31));
             ++i;
         }
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if(checkFinished()) return;
+        if (checkFinished()) return;
         context.getMatrices().push();
         RenderSystem.enableBlend();
         int centerX = this.width / 2 - 62;
@@ -75,11 +74,11 @@ public abstract class GenericSwitcher extends Screen {
         context.getMatrices().pop();
         super.render(context, mouseX, mouseY, delta);
 
-        if(lastMouseX == null) lastMouseX = mouseX;
-        if(lastMouseY == null) lastMouseY = mouseY;
+        if (lastMouseX == null) lastMouseX = mouseX;
+        if (lastMouseY == null) lastMouseY = mouseY;
 
-        if(!usingMouseToSelect) {
-            if(this.lastMouseX != mouseX || this.lastMouseY != mouseY) this.usingMouseToSelect = true;
+        if (!usingMouseToSelect) {
+            if (this.lastMouseX != mouseX || this.lastMouseY != mouseY) this.usingMouseToSelect = true;
             lastMouseX = mouseX;
             lastMouseY = mouseY;
         }
@@ -93,12 +92,12 @@ public abstract class GenericSwitcher extends Screen {
         int i = 0;
 
         for (SelectableButtonWidget button : buttons) {
-            if(usingMouseToSelect) {
-                if(button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
+            if (usingMouseToSelect) {
+                if (button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
             }
             button.selected = this.selected == i;
             context.drawGuiTexture(SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
-            if(button.selected) context.drawGuiTexture(SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
+            if (button.selected) context.drawGuiTexture(SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
             button.render(context, mouseX, mouseY, delta);
             ++i;
         }
@@ -109,13 +108,13 @@ public abstract class GenericSwitcher extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if(keyCode == PRESS_KEY) {
+        if (keyCode == PRESS_KEY) {
             this.usingMouseToSelect = false;
-            this.selected ++;
+            this.selected++;
             this.selected %= getOptions().size();
             return true;
         }
-        if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             this.close();
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -126,10 +125,10 @@ public abstract class GenericSwitcher extends Screen {
         int i = 0;
 
         for (SelectableButtonWidget widget : buttons) {
-            if(widget.getX() < mouseX && widget.getX() + 31 > mouseX
+            if (widget.getX() < mouseX && widget.getX() + 31 > mouseX
                     && widget.getY() < mouseY && widget.getY() + 31 > mouseY) this.selected = i;
             widget.selected = this.selected == i;
-            if(widget.selected) {
+            if (widget.selected) {
                 hasClicked = true;
                 return true;
             }
@@ -139,10 +138,10 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     protected boolean checkFinished() {
-        if(this.client == null) return false;
-        if(hasClicked || !InputUtil.isKeyPressed(this.client.getWindow().getHandle(), HOLD_KEY)) {
+        if (this.client == null) return false;
+        if (hasClicked || !InputUtil.isKeyPressed(this.client.getWindow().getHandle(), HOLD_KEY)) {
             Option selected = getSelected();
-            if(selected != null) selected.run();
+            if (selected != null) selected.run();
             this.client.setScreen(null);
             return true;
         }
@@ -151,15 +150,25 @@ public abstract class GenericSwitcher extends Screen {
 
     protected Option getSelected() {
         List<Option> options = getOptions();
-        if(selected >= options.size()) return null;
-        if(selected < 0) return null;
+        if (selected >= options.size()) return null;
+        if (selected < 0) return null;
         return options.get(selected);
     }
 
+    @Override
+    public boolean shouldPause() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return true;
+    }
 
     public interface Callback {
         void run();
     }
+
     @Environment(EnvType.CLIENT)
     public record Option(Text text, ItemStack icon, Callback callback) {
         public void run() {
@@ -173,23 +182,23 @@ public abstract class GenericSwitcher extends Screen {
         public boolean selected = false;
 
         public SelectableButtonWidget(Option option, int x, int y) {
-            super(x,y,26,26,option.text());
+            super(x, y, 26, 26, option.text());
             this.option = option;
         }
 
         @Override
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             context.getMatrices().push();
-            context.getMatrices().translate((float)this.getX(), (float)this.getY(), 0.0F);
-            context.drawTexture(TEXTURE,0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
+            context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
+            context.drawTexture(TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
             context.getMatrices().pop();
 
             context.drawItem(option.icon, this.getX() + 5, this.getY() + 5);
             context.drawItemInSlot(textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
 
-            if(selected) {
+            if (selected) {
                 context.getMatrices().push();
-                context.getMatrices().translate((float)this.getX(), (float)this.getY(), 0.0F);
+                context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
                 context.drawTexture(TEXTURE, 0, 0, 26.0F, 75.0F, 26, 26, 128, 128);
                 context.getMatrices().pop();
             }
@@ -199,15 +208,5 @@ public abstract class GenericSwitcher extends Screen {
         protected void appendClickableNarrations(NarrationMessageBuilder builder) {
             this.appendDefaultNarrations(builder);
         }
-    }
-
-    @Override
-    public boolean shouldPause() {
-        return false;
-    }
-
-    @Override
-    public boolean shouldCloseOnEsc() {
-        return true;
     }
 }

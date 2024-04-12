@@ -21,13 +21,13 @@ public class VarItems {
                 case "pot" -> new Potion(material, var);
                 case "snd" -> new Sound(material, var);
                 case "g_val" -> new GameValue(material, var);
-                case "pn_el" -> new Parameter(material, var); // Short for `pattern_element`. Parameters, each bullet in a actions Chest Parameters is a pattern internally. Apparently.
+                case "pn_el" ->
+                        new Parameter(material, var); // Short for `pattern_element`. Parameters, each bullet in a actions Chest Parameters is a pattern internally. Apparently.
                 case "bl_tag" -> new BlockTag(material, var);
                 case "hint" -> new Hint(material, var); // we're so funny
                 default -> null;
             };
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }

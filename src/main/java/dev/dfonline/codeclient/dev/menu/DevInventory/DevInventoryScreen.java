@@ -46,9 +46,9 @@ import static dev.dfonline.codeclient.dev.menu.DevInventory.DevInventoryGroup.*;
 
 @Environment(EnvType.CLIENT)
 public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler> {
-    private static final Identifier TEXTURE = new Identifier(CodeClient.MOD_ID,"textures/gui/container/dev_inventory/tabs.png");
-    private static final String TAB_TEXTURE_PREFIX = "textures/gui/container/creative_inventory/tab_";
     static final SimpleInventory Inventory = new SimpleInventory(45);
+    private static final Identifier TEXTURE = new Identifier(CodeClient.MOD_ID, "textures/gui/container/dev_inventory/tabs.png");
+    private static final String TAB_TEXTURE_PREFIX = "textures/gui/container/creative_inventory/tab_";
     private static final Text DELETE_ITEM_SLOT_TEXT = Text.translatable("inventory.binSlot");
     private static int selectedTab;
     private double scrollPosition;
@@ -78,45 +78,46 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     protected void onMouseClick(@Nullable Slot slot, int slotId, int button, SlotActionType actionType) {
-        if(slot == null) return;
+        if (slot == null) return;
         this.searchBox.setCursorToEnd(false);
         this.searchBox.setSelectionEnd(0);
 
-        if(slot == this.deleteItemSlot) {
+        if (slot == this.deleteItemSlot) {
             (this.handler).setCursorStack(ItemStack.EMPTY);
             return;
         }
 
-        if(slot.inventory instanceof SimpleInventory) {
-            if(actionType == SlotActionType.PICKUP) {
-                if(this.handler.getCursorStack().getItem().equals(Items.AIR)) this.handler.setCursorStack(slot.getStack());
+        if (slot.inventory instanceof SimpleInventory) {
+            if (actionType == SlotActionType.PICKUP) {
+                if (this.handler.getCursorStack().getItem().equals(Items.AIR))
+                    this.handler.setCursorStack(slot.getStack());
                 else this.handler.setCursorStack(Items.AIR.getDefaultStack());
             }
         }
-        if(slot.inventory instanceof PlayerInventory) {
+        if (slot.inventory instanceof PlayerInventory) {
             ItemStack slotStack = slot.getStack();
             ItemStack cursorItem = this.handler.getCursorStack();
 
             slot.setStack(cursorItem);
             this.handler.setCursorStack(slotStack);
             this.handler.syncState();
-            this.listener.onSlotUpdate(this.handler,slot.id - 9,slot.getStack());
+            this.listener.onSlotUpdate(this.handler, slot.id - 9, slot.getStack());
 //            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.id,slot.getStack()));
         }
     }
+
     protected void init() {
         super.init();
-        if(this.client == null || this.client.player == null) return;
+        if (this.client == null || this.client.player == null) return;
 
         try {
             ActionDump.getActionDump();
-        }
-        catch (IOException | JsonParseException e) {
+        } catch (IOException | JsonParseException e) {
             CodeClient.LOGGER.error(e.getMessage());
             Utility.sendMessage(
-                Text.translatable("codeclient.parse_db",Text.literal("https://github.com/DFOnline/CodeClient/wiki/actiondump").formatted(Formatting.AQUA,Formatting.UNDERLINE))
-                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump"))),
-            ChatType.FAIL);
+                    Text.translatable("codeclient.parse_db", Text.literal("https://github.com/DFOnline/CodeClient/wiki/actiondump").formatted(Formatting.AQUA, Formatting.UNDERLINE))
+                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump"))),
+                    ChatType.FAIL);
         }
 
         TextRenderer textRenderer = this.textRenderer;
@@ -129,8 +130,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         this.addSelectableChild(this.searchBox);
         // TODO: config for defaults on open
         setSelectedTab(6);
-        if(Config.getConfig().FocusSearch)
-        searchBox.setFocused(true);
+        if (Config.getConfig().FocusSearch)
+            searchBox.setFocused(true);
         searchBox.setCursorToEnd(false);
         searchBox.setSelectionEnd(0);
         this.client.player.playerScreenHandler.removeListener(this.listener);
@@ -171,13 +172,14 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             context.drawText(textRenderer, itemGroup.getName(), 8, 6, 0x404040, false);
         }
     }
-//
+
+    //
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
-            Integer clicked = getGroupFromMouse(mouseX,mouseY);
-            if(clicked != null && clicked != selectedTab) setSelectedTab(clicked);
+            Integer clicked = getGroupFromMouse(mouseX, mouseY);
+            if (clicked != null && clicked != selectedTab) setSelectedTab(clicked);
 
-            if(isClickInScrollbar(mouseX,mouseY)) {
+            if (isClickInScrollbar(mouseX, mouseY)) {
                 this.scrolling = true;
             }
         }
@@ -185,17 +187,17 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if(button == 0) {
+        if (button == 0) {
             this.scrolling = false;
         }
-        return super.mouseReleased(mouseX,mouseY,button);
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if(this.scrolling) {
+        if (this.scrolling) {
             int scrollOriginY = this.y + 18;
             int scrollEnd = scrollOriginY + 112;
-            double percentThrough = MathHelper.clamp(((float)mouseY - (float)scrollOriginY - 7.5F) / ((float)(scrollEnd - scrollOriginY) - 15.0F),0,1);
+            double percentThrough = MathHelper.clamp(((float) mouseY - (float) scrollOriginY - 7.5F) / ((float) (scrollEnd - scrollOriginY) - 15.0F), 0, 1);
             this.scrollPosition = ((double) this.scrollHeight / 9) * percentThrough;
             scroll();
         }
@@ -203,11 +205,11 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     private Integer getGroupFromMouse(double mouseX, double mouseY) {
-        double x = mouseX - (double)this.x;
-        double y = mouseY - (double)this.y;
+        double x = mouseX - (double) this.x;
+        double y = mouseY - (double) this.y;
         DevInventoryGroup[] groups = DevInventoryGroup.GROUPS;
 
-        for(int i = 0; i < groups.length; ++i) {
+        for (int i = 0; i < groups.length; ++i) {
             DevInventoryGroup itemGroup = groups[i];
             if (this.isClickInTab(itemGroup, x, y)) {
                 return i;
@@ -223,8 +225,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
         selectedTab = tab;
 
-        if(this.client == null || this.client.player == null) return;
-        if(group == DevInventoryGroup.INVENTORY && this.survivalInventorySwapList == null) {
+        if (this.client == null || this.client.player == null) return;
+        if (group == DevInventoryGroup.INVENTORY && this.survivalInventorySwapList == null) {
             ScreenHandler playerScreenHandler = this.client.player.playerScreenHandler;
             this.survivalInventorySwapList = ImmutableList.copyOf((this.handler).slots);
             this.handler.slots.clear();
@@ -237,7 +239,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
             int slotSize = 18;
 
-            for(int i = 0; i < 27 && i < playerScreenHandler.slots.size(); ++i) {
+            for (int i = 0; i < 27 && i < playerScreenHandler.slots.size(); ++i) {
                 int slotIndex = i + 9;
                 int x = 9 + (slotIndex % 9) * slotSize;
                 int y = 36 + slotIndex / 9 * slotSize;
@@ -246,8 +248,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
                 this.handler.slots.add(slot);
             }
             return;
-        }
-        else if(this.survivalInventorySwapList != null) {
+        } else if (this.survivalInventorySwapList != null) {
             this.handler.slots.clear();
             this.handler.slots.addAll(this.survivalInventorySwapList);
             this.survivalInventorySwapList = null;
@@ -257,14 +258,15 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     private void scroll() {
-        if( searchResults == null ) return;
-        scrollHeight = Math.max(0,(int) Math.ceil((double) (searchResults.size() - 45) / 9) * 9);
+        if (searchResults == null) return;
+        scrollHeight = Math.max(0, (int) Math.ceil((double) (searchResults.size() - 45) / 9) * 9);
         for (int i = 0; i < 45; i++) {
             int value = i + (int) scrollPosition * 9;
-            if(value < searchResults.size()) this.handler.slots.get(i).setStack(searchResults.get(value).getItem());
+            if (value < searchResults.size()) this.handler.slots.get(i).setStack(searchResults.get(value).getItem());
             else this.handler.slots.get(i).setStack(Items.AIR.getDefaultStack());
         }
     }
+
     private void populate() {
         DevInventoryGroup group = GROUPS[selectedTab];
 //        if(group == INVENTORY) {
@@ -272,17 +274,17 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 //            return;
 //        }
         String text = searchBox.getText();
-        if(text.equals("")) text = null;
+        if (text.equals("")) text = null;
         searchResults = group.searchItems(text);
-        if(searchResults != null) this.scroll();
+        if (searchResults != null) this.scroll();
     }
 
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
 
-        Integer hoveredGroup = getGroupFromMouse(mouseX,mouseY);
-        if(hoveredGroup != null) {
+        Integer hoveredGroup = getGroupFromMouse(mouseX, mouseY);
+        if (hoveredGroup != null) {
             DevInventoryGroup group = GROUPS[hoveredGroup];
             context.drawTooltip(textRenderer, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
         }
@@ -294,12 +296,13 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.drawMouseoverTooltip(context, mouseX, mouseY);
     }
+
     public boolean charTyped(char chr, int modifiers) {
-        if(ignoreNextKey) {
+        if (ignoreNextKey) {
             ignoreNextKey = false;
             return true;
         }
-        if(searchBox.charTyped(chr, modifiers)) {
+        if (searchBox.charTyped(chr, modifiers)) {
             populate();
             return true;
         }
@@ -307,28 +310,28 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if(keyCode == GLFW.GLFW_KEY_GRAVE_ACCENT) {
+        if (keyCode == GLFW.GLFW_KEY_GRAVE_ACCENT) {
             this.close();
         }
-        if(keyCode >= GLFW.GLFW_KEY_0 && keyCode <= GLFW.GLFW_KEY_9) {
+        if (keyCode >= GLFW.GLFW_KEY_0 && keyCode <= GLFW.GLFW_KEY_9) {
             int number = keyCode - GLFW.GLFW_KEY_1;
-            if(number == -1) number = 9;
+            if (number == -1) number = 9;
             Slot slot = this.handler.slots.get(number);
-            if(this.client == null || this.client.player == null) return false;
+            if (this.client == null || this.client.player == null) return false;
             this.client.player.setStackInHand(Hand.MAIN_HAND, slot.getStack());
-            if(CodeClient.MC.getNetworkHandler() != null) Utility.sendHandItem(slot.getStack());
+            if (CodeClient.MC.getNetworkHandler() != null) Utility.sendHandItem(slot.getStack());
             this.ignoreNextKey = true;
             return true;
         }
-        if(keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
+        if (keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
             selectedTab += 7 * ((keyCode == GLFW.GLFW_KEY_DOWN) ? -1 : 1);
             selectedTab %= GROUPS.length;
-            if(selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
+            if (selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
             setSelectedTab(selectedTab);
             return true;
         }
-        if(keyCode != GLFW.GLFW_KEY_TAB && searchBox.isFocused()) {
-            if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (keyCode != GLFW.GLFW_KEY_TAB && searchBox.isFocused()) {
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 this.searchBox.setFocused(false);
                 this.setFocused(null);
                 return false;
@@ -337,18 +340,17 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             populate();
             return true;
         }
-        if(keyCode == GLFW.GLFW_KEY_TAB || keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_LEFT) {
-            if((modifiers & GLFW.GLFW_MOD_SHIFT) == 1 || keyCode == GLFW.GLFW_KEY_LEFT) {
+        if (keyCode == GLFW.GLFW_KEY_TAB || keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_LEFT) {
+            if ((modifiers & GLFW.GLFW_MOD_SHIFT) == 1 || keyCode == GLFW.GLFW_KEY_LEFT) {
                 selectedTab = selectedTab - 1;
-                if(selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
+                if (selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
                 setSelectedTab(selectedTab);
-            }
-            else setSelectedTab((selectedTab + 1) % GROUPS.length);
+            } else setSelectedTab((selectedTab + 1) % GROUPS.length);
             return true;
         }
-        if(searchBox.active) {
-            if(CodeClient.MC.options.chatKey.matchesKey(keyCode,scanCode) || CodeClient.editBind.matchesKey(keyCode,scanCode)) {
-                if(keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
+        if (searchBox.active) {
+            if (CodeClient.MC.options.chatKey.matchesKey(keyCode, scanCode) || CodeClient.editBind.matchesKey(keyCode, scanCode)) {
+                if (keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
                 searchBox.setFocused(true);
                 searchBox.setCursorToEnd(false);
                 searchBox.setSelectionEnd(0);
@@ -363,7 +365,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
 
-        for(DevInventoryGroup group : DevInventoryGroup.GROUPS) {
+        for (DevInventoryGroup group : DevInventoryGroup.GROUPS) {
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, TEXTURE);
             this.renderTabIcon(context, group);
@@ -371,23 +373,24 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         String texture = "item_search";
-        if(!itemGroup.hasSearchBar()) texture = "items";
-        if(itemGroup == INVENTORY) texture = "inventory";
+        if (!itemGroup.hasSearchBar()) texture = "items";
+        if (itemGroup == INVENTORY) texture = "inventory";
         context.drawTexture(new Identifier(TAB_TEXTURE_PREFIX + texture + ".png"), this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE);
         this.renderTabIcon(context, itemGroup);
 
-        if(itemGroup.hasSearchBar()) this.searchBox.render(context, mouseX, mouseY, delta);
+        if (itemGroup.hasSearchBar()) this.searchBox.render(context, mouseX, mouseY, delta);
         if (itemGroup != INVENTORY) {
             int scrollbarX = this.x + 175;
             int scrollbarY = this.y + 18;
-            if(scrollHeight == 0) context.drawTexture(TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15);
-            else context.drawTexture(TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
-        }
-        else {
-            if(this.client != null && this.client.player != null) InventoryScreen.drawEntity(context, this.x + 73, this.y + 6, this.x + 105, this.y + 49, 20, 0.0625F, (float)mouseX, (float)mouseY, this.client.player);
+            if (scrollHeight == 0) context.drawTexture(TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15);
+            else
+                context.drawTexture(TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
+        } else {
+            if (this.client != null && this.client.player != null)
+                InventoryScreen.drawEntity(context, this.x + 73, this.y + 6, this.x + 105, this.y + 49, 20, 0.0625F, (float) mouseX, (float) mouseY, this.client.player);
         }
 
     }
@@ -397,7 +400,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         int y = group.getDisplayY(0, this.backgroundHeight);
 
         return mouseX >= x && mouseX <= (x + TAB_WIDTH)
-            && mouseY >= y && mouseY <= (y + TAB_HEIGHT);
+                && mouseY >= y && mouseY <= (y + TAB_HEIGHT);
     }
 
     protected void renderTabIcon(DrawContext context, DevInventoryGroup group) {
@@ -409,7 +412,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         int originX = group.getDisplayX(this.x);
         int originY = group.getDisplayY(this.y, this.backgroundHeight);
         if (isSelected) mapY += 32;
-        if(!isTopRow) mapY += 64;
+        if (!isTopRow) mapY += 64;
 
         context.drawTexture(TEXTURE, originX, originY, mapX, mapY, TAB_WIDTH, 32);
 //        this.itemRenderer.zOffset = 100.0F;
@@ -422,23 +425,23 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if(!GROUPS[selectedTab].hasSearchBar()) return false;
+        if (!GROUPS[selectedTab].hasSearchBar()) return false;
         this.scrollPosition -= verticalAmount;
-        if(scrollPosition < 0) scrollPosition = 0;
-        if((scrollPosition * 9) > scrollHeight) scrollPosition = (double) scrollHeight / 9;
+        if (scrollPosition < 0) scrollPosition = 0;
+        if ((scrollPosition * 9) > scrollHeight) scrollPosition = (double) scrollHeight / 9;
 
         scroll();
         return true;
     }
 
     protected boolean isClickInScrollbar(double mouseX, double mouseY) {
-        if(!GROUPS[selectedTab].hasSearchBar()) return false;
+        if (!GROUPS[selectedTab].hasSearchBar()) return false;
         int windowX = this.x;
         int windowY = this.y;
         int scrollOriginX = windowX + 175;
         int scrollOriginY = windowY + 18;
         int scrollFarX = scrollOriginX + 14;
         int scrollFarY = scrollOriginY + 112;
-        return mouseX >= (double)scrollOriginX && mouseY >= (double)scrollOriginY && mouseX < (double)scrollFarX && mouseY < (double)scrollFarY;
+        return mouseX >= (double) scrollOriginX && mouseY >= (double) scrollOriginY && mouseX < (double) scrollFarX && mouseY < (double) scrollFarY;
     }
 }

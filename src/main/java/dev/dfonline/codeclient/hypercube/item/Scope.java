@@ -13,6 +13,7 @@ public enum Scope {
     public final TextColor color;
     public final String longName;
     public final String shortName;
+
     Scope(TextColor color, String longName, String shortName) {
         this.color = color;
         this.longName = longName;

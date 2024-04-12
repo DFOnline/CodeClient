@@ -11,7 +11,6 @@ import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,23 +23,23 @@ import java.util.Arrays;
 public class MBlock {
     @Inject(method = "getPickStack", at = @At("HEAD"), cancellable = true)
     private void getPickStack(WorldView world, BlockPos pos, BlockState state, CallbackInfoReturnable<ItemStack> cir) {
-        if(!Config.getConfig().PickAction) return;
-        if(CodeClient.location instanceof Dev dev) {
-            if(!dev.isInDev(pos)) return;
+        if (!Config.getConfig().PickAction) return;
+        if (CodeClient.location instanceof Dev dev) {
+            if (!dev.isInDev(pos)) return;
             var breakable = InteractionManager.isBlockBreakable(pos);
-            if(breakable == null) return;
+            if (breakable == null) return;
             var sign = breakable.west(1);
-            if(CodeClient.MC.world.getBlockEntity(sign) instanceof SignBlockEntity signBlock)
+            if (CodeClient.MC.world.getBlockEntity(sign) instanceof SignBlockEntity signBlock)
                 try {
                     SignText text = signBlock.getFrontText();
                     var actiondump = ActionDump.getActionDump();
                     var action = Arrays.stream(actiondump.actions).filter(a ->
                             a.codeblockName.equals(text.getMessage(0, false).getString()) &&
-                            a.name.equals(text.getMessage(1, false).getString())).findFirst();
-                    if(action.isEmpty()) return;
+                                    a.name.equals(text.getMessage(1, false).getString())).findFirst();
+                    if (action.isEmpty()) return;
                     cir.setReturnValue(action.get().getItem());
+                } catch (Exception ignored) {
                 }
-            catch (Exception ignored) {}
         }
     }
 }

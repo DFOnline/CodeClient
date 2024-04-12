@@ -13,9 +13,10 @@ import java.nio.file.StandardOpenOption;
 public class FileManager {
     /**
      * Verify the existence and get the mod data folder.
+     *
      * @return
      */
-    public static Path Path(){
+    public static Path Path() {
         Path path = CodeClient.MC.runDirectory.toPath().resolve(CodeClient.MOD_ID);
         path.toFile().mkdir();
         return path;
@@ -34,14 +35,16 @@ public class FileManager {
     public static File getConfigFile() {
         return new File(FabricLoader.getInstance().getConfigDir().toFile(), CodeClient.MOD_ID + ".json");
     }
+
     public static void writeConfig(String content) throws IOException {
         boolean ignore;
         File file = getConfigFile();
         Files.deleteIfExists(file.toPath());
         Files.createFile(file.toPath());
-        if(!file.exists()) ignore = file.createNewFile();
+        if (!file.exists()) ignore = file.createNewFile();
         Files.write(file.toPath(), content.getBytes(), StandardOpenOption.WRITE);
     }
+
     public static String readConfig() throws IOException {
         return Files.readString(getConfigFile().toPath());
     }
@@ -50,10 +53,9 @@ public class FileManager {
         Path path = Path().resolve(fileName);
         Files.deleteIfExists(path);
         Files.createFile(path);
-        if(doCharSet) {
+        if (doCharSet) {
             Files.write(path, content.getBytes(Config.getConfig().SaveCharSet.charSet), StandardOpenOption.WRITE);
-        }
-        else {
+        } else {
             Files.write(path, content.getBytes(), StandardOpenOption.WRITE);
         }
         return path;

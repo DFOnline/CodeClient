@@ -10,9 +10,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Optional;
 
 public class GameValue extends VarItem {
     private String type;
@@ -31,7 +29,7 @@ public class GameValue extends VarItem {
     // TODO: allow rejecting nonexistant values if actiondump is loaded
     public void setType(String type) {
         this.type = type;
-        this.data.addProperty("type",type);
+        this.data.addProperty("type", type);
     }
 
 //    public void setData(String type, Target target) {
@@ -47,7 +45,7 @@ public class GameValue extends VarItem {
 
     public void setTarget(Target target) {
         this.target = target;
-        this.data.addProperty("target",target.name());
+        this.data.addProperty("target", target.name());
     }
 
     @Override
@@ -56,12 +54,12 @@ public class GameValue extends VarItem {
         try {
             ActionDump db = ActionDump.getActionDump();
             var value = Arrays.stream(db.gameValues).filter(gv -> gv.icon.getCleanName().equals(type)).findFirst();
-            if(value.isEmpty()) throw new Exception("");
+            if (value.isEmpty()) throw new Exception("");
             stack.setCustomName(Text.literal(value.get().icon.name));
         } catch (Exception e) {
             stack.setCustomName(Text.literal(type).setStyle(Style.EMPTY));
         }
-        Utility.addLore(stack,Text.literal("Target: ").formatted(Formatting.GRAY).append(Text.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color))));
+        Utility.addLore(stack, Text.literal("Target: ").formatted(Formatting.GRAY).append(Text.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color))));
         return stack;
     }
 }

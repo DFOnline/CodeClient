@@ -19,18 +19,20 @@ import java.util.Objects;
 
 @Mixin(InGameHud.class)
 public abstract class MInGameHud {
-    @Shadow public abstract TextRenderer getTextRenderer();
+    @Shadow
+    private int scaledHeight;
+    @Shadow
+    private int scaledWidth;
 
-    @Shadow private int scaledHeight;
-
-    @Shadow private int scaledWidth;
+    @Shadow
+    public abstract TextRenderer getTextRenderer();
 
     @Inject(method = "render", at = @At("HEAD"))
     private void onRender(DrawContext context, float tickDelta, CallbackInfo ci) {
         TextRenderer textRenderer = getTextRenderer();
 
         List<Text> overlay = List.copyOf(OverlayManager.getOverlayText());
-        if(!overlay.isEmpty()) {
+        if (!overlay.isEmpty()) {
             int index = 0;
             for (Text text : overlay) {
                 context.drawTextWithShadow(textRenderer, Objects.requireNonNullElseGet(text, () -> Text.literal("NULL")), 30, 30 + (index * 9), -1);
@@ -41,13 +43,13 @@ public abstract class MInGameHud {
         int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;
         try {
             List<Text> peeker = ChestPeeker.getOverlayText();
-            if(peeker == null) peeker = SignPeeker.getOverlayText();
-            if(peeker != null && !peeker.isEmpty()) {
-                context.drawTooltip(textRenderer,peeker,x,yOrig);
+            if (peeker == null) peeker = SignPeeker.getOverlayText();
+            if (peeker != null && !peeker.isEmpty()) {
+                context.drawTooltip(textRenderer, peeker, x, yOrig);
 
             }
         } catch (Exception ignored) {
-            context.drawTooltip(textRenderer,Text.literal("An error occurred"),x,yOrig);
+            context.drawTooltip(textRenderer, Text.literal("An error occurred"), x, yOrig);
 
         }
     }

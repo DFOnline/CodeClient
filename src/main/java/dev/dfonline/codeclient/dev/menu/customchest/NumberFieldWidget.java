@@ -7,37 +7,40 @@ import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.Nullable;
 
 public class NumberFieldWidget extends TextFieldWidget {
-    private double number = 0;
-    private @RegExp String regex = "(?<!^)-|[^\\d-.]";
-    private boolean isInt = false;
     @Nullable
     public Double min = null;
     @Nullable
     public Double max = null;
+    private double number = 0;
+    private @RegExp String regex = "(?<!^)-|[^\\d-.]";
+    private boolean isInt = false;
 
     public NumberFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, Text text) {
         super(textRenderer, x, y, width, height, text);
     }
+
     public NumberFieldWidget integer() {
         this.regex = "(?<!^)-|[^\\d-]";
         this.isInt = true;
         return this;
     }
+
     public NumberFieldWidget min(double min) {
         this.min = min;
         return this;
     }
+
     public NumberFieldWidget max(double max) {
         this.max = max;
         return this;
     }
 
     private void setValue(double number) {
-        if(min != null) {
-            number = Math.max(min,number);
+        if (min != null) {
+            number = Math.max(min, number);
         }
-        if(max != null) {
-            number = Math.min(max,number);
+        if (max != null) {
+            number = Math.min(max, number);
         }
         this.number = number;
     }
@@ -46,29 +49,32 @@ public class NumberFieldWidget extends TextFieldWidget {
     public void setText(String text) {
         try {
             setValue(Double.parseDouble(text));
+        } catch (Exception ignored) {
         }
-        catch (Exception ignored) {}
         super.setText(text);
-    }
-
-    public void setNumber(double number) {
-        setValue(number);
-        this.setText((isInt? "%.0f" : "%.2f").formatted(this.number));
     }
 
     public double getNumber() {
         return number;
     }
-    public int getInt() {return (int) number;}
+
+    public void setNumber(double number) {
+        setValue(number);
+        this.setText((isInt ? "%.0f" : "%.2f").formatted(this.number));
+    }
+
+    public int getInt() {
+        return (int) number;
+    }
 
     @Override
     public void write(String text) {
-        super.write(text.replaceAll(regex,""));
+        super.write(text.replaceAll(regex, ""));
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if(isMouseOver(mouseX,mouseY)) {
+        if (isMouseOver(mouseX, mouseY)) {
             this.setNumber(this.getNumber() + (verticalAmount));
             return true;
         }

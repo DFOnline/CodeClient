@@ -20,7 +20,7 @@ public class NamedItem extends VarItem {
 
     public void setName(String name) {
         this.name = name;
-        this.data.addProperty("name",name);
+        this.data.addProperty("name", name);
     }
 
     @Override

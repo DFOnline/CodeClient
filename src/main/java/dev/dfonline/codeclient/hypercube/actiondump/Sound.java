@@ -10,14 +10,14 @@ public class Sound extends VarItem implements Searchable {
 
     @Override
     public List<String> getTerms() {
-        return List.of(sound,icon.name);
+        return List.of(sound, icon.name);
     }
 
     public ItemStack getItem() {
         JsonObject data = new JsonObject();
         data.addProperty("sound", icon.getCleanName());
-        data.addProperty("pitch",1);
-        data.addProperty("vol",2);
-        return super.getItem("snd",data);
+        data.addProperty("pitch", 1);
+        data.addProperty("vol", 2);
+        return super.getItem("snd", data);
     }
 }

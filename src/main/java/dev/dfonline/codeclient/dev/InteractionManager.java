@@ -56,36 +56,38 @@ public class InteractionManager {
 
     /**
      * Assuming pos is in a codespace.
+     *
      * @param pos The targeted pos.
      * @return The origin of the codeblock to be broken. null if it shouldn't break.
      */
     public static BlockPos isBlockBreakable(BlockPos pos) {
         if (pos.getY() % 5 != 0) return null;
         Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
-        if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON, Blocks.CHEST).contains(type)) return null;
+        if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON, Blocks.CHEST).contains(type))
+            return null;
         if (type == Blocks.OAK_WALL_SIGN) return pos.east();
         return pos;
     }
 
     public static boolean onBreakBlock(BlockPos pos) {
-        if(CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Dev plot) {
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
-            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
+            if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
                 ChestPeeker.invalidate();
-                if((!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir) && Config.getConfig().RecentChestInsert) {
+                if ((!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir) && Config.getConfig().RecentChestInsert) {
                     RecentChestInsert.setLastChest(pos);
                 }
             }
             BlockPos breakPos = isBlockBreakable(pos);
-            if(breakPos != null) {
-                if(Config.getConfig().ReportBrokenBlock && validBlocks.contains(CodeClient.MC.world.getBlockState(breakPos).getBlock()) && CodeClient.MC.world.getBlockEntity(breakPos.west()) instanceof SignBlockEntity sign) {
-                    if(!sign.getFrontText().getMessage(1,false).equals(Text.empty()))
-                        Utility.sendMessage(Text.translatable("codeclient.interaction.broke",Text.empty().formatted(Formatting.WHITE).append(sign.getFrontText().getMessage(1,false))).formatted(Formatting.AQUA), ChatType.INFO);
+            if (breakPos != null) {
+                if (Config.getConfig().ReportBrokenBlock && validBlocks.contains(CodeClient.MC.world.getBlockState(breakPos).getBlock()) && CodeClient.MC.world.getBlockEntity(breakPos.west()) instanceof SignBlockEntity sign) {
+                    if (!sign.getFrontText().getMessage(1, false).equals(Text.empty()))
+                        Utility.sendMessage(Text.translatable("codeclient.interaction.broke", Text.empty().formatted(Formatting.WHITE).append(sign.getFrontText().getMessage(1, false))).formatted(Formatting.AQUA), ChatType.INFO);
                 }
                 BlockBreakDeltaCalculator.breakBlock(pos);
             }
-            if(Config.getConfig().CustomBlockInteractions) {
-                if(breakPos != null) {
+            if (Config.getConfig().CustomBlockInteractions) {
+                if (breakPos != null) {
                     breakCodeBlock(breakPos);
                 }
             }
@@ -98,15 +100,15 @@ public class InteractionManager {
         ClientWorld world = CodeClient.MC.world;
         CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvent.of(new Identifier("minecraft:block.stone.break")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
         world.setBlockState(pos, Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(0,1,0), Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(-1,0,0), Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(0,0,1), Blocks.AIR.getDefaultState());
+        world.setBlockState(pos.add(0, 1, 0), Blocks.AIR.getDefaultState());
+        world.setBlockState(pos.add(-1, 0, 0), Blocks.AIR.getDefaultState());
+        world.setBlockState(pos.add(0, 0, 1), Blocks.AIR.getDefaultState());
     }
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-        if(!slot.hasStack()) return false;
+        if (!slot.hasStack()) return false;
         ItemStack item = slot.getStack();
-        if(!item.hasNbt()) return false;
+        if (!item.hasNbt()) return false;
         NbtCompound nbt = item.getNbt();
         if (nbt != null && !nbt.contains("PublicBukkitValues")) return false;
         if (nbt != null && nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
@@ -126,7 +128,7 @@ public class InteractionManager {
                     String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
                     NbtCompound display = nbt.getCompound("display");
                     NbtList lore = (NbtList) display.get("Lore");
-                    if(lore == null) return true;
+                    if (lore == null) return true;
 
                     int i = 0;
                     Integer tagStartIndex = null;
@@ -136,7 +138,7 @@ public class InteractionManager {
                     // TODO: Utility.getBlockTagLines
                     for (NbtElement element : lore) {
                         Text text = Text.Serialization.fromJson(element.asString());
-                        if(text == null) return false;
+                        if (text == null) return false;
                         TextColor color = text.getStyle().getColor();
                         if (color == null) {
                             List<Text> siblings = text.getSiblings();
@@ -170,8 +172,8 @@ public class InteractionManager {
                         lore.set(tagStartIndex + optionIndex, Utility.nbtify(text));
                         optionIndex++;
                     }
-                    display.put("Lore",lore);
-                    item.setSubNbt("display",display);
+                    display.put("Lore", lore);
+                    item.setSubNbt("display", display);
                     slot.setStack(item);
                     return true;
                 }
@@ -183,8 +185,8 @@ public class InteractionManager {
     }
 
     public static boolean isInsideWall(Vec3d playerPos) {
-        Vec3d middlePos = playerPos.add(0,0.75,0);
-        Box box = new EntityDimensions(0.6f,1.8f,true).getBoxAt(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
+        Vec3d middlePos = playerPos.add(0, 0.75, 0);
+        Box box = new EntityDimensions(0.6f, 1.8f, true).getBoxAt(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
         CodeClient.LOGGER.info(String.valueOf(box));
         return BlockPos.stream(box).anyMatch((pos) -> {
             BlockState blockState = CodeClient.MC.world.getBlockState(pos);
@@ -194,37 +196,41 @@ public class InteractionManager {
 
     /**
      * Gets where a df block will place from a hit result.
+     *
      * @return The pos for the block behind the sign. Null if the place should've failed.
      */
     @Nullable
     public static BlockPos getPlacePos(BlockHitResult hitResult) {
         BlockState state = CodeClient.MC.world.getBlockState(hitResult.getBlockPos());
         BlockPos pos = state.getBlock() == Blocks.STONE ? hitResult.getBlockPos().south() : hitResult.getBlockPos().offset(hitResult.getSide());
-        if(pos.getY() % 5 != 0) return null;
-        Vec3i[] check = {new Vec3i(1,0,0), new Vec3i(1,0,1), new Vec3i(1, 0 ,2), new Vec3i(2,0,0), new Vec3i(-1,0,0)};
-        for (Vec3i offset: check) {
-            if(CodeClient.MC.world.getBlockState(pos.add(offset)).isSolidBlock(CodeClient.MC.world,pos.add(offset))) return null;
+        if (pos.getY() % 5 != 0) return null;
+        Vec3i[] check = {new Vec3i(1, 0, 0), new Vec3i(1, 0, 1), new Vec3i(1, 0, 2), new Vec3i(2, 0, 0), new Vec3i(-1, 0, 0)};
+        for (Vec3i offset : check) {
+            if (CodeClient.MC.world.getBlockState(pos.add(offset)).isSolidBlock(CodeClient.MC.world, pos.add(offset)))
+                return null;
         }
         return pos;
     }
 
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
-        if(CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Dev plot) {
             ChestPeeker.invalidate();
             BlockPos pos = hitResult.getBlockPos();
-            if(plot.isInDev(pos)) {
-                if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
+            if (plot.isInDev(pos)) {
+                if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
                     isOpeningCodeChest = true;
                 }
-                if(pos.getY() % 5 == 4) { // Is a code space level (glass)
-                    if(hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
-                        if(CodeClient.MC.world.getBlockState(pos).isAir() && Config.getConfig().PlaceOnAir) return new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos().add(0,1,0),hitResult.isInsideBlock());
-                        if(Config.getConfig().CustomBlockInteractions) return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos(), hitResult.isInsideBlock());
+                if (pos.getY() % 5 == 4) { // Is a code space level (glass)
+                    if (hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
+                        if (CodeClient.MC.world.getBlockState(pos).isAir() && Config.getConfig().PlaceOnAir)
+                            return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos().add(0, 1, 0), hitResult.isInsideBlock());
+                        if (Config.getConfig().CustomBlockInteractions)
+                            return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos(), hitResult.isInsideBlock());
                     }
                 }
             }
-            if(hitResult.getSide() == Direction.DOWN) {
-                BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(),Direction.UP,hitResult.getBlockPos().add(0,-1,0), hitResult.isInsideBlock());
+            if (hitResult.getSide() == Direction.DOWN) {
+                BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos().add(0, -1, 0), hitResult.isInsideBlock());
                 return newHitResult;
             }
         }
@@ -232,7 +238,7 @@ public class InteractionManager {
     }
 
     public static boolean shouldTeleportUp() {
-        if(CodeClient.location instanceof Dev) {
+        if (CodeClient.location instanceof Dev) {
             ClientPlayerEntity pl = CodeClient.MC.player;
             return NoClip.isInDevSpace() && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
         }
@@ -240,18 +246,18 @@ public class InteractionManager {
     }
 
     public static boolean onItemInteract(PlayerEntity player, Hand hand) {
-        if(player.isSneaking() || !Config.getConfig().ScopeSwitcher) return false;
+        if (player.isSneaking() || !Config.getConfig().ScopeSwitcher) return false;
 
         ItemStack stack = player.getStackInHand(hand);
 
         NbtCompound nbt = stack.getNbt();
-        if(nbt == null) return false;
+        if (nbt == null) return false;
         NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
-        if(pbv == null) return false;
+        if (pbv == null) return false;
         NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
-        if(varItem == null) return false;
+        if (varItem == null) return false;
         JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
-        if(!var.get("id").getAsString().equals("var")) return false;
+        if (!var.get("id").getAsString().equals("var")) return false;
         JsonObject data = var.get("data").getAsJsonObject();
         String scopeName = data.get("scope").getAsString();
 
@@ -320,39 +326,39 @@ public class InteractionManager {
 
     @Nullable
     public static VoxelShape customVoxelShape(BlockView world, BlockPos pos) {
-        if(CodeClient.MC != null && CodeClient.MC.player != null && CodeClient.location instanceof Dev plot) {
+        if (CodeClient.MC != null && CodeClient.MC.player != null && CodeClient.location instanceof Dev plot) {
             Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
             Boolean isInDev = plot.isInDev(pos);
-            if(isInDev == null) return null;
-            if(!isInDev) {
+            if (isInDev == null) return null;
+            if (!isInDev) {
                 var player = CodeClient.MC.player;
                 boolean playerIsOutside = player.getEyeY() < 50
                         && ((player.getX() <= plot.getX() - 20)
                         || player.getZ() <= (plot.getZ())
                         || (player.getZ() >= plot.getZ() + plot.assumeSize().size)
                 );
-                if(!playerIsOutside) return null;
+                if (!playerIsOutside) return null;
                 boolean blockIsOutside = pos.getY() < 50
                         && (pos.getX() < plot.getX()) && (pos.getX() >= plot.getX() - 22)
                         && (pos.getZ() >= (plot.getZ() - 2)) && (pos.getZ() <= plot.getZ() + plot.assumeSize().size + 2);
-                if(blockIsOutside) return VoxelShapes.empty();
+                if (blockIsOutside) return VoxelShapes.empty();
                 return null;
             }
             boolean isLevel = pos.getY() % 5 == 4;
             boolean noClipAllowsBlock = Config.getConfig().NoClipEnabled || world.getBlockState(pos).isAir();
             boolean hideCodeSpace =
                     pos.getY() >= plot.getFloorY() &&
-                    noClipAllowsBlock &&
-                    mode != Config.LayerInteractionMode.OFF
-                    && isLevel
-                    && (
+                            noClipAllowsBlock &&
+                            mode != Config.LayerInteractionMode.OFF
+                            && isLevel
+                            && (
                             mode == Config.LayerInteractionMode.ON
-                            || pos.getY() + 1 < CodeClient.MC.player.getEyeY()
+                                    || pos.getY() + 1 < CodeClient.MC.player.getEyeY()
                     )
-                    && !world.getBlockState(pos.add(0,1,0)).isSolidBlock(world, pos)
-            ;
-            if(hideCodeSpace) return VoxelShapes.cuboid(0, 1 - 1d / (4096) ,0,1,1,1);
-            if(noClipAllowsBlock && mode != Config.LayerInteractionMode.OFF && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && isLevel) return VoxelShapes.empty();
+                            && !world.getBlockState(pos.add(0, 1, 0)).isSolidBlock(world, pos);
+            if (hideCodeSpace) return VoxelShapes.cuboid(0, 1 - 1d / (4096), 0, 1, 1, 1);
+            if (noClipAllowsBlock && mode != Config.LayerInteractionMode.OFF && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && isLevel)
+                return VoxelShapes.empty();
         }
         return null;
     }

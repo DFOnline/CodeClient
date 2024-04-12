@@ -18,17 +18,6 @@ public abstract class VarItem {
         this.id = id;
     }
 
-    public static JsonObject prefetch(ItemStack item) throws Exception {
-        if (!item.hasNbt()) throw new Exception("Item has no nbt.");
-        NbtCompound nbt = item.getNbt();
-        if (nbt == null) throw new Exception("NBT is null.");
-        if (!nbt.contains("PublicBukkitValues",NbtElement.COMPOUND_TYPE)) throw new Exception("Item has no PublicBukkitValues");
-        NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-        if (!publicBukkit.contains("hypercube:varitem", NbtElement.STRING_TYPE)) throw new Exception("Item has no hypercube:varitem");
-        String varitem = publicBukkit.getString("hypercube:varitem");
-        return JsonParser.parseString(varitem).getAsJsonObject();
-
-    }
     public VarItem(ItemStack item) throws Exception {
         this(item.getItem(), prefetch(item));
     }
@@ -39,15 +28,28 @@ public abstract class VarItem {
         data = var.get("data").getAsJsonObject();
     }
 
+    public static JsonObject prefetch(ItemStack item) throws Exception {
+        if (!item.hasNbt()) throw new Exception("Item has no nbt.");
+        NbtCompound nbt = item.getNbt();
+        if (nbt == null) throw new Exception("NBT is null.");
+        if (!nbt.contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE))
+            throw new Exception("Item has no PublicBukkitValues");
+        NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
+        if (!publicBukkit.contains("hypercube:varitem", NbtElement.STRING_TYPE))
+            throw new Exception("Item has no hypercube:varitem");
+        String varitem = publicBukkit.getString("hypercube:varitem");
+        return JsonParser.parseString(varitem).getAsJsonObject();
+
+    }
 
     public ItemStack toStack() {
         var pbv = new NbtCompound();
         var varItem = new JsonObject();
-        varItem.addProperty("id",id);
-        varItem.add("data",data);
+        varItem.addProperty("id", id);
+        varItem.add("data", data);
         pbv.put("hypercube:varitem", NbtString.of(varItem.toString()));
         ItemStack item = material.getDefaultStack();
-        item.setSubNbt("PublicBukkitValues",pbv);
+        item.setSubNbt("PublicBukkitValues", pbv);
         return item;
     }
 
@@ -58,8 +60,8 @@ public abstract class VarItem {
     public JsonObject getVar() {
         // This is probably the best approach tbh instead of updating data constantly
         var var = new JsonObject();
-        var.addProperty("id",id);
-        var.add("data",getData());
+        var.addProperty("id", id);
+        var.add("data", getData());
         return var;
     }
 }

@@ -16,9 +16,9 @@ public class Potion extends VarItem implements Searchable {
     @Override
     public ItemStack getItem() {
         JsonObject data = new JsonObject();
-        data.addProperty("pot",icon.getCleanName());
-        data.addProperty("dur",1000000);
-        data.addProperty("amp",0);
-        return super.getItem("pot",data);
+        data.addProperty("pot", icon.getCleanName());
+        data.addProperty("dur", 1000000);
+        data.addProperty("amp", 0);
+        return super.getItem("pot", data);
     }
 }

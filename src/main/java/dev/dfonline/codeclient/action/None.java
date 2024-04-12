@@ -4,11 +4,13 @@ import dev.dfonline.codeclient.OverlayManager;
 
 public class None extends Action {
     public None() {
-        super(() -> {});
+        super(() -> {
+        });
         this.init();
     }
 
-    @Override public void init() {
+    @Override
+    public void init() {
         OverlayManager.setOverlayText();
     }
 }

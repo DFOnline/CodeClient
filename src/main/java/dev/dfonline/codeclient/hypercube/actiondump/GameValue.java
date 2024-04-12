@@ -20,8 +20,8 @@ public class GameValue extends VarItem implements Searchable {
 
     public ItemStack getItem() {
         JsonObject data = new JsonObject();
-        data.addProperty("type",icon.getCleanName());
-        data.addProperty("target","Default");
+        data.addProperty("type", icon.getCleanName());
+        data.addProperty("target", "Default");
         return super.getItem("g_val", data);
     }
 }

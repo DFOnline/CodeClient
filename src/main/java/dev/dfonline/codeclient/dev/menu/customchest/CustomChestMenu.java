@@ -32,9 +32,9 @@ import java.util.List;
 public class CustomChestMenu extends HandledScreen<CustomChestHandler> implements ScreenHandlerProvider<CustomChestHandler> {
 
     private final CustomChestNumbers Size;
-    private double scroll = 0;
-    private final HashMap<Integer,Widget> widgets = new HashMap<>();
+    private final HashMap<Integer, Widget> widgets = new HashMap<>();
     private final ArrayList<VarItem> varItems = new ArrayList<>();
+    private double scroll = 0;
     private boolean update = true;
 
     public CustomChestMenu(CustomChestHandler handler, PlayerInventory inventory, Text title) {
@@ -63,7 +63,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     protected void handledScreenTick() {
-        if(update) {
+        if (update) {
             update((int) scroll);
             update = false;
         }
@@ -85,28 +85,28 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             var slot = subList.get(i);
             final int x = Size.SLOT_X + 1;
             final int y = i * 18 + Size.SLOT_Y + 1;
-            if(i + scroll < 27) {
-                context.drawItem(slot.getStack(),x,y);
-                context.drawItemInSlot(textRenderer,slot.getStack(),x,y);
+            if (i + scroll < 27) {
+                context.drawItem(slot.getStack(), x, y);
+                context.drawItemInSlot(textRenderer, slot.getStack(), x, y);
                 int relX = mouseX - this.x;
                 int relY = mouseY - this.y;
-                if(
-                           relX > x
-                        && relX < x+18
-                        && relY > y
-                        && relY < y+18
+                if (
+                        relX > x
+                                && relX < x + 18
+                                && relY > y
+                                && relY < y + 18
                 ) {
                     drawSlotHighlight(context, x, y, -10);
                     focusedSlot = slot;
                 }
-            }
-            else {
-                context.drawTexture(Size.TEXTURE, x-1,y-1,Size.DISABLED_X,0,18,18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+            } else {
+                context.drawTexture(Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
             }
         }
 
-        if(focusedSlot != null) {
-            if(focusedSlot.hasStack()) context.drawItemTooltip(textRenderer,focusedSlot.getStack(),mouseX - this.x,mouseY - this.y);
+        if (focusedSlot != null) {
+            if (focusedSlot.hasStack())
+                context.drawItemTooltip(textRenderer, focusedSlot.getStack(), mouseX - this.x, mouseY - this.y);
         }
         context.getMatrices().pop();
     }
@@ -124,31 +124,31 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             Slot slot = subList.get(i);
-            if(!slot.hasStack()) continue;
+            if (!slot.hasStack()) continue;
             ItemStack stack = slot.getStack();
             final int x = Size.WIDGET_X;
             final int y = i * 18 + Size.SLOT_Y;
             VarItem varItem = (VarItems.parse(stack));
             varItems.add(varItem);
-            if(i >= Size.WIDGETS) continue;
-            if(varItem != null) {
+            if (i >= Size.WIDGETS) continue;
+            if (varItem != null) {
 //                TextFieldWidget widget = new TextFieldWidget(textRenderer,x,y,Size.WIDGET_WIDTH,18,Text.of(named.getName()));
 //                widget.setMaxLength(10_000);
 //                widget.setText(named.getName());
 //                widget.setFocused(Objects.equals(i,focused));
                 var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.id), stack, varItem, this.handler);
-                widgets.put(i,widget);
+                widgets.put(i, widget);
                 varItems.add(varItem);
                 continue;
             }
 
-            widgets.put(i,new TextWidget(x + 3,y,Size.WIDGET_WIDTH,16,stack.getName(),textRenderer).alignLeft());
+            widgets.put(i, new TextWidget(x + 3, y, Size.WIDGET_WIDTH, 16, stack.getName(), textRenderer).alignLeft());
         }
     }
 
     @Override
-        public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        for (var widget: widgets.entrySet()) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        for (var widget : widgets.entrySet()) {
             if (widget.getValue() instanceof ClickableWidget click
                     && click.isMouseOver(mouseX - this.x, mouseY - this.y)
                     && click.mouseScrolled(mouseX - this.x, mouseY - this.y, horizontalAmount, verticalAmount)) {
@@ -164,24 +164,24 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS,27));
+        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS, 27));
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
             final int x = 8;
             final int y = i * 18 - 11 + 25;
             double relX = mouseX - this.x;
             double relY = mouseY - this.y;
-            if(
+            if (
                     relX > x
-                            && relX < x+18
+                            && relX < x + 18
                             && relY > y
-                            && relY < y+18
+                            && relY < y + 18
             ) {
-                if(button == 2) {
+                if (button == 2) {
                     this.onMouseClick(slot, slot.id, button, SlotActionType.CLONE);
                     return true;
                 }
-                if(hasShiftDown()) {
+                if (hasShiftDown()) {
                     this.onMouseClick(slot, slot.id, button, SlotActionType.QUICK_MOVE);
                     return true;
                 }
@@ -194,7 +194,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             if (entry.getValue() instanceof ClickableWidget clickable) {
                 boolean mouseOver = clickable.isMouseOver(mouseX - this.x, mouseY - this.y);
                 clickable.setFocused(mouseOver);
-                if(mouseOver && clickable.mouseClicked(mouseX - this.x,mouseY - this.y,button)) {
+                if (mouseOver && clickable.mouseClicked(mouseX - this.x, mouseY - this.y, button)) {
 //                    updateItem(entry.getKey());
                     returnValue = true;
                 }
@@ -211,28 +211,28 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     private void updateItem(int scrollRelativeSlot) {
-        if(CodeClient.MC.getNetworkHandler() == null) return;
-        if(scrollRelativeSlot + scroll > 27) return;
+        if (CodeClient.MC.getNetworkHandler() == null) return;
+        if (scrollRelativeSlot + scroll > 27) return;
         Slot slot = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.WIDGETS).get(scrollRelativeSlot);
-        if(scrollRelativeSlot > widgets.size()) return;
+        if (scrollRelativeSlot > widgets.size()) return;
         Widget widget = widgets.get(scrollRelativeSlot);
-        if(widget instanceof CustomChestField<?> field) {
+        if (widget instanceof CustomChestField<?> field) {
             VarItem item = field.item;
-            if(item instanceof BlockTag) {
+            if (item instanceof BlockTag) {
                 Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
                 CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.nextRevision(), slot.getIndex(), 0, SlotActionType.PICKUP, item.toStack(), int2ObjectMap));
             } else {
-                super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
+                super.onMouseClick(slot, slot.id, 0, SlotActionType.SWAP);
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, item.toStack()));
-                super.onMouseClick(slot,slot.id,0,SlotActionType.SWAP);
-                super.onMouseClick(slot,54,0,SlotActionType.QUICK_CRAFT);
+                super.onMouseClick(slot, slot.id, 0, SlotActionType.SWAP);
+                super.onMouseClick(slot, 54, 0, SlotActionType.QUICK_CRAFT);
             }
         }
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             for (int i = 0; i < widgets.size(); i++) {
                 Widget widget = widgets.get(i);
                 if (widget instanceof ClickableWidget clickable) {
@@ -244,7 +244,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 }
             }
         }
-        if(keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
+        if (keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
             for (int i = 0; i < widgets.size(); i++) {
                 Widget widget = widgets.get(i);
                 if (widget instanceof ClickableWidget clickable) {
@@ -256,34 +256,34 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 }
             }
         }
-        boolean up = keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.forwardKey.matchesKey(keyCode,scanCode);
-        boolean down = keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.backKey.matchesKey(keyCode,scanCode);
+        boolean up = keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.forwardKey.matchesKey(keyCode, scanCode);
+        boolean down = keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.backKey.matchesKey(keyCode, scanCode);
         boolean pageUp = keyCode == GLFW.GLFW_KEY_PAGE_UP || (up && hasShiftDown());
         boolean pageDown = keyCode == GLFW.GLFW_KEY_PAGE_DOWN || (down && hasShiftDown());
         boolean start = keyCode == GLFW.GLFW_KEY_HOME || (up && hasAltDown() && !pageUp);
         boolean end = keyCode == GLFW.GLFW_KEY_END || (down && hasAltDown() && !pageDown);
         int prev = (int) scroll;
-        if(pageDown) {
+        if (pageDown) {
             scroll = Math.min(27 - Size.WIDGETS, scroll + Size.WIDGETS);
             update(prev);
         }
-        if(pageUp) {
+        if (pageUp) {
             scroll = Math.max(0, scroll - Size.WIDGETS);
             update(prev);
         }
-        if(start) {
+        if (start) {
             scroll = 0;
             update(prev);
         }
-        if(end) {
+        if (end) {
             scroll = 27 - Size.WIDGETS;
             update(prev);
         }
-        if(up) {
-            scroll = Math.max(0,scroll - 1);
+        if (up) {
+            scroll = Math.max(0, scroll - 1);
             update(prev);
         }
-        if(down) {
+        if (down) {
             scroll = Math.min(27 - Size.WIDGETS, scroll + 1);
             update(prev);
         }

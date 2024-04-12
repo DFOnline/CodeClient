@@ -16,7 +16,7 @@ import java.util.List;
 public class SignPeeker {
     public static List<Text> getOverlayText() {
         if (!Config.getConfig().SignPeeker) return null;
-        if(CodeClient.location instanceof Dev dev) {
+        if (CodeClient.location instanceof Dev dev) {
             if (CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
                 BlockPos pos = InteractionManager.isBlockBreakable(block.getBlockPos());
                 if (pos == null || (!dev.isInDev(pos)) || CodeClient.MC.world == null) return null;

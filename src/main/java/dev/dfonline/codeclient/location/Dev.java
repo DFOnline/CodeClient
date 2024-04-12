@@ -3,7 +3,7 @@ package dev.dfonline.codeclient.location;
 public class Dev extends Creator {
     public Dev(double x, double z) {
         this.hasDev = true;
-        setDevSpawn(x,z);
+        setDevSpawn(x, z);
     }
 
     public void setDevSpawn(double x, double z) {

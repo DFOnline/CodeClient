@@ -32,25 +32,25 @@ public class Debug {
     }
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
-        if(!Config.getConfig().CCDBUG) return false;
-        if(packet instanceof OverlayMessageS2CPacket overlay) {
+        if (!Config.getConfig().CCDBUG) return false;
+        if (packet instanceof OverlayMessageS2CPacket overlay) {
             var txt = overlay.getMessage();
-            if(Text.empty().equals(txt)) {
+            if (Text.empty().equals(txt)) {
                 Utility.debug("empty");
                 return false;
             }
             var siblings = txt.getSiblings();
-            if(siblings.isEmpty()) {
+            if (siblings.isEmpty()) {
                 Utility.debug("no siblings");
                 return false;
             }
             var command = siblings.get(0);
-            if(!Objects.equals(command.getStyle().getColor(), TextColor.fromRgb(0x00ccdb))) return false;
-            if(command.getContent().equals(new PlainTextContent.Literal("ccdbug text"))) {
+            if (!Objects.equals(command.getStyle().getColor(), TextColor.fromRgb(0x00ccdb))) return false;
+            if (command.getContent().equals(new PlainTextContent.Literal("ccdbug text"))) {
                 boolean first = true;
                 text = new ArrayList<>();
-                for (var part: siblings) {
-                    if(first) {
+                for (var part : siblings) {
+                    if (first) {
                         first = false;
                         continue;
                     }
@@ -73,29 +73,29 @@ public class Debug {
     }
 
     public static void updateDisplay() {
-        if(!active) return;
-        if(text == null) return;
+        if (!active) return;
+        if (text == null) return;
         OverlayManager.setOverlayText();
-        OverlayManager.addOverlayText(Text.empty().append(Text.literal("CCDBUG").formatted(Formatting.YELLOW,Formatting.BOLD)).append(" (/abort to hide)"));
-        if(CPU != null) {
+        OverlayManager.addOverlayText(Text.empty().append(Text.literal("CCDBUG").formatted(Formatting.YELLOW, Formatting.BOLD)).append(" (/abort to hide)"));
+        if (CPU != null) {
             OverlayManager.addOverlayText(Text.literal("CPU Usage: ").formatted(Formatting.GOLD).append(Text.literal(String.valueOf(CPU)).formatted(Formatting.AQUA)));
             OverlayManager.addOverlayText(Text.empty());
         }
-        for(var line: text) {
+        for (var line : text) {
             OverlayManager.addOverlayText(line);
         }
     }
 
     public static void tick() {
-        if(Config.getConfig().CCDBUG && active && CodeClient.location instanceof Plot) {
+        if (Config.getConfig().CCDBUG && active && CodeClient.location instanceof Plot) {
             updateDisplay();
-        }
-        else {
+        } else {
             CPU = null;
         }
     }
 
     public static void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers) {
-        if(active) DebugRenderer.drawString(matrices,vertexConsumers, "womp womp", CodeClient.MC.player.getX(),CodeClient.MC.player.getY(),CodeClient.MC.player.getZ(), 0, 0.02F, true, 0, true);
+        if (active)
+            DebugRenderer.drawString(matrices, vertexConsumers, "womp womp", CodeClient.MC.player.getX(), CodeClient.MC.player.getY(), CodeClient.MC.player.getZ(), 0, 0.02F, true, 0, true);
     }
 }

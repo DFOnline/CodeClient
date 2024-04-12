@@ -17,8 +17,8 @@ public class ActionDump {
 
 
     public static ActionDump getActionDump() throws IOException {
-        if(instance == null) {
-            instance = CodeClient.gson.fromJson(FileManager.readFile("actiondump.json"),ActionDump.class);
+        if (instance == null) {
+            instance = CodeClient.gson.fromJson(FileManager.readFile("actiondump.json"), ActionDump.class);
         }
         return instance;
     }

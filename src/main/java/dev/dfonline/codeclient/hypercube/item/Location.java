@@ -6,37 +6,36 @@ import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.NotNull;
 
 public class Location extends VarItem {
+    private static final JsonObject defaultObject;
+
+    static {
+        var obj = new JsonObject();
+        obj.addProperty("id", "loc");
+        var data = new JsonObject();
+        data.addProperty("isBlock", false);
+        var loc = new JsonObject();
+        loc.addProperty("x", 0);
+        loc.addProperty("y", 0);
+        loc.addProperty("z", 0);
+        loc.addProperty("pitch", 0);
+        loc.addProperty("yaw", 0);
+        data.add("loc", loc);
+        obj.add("data", data);
+        defaultObject = obj;
+    }
+
     private JsonObject loc;
     private double x;
     private double y;
     private double z;
     private double pitch;
     private double yaw;
-
-    private static final JsonObject defaultObject;
-    static {
-        var obj = new JsonObject();
-        obj.addProperty("id","loc");
-        var data = new JsonObject();
-        data.addProperty("isBlock",false);
-        var loc = new JsonObject();
-        loc.addProperty("x",0);
-        loc.addProperty("y",0);
-        loc.addProperty("z",0);
-        loc.addProperty("pitch",0);
-        loc.addProperty("yaw",0);
-        data.add("loc",loc);
-        obj.add("data",data);
-        defaultObject = obj;
-    }
 
     public Location(Item material, JsonObject data) {
         super(material, data);
@@ -47,6 +46,7 @@ public class Location extends VarItem {
         this.pitch = loc.get("pitch").getAsDouble();
         this.yaw = loc.get("yaw").getAsDouble();
     }
+
     private Location() {
         this(Items.PAPER, defaultObject);
         // Make sure everything is init'd.
@@ -65,6 +65,7 @@ public class Location extends VarItem {
         setPitch(pitch);
         setYaw(yaw);
     }
+
     public Location(Vec3d pos) {
         this();
         setX(pos.x);
@@ -72,49 +73,59 @@ public class Location extends VarItem {
         setZ(pos.z);
     }
 
-    public void setX(double x) {
-        loc.addProperty("x",x);
-        data.add("loc",loc);
-        this.x = x;
-    }
     public double getX() {
         return x;
     }
-    public void setY(double y) {
-        loc.addProperty("y",y);
-        data.add("loc",loc);
-        this.y = y;
+
+    public void setX(double x) {
+        loc.addProperty("x", x);
+        data.add("loc", loc);
+        this.x = x;
     }
+
     public double getY() {
         return y;
     }
-    public void setZ(double z) {
-        loc.addProperty("z",z);
-        data.add("loc",loc);
-        this.z = z;
+
+    public void setY(double y) {
+        loc.addProperty("y", y);
+        data.add("loc", loc);
+        this.y = y;
     }
+
     public double getZ() {
         return z;
     }
-    public void setPitch(double pitch) {
-        loc.addProperty("pitch",pitch);
-        data.add("loc",loc);
-        this.pitch = pitch;
+
+    public void setZ(double z) {
+        loc.addProperty("z", z);
+        data.add("loc", loc);
+        this.z = z;
     }
+
     public double getPitch() {
         return pitch;
     }
-    public void setYaw(double yaw) {
-        loc.addProperty("yaw",yaw);
-        data.add("loc",loc);
-        this.yaw = yaw;
+
+    public void setPitch(double pitch) {
+        loc.addProperty("pitch", pitch);
+        data.add("loc", loc);
+        this.pitch = pitch;
     }
+
     public double getYaw() {
         return yaw;
     }
 
+    public void setYaw(double yaw) {
+        loc.addProperty("yaw", yaw);
+        data.add("loc", loc);
+        this.yaw = yaw;
+    }
+
     /**
      * Mutates the location.
+     *
      * @return The mutated location with the rotation.
      */
     public Location setRotation(double pitch, double yaw) {
@@ -129,12 +140,12 @@ public class Location extends VarItem {
         this.z = z;
         this.pitch = pitch;
         this.yaw = yaw;
-        this.loc.addProperty("x",x);
-        this.loc.addProperty("y",y);
-        this.loc.addProperty("z",z);
-        this.loc.addProperty("pitch",pitch);
-        this.loc.addProperty("yaw",yaw);
-        data.add("loc",loc);
+        this.loc.addProperty("x", x);
+        this.loc.addProperty("y", y);
+        this.loc.addProperty("z", z);
+        this.loc.addProperty("pitch", pitch);
+        this.loc.addProperty("yaw", yaw);
+        data.add("loc", loc);
     }
 
     @Override
@@ -142,12 +153,12 @@ public class Location extends VarItem {
         ItemStack stack = super.toStack();
         stack.setCustomName(Text.literal("Location").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.LOCATION.color)));
         Utility.addLore(
-            stack,
-            Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x)),
-            Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y)),
-            Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z)),
-            Text.empty().append(Text.literal("p: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z)),
-            Text.empty().append(Text.literal("y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))
+                stack,
+                Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x)),
+                Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y)),
+                Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z)),
+                Text.empty().append(Text.literal("p: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z)),
+                Text.empty().append(Text.literal("y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))
         );
         return stack;
     }

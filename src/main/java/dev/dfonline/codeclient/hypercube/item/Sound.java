@@ -19,9 +19,9 @@ public class Sound extends VarItem {
 
     public Sound(Item material, JsonObject var) {
         super(material, var);
-        this.sound  = data.get("sound").getAsString();
-        this.pitch  = data.get("pitch").getAsDouble();
-        this.volume = data.get("vol"  ).getAsDouble();
+        this.sound = data.get("sound").getAsString();
+        this.pitch = data.get("pitch").getAsDouble();
+        this.volume = data.get("vol").getAsDouble();
     }
 
     public String getSound() {
@@ -30,7 +30,7 @@ public class Sound extends VarItem {
 
     public void setSound(String sound) {
         this.sound = sound;
-        this.data.addProperty("sound",sound);
+        this.data.addProperty("sound", sound);
     }
 
     public double getPitch() {
@@ -39,7 +39,7 @@ public class Sound extends VarItem {
 
     public void setPitch(double pitch) {
         this.pitch = pitch;
-        this.data.addProperty("pitch",pitch);
+        this.data.addProperty("pitch", pitch);
     }
 
     public double getVolume() {
@@ -48,7 +48,7 @@ public class Sound extends VarItem {
 
     public void setVolume(double volume) {
         this.volume = volume;
-        this.data.addProperty("vol",volume);
+        this.data.addProperty("vol", volume);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class Sound extends VarItem {
         try {
             ActionDump db = ActionDump.getActionDump();
             var value = Arrays.stream(db.sounds).filter(gv -> gv.icon.getCleanName().equals(sound)).findFirst();
-            if(value.isEmpty()) throw new Exception("");
+            if (value.isEmpty()) throw new Exception("");
             name = Text.literal(value.get().icon.name);
         } catch (Exception e) {
             name = Text.literal(sound).setStyle(Style.EMPTY);

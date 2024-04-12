@@ -30,72 +30,73 @@ import net.minecraft.util.math.Vec3d;
 
 public class BuildPhaser {
     private static boolean clipping = false;
-    public static boolean isClipping() {
-        return clipping;
-    }
-
     private static boolean wasFlying = true;
-    private static Vec3d lastPos = new Vec3d(0,0,0);
+    private static Vec3d lastPos = new Vec3d(0, 0, 0);
     private static boolean allowPacket = false;
     private static boolean waitForTP = false;
     private static boolean dontSpamBuildWarn = false;
 
+    public static boolean isClipping() {
+        return clipping;
+    }
+
     public static void tick() {
 //        CodeClient.LOGGER.info(String.valueOf(CodeClient.MC.player.getPos()));
 
-        if(CodeClient.location instanceof Dev plot) {
-            if(plot.getX() == null) {
-                if(CodeClient.clipBind.wasPressed()) Utility.sendMessage(Text.translatable("codeclient.phaser.plot_origin"));
+        if (CodeClient.location instanceof Dev plot) {
+            if (plot.getX() == null) {
+                if (CodeClient.clipBind.wasPressed())
+                    Utility.sendMessage(Text.translatable("codeclient.phaser.plot_origin"));
             }
 //            CodeClient.LOGGER.info("dev and X");
-            if(!clipping && CodeClient.clipBind.isPressed() && plot.getX() != null) startClipping();
-            if(clipping) {
+            if (!clipping && CodeClient.clipBind.isPressed() && plot.getX() != null) startClipping();
+            if (clipping) {
                 var player = CodeClient.MC.player;
                 player.setPos(
-                        Math.min(Math.max(player.getX(),plot.getX() - 20),plot.getX() + plot.assumeSize().size + 1),
+                        Math.min(Math.max(player.getX(), plot.getX() - 20), plot.getX() + plot.assumeSize().size + 1),
                         player.getY(),
-                        Math.min(Math.max(player.getZ(),plot.getZ()),plot.getZ() + plot.assumeSize().size + 1)
+                        Math.min(Math.max(player.getZ(), plot.getZ()), plot.getZ() + plot.assumeSize().size + 1)
                 );
                 allowPacket = true;
                 CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false));
                 CodeClient.MC.player.getAbilities().flying = true;
-                if(!CodeClient.clipBind.isPressed()) finishClipping();
+                if (!CodeClient.clipBind.isPressed()) finishClipping();
             }
-        }
-        else if(clipping || waitForTP) {
+        } else if (clipping || waitForTP) {
             disableClipping();
         }
 
-        if(CodeClient.location instanceof Build) {
-            if(CodeClient.clipBind.isPressed() && !dontSpamBuildWarn) {
+        if (CodeClient.location instanceof Build) {
+            if (CodeClient.clipBind.isPressed() && !dontSpamBuildWarn) {
                 dontSpamBuildWarn = true;
                 Utility.sendMessage(Text.translatable("codeclient.phaser.dev_mode1",
-                        Text.translatable("codeclient.phaser.dev_mode2")
-                                .setStyle(Text.empty().getStyle()
-                                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,"https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
-                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.link.open")))
-                                ).formatted(Formatting.AQUA,Formatting.UNDERLINE)),
-                    ChatType.FAIL);
+                                Text.translatable("codeclient.phaser.dev_mode2")
+                                        .setStyle(Text.empty().getStyle()
+                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.link.open")))
+                                        ).formatted(Formatting.AQUA, Formatting.UNDERLINE)),
+                        ChatType.FAIL);
             }
-            if(dontSpamBuildWarn && !CodeClient.clipBind.isPressed()) dontSpamBuildWarn = false;
+            if (dontSpamBuildWarn && !CodeClient.clipBind.isPressed()) dontSpamBuildWarn = false;
         }
     }
 
     public static <T extends PacketListener> boolean onPacket(Packet<T> packet) {
-        if(allowPacket) {
+        if (allowPacket) {
             allowPacket = false;
             return false;
         }
         return clipping && (packet instanceof PlayerMoveC2SPacket || packet instanceof ClientCommandC2SPacket);
     }
+
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
-        if(!waitForTP) return false;
-        if(packet instanceof PlayerPositionLookS2CPacket move) {
+        if (!waitForTP) return false;
+        if (packet instanceof PlayerPositionLookS2CPacket move) {
             CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.getTeleportId()));
             return true;
         }
-        if(packet instanceof EntityAnimationS2CPacket) return true;
-        if(packet instanceof PlaySoundFromEntityS2CPacket) {
+        if (packet instanceof EntityAnimationS2CPacket) return true;
+        if (packet instanceof PlaySoundFromEntityS2CPacket) {
             waitForTP = false;
             return true;
         }
@@ -113,7 +114,7 @@ public class BuildPhaser {
 
     private static void finishClipping() {
         disableClipping();
-        if(CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
             PlayerAbilities abilities = player.getAbilities();
             abilities.allowFlying = true;
@@ -127,12 +128,13 @@ public class BuildPhaser {
             Utility.sendHandItem(location);
 
             boolean sneaky = !player.isSneaking();
-            BlockPos lastBlockPos = new BlockPos((int) lastPos.x,(int) lastPos.y,(int) lastPos.z);
+            BlockPos lastBlockPos = new BlockPos((int) lastPos.x, (int) lastPos.y, (int) lastPos.z);
             ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
-            if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+            if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, lastBlockPos, Direction.UP));
             net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, lastBlockPos, Direction.UP));
-            if(sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            if (sneaky)
+                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 
             Utility.sendHandItem(lastItem);
         }

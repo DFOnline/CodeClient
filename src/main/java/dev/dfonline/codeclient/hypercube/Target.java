@@ -17,6 +17,7 @@ public enum Target {
     public final TextColor color;
     public final boolean onActions;
     public final boolean onGameValue;
+
     Target(Formatting color, boolean onActions, boolean onGameValue) {
         this.color = TextColor.fromFormatting(color);
         this.onActions = onActions;

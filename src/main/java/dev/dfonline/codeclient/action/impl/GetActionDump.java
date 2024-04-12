@@ -7,7 +7,6 @@ import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.action.Action;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
@@ -18,9 +17,8 @@ import java.util.Date;
 import java.util.Objects;
 
 public class GetActionDump extends Action {
-    public StringBuilder capturedData = null;
     private final ColorMode colorMode;
-
+    public StringBuilder capturedData = null;
     private int lines;
     private int length;
     private Date startTime;
@@ -33,7 +31,7 @@ public class GetActionDump extends Action {
 
     @Override
     public void init() {
-        if(CodeClient.MC == null || CodeClient.MC.getNetworkHandler() == null) return;
+        if (CodeClient.MC == null || CodeClient.MC.getNetworkHandler() == null) return;
         CodeClient.MC.getNetworkHandler().sendCommand("dumpactioninfo");
         capturedData = new StringBuilder();
         startTime = new Date();
@@ -41,23 +39,23 @@ public class GetActionDump extends Action {
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if(capturedData == null || isDone) return false;
-        if(packet instanceof GameMessageS2CPacket message) {
-            if(message.content().getString().startsWith("Error:")) {
+        if (capturedData == null || isDone) return false;
+        if (packet instanceof GameMessageS2CPacket message) {
+            if (message.content().getString().startsWith("Error:")) {
                 isDone = true;
                 OverlayManager.setOverlayText(Text.translatable("codeclient.action.get_action_dump.error.could_not_start").formatted(Formatting.RED));
                 OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.error.beta_broke").formatted(Formatting.RED));
-                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort",Text.literal(" /abort ").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort", Text.literal(" /abort ").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
 
                 return true;
             }
             TextColor lastColor = null;
-            for(Text text : message.content().getSiblings()) {
+            for (Text text : message.content().getSiblings()) {
                 TextColor color = text.getStyle().getColor();
-                if(color != null && (lastColor != color) && (colorMode != ColorMode.NONE)) {
+                if (color != null && (lastColor != color) && (colorMode != ColorMode.NONE)) {
                     lastColor = color;
-                    if(color.getName().contains("#")) {
-                        capturedData.append(String.join(colorMode.text,color.getName().split("")).replace("#", colorMode.text+"x").toLowerCase());
+                    if (color.getName().contains("#")) {
+                        capturedData.append(String.join(colorMode.text, color.getName().split("")).replace("#", colorMode.text + "x").toLowerCase());
                     } else {
                         capturedData.append(Formatting.valueOf(String.valueOf(color).toUpperCase()).toString().replace("§", colorMode.text));
                     }
@@ -70,17 +68,17 @@ public class GetActionDump extends Action {
             length += content.length();
             OverlayManager.setOverlayText();
             OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.title").formatted(Formatting.GOLD));
-            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.size",Text.literal(String.valueOf(length)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
-            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.lines",Text.literal(String.valueOf(lines)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
-            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.time",Text.literal(String.valueOf((float) (new Date().getTime() - startTime.getTime()) / 1000)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
-            if(Objects.equals(content, "}")) {
+            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.size", Text.literal(String.valueOf(length)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.lines", Text.literal(String.valueOf(lines)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.time", Text.literal(String.valueOf((float) (new Date().getTime() - startTime.getTime()) / 1000)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+            if (Objects.equals(content, "}")) {
                 isDone = true;
                 OverlayManager.addOverlayText(Text.literal(""));
                 OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.complete").formatted(Formatting.LIGHT_PURPLE));
-                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort",Text.literal(" /abort ").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort", Text.literal(" /abort ").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
                 OverlayManager.addOverlayText(Text.literal(""));
                 try {
-                    Path path = FileManager.writeFile("actiondump.json",capturedData.toString());
+                    Path path = FileManager.writeFile("actiondump.json", capturedData.toString());
                     OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.complete.file").formatted(Formatting.LIGHT_PURPLE));
                     OverlayManager.addOverlayText(Text.literal(path.toString()).formatted(Formatting.GREEN));
                 } catch (IOException e) {
@@ -105,6 +103,7 @@ public class GetActionDump extends Action {
         SECTION("§");
 
         public final String text;
+
         ColorMode(String text) {
             this.text = text;
         }

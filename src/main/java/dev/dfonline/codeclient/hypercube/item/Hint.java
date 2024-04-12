@@ -8,13 +8,13 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 
 public class Hint extends VarItem {
+    public static final TextColor HintGreen = TextColor.fromRgb(0xAAFF55);
+    private static final Text Parameter = Text.literal("Parameter").fillStyle(Style.EMPTY.withColor(0xAAFFAA));
+    private static final Text Line = Text.literal("LINE");
     public Hint(Item material, JsonObject var) {
         super(material, var);
     }
 
-    private static final Text Parameter = Text.literal("Parameter").fillStyle(Style.EMPTY.withColor(0xAAFFAA));
-    private static final Text Line = Text.literal("LINE");
-    public static final TextColor HintGreen = TextColor.fromRgb(0xAAFF55);
     public enum HintType {
         function("Function Parameters",
                 Text.empty().formatted(Formatting.GRAY)
@@ -31,6 +31,7 @@ public class Hint extends VarItem {
 
         public final String name;
         public final Text text;
+
         HintType(String name, Text text) {
             this.name = name;
             this.text = text;

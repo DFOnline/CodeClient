@@ -2,9 +2,7 @@ package dev.dfonline.codeclient.mixin.world.block;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.location.Build;
 import dev.dfonline.codeclient.location.Creator;
-import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.BarrierBlock;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
