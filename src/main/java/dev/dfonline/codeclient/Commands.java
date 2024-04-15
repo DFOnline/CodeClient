@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
+import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
@@ -84,6 +85,7 @@ public class Commands {
         dispatcher.register(literal("abort").executes(context -> {
             confirm = null;
             CodeClient.currentAction = new None();
+            Debug.clean();
             return 0;
         }));
 
