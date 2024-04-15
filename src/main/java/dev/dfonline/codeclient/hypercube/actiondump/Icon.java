@@ -2,7 +2,10 @@ package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.Utility;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtInt;
+import net.minecraft.nbt.NbtIntArray;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -14,6 +17,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 
 public class Icon {
+    private static TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
     public String material;
     public String head;
     public String name;
@@ -36,10 +40,11 @@ public class Icon {
 
     /**
      * Gets the pure name, without any color codes.
+     *
      * @return
      */
     public String getCleanName() {
-        return this.name.replaceAll("§.","");
+        return this.name.replaceAll("§.", "");
     }
 
     public ItemStack getItem() {
@@ -49,121 +54,123 @@ public class Icon {
         NbtCompound display = new NbtCompound();
         NbtList lore = new NbtList();
 
-        for (String line: description) {
+        for (String line : description) {
             addToLore(lore, "§7" + line);
         }
-        if(example != null && example.length != 0) {
-            addToLore(lore,"");
-            addToLore(lore,"Example:");
-            for (String line: example) {
+        if (example != null && example.length != 0) {
+            addToLore(lore, "");
+            addToLore(lore, "Example:");
+            for (String line : example) {
                 addToLore(lore, "§7" + line);
             }
         }
-        if(arguments != null && arguments.length != 0) {
-            addToLore(lore,"");
-            addToLore(lore,"Chest Parameters:");
+        if (arguments != null && arguments.length != 0) {
+            addToLore(lore, "");
+            addToLore(lore, "Chest Parameters:");
             boolean hasOptional = false;
-            for (Argument arg: arguments) {
+            for (Argument arg : arguments) {
                 int i = 0;
-                if(arg.text != null) addToLore(lore, arg.text);
-                if(arg.description != null && description.length != 0) for (String line: arg.description) {
+                if (arg.text != null) addToLore(lore, arg.text);
+                if (arg.description != null && description.length != 0) for (String line : arg.description) {
                     Type type = Type.valueOf(arg.type);
-                    if(i == 0) {
+                    if (i == 0) {
                         MutableText text = Text.empty().formatted(Formatting.GRAY);
                         MutableText typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color));
-                        if(arg.plural) typeText.append("(s)");
+                        if (arg.plural) typeText.append("(s)");
                         text.append(typeText);
-                        if(arg.optional) {
+                        if (arg.optional) {
                             text.append(Text.literal("*").formatted(Formatting.WHITE));
                             hasOptional = true;
                         }
                         text.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
                         text.append(Utility.textFromString(line).formatted(Formatting.GRAY));
                         lore.add(Utility.nbtify(text));
-                    }
-                    else lore.add(Utility.nbtify(Utility.textFromString(line).formatted(Formatting.GRAY)));
+                    } else lore.add(Utility.nbtify(Utility.textFromString(line).formatted(Formatting.GRAY)));
                     i++;
                 }
-                if(arg.notes != null) for (String[] lines: arg.notes) {
+                if (arg.notes != null) for (String[] lines : arg.notes) {
                     i = 0;
-                    if(lines != null) for (String line: lines) {
-                        if(i == 0) addToLore(lore, "§9⏵ §7" + line);
+                    if (lines != null) for (String line : lines) {
+                        if (i == 0) addToLore(lore, "§9⏵ §7" + line);
                         else addToLore(lore, "§7" + line);
                         i++;
                     }
                 }
             }
-            if(tags != null && tags != 0) {
+            if (tags != null && tags != 0) {
                 lore.add(Utility.nbtify(Text.literal("# ").formatted(Formatting.DARK_AQUA).append(Text.literal(tags + " Tag" + (tags != 1 ? "s" : "")).formatted(Formatting.GRAY))));
             }
-            if(hasOptional) {
+            if (hasOptional) {
                 lore.add(Utility.nbtify(Text.literal("")));
                 lore.add(Utility.nbtify(Text.literal("*Optional").formatted(Formatting.GRAY)));
             }
         }
-        if(returnValues != null && returnValues.length != 0) {
-            addToLore(lore,"");
-            addToLore(lore,"Returns Value:");
-            for (ReturnValue returnValue: returnValues) {
-                if(returnValue.text != null) addToLore(lore,returnValue.text);
+        if (returnValues != null && returnValues.length != 0) {
+            addToLore(lore, "");
+            addToLore(lore, "Returns Value:");
+            for (ReturnValue returnValue : returnValues) {
+                if (returnValue.text != null) addToLore(lore, returnValue.text);
                 else {
                     lore.add(Utility.nbtify(Text.empty().append(Text.literal(returnValue.type.display).setStyle(Style.EMPTY.withColor(returnValue.type.color))).append(Text.literal(" - ").formatted(Formatting.DARK_GRAY)).append(Text.literal(returnValue.description[0]).formatted(Formatting.GRAY))));
                     boolean first = true;
-                    for (String description: returnValue.description) {
-                        if(first) {
+                    for (String description : returnValue.description) {
+                        if (first) {
                             first = false;
                             continue;
                         }
-                        addToLore(lore,"§7" + description);
+                        addToLore(lore, "§7" + description);
                     }
                 }
             }
         }
-        if(additionalInfo != null && additionalInfo.length != 0) {
-            addToLore(lore,"");
-            addToLore(lore,"§9Additional Info:");
-            for(String[] group : additionalInfo) {
+        if (additionalInfo != null && additionalInfo.length != 0) {
+            addToLore(lore, "");
+            addToLore(lore, "§9Additional Info:");
+            for (String[] group : additionalInfo) {
                 int i = 0;
-                for(String line: group) {
-                    if(i == 0) addToLore(lore, "§b» §7" + line);
+                for (String line : group) {
+                    if (i == 0) addToLore(lore, "§b» §7" + line);
                     else addToLore(lore, "§7" + line);
                     i++;
                 }
             }
         }
-        if(cancellable != null && cancellable) {
-            addToLore(lore,"");
-            if(cancelledAutomatically) addToLore(lore, "§4∅ §cCancelled automatically");
+        if (cancellable != null && cancellable) {
+            addToLore(lore, "");
+            if (cancelledAutomatically) addToLore(lore, "§4∅ §cCancelled automatically");
             else addToLore(lore, "§4∅ §cCancellable");
         }
-        display.put("Lore",lore);
+        display.put("Lore", lore);
 
-        display.put("Name",Utility.nbtify(Utility.textFromString(name)));
+        display.put("Name", Utility.nbtify(Utility.textFromString(name)));
 
-        nbt.put("display",display);
+        nbt.put("display", display);
         nbt.put("HideFlags", NbtInt.of(127));
-        if(color != null) nbt.put("CustomPotionColor", NbtInt.of(color.getColor()));
+        if (color != null) nbt.put("CustomPotionColor", NbtInt.of(color.getColor()));
 
-        if(head != null) {
+        if (head != null) {
             NbtCompound SkullOwner = new NbtCompound();
-            NbtIntArray Id = new NbtIntArray(List.of(0,0,0,0));
-            SkullOwner.put("Id",Id);
-            SkullOwner.putString("Name","DF-HEAD");
+            NbtIntArray Id = new NbtIntArray(List.of(0, 0, 0, 0));
+            SkullOwner.put("Id", Id);
+            SkullOwner.putString("Name", "DF-HEAD");
             NbtCompound Properties = new NbtCompound();
-                NbtList textures = new NbtList();
-                    NbtCompound texture = new NbtCompound();
-                        texture.putString("Value",head);
-                textures.add(texture);
-                Properties.put("textures",textures);
-            SkullOwner.put("Properties",Properties);
-            nbt.put("SkullOwner",SkullOwner);
+            NbtList textures = new NbtList();
+            NbtCompound texture = new NbtCompound();
+            texture.putString("Value", head);
+            textures.add(texture);
+            Properties.put("textures", textures);
+            SkullOwner.put("Properties", Properties);
+            nbt.put("SkullOwner", SkullOwner);
         }
 
         item.setNbt(nbt);
         return item;
     }
 
-    private static TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
+    private void addToLore(NbtList lore, String text) {
+        lore.add(Utility.nbtify(Utility.textFromString(text)));
+    }
+
     public enum Type {
         TEXT(TextColor.fromFormatting(Formatting.AQUA), "Text"),
         COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text"),
@@ -189,16 +196,14 @@ public class Icon {
 
         public final TextColor color;
         public final String display;
+
         Type(TextColor color, String display) {
             this.color = color;
             this.display = display;
         }
     }
 
-    record ReturnValue(Type type, String[] description, String text) {}
-
-    private void addToLore(NbtList lore, String text) {
-        lore.add(Utility.nbtify(Utility.textFromString(text)));
+    record ReturnValue(Type type, String[] description, String text) {
     }
 
     public static class Color {

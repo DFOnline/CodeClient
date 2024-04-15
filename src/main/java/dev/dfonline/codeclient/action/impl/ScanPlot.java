@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class ScanPlot extends Action {
+    private static final Vec3d goToOffset = new Vec3d(0, 1.5, 0);
+    private final ArrayList<ItemStack> returnList;
     private List<BlockPos> blocks = null;
     private HashMap<BlockPos, ItemStack> scanned = null;
     private Action step = null;
-    private static final Vec3d goToOffset = new Vec3d(0, 1.5, 0);
-    private final ArrayList<ItemStack> returnList;
 
     public ScanPlot(Callback callback, ArrayList<ItemStack> scanList) {
         super(callback);
@@ -67,9 +67,9 @@ public class ScanPlot extends Action {
     private BlockPos findNextBlock() {
         var player = CodeClient.MC.player.getPos();
         BlockPos nearest = null;
-        for (BlockPos pos: blocks) {
-            if(nearest == null || pos.isWithinDistance(player,nearest.toCenterPos().distanceTo(player))) {
-                if(scanned.containsKey(pos) && scanned.get(pos) != null) {
+        for (BlockPos pos : blocks) {
+            if (nearest == null || pos.isWithinDistance(player, nearest.toCenterPos().distanceTo(player))) {
+                if (scanned.containsKey(pos) && scanned.get(pos) != null) {
                     continue;
                 }
                 nearest = pos;
@@ -80,14 +80,14 @@ public class ScanPlot extends Action {
 
     private void next() {
         var block = findNextBlock();
-        if(block == null) {
+        if (block == null) {
             returnList.clear();
             returnList.addAll(scanned.values());
             callback();
             return;
         }
         step = new GoTo(block.toCenterPos().add(goToOffset), () -> {
-            this.step = new PickUpBlock(block,() -> {
+            this.step = new PickUpBlock(block, () -> {
                 this.step = null;
 //                next(progress + 1);
             });
@@ -98,7 +98,7 @@ public class ScanPlot extends Action {
 
     @Override
     public void onTick() {
-        if(blocks == null) return;
+        if (blocks == null) return;
         if (step != null) step.onTick();
         else {
             next();
@@ -124,7 +124,8 @@ public class ScanPlot extends Action {
             boolean sneaky = !player.isSneaking();
             if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             inter.interactBlock(player, Hand.MAIN_HAND, new BlockHitResult(this.pos.toCenterPos(), Direction.UP, this.pos, false));
-            if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            if (sneaky)
+                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
         }
 
         @Override
@@ -134,7 +135,7 @@ public class ScanPlot extends Action {
                 var data = Utility.templateDataItem(slot.getStack());
                 var template = Template.parse64(data);
                 if (template == null) return false;
-                scanned.put(pos,slot.getStack());
+                scanned.put(pos, slot.getStack());
                 net.sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
                 this.callback();
                 return true;
@@ -145,7 +146,7 @@ public class ScanPlot extends Action {
         @Override
         public void onTick() {
             ticks += 1;
-            if(ticks == 10) {
+            if (ticks == 10) {
                 ticks = 0;
                 init();
             }

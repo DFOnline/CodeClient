@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MClientCommonPlayNetworkHandler {
     @Inject(method = "sendPacket", at = @At("HEAD"), cancellable = true)
     private void sendPacket(Packet<?> packet, CallbackInfo ci) {
-        if(CodeClient.onSendPacket(packet)) ci.cancel();
+        if (CodeClient.onSendPacket(packet)) ci.cancel();
     }
 }

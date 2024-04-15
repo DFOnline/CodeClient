@@ -4,12 +4,13 @@ import com.google.gson.JsonObject;
 
 public class Bracket extends TemplateBlock {
     public Bracket() {
-        this(false,false);
+        this(false, false);
     }
 
     public Bracket(boolean closing) {
-        this(closing,false);
+        this(closing, false);
     }
+
     public Bracket(boolean closing, boolean sticky) {
         this.id = "bracket";
         this.block = null;
@@ -21,8 +22,8 @@ public class Bracket extends TemplateBlock {
     @Override
     public JsonObject toJsonObject() {
         var obj = super.toJsonObject();
-        obj.addProperty("direct",direct);
-        obj.addProperty("type",type);
+        obj.addProperty("direct", direct);
+        obj.addProperty("type", type);
         return obj;
     }
 }

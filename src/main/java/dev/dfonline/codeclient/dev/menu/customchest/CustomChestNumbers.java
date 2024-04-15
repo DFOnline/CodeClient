@@ -5,6 +5,46 @@ import dev.dfonline.codeclient.config.Config;
 import net.minecraft.util.Identifier;
 
 public class CustomChestNumbers {
+    public static final CustomChestNumbers SMALL = new CustomChestNumbers(
+            new Identifier(CodeClient.MOD_ID, "textures/gui/container/custom_chest/background.png"),
+            176,
+            216,
+            202,
+            229,
+            6,
+            6,
+            128,
+            25,
+            12,
+            15,
+            156,
+            13,
+            108,
+            7,
+            13,
+            7,
+            133,
+            -1);
+    public static final CustomChestNumbers LARGE = new CustomChestNumbers(
+            new Identifier(CodeClient.MOD_ID, "textures/gui/container/custom_chest/background_big.png"),
+            198,
+            294,
+            228,
+            294,
+            15,
+            10,
+            156,
+            26,
+            6,
+            27,
+            184,
+            18,
+            178,
+            7,
+            17,
+            29,
+            211,
+            210);
     public final Identifier TEXTURE;
     public final int MENU_WIDTH;
     public final int MENU_HEIGHT;
@@ -62,46 +102,4 @@ public class CustomChestNumbers {
     public static CustomChestNumbers getSize() {
         return Config.getConfig().CustomCodeChest.size;
     }
-
-    public static final CustomChestNumbers SMALL = new CustomChestNumbers(
-            new Identifier(CodeClient.MOD_ID,"textures/gui/container/custom_chest/background.png"),
-            176,
-            216,
-            202,
-            229,
-            6,
-            6,
-            128,
-            25,
-            12,
-            15,
-            156,
-            13,
-            108,
-            7,
-            13,
-            7,
-            133,
-            -1);
-
-    public static final CustomChestNumbers LARGE = new CustomChestNumbers(
-            new Identifier(CodeClient.MOD_ID,"textures/gui/container/custom_chest/background_big.png"),
-            198,
-            294,
-            228,
-            294,
-            15,
-            10,
-            156,
-            26,
-            6,
-            27,
-            184,
-            18,
-            178,
-            7,
-            17,
-            29,
-            211,
-            210);
 }

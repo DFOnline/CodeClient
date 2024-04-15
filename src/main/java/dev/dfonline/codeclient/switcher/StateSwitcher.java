@@ -8,9 +8,7 @@ import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class StateSwitcher extends GenericSwitcher {
     public StateSwitcher() {
@@ -19,16 +17,16 @@ public class StateSwitcher extends GenericSwitcher {
 
     @Override
     protected void init() {
-        footer = Text.translatable("codeclient.switcher.footer.next",Text.translatable("codeclient.switcher.footer.brackets","F4").formatted(Formatting.AQUA));
+        footer = Text.translatable("codeclient.switcher.footer.next", Text.translatable("codeclient.switcher.footer.brackets", "F4").formatted(Formatting.AQUA));
         selected = 0;
-        if(CodeClient.lastLocation instanceof Plot) {
-            if(CodeClient.lastLocation instanceof Play) selected = 0;
-            if(CodeClient.lastLocation instanceof Build) selected = 1;
-            if(CodeClient.lastLocation instanceof Dev) selected = 2;
+        if (CodeClient.lastLocation instanceof Plot) {
+            if (CodeClient.lastLocation instanceof Play) selected = 0;
+            if (CodeClient.lastLocation instanceof Build) selected = 1;
+            if (CodeClient.lastLocation instanceof Dev) selected = 2;
         }
-        if(CodeClient.lastLocation instanceof Spawn) {
-            if(CodeClient.location instanceof Creator) selected = 0;
-            if(CodeClient.location instanceof Play) selected = 2;
+        if (CodeClient.lastLocation instanceof Spawn) {
+            if (CodeClient.location instanceof Creator) selected = 0;
+            if (CodeClient.location instanceof Play) selected = 2;
         }
         super.init();
     }

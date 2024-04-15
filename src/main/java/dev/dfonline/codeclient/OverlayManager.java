@@ -17,13 +17,6 @@ public class OverlayManager {
     }
 
     /**
-     * Clears the overlay text.
-     */
-    public static void setOverlayText() {
-        setOverlayText(new ArrayList<>());
-    }
-
-    /**
      * Clears and sets the overlay text.
      */
     public static void setOverlayText(Text overlayText) {
@@ -35,6 +28,13 @@ public class OverlayManager {
      */
     public static void setOverlayText(ArrayList<Text> overlayText) {
         OverlayManager.overlayText = overlayText;
+    }
+
+    /**
+     * Clears the overlay text.
+     */
+    public static void setOverlayText() {
+        setOverlayText(new ArrayList<>());
     }
 
     public static void addOverlayText(Text overlayText) {

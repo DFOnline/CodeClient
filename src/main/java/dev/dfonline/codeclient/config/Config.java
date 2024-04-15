@@ -3,7 +3,6 @@ package dev.dfonline.codeclient.config;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
-import dev.dfonline.codeclient.dev.menu.customchest.CustomChestHandler;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestNumbers;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.isxander.yacl3.api.*;
@@ -65,63 +64,14 @@ public class Config {
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
     public boolean PickAction = true;
 
-    private void save() {
-        try {
-            JsonObject object = new JsonObject();
-            object.addProperty("NoClipEnabled",NoClipEnabled);
-            object.addProperty("AirSpeed", AirSpeed);
-            object.addProperty("PlaceOnAir",PlaceOnAir);
-            object.addProperty("CodeClientAPI",CodeClientAPI);
-            object.addProperty("CCDBUG",CCDBUG);
-            object.addProperty("CustomBlockInteractions",CustomBlockInteractions);
-            object.addProperty("CustomTagInteraction",CustomTagInteraction);
-            object.addProperty("AutoJoin", AutoJoin);
-            object.addProperty("AutoNode",AutoNode.name());
-            object.addProperty("AutoJoinPlot",AutoJoinPlot);
-            object.addProperty("AutoJoinPlotId",AutoJoinPlotId);
-            object.addProperty("FileCharSet",FileCharSet.name());
-            object.addProperty("InvisibleBlocksInDev",InvisibleBlocksInDev);
-            object.addProperty("ReachDistance",ReachDistance);
-            object.addProperty("AutoFly",AutoFly);
-            object.addProperty("CodeLayerInteractionMode",CodeLayerInteractionMode.name());
-            object.addProperty("AirControl",AirControl);
-            object.addProperty("FocusSearch",FocusSearch);
-            object.addProperty("SaveCharSet",SaveCharSet.name());
-            object.addProperty("RecentChestInsert",RecentChestInsert);
-            object.addProperty("HighlightChestsWithAir",HighlightChestsWithAir);
-            object.addProperty("HighlightChestDuration",HighlightChestDuration);
-            object.addProperty("ChestHighlightColor",ChestHighlightColor);
-            object.addProperty("UseIForLineScope",UseIForLineScope);
-            object.addProperty("CustomBlockBreaking",CustomBlockBreaking);
-            object.addProperty("ChestPeeker",ChestPeeker);
-            object.addProperty("ChestPeekerX",ChestPeekerX);
-            object.addProperty("ChestPeekerY",ChestPeekerY);
-            object.addProperty("ReportBrokenBlock",ReportBrokenBlock);
-            object.addProperty("ScopeSwitcher",ScopeSwitcher);
-            object.addProperty("UpAngle",UpAngle);
-            object.addProperty("DownAngle",DownAngle);
-            object.addProperty("TeleportUp",TeleportUp);
-            object.addProperty("TeleportDown",TeleportDown);
-            object.addProperty("Line1Color",Line1Color);
-            object.addProperty("Line2Color",Line2Color);
-            object.addProperty("Line3Color",Line3Color);
-            object.addProperty("UseSelectionColor",UseSelectionColor);
-            object.addProperty("Line4Color",Line4Color);
-            object.addProperty("SignPeeker",SignPeeker);
-            object.addProperty("CustomCodeChest",CustomCodeChest.name());
-            object.addProperty("PickAction",PickAction);
-            FileManager.writeConfig(object.toString());
-        } catch (Exception e) {
-            CodeClient.LOGGER.info("Couldn't save config: " + e);
-        }
+    public Config() {
     }
 
     public static Config getConfig() {
-        if(instance == null) {
+        if (instance == null) {
             try {
                 instance = CodeClient.gson.fromJson(FileManager.readConfig(), Config.class);
-            }
-            catch (Exception exception) {
+            } catch (Exception exception) {
                 CodeClient.LOGGER.info("Config didn't load: " + exception);
                 CodeClient.LOGGER.info("Making a new one.");
                 instance = new Config();
@@ -130,8 +80,60 @@ public class Config {
         }
         return instance;
     }
+
     public static void clear() {
         instance = null;
+    }
+
+    private void save() {
+        try {
+            JsonObject object = new JsonObject();
+            object.addProperty("NoClipEnabled", NoClipEnabled);
+            object.addProperty("AirSpeed", AirSpeed);
+            object.addProperty("PlaceOnAir", PlaceOnAir);
+            object.addProperty("CodeClientAPI", CodeClientAPI);
+            object.addProperty("CCDBUG", CCDBUG);
+            object.addProperty("CustomBlockInteractions", CustomBlockInteractions);
+            object.addProperty("CustomTagInteraction", CustomTagInteraction);
+            object.addProperty("AutoJoin", AutoJoin);
+            object.addProperty("AutoNode", AutoNode.name());
+            object.addProperty("AutoJoinPlot", AutoJoinPlot);
+            object.addProperty("AutoJoinPlotId", AutoJoinPlotId);
+            object.addProperty("FileCharSet", FileCharSet.name());
+            object.addProperty("InvisibleBlocksInDev", InvisibleBlocksInDev);
+            object.addProperty("ReachDistance", ReachDistance);
+            object.addProperty("AutoFly", AutoFly);
+            object.addProperty("CodeLayerInteractionMode", CodeLayerInteractionMode.name());
+            object.addProperty("AirControl", AirControl);
+            object.addProperty("FocusSearch", FocusSearch);
+            object.addProperty("SaveCharSet", SaveCharSet.name());
+            object.addProperty("RecentChestInsert", RecentChestInsert);
+            object.addProperty("HighlightChestsWithAir", HighlightChestsWithAir);
+            object.addProperty("HighlightChestDuration", HighlightChestDuration);
+            object.addProperty("ChestHighlightColor", ChestHighlightColor);
+            object.addProperty("UseIForLineScope", UseIForLineScope);
+            object.addProperty("CustomBlockBreaking", CustomBlockBreaking);
+            object.addProperty("ChestPeeker", ChestPeeker);
+            object.addProperty("ChestPeekerX", ChestPeekerX);
+            object.addProperty("ChestPeekerY", ChestPeekerY);
+            object.addProperty("ReportBrokenBlock", ReportBrokenBlock);
+            object.addProperty("ScopeSwitcher", ScopeSwitcher);
+            object.addProperty("UpAngle", UpAngle);
+            object.addProperty("DownAngle", DownAngle);
+            object.addProperty("TeleportUp", TeleportUp);
+            object.addProperty("TeleportDown", TeleportDown);
+            object.addProperty("Line1Color", Line1Color);
+            object.addProperty("Line2Color", Line2Color);
+            object.addProperty("Line3Color", Line3Color);
+            object.addProperty("UseSelectionColor", UseSelectionColor);
+            object.addProperty("Line4Color", Line4Color);
+            object.addProperty("SignPeeker", SignPeeker);
+            object.addProperty("CustomCodeChest", CustomCodeChest.name());
+            object.addProperty("PickAction", PickAction);
+            FileManager.writeConfig(object.toString());
+        } catch (Exception e) {
+            CodeClient.LOGGER.info("Couldn't save config: " + e);
+        }
     }
 
     public YetAnotherConfigLib getLibConfig() {
@@ -171,7 +173,7 @@ public class Config {
                         .option(Option.createBuilder(CharSetOption.class)
                                 .name(Text.literal("Save Charset"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("When getting the actiondump get it in a needed format."),Text.literal("Default recommended."))
+                                        .text(Text.literal("When getting the actiondump get it in a needed format."), Text.literal("Default recommended."))
                                         .build())
                                 .binding(
                                         CharSetOption.UTF_8,
@@ -195,7 +197,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Auto Focus Search"))
-                                .description(OptionDescription.of(Text.literal("When opening the Code Palette (").append(Text.keybind("key.codeclient.codepalette")).append(") automatically select the search bar."),Text.literal("This is disabled because it interferes with navigation binds.")))
+                                .description(OptionDescription.of(Text.literal("When opening the Code Palette (").append(Text.keybind("key.codeclient.codepalette")).append(") automatically select the search bar."), Text.literal("This is disabled because it interferes with navigation binds.")))
                                 .binding(
                                         false,
                                         () -> FocusSearch,
@@ -313,7 +315,7 @@ public class Config {
                                         () -> UpAngle,
                                         opt -> UpAngle = opt
                                 )
-                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F, 180F).step(1F))
                                 .build())
                         .option(Option.createBuilder(float.class)
                                 .name(Text.literal("Angle to go down"))
@@ -322,7 +324,7 @@ public class Config {
                                         () -> DownAngle,
                                         opt -> DownAngle = opt
                                 )
-                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F,180F).step(1F))
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F, 180F).step(1F))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Teleport Up"))
@@ -377,7 +379,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.literal("Custom Block Breaking"))
-                                .description(OptionDescription.of(Text.literal("Keep codeblocks safe from accidental breaking."),Text.literal("They will have the survival breaking animation."),Text.literal("They will take 5 ticks to break (0.25 seconds)")))
+                                .description(OptionDescription.of(Text.literal("Keep codeblocks safe from accidental breaking."), Text.literal("They will have the survival breaking animation."), Text.literal("They will take 5 ticks to break (0.25 seconds)")))
                                 .binding(
                                         false,
                                         () -> CustomBlockBreaking,
@@ -402,7 +404,7 @@ public class Config {
                                 .description(OptionDescription.createBuilder()
                                         .text(Text.literal("Use a custom menu for chests, with value text boxes for quick editing."))
                                         .text(Text.of(CustomCodeChest.description))
-                                        .text(Text.literal("THIS IS IN BETA!").formatted(Formatting.YELLOW,Formatting.BOLD))
+                                        .text(Text.literal("THIS IS IN BETA!").formatted(Formatting.YELLOW, Formatting.BOLD))
                                         .build())
                                 .binding(
                                         CustomChestMenuType.OFF,
@@ -415,7 +417,7 @@ public class Config {
                                 .name(Text.literal("Place on Air"))
                                 .description(OptionDescription.createBuilder()
                                         .text(Text.literal("Allows you to place on air where codespaces would go."))
-                                        .text(Text.literal("This will interfere with other players who don't have this mod, such as helpers!").formatted(Formatting.YELLOW,Formatting.BOLD))
+                                        .text(Text.literal("This will interfere with other players who don't have this mod, such as helpers!").formatted(Formatting.YELLOW, Formatting.BOLD))
                                         .build())
                                 .binding(
                                         false,
@@ -476,7 +478,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.literal("Pick Block Action"))
-                                .description(OptionDescription.of(Text.literal("Replaces pick block with the action"),Text.literal("Requires actiondump.").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,"https://github.com/DFOnline/CodeClient/wiki/actiondump")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,Text.literal("Click to open link."))).withUnderline(true).withColor(Formatting.AQUA))))
+                                .description(OptionDescription.of(Text.literal("Replaces pick block with the action"), Text.literal("Requires actiondump.").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to open link."))).withUnderline(true).withColor(Formatting.AQUA))))
                                 .binding(
                                         true,
                                         () -> PickAction,
@@ -547,7 +549,7 @@ public class Config {
                                                 () -> ChestPeekerX,
                                                 opt -> ChestPeekerX = opt
                                         )
-                                        .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500,500))
+                                        .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500, 500))
                                         .build())
                                 .option(Option.createBuilder(int.class)
                                         .name(Text.literal("Preview Y Offset"))
@@ -557,69 +559,69 @@ public class Config {
                                                 () -> ChestPeekerY,
                                                 opt -> ChestPeekerY = opt
                                         )
-                                        .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500,500))
+                                        .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500, 500))
                                         .build())
                                 .build())
                         //</editor-fold>
                         //<editor-fold desc="Chest Highlight">
-                                .group(OptionGroup.createBuilder()
-                                        .name(Text.literal("Chest Highlight"))
-                                        .description(OptionDescription.of(
-                                                Text.literal("A highlight for inserting items into chests"),
-                                                Text.literal("Helpful with finding where you where, or accidentally punching chests.")))
-                                        .option(Option.createBuilder(Boolean.class)
-                                                .name(Text.literal("Highlight Recent Inserted Chest"))
-                                                .description(OptionDescription.createBuilder()
-                                                        .text(Text.literal("Highlights the chest you inserted (via punching with an item) an item into"))
-                                                        .build())
-                                                .binding(
-                                                        true,
-                                                        () -> RecentChestInsert,
-                                                        opt -> RecentChestInsert = opt
-                                                )
-                                                .controller(TickBoxControllerBuilder::create)
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.literal("Chest Highlight"))
+                                .description(OptionDescription.of(
+                                        Text.literal("A highlight for inserting items into chests"),
+                                        Text.literal("Helpful with finding where you where, or accidentally punching chests.")))
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.literal("Highlight Recent Inserted Chest"))
+                                        .description(OptionDescription.createBuilder()
+                                                .text(Text.literal("Highlights the chest you inserted (via punching with an item) an item into"))
                                                 .build())
-                                        .option(Option.createBuilder(Boolean.class)
-                                                .name(Text.literal("Highlight With Empty Hand"))
-                                                .description(OptionDescription.of(Text.literal("If punching a chest with an empty hand should highlight it.")))
-                                                .binding(
-                                                        false,
-                                                        () -> HighlightChestsWithAir,
-                                                        opt -> HighlightChestsWithAir = opt
-                                                )
-                                                .controller(TickBoxControllerBuilder::create)
-                                                .build())
-                                        .option(Option.createBuilder(int.class)
-                                                .name(Text.literal("Highlight Duration"))
-                                                .description(OptionDescription.of(Text.literal("How long the highlight should show."),Text.literal("The last second will fade out.")))
-                                                .binding(
-                                                        10,
-                                                        () -> HighlightChestDuration,
-                                                        opt -> HighlightChestDuration = opt
-                                                )
-                                                .controller(integerOption -> new IntegerFieldControllerBuilderImpl(integerOption).min(1))
-                                                .build())
-                                        .option(Option.createBuilder(Color.class)
-                                                .name(Text.literal("Recent Inserted Chest Highlight Color"))
-                                                .description(OptionDescription.createBuilder()
-                                                        .text(Text.literal("Color of chest highlight"))
-                                                        .build())
-                                                .binding(
-                                                        new Color(0.2F, 1.0F, 1.0F),
-                                                        () -> new Color(ChestHighlightColor),
-                                                        opt -> ChestHighlightColor = opt.getRGB()
-                                                )
-                                                .controller(ColorControllerBuilder::create)
-                                                .build())
+                                        .binding(
+                                                true,
+                                                () -> RecentChestInsert,
+                                                opt -> RecentChestInsert = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
                                         .build())
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.literal("Highlight With Empty Hand"))
+                                        .description(OptionDescription.of(Text.literal("If punching a chest with an empty hand should highlight it.")))
+                                        .binding(
+                                                false,
+                                                () -> HighlightChestsWithAir,
+                                                opt -> HighlightChestsWithAir = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(int.class)
+                                        .name(Text.literal("Highlight Duration"))
+                                        .description(OptionDescription.of(Text.literal("How long the highlight should show."), Text.literal("The last second will fade out.")))
+                                        .binding(
+                                                10,
+                                                () -> HighlightChestDuration,
+                                                opt -> HighlightChestDuration = opt
+                                        )
+                                        .controller(integerOption -> new IntegerFieldControllerBuilderImpl(integerOption).min(1))
+                                        .build())
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.literal("Recent Inserted Chest Highlight Color"))
+                                        .description(OptionDescription.createBuilder()
+                                                .text(Text.literal("Color of chest highlight"))
+                                                .build())
+                                        .binding(
+                                                new Color(0.2F, 1.0F, 1.0F),
+                                                () -> new Color(ChestHighlightColor),
+                                                opt -> ChestHighlightColor = opt.getRGB()
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build())
+                                .build())
                         //</editor-fold>
                         //<editor-fold desc="Sign Colors">
                         .group(OptionGroup.createBuilder()
                                 .name(Text.literal("Sign Colors"))
-                                .description(OptionDescription.of(Text.literal("Override the color of text on the signs in the dev space."),Text.literal("Using #000000 (pure black) has no effect and disable disable it.")))
+                                .description(OptionDescription.of(Text.literal("Override the color of text on the signs in the dev space."), Text.literal("Using #000000 (pure black) has no effect and disable disable it.")))
                                 .option(Option.createBuilder(Color.class)
                                         .name(Text.literal("Line 1"))
-                                        .description(OptionDescription.of(Text.literal("The top line on a sign."),Text.literal("Tells you what block it is, such as PLAYER ACTION")))
+                                        .description(OptionDescription.of(Text.literal("The top line on a sign."), Text.literal("Tells you what block it is, such as PLAYER ACTION")))
                                         .binding(
                                                 new Color(0xAAAAAA),
                                                 () -> new Color(Line1Color),
@@ -629,7 +631,7 @@ public class Config {
                                         .build())
                                 .option(Option.createBuilder(Color.class)
                                         .name(Text.literal("Line 2"))
-                                        .description(OptionDescription.of(Text.literal("The second line on a sign."),Text.literal("Tells you the action or data, such as SendMessage")))
+                                        .description(OptionDescription.of(Text.literal("The second line on a sign."), Text.literal("Tells you the action or data, such as SendMessage")))
                                         .binding(
                                                 new Color(0xC5C5C5),
                                                 () -> new Color(Line2Color),
@@ -639,7 +641,7 @@ public class Config {
                                         .build())
                                 .option(Option.createBuilder(Color.class)
                                         .name(Text.literal("Line 3"))
-                                        .description(OptionDescription.of(Text.literal("The third line on a sign."),Text.literal("Tells you either the selection or SubAction")))
+                                        .description(OptionDescription.of(Text.literal("The third line on a sign."), Text.literal("Tells you either the selection or SubAction")))
                                         .binding(
                                                 new Color(0xAAFFAA),
                                                 () -> new Color(Line3Color),
@@ -659,7 +661,7 @@ public class Config {
                                         .build())
                                 .option(Option.createBuilder(Color.class)
                                         .name(Text.literal("Line 4"))
-                                        .description(OptionDescription.of(Text.literal("The bottom line on a sign."),Text.literal("Only tells you if it is inverted: NOT")))
+                                        .description(OptionDescription.of(Text.literal("The bottom line on a sign."), Text.literal("Only tells you if it is inverted: NOT")))
                                         .binding(
                                                 new Color(0xFF8800),
                                                 () -> new Color(Line4Color),
@@ -687,6 +689,7 @@ public class Config {
         Beta("beta.");
 
         public final String prepend;
+
         Node(String prepend) {
             this.prepend = prepend;
         }
@@ -697,6 +700,7 @@ public class Config {
         UTF_8(StandardCharsets.UTF_8);
 
         public final Charset charSet;
+
         CharSetOption(Charset charSet) {
             this.charSet = charSet;
         }
@@ -708,13 +712,14 @@ public class Config {
         ON("Code layers are always custom.");
 
         public final String description;
+
         LayerInteractionMode(String description) {
             this.description = description;
         }
     }
 
     public enum CustomChestMenuType {
-        OFF("No changes.",null),
+        OFF("No changes.", null),
         SMALL("A small menu with a few lines for editing code values", CustomChestNumbers.SMALL),
         LARGE("A large menu with lots of lines for editing values, and extra slots showing values without editable lines.", CustomChestNumbers.LARGE);
 
@@ -725,8 +730,5 @@ public class Config {
             this.description = description;
             this.size = size;
         }
-    }
-
-    public Config() {
     }
 }

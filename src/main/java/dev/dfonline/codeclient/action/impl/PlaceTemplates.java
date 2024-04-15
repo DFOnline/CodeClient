@@ -34,10 +34,10 @@ public class PlaceTemplates extends Action {
 
     public PlaceTemplates(List<ItemStack> templates, Callback callback) {
         super(callback);
-        if(CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Dev plot) {
             int i = 0;
             ArrayList<Operation> templatesToPlace = new ArrayList<>();
-            for (ItemStack template: templates) {
+            for (ItemStack template : templates) {
                 int row = i % rowSize;
                 int level = i / rowSize;
                 i++;
@@ -45,15 +45,15 @@ public class PlaceTemplates extends Action {
                 templatesToPlace.add(new TemplateToPlace(pos, template));
             }
             this.operations = templatesToPlace;
-        }
-        else {
+        } else {
             throw new IllegalStateException("Player must be in dev mode.");
         }
     }
-    public PlaceTemplates(HashMap<BlockPos,ItemStack> templates, Callback callback) {
+
+    public PlaceTemplates(HashMap<BlockPos, ItemStack> templates, Callback callback) {
         super(callback);
         ArrayList<Operation> templatesToPlace = new ArrayList<>();
-        for (var template: templates.entrySet()) {
+        for (var template : templates.entrySet()) {
             templatesToPlace.add(new TemplateToPlace(template.getKey(), template.getValue()));
         }
         this.operations = templatesToPlace;
@@ -75,10 +75,10 @@ public class PlaceTemplates extends Action {
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if(packet instanceof OpenScreenS2CPacket) {
+        if (packet instanceof OpenScreenS2CPacket) {
             return true;
         }
-        if(packet instanceof ChunkDeltaUpdateS2CPacket updates) {
+        if (packet instanceof ChunkDeltaUpdateS2CPacket updates) {
             for (Operation operation : operations) {
                 var block = new Object() {
                     boolean isTemplate = false;
@@ -101,19 +101,19 @@ public class PlaceTemplates extends Action {
 
     @Override
     public void onTick() {
-        if(CodeClient.MC.interactionManager == null) return;
-        if(CodeClient.location instanceof Dev) {
-            if(operations.isEmpty()) {
+        if (CodeClient.MC.interactionManager == null) return;
+        if (CodeClient.location instanceof Dev) {
+            if (operations.isEmpty()) {
                 callback();
                 return;
             }
-            if(goTo != null) {
+            if (goTo != null) {
                 goTo.onTick();
             }
-            if(cooldown > 0) cooldown--;
+            if (cooldown > 0) cooldown--;
             Operation closestOperation = null;
             operations.removeIf(Operation::isComplete);
-            for (Operation operation: operations.stream().toList()) {
+            for (Operation operation : operations.stream().toList()) {
                 double distanceToCurrentOperation = (operation.pos().distanceTo(CodeClient.MC.player.getEyePos()));
                 if (distanceToCurrentOperation <= 5.8 && operation.isOpen() && !operation.isComplete()) {
                     if (cooldown == 0) {
@@ -137,16 +137,15 @@ public class PlaceTemplates extends Action {
                     }
                     return;
                 }
-                if((closestOperation == null) || (distanceToCurrentOperation < closestOperation.pos().distanceTo(CodeClient.MC.player.getEyePos()))) {
+                if ((closestOperation == null) || (distanceToCurrentOperation < closestOperation.pos().distanceTo(CodeClient.MC.player.getEyePos()))) {
                     closestOperation = operation;
                 }
             }
-            if(closestOperation == null) {
-                for (Operation operation: operations) {
+            if (closestOperation == null) {
+                for (Operation operation : operations) {
                     operation.setOpen(!operation.isComplete());
                 }
-            }
-            else {
+            } else {
                 goTo = new GoTo(closestOperation.pos().add(-2, 0.5, 0), () -> this.goTo = null);
                 goTo.init();
                 cooldown = 2;
@@ -169,6 +168,7 @@ public class PlaceTemplates extends Action {
         public Operation(BlockPos pos) {
             this.pos = pos;
         }
+
         public Operation(Vec3d pos) {
             this.pos = new BlockPos((int) pos.x, (int) pos.y, (int) pos.z);
         }
@@ -177,11 +177,12 @@ public class PlaceTemplates extends Action {
             return pos.toCenterPos();
         }
 
-        public void setOpen(boolean open) {
-            this.open = open;
-        }
         public boolean isOpen() {
             return open;
+        }
+
+        public void setOpen(boolean open) {
+            this.open = open;
         }
 
         /**
@@ -191,10 +192,12 @@ public class PlaceTemplates extends Action {
             this.open = false;
             this.complete = true;
         }
+
         public boolean isComplete() {
             return complete;
         }
     }
+
     private static class TemplateToPlace extends Operation {
         private final ItemStack template;
 

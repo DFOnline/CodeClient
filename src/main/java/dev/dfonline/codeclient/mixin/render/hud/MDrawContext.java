@@ -22,18 +22,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DrawContext.class)
 public abstract class MDrawContext {
-    @Shadow @Final private MatrixStack matrices;
+    @Shadow
+    @Final
+    private MatrixStack matrices;
 
-    @Shadow public abstract int drawText(TextRenderer textRenderer, Text text, int x, int y, int color, boolean shadow);
+    @Shadow
+    public abstract int drawText(TextRenderer textRenderer, Text text, int x, int y, int color, boolean shadow);
 
     @Inject(method = "drawItemInSlot(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;push()V", shift = At.Shift.AFTER))
     private void additionalItemRendering(TextRenderer textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo ci) {
         NbtCompound nbt = stack.getNbt();
-        if(nbt == null) return;
+        if (nbt == null) return;
         NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
-        if(pbv == null) return;
+        if (pbv == null) return;
         NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
-        if(varItem == null) return;
+        if (varItem == null) return;
         JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
         JsonObject data = var.get("data").getAsJsonObject();
         Text text = null;
@@ -42,28 +45,26 @@ public abstract class MDrawContext {
                 try {
                     Scope scope = Scope.valueOf(data.get("scope").getAsString());
                     text = Text.literal((Config.getConfig().UseIForLineScope && scope == Scope.line) ? "I" : scope.shortName).setStyle(Style.EMPTY.withColor(scope.color));
-                }
-                catch (Exception ignored) {
+                } catch (Exception ignored) {
                     text = Text.literal("?").formatted(Formatting.DARK_RED);
                 }
                 break;
             }
             case "num": {
                 String name = data.get("name").getAsString();
-                if(textRenderer.getWidth(Text.of(name)) > 16) {
-                    var avail = textRenderer.trimToWidth(name,16-2);
-                    text = Text.literal(avail).formatted(Formatting.RED).append(Text.literal(".".repeat((16-textRenderer.getWidth(Text.of(avail))) / 2)).formatted(Formatting.WHITE));
-                }
-                else text = Text.literal(name).formatted(Formatting.RED);
+                if (textRenderer.getWidth(Text.of(name)) > 16) {
+                    var avail = textRenderer.trimToWidth(name, 16 - 2);
+                    text = Text.literal(avail).formatted(Formatting.RED).append(Text.literal(".".repeat((16 - textRenderer.getWidth(Text.of(avail))) / 2)).formatted(Formatting.WHITE));
+                } else text = Text.literal(name).formatted(Formatting.RED);
                 break;
             }
             default: {
                 return;
             }
         }
-        if(text == null) return;
+        if (text == null) return;
         this.matrices.translate(0.0F, 0.0F, 200.0F);
-        this.drawText(textRenderer,text,x,y,0xFFFFFF,true);
+        this.drawText(textRenderer, text, x, y, 0xFFFFFF, true);
         matrices.translate(0.0F, 0.0F, -200.0F);
     }
 }

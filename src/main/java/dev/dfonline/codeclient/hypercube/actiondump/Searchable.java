@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface Searchable {
     List<String> getTerms();
+
     ItemStack getItem();
 
     class StaticSearchable implements Searchable {

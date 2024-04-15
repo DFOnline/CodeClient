@@ -1,7 +1,8 @@
 package dev.dfonline.codeclient.location;
 
 public class Play extends Plot {
-    public Play() {}
+    public Play() {
+    }
 
     @Override
     public String name() {

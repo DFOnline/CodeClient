@@ -41,43 +41,54 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class MClientPlayerInteractionManager {
-    @Shadow protected abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
-
-    @Shadow private boolean breakingBlock;
-    @Shadow private BlockPos currentBreakingPos;
-    @Shadow private float currentBreakingProgress;
-    @Shadow private float blockBreakingSoundCooldown;
-    @Shadow @Final private MinecraftClient client;
-
-    @Shadow public abstract int getBlockBreakingProgress();
-
-    @Shadow public abstract boolean breakBlock(BlockPos pos);
-
-    @Shadow private int blockBreakingCooldown;
-
-    @Shadow private int lastSelectedSlot;
-
-    @Shadow public abstract void cancelBlockBreaking();
-
     private static ItemStack item = null;
+    @Shadow
+    private boolean breakingBlock;
+    @Shadow
+    private BlockPos currentBreakingPos;
+    @Shadow
+    private float currentBreakingProgress;
+    @Shadow
+    private float blockBreakingSoundCooldown;
+    @Shadow
+    @Final
+    private MinecraftClient client;
+    @Shadow
+    private int blockBreakingCooldown;
+    @Shadow
+    private int lastSelectedSlot;
+
+    @Shadow
+    protected abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
+
+    @Shadow
+    public abstract int getBlockBreakingProgress();
+
+    @Shadow
+    public abstract boolean breakBlock(BlockPos pos);
+
+    @Shadow
+    public abstract void cancelBlockBreaking();
 
     @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
     public void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if(InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
+        if (InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
     }
 
     @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V"))
     public void beforeSendPlace(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
         ItemStack handItem = player.getStackInHand(hand);
         boolean isTemplate = handItem.hasNbt() && handItem.getNbt() != null && handItem.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && handItem.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE);
-        if(!isTemplate) return;
+        if (!isTemplate) return;
         BlockPos place = InteractionManager.getPlacePos(hitResult);
-        if(place != null && CodeClient.MC.world.getBlockState(place).isSolidBlock(CodeClient.MC.world, place)) {
+        if (place != null && CodeClient.MC.world.getBlockState(place).isSolidBlock(CodeClient.MC.world, place)) {
             ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
-            if(!player.isSneaking()) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+            if (!player.isSneaking())
+                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             this.sendSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult, sequence));
-            if(!player.isSneaking()) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-            if(!player.isSneaking()) {
+            if (!player.isSneaking())
+                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            if (!player.isSneaking()) {
                 this.sendSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(place.toCenterPos(), Direction.UP, place, hitResult.isInsideBlock()), sequence));
             }
         }
@@ -89,7 +100,7 @@ public abstract class MClientPlayerInteractionManager {
 
     @ModifyVariable(method = "interactBlock", at = @At("HEAD"), argsOnly = true)
     private BlockHitResult onBlockInteract(BlockHitResult hitResult) {
-        if(CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ())) {
+        if (CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ())) {
             return InteractionManager.onBlockInteract(hitResult);
         }
         return hitResult;
@@ -97,7 +108,7 @@ public abstract class MClientPlayerInteractionManager {
 
     @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V", shift = At.Shift.AFTER))
     public void afterSendPlace(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-        if(item != null) {
+        if (item != null) {
             Utility.sendHandItem(item);
             item = null;
         }
@@ -105,43 +116,44 @@ public abstract class MClientPlayerInteractionManager {
 
     @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
     public void interactItemMovement(ClientPlayNetworkHandler instance, Packet<?> packet) {
-        if(!NoClip.isIgnoringWalls()) {
+        if (!NoClip.isIgnoringWalls()) {
             instance.sendPacket(packet);
         }
     }
 
     @Inject(method = "interactItem", at = @At("HEAD"), cancellable = true)
     public void interactItem(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        if(InteractionManager.onItemInteract(player, hand)) {
+        if (InteractionManager.onItemInteract(player, hand)) {
             cir.setReturnValue(ActionResult.PASS);
         }
     }
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     private void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
-        if(slotId < 0) return;
-        if(!player.isMainPlayer()) return;
+        if (slotId < 0) return;
+        if (!player.isMainPlayer()) return;
 
         ScreenHandler screenHandler = player.currentScreenHandler;
-        if(InteractionManager.onClickSlot(screenHandler.slots.get(slotId),button,actionType,syncId,screenHandler.getRevision())) ci.cancel();
+        if (InteractionManager.onClickSlot(screenHandler.slots.get(slotId), button, actionType, syncId, screenHandler.getRevision()))
+            ci.cancel();
     }
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void reachDistance(CallbackInfoReturnable<Float> cir) {
-        if(CodeClient.location instanceof Dev) {
+        if (CodeClient.location instanceof Dev) {
             cir.setReturnValue(Config.getConfig().ReachDistance);
         }
     }
 
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     private void attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-        if(!Config.getConfig().CustomBlockBreaking) return;
-        if(CodeClient.location instanceof Dev dev) {
-            if(Utility.isGlitchStick(CodeClient.MC.player.getMainHandStack())) return;
-            if(!dev.isInDev(pos)) return;
-            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
+        if (!Config.getConfig().CustomBlockBreaking) return;
+        if (CodeClient.location instanceof Dev dev) {
+            if (Utility.isGlitchStick(CodeClient.MC.player.getMainHandStack())) return;
+            if (!dev.isInDev(pos)) return;
+            if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
-            if(breakPos == null) {
+            if (breakPos == null) {
                 return;
             }
             this.breakingBlock = true;
@@ -152,18 +164,19 @@ public abstract class MClientPlayerInteractionManager {
             cir.setReturnValue(true);
         }
     }
+
     @Inject(method = "updateBlockBreakingProgress", at = @At("HEAD"), cancellable = true)
     private void updateBlockBreakingProgress(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-        if(!Config.getConfig().CustomBlockBreaking) return;
+        if (!Config.getConfig().CustomBlockBreaking) return;
         if (CodeClient.location instanceof Dev dev) {
-            if(Utility.isGlitchStick(CodeClient.MC.player.getMainHandStack())) return;
+            if (Utility.isGlitchStick(CodeClient.MC.player.getMainHandStack())) return;
             if (!dev.isInDev(pos)) return;
-            if(CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
+            if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
             cir.cancel();
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
-            if(breakPos == null || !breakPos.equals(currentBreakingPos) || !breakingBlock) {
+            if (breakPos == null || !breakPos.equals(currentBreakingPos) || !breakingBlock) {
                 cancelBlockBreaking();
-                CodeClient.MC.interactionManager.attackBlock(pos,direction);
+                CodeClient.MC.interactionManager.attackBlock(pos, direction);
                 return;
             }
             this.currentBreakingProgress += BlockBreakDeltaCalculator.calculateBlockDelta(breakPos);

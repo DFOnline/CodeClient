@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
-import org.java_websocket.enums.Opcode;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,9 +26,12 @@ import static dev.dfonline.codeclient.CodeClient.MC;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class MClientPlayerEntity {
-    @Shadow @Final public ClientPlayNetworkHandler networkHandler;
+    @Shadow
+    @Final
+    public ClientPlayNetworkHandler networkHandler;
 
-    @Shadow private boolean inSneakingPose;
+    @Shadow
+    private boolean inSneakingPose;
     private boolean lastSneaking = false;
 
     @Inject(method = "tick", at = @At("HEAD"))
@@ -39,35 +41,33 @@ public abstract class MClientPlayerEntity {
 
     @Inject(method = "sendMovementPackets", at = @At("HEAD"), cancellable = true)
     private void sendMovementPackets(CallbackInfo ci) {
-        if(CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Dev plot) {
             if (CodeClient.currentAction instanceof MoveToSpawn mts) if (mts.moveModifier()) ci.cancel();
             ClientPlayerEntity player = MC.player;
             if (NoClip.isIgnoringWalls()) {
-                if(Config.getConfig().TeleportDown && player.getY() % 5 == 0 && !lastSneaking && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle)) {
+                if (Config.getConfig().TeleportDown && player.getY() % 5 == 0 && !lastSneaking && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle)) {
                     Vec3d move = CodeClient.MC.player.getPos().add(0, -5, 0);
-                    if(move.y < plot.getFloorY()) move = new Vec3d(move.x,plot.getFloorY(),move.z);
+                    if (move.y < plot.getFloorY()) move = new Vec3d(move.x, plot.getFloorY(), move.z);
                     if ((!NoClip.isIgnoringWalls()) && NoClip.isInsideWall(move)) move = move.add(0, 2, 0);
                     CodeClient.MC.player.setPosition(move);
                 }
                 ci.cancel();
                 Vec3d pos = NoClip.handleSeverPosition();
                 boolean idle = NoClip.timesSinceMoved++ > 40;
-                if(idle) NoClip.timesSinceMoved = 0;
+                if (idle) NoClip.timesSinceMoved = 0;
                 float yaw = player.getYaw();
                 float pitch = player.getPitch();
                 boolean rotation = pitch != NoClip.lastPitch || yaw != NoClip.lastYaw;
                 boolean position = !pos.equals(NoClip.lastPos) || idle;
-                if(position || rotation) {
-                    if(position) {
+                if (position || rotation) {
+                    if (position) {
                         NoClip.timesSinceMoved = 0;
-                        if(rotation) {
+                        if (rotation) {
                             this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, yaw, pitch, false));
-                        }
-                        else {
+                        } else {
                             this.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false));
                         }
-                    }
-                    else {
+                    } else {
                         this.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false));
                     }
                 }
@@ -86,22 +86,22 @@ public abstract class MClientPlayerEntity {
 
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double z, CallbackInfo ci) {
-        if(NoClip.isIgnoringWalls()) ci.cancel();
+        if (NoClip.isIgnoringWalls()) ci.cancel();
     }
 
     @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
     private void slowDown(CallbackInfoReturnable<Boolean> cir) {
-        if(NoClip.isIgnoringWalls()) cir.setReturnValue(false);
+        if (NoClip.isIgnoringWalls()) cir.setReturnValue(false);
     }
 
     @Inject(method = "shouldAutoJump", at = @At("HEAD"), cancellable = true)
     private void autoJump(CallbackInfoReturnable<Boolean> cir) {
-        if(NoClip.isIgnoringWalls()) cir.setReturnValue(false);
+        if (NoClip.isIgnoringWalls()) cir.setReturnValue(false);
     }
 
     @Redirect(method = "tickMovement", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerAbilities;allowFlying:Z", opcode = Opcodes.GETFIELD))
     private boolean canFly(PlayerAbilities instance) {
-        if(InteractionManager.shouldTeleportUp()) return false;
+        if (InteractionManager.shouldTeleportUp()) return false;
         return instance.allowFlying;
     }
 }

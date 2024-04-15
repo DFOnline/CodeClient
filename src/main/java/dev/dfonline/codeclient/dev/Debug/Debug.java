@@ -106,24 +106,23 @@ public class Debug {
     }
 
     public static void updateDisplay() {
-        if(!active) return;
-        if(text == null) return;
+        if (!active) return;
+        if (text == null) return;
         OverlayManager.setOverlayText();
-        OverlayManager.addOverlayText(Text.empty().append(Text.literal("CCDBUG").formatted(Formatting.YELLOW,Formatting.BOLD)).append(" (/abort to hide)"));
-        if(CPU != null) {
+        OverlayManager.addOverlayText(Text.empty().append(Text.literal("CCDBUG").formatted(Formatting.YELLOW, Formatting.BOLD)).append(" (/abort to hide)"));
+        if (CPU != null) {
             OverlayManager.addOverlayText(Text.literal("CPU Usage: ").formatted(Formatting.GOLD).append(Text.literal(String.valueOf(CPU)).formatted(Formatting.AQUA)));
             OverlayManager.addOverlayText(Text.empty());
         }
-        for(var line: text) {
+        for (var line : text) {
             OverlayManager.addOverlayText(line);
         }
     }
 
     public static void tick() {
-        if(Config.getConfig().CCDBUG && active && CodeClient.location instanceof Plot) {
+        if (Config.getConfig().CCDBUG && active && CodeClient.location instanceof Plot) {
             updateDisplay();
-        }
-        else {
+        } else {
             CPU = null;
         }
     }

@@ -16,13 +16,13 @@ public class Variable extends NamedItem {
         this.scope = Scope.valueOf(data.get("scope").getAsString());
     }
 
-    public void setScope(Scope scope) {
-        this.scope = scope;
-        data.addProperty("scope",scope.name());
-    }
-
     public Scope getScope() {
         return scope;
+    }
+
+    public void setScope(Scope scope) {
+        this.scope = scope;
+        data.addProperty("scope", scope.name());
     }
 
     @Override

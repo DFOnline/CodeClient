@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 /**
@@ -19,7 +18,7 @@ public class BlockBreakDeltaCalculator {
      * Only invoked when a codeblock is broken.
      */
     public static void breakBlock(BlockPos pos) {
-        if(pos == null) return;
+        if (pos == null) return;
         oldBlocks.addBlock(pos);
     }
 
@@ -44,6 +43,7 @@ public class BlockBreakDeltaCalculator {
         public void addBlock(BlockPos pos) {
             blocks.add(new RecentBlock(pos, new Date()));
         }
+
         public Stream<RecentBlock> getBlock(BlockPos pos) {
             return blocks.stream().filter(recentBlock -> Objects.equals(recentBlock.pos, pos));
         }
@@ -52,6 +52,7 @@ public class BlockBreakDeltaCalculator {
             return blocks;
         }
     }
+
     private record RecentBlock(BlockPos pos, Date time) {
         /**
          * Milliseconds

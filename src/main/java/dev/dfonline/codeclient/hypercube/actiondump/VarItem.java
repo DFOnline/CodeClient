@@ -13,8 +13,8 @@ public abstract class VarItem {
         NbtCompound nbt = item.getNbt();
         NbtCompound publicBukkitValues = new NbtCompound();
         JsonObject varItem = new JsonObject();
-        varItem.addProperty("id",id);
-        varItem.add("data",data);
+        varItem.addProperty("id", id);
+        varItem.add("data", data);
         publicBukkitValues.put("hypercube:varitem", NbtString.of(varItem.toString()));
         nbt.put("PublicBukkitValues", publicBukkitValues);
         item.setNbt(nbt);

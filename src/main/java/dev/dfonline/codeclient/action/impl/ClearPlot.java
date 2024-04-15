@@ -32,9 +32,9 @@ public class ClearPlot extends Action {
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if(packet instanceof InventoryS2CPacket inventoryS2CPacket) {
-            if(currentStep == Step.WAIT_FOR_OPTIONS) {
-                for (int i : List.of(9,14,15,44)) {
+        if (packet instanceof InventoryS2CPacket inventoryS2CPacket) {
+            if (currentStep == Step.WAIT_FOR_OPTIONS) {
+                for (int i : List.of(9, 14, 15, 44)) {
                     ItemStack itemStack = inventoryS2CPacket.getContents().get(i);
                     Int2ObjectMap<ItemStack> modified = Int2ObjectMaps.singleton(i, new ItemStack(Items.AIR));
                     CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.getSyncId(), inventoryS2CPacket.getRevision(), i, 0, SlotActionType.PICKUP, itemStack, modified));
@@ -42,10 +42,10 @@ public class ClearPlot extends Action {
                 currentStep = Step.WAIT_FOR_CLEAR;
                 return true;
             }
-            if(currentStep == Step.WAIT_FOR_CLEAR) {
+            if (currentStep == Step.WAIT_FOR_CLEAR) {
                 int i = 11;
                 ItemStack itemStack = inventoryS2CPacket.getContents().get(i);
-                if(itemStack.getItem().equals(Items.GREEN_CONCRETE)) {
+                if (itemStack.getItem().equals(Items.GREEN_CONCRETE)) {
                     Int2ObjectMap<ItemStack> modified = Int2ObjectMaps.singleton(i, new ItemStack(Items.AIR));
                     CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.getSyncId(), inventoryS2CPacket.getRevision(), i, 0, SlotActionType.PICKUP, itemStack, modified));
                     currentStep = Step.DONE;
@@ -54,11 +54,11 @@ public class ClearPlot extends Action {
                 }
             }
         }
-        if(currentStep != Step.DONE) {
-            if(packet instanceof InventoryS2CPacket) return true;
-            if(packet instanceof PlaySoundS2CPacket) return true;
-            if(packet instanceof OpenScreenS2CPacket) return true;
-            if(packet instanceof ScreenHandlerSlotUpdateS2CPacket) return true;
+        if (currentStep != Step.DONE) {
+            if (packet instanceof InventoryS2CPacket) return true;
+            if (packet instanceof PlaySoundS2CPacket) return true;
+            if (packet instanceof OpenScreenS2CPacket) return true;
+            if (packet instanceof ScreenHandlerSlotUpdateS2CPacket) return true;
         }
         return super.onReceivePacket(packet);
     }

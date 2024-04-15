@@ -24,25 +24,37 @@ public class Potion extends VarItem {
         this.amplifier = data.get("amp").getAsInt();
     }
 
+    public static String durationToString(int duration) {
+        if (duration >= 1000000) return "Infinite";
+        if (duration % 20 != 0) return "%d ticks".formatted(duration);
+        int seconds = duration / 20;
+        return "%d:%d".formatted(seconds / 60, seconds % 60);
+    }
+
     public String getPotion() {
         return potion;
     }
+
     public void setPotion(String potion) {
-        data.addProperty("pot",potion);
+        data.addProperty("pot", potion);
         this.potion = potion;
     }
+
     public int getDuration() {
         return duration;
     }
+
     public void setDuration(int duration) {
-        data.addProperty("dur",duration);
+        data.addProperty("dur", duration);
         this.duration = duration;
     }
+
     public int getAmplifier() {
         return amplifier;
     }
+
     public void setAmplifier(int amplifier) {
-        data.addProperty("amp",amplifier);
+        data.addProperty("amp", amplifier);
         this.amplifier = amplifier;
     }
 
@@ -54,7 +66,7 @@ public class Potion extends VarItem {
         try {
             ActionDump db = ActionDump.getActionDump();
             var value = Arrays.stream(db.potions).filter(gv -> gv.icon.getCleanName().equals(potion)).findFirst();
-            if(value.isEmpty()) throw new Exception("");
+            if (value.isEmpty()) throw new Exception("");
             name = Text.literal(value.get().icon.name);
         } catch (Exception e) {
             name = Text.literal(potion).setStyle(Style.EMPTY);
@@ -69,12 +81,5 @@ public class Potion extends VarItem {
 
     public String duration() {
         return durationToString(duration);
-    }
-
-    public static String durationToString(int duration) {
-        if(duration >= 1000000) return "Infinite";
-        if(duration % 20 != 0) return "%d ticks".formatted(duration);
-        int seconds = duration / 20;
-        return "%d:%d".formatted(seconds / 60, seconds % 60);
     }
 }

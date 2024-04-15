@@ -15,11 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MTitleScreen {
     @Inject(method = "init", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
-        if(CodeClient.autoJoin == CodeClient.AutoJoin.GAME) {
+        if (CodeClient.autoJoin == CodeClient.AutoJoin.GAME) {
             ServerInfo info = new ServerInfo("DiamondFire", Config.getConfig().AutoNode.prepend + "mcdiamondfire.com", ServerInfo.ServerType.OTHER);
-            ConnectScreen.connect((TitleScreen)(Object)this, CodeClient.MC, ServerAddress.parse(info.address), info, true);
+            ConnectScreen.connect((TitleScreen) (Object) this, CodeClient.MC, ServerAddress.parse(info.address), info, true);
 
-            CodeClient.autoJoin =Config.getConfig().AutoJoinPlot ? CodeClient.AutoJoin.PLOT : CodeClient.AutoJoin.NONE;
+            CodeClient.autoJoin = Config.getConfig().AutoJoinPlot ? CodeClient.AutoJoin.PLOT : CodeClient.AutoJoin.NONE;
         }
     }
 }

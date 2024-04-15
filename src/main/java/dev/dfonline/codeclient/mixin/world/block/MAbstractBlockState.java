@@ -15,11 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractBlockState.class)
 public abstract class MAbstractBlockState {
-    @Shadow public abstract Block getBlock();
+    @Shadow
+    public abstract Block getBlock();
 
     @Inject(method = "getOutlineShape(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;", at = @At("HEAD"), cancellable = true)
     private void onGetOutlineShape(BlockView world, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> cir) {
         VoxelShape shape = InteractionManager.customVoxelShape(world, pos);
-        if(shape != null) cir.setReturnValue(shape);
+        if (shape != null) cir.setReturnValue(shape);
     }
 }

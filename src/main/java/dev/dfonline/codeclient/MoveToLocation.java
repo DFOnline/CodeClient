@@ -9,6 +9,7 @@ import net.minecraft.util.math.Vec3d;
  */
 public class MoveToLocation {
     private final ClientPlayerEntity player;
+
     public MoveToLocation(ClientPlayerEntity player) {
         this.player = player;
     }
@@ -20,20 +21,24 @@ public class MoveToLocation {
     public static Vec3d shiftTowards(Vec3d origin, Vec3d location) {
         Vec3d pos = origin.relativize(location);
         double maxLength = 9.9;
-        if(pos.length() > maxLength) {
+        if (pos.length() > maxLength) {
             return origin.add(pos.normalize().multiply(maxLength));
-        }
-        else {
+        } else {
             return location;
         }
+    }
+
+    public static void shove(ClientPlayerEntity player, Vec3d location) {
+        new MoveToLocation(player).teleportTowards(player.getPos(), location);
     }
 
     public void setPos(Vec3d pos) {
         setPos(pos.x, pos.y, pos.z);
     }
+
     public void setPos(double x, double y, double z) {
-        if(CodeClient.MC.getNetworkHandler() == null) return;
-        if(new Vec3d(x,y,x).distanceTo(player.getPos()) > 10) {
+        if (CodeClient.MC.getNetworkHandler() == null) return;
+        if (new Vec3d(x, y, x).distanceTo(player.getPos()) > 10) {
             // I've always done it like this, problems?
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
@@ -51,14 +56,10 @@ public class MoveToLocation {
         CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, false));
     }
 
-    public static void shove(ClientPlayerEntity player, Vec3d location) {
-        new MoveToLocation(player).teleportTowards(player.getPos(), location);
-    }
-
     /**
      * Moves the player up to 10 blocks towards `to` from `from`
      */
     public void teleportTowards(Vec3d from, Vec3d to) {
-        setPos(shiftTowards(from,to));
+        setPos(shiftTowards(from, to));
     }
 }

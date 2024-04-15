@@ -1,8 +1,5 @@
 package dev.dfonline.codeclient.location;
 
-import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.config.Config;
-
 public class Spawn extends Location {
     private boolean hasJustJoined = false;
 

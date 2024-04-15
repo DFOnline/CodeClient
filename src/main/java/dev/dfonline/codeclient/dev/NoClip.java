@@ -14,12 +14,12 @@ import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
 
 public class NoClip {
+    public static final double PLAYER_FREEDOM = 0.621;
     public static LineType display = null;
     public static Vec3d lastPos = null;
     public static float lastYaw = 0;
     public static float lastPitch = 0;
     public static int timesSinceMoved = 0;
-    public static final double PLAYER_FREEDOM = 0.621;
 
     public static boolean isIgnoringWalls() {
         return CodeClient.noClipOn() && isInDevSpace();
@@ -30,7 +30,7 @@ public class NoClip {
     }
 
     public static Vec3d handleClientPosition(Vec3d movement) {
-        if(CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
 
             double nearestFloor = Math.floor(player.getY() / 5) * 5;
@@ -39,22 +39,23 @@ public class NoClip {
             double x = Math.max(player.getX() + movement.x * 1.3, plot.getX() - 22);
             double y = Math.max(player.getY() + movement.y * 1, plot.getFloorY());
             double z = Math.max(player.getZ() + movement.z * 1.3, plot.getZ() - 2);
-            if(plot.getSize() != null) {
+            if (plot.getSize() != null) {
                 z = Math.min(z, plot.getZ() + plot.getSize().size + 3);
-                if(z == plot.getZ() + plot.getSize().size + 3 && velocity.getZ() > 0) player.setVelocityClient(velocity.x, velocity.y, 0);
+                if (z == plot.getZ() + plot.getSize().size + 3 && velocity.getZ() > 0)
+                    player.setVelocityClient(velocity.x, velocity.y, 0);
             }
-            if(z == plot.getZ() - 2  && velocity.getZ() < 0) player.setVelocityClient(velocity.x, velocity.y, 0);
-            if(x == plot.getX() - 22 && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
+            if (z == plot.getZ() - 2 && velocity.getZ() < 0) player.setVelocityClient(velocity.x, velocity.y, 0);
+            if (x == plot.getX() - 22 && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
 
             player.setOnGround(false);
             boolean wantsToFall = !Config.getConfig().TeleportDown && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle);
-            if((y < nearestFloor && !wantsToFall && !player.getAbilities().flying) || y == plot.getFloorY()) {
+            if ((y < nearestFloor && !wantsToFall && !player.getAbilities().flying) || y == plot.getFloorY()) {
                 player.setVelocityClient(velocity.x, 0, velocity.z);
                 y = nearestFloor;
                 player.setOnGround(true);
             }
 
-            return new Vec3d(x, Math.min(y,256), z);
+            return new Vec3d(x, Math.min(y, 256), z);
         }
         return null;
     }
@@ -64,11 +65,11 @@ public class NoClip {
     }
 
     public static Vec3d handleSeverPosition() {
-        if(CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
 
             double z = Math.max(player.getZ(), plot.getZ() + PLAYER_FREEDOM);
-            if(plot.getSize() != null) {
+            if (plot.getSize() != null) {
                 z = Math.min(z, plot.getZ() + plot.getSize().size + PLAYER_FREEDOM);
             }
 
@@ -86,7 +87,7 @@ public class NoClip {
     }
 
     public static boolean isInsideWall(Vec3d playerPos) {
-        Vec3d middlePos = playerPos.add(0,1.8 / 2,0);
+        Vec3d middlePos = playerPos.add(0, 1.8 / 2, 0);
         float f = 0.6F + 0.1F * 0.8F;
         Box box = Box.of(middlePos, f, (1.799 + 1.0E-6 * 0.8F), f);
         return BlockPos.stream(box).anyMatch((pos) -> {
@@ -97,7 +98,7 @@ public class NoClip {
 
     @Nullable
     public static BlockState replaceBlockAt(BlockPos pos) {
-        if(CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Dev plot) {
             Boolean isInDev = plot.isInDev(pos.toCenterPos());
             if (isInDev == null || !isInDev) return null;
             if (display == null) return null;

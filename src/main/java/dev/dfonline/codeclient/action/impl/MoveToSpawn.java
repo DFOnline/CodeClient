@@ -12,9 +12,8 @@ import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class MoveToSpawn extends Action {
-    public Step currentStep = Step.WAIT_FOR_TELEPORT;
-
     private final ClientPlayerEntity player = CodeClient.MC.player;
+    public Step currentStep = Step.WAIT_FOR_TELEPORT;
 
     public MoveToSpawn(Callback callback) {
         super(callback);
@@ -28,14 +27,15 @@ public class MoveToSpawn extends Action {
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if(packet instanceof PlayerPositionLookS2CPacket positionLookS2CPacket) return onTeleport(positionLookS2CPacket);
-        if(packet instanceof PlaySoundS2CPacket && currentStep != Step.DONE) return true;
+        if (packet instanceof PlayerPositionLookS2CPacket positionLookS2CPacket)
+            return onTeleport(positionLookS2CPacket);
+        if (packet instanceof PlaySoundS2CPacket && currentStep != Step.DONE) return true;
         return super.onReceivePacket(packet);
     }
 
     public boolean onTeleport(PlayerPositionLookS2CPacket packet) {
         Dev plot = (Dev) CodeClient.location;
-        if(currentStep == Step.WAIT_FOR_TELEPORT) {
+        if (currentStep == Step.WAIT_FOR_TELEPORT) {
             plot.setDevSpawn(packet.getX(), packet.getZ());
             currentStep = Step.MOVE_TO_CORNER;
         }
@@ -45,8 +45,8 @@ public class MoveToSpawn extends Action {
     public boolean moveModifier() {
         Dev plot = (Dev) CodeClient.location;
         Vec3d location = new Vec3d(plot.getX(), plot.getFloorY(), plot.getZ());
-        if(currentStep == Step.MOVE_TO_CORNER) {
-            if(player.getPos().distanceTo(location) == 0) {
+        if (currentStep == Step.MOVE_TO_CORNER) {
+            if (player.getPos().distanceTo(location) == 0) {
                 currentStep = Step.DONE;
                 this.callback();
                 return false;

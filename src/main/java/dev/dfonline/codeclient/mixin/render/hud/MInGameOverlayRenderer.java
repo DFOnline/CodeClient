@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MInGameOverlayRenderer {
     @Inject(method = "getInWallBlockState", at = @At("HEAD"), cancellable = true)
     private static void inWall(PlayerEntity player, CallbackInfoReturnable<BlockState> cir) {
-        if(NoClip.isIgnoringWalls()) cir.setReturnValue(null);
+        if (NoClip.isIgnoringWalls()) cir.setReturnValue(null);
     }
 }
