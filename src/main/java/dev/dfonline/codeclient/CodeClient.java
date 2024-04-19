@@ -4,12 +4,12 @@ import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.dev.BuildPhaser;
 import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.dev.LastPos;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.dev.RecentChestInsert;
-import dev.dfonline.codeclient.dev.menu.DevInventory.DevInventoryScreen;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.Dev;
@@ -28,10 +28,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
@@ -39,7 +37,6 @@ import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,14 +47,7 @@ public class CodeClient implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
     public static final Gson gson = new Gson();
     public static MinecraftClient MC = MinecraftClient.getInstance();
-    /**
-     * Starts the "Code Palette" screen if pressed.
-     */
-    public static KeyBinding editBind;
-    /**
-     * If in build mode, holding this will allow you to phase through blocks.
-     */
-    public static KeyBinding clipBind;
+
     public static AutoJoin autoJoin = AutoJoin.NONE;
 
     /**
@@ -127,14 +117,12 @@ public class CodeClient implements ModInitializer {
         BuildPhaser.tick();
         ChestPeeker.tick();
         RecentChestInsert.tick();
+        KeyBinds.tick();
 
         if (location instanceof Dev dev) {
             if (MC.player == null) return;
             MC.player.getAbilities().allowFlying = true;
             if (NoClip.isIgnoringWalls()) MC.player.noClip = true;
-            if (editBind.wasPressed()) {
-                MC.setScreen(new DevInventoryScreen(MC.player));
-            }
             var pos = new BlockPos(dev.getX() - 1, 49, dev.getZ());
             if (dev.getSize() == null) {
                 // TODO wait for plugin messages, or make a fix now.
@@ -218,17 +206,7 @@ public class CodeClient implements ModInitializer {
             autoJoin = AutoJoin.GAME;
         }
 
-        editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.codepalette",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_Y,
-                "category.codeclient.dev"
-        ));
-        clipBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.codeclient.phaser",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_V,
-                "category.codeclient.dev"
-        ));
+        KeyBinds.init();
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             Commands.register(dispatcher);

@@ -1,8 +1,13 @@
 {
   "category.codeclient.dev": "CodeClient",
-
   "key.codeclient.codepalette": "Code Palette",
   "key.codeclient.phaser": "Phaser",
+
+  "category.codeclient.navigation": "Code Navigation",
+  "key.codeclient.tp.left": "Teleport Left",
+  "key.codeclient.tp.right": "Teleport Right",
+  "key.codeclient.tp.forward": "Teleport Forwards",
+  "key.codeclient.tp.backward": "Teleport Backwards",
 
   "codeclient.parse_db": "Could not parse ActionDump. Go to %s to find out how to fix this.",
 

@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Searchable;
 import net.fabricmc.api.EnvType;
@@ -349,7 +350,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
             return true;
         }
         if (searchBox.active) {
-            if (CodeClient.MC.options.chatKey.matchesKey(keyCode, scanCode) || CodeClient.editBind.matchesKey(keyCode, scanCode)) {
+            if (CodeClient.MC.options.chatKey.matchesKey(keyCode, scanCode) || KeyBinds.editBind.matchesKey(keyCode, scanCode)) {
                 if (keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
                 searchBox.setFocused(true);
                 searchBox.setCursorToEnd(false);

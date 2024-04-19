@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.dev;
 import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.hypercube.item.Location;
 import dev.dfonline.codeclient.location.Build;
 import dev.dfonline.codeclient.location.Dev;
@@ -45,11 +46,11 @@ public class BuildPhaser {
 
         if (CodeClient.location instanceof Dev plot) {
             if (plot.getX() == null) {
-                if (CodeClient.clipBind.wasPressed())
+                if (KeyBinds.clipBind.wasPressed())
                     Utility.sendMessage(Text.translatable("codeclient.phaser.plot_origin"));
             }
 //            CodeClient.LOGGER.info("dev and X");
-            if (!clipping && CodeClient.clipBind.isPressed() && plot.getX() != null) startClipping();
+            if (!clipping && KeyBinds.clipBind.isPressed() && plot.getX() != null) startClipping();
             if (clipping) {
                 var player = CodeClient.MC.player;
                 player.setPos(
@@ -60,14 +61,14 @@ public class BuildPhaser {
                 allowPacket = true;
                 CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false));
                 CodeClient.MC.player.getAbilities().flying = true;
-                if (!CodeClient.clipBind.isPressed()) finishClipping();
+                if (!KeyBinds.clipBind.isPressed()) finishClipping();
             }
         } else if (clipping || waitForTP) {
             disableClipping();
         }
 
         if (CodeClient.location instanceof Build) {
-            if (CodeClient.clipBind.isPressed() && !dontSpamBuildWarn) {
+            if (KeyBinds.clipBind.isPressed() && !dontSpamBuildWarn) {
                 dontSpamBuildWarn = true;
                 Utility.sendMessage(Text.translatable("codeclient.phaser.dev_mode1",
                                 Text.translatable("codeclient.phaser.dev_mode2")
@@ -77,7 +78,7 @@ public class BuildPhaser {
                                         ).formatted(Formatting.AQUA, Formatting.UNDERLINE)),
                         ChatType.FAIL);
             }
-            if (dontSpamBuildWarn && !CodeClient.clipBind.isPressed()) dontSpamBuildWarn = false;
+            if (dontSpamBuildWarn && !KeyBinds.clipBind.isPressed()) dontSpamBuildWarn = false;
         }
     }
 
