@@ -8,6 +8,7 @@
   "key.codeclient.tp.right": "Teleport Right",
   "key.codeclient.tp.forward": "Teleport Forwards",
   "key.codeclient.tp.backward": "Teleport Backwards",
+  "key.codeclient.open_action": "Open Action",
 
   "codeclient.parse_db": "Could not parse ActionDump. Go to %s to find out how to fix this.",
 

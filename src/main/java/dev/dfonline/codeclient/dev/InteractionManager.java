@@ -69,6 +69,29 @@ public class InteractionManager {
         return pos;
     }
 
+    /**
+     * Get the origin of the given codeblock. Assuming you are in the codespace.
+     *
+     * @param pos The targeted pos.
+     * @return The origin of the codeblock. null if there is none.
+     */
+    public static BlockPos targetedBlockPos(BlockPos pos) {
+        Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
+        if (List.of(Blocks.DIRT, Blocks.AIR).contains(type))
+            return null;
+        if (type == Blocks.OAK_WALL_SIGN) return pos.east();
+        if (type == Blocks.CHEST) return pos.down();
+        if (type == Blocks.STONE || type == Blocks.PISTON || type == Blocks.STICKY_PISTON) {
+            var pos2 = pos.north();
+            if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON).contains(CodeClient.MC.world.getBlockState(pos2).getBlock()))
+                return null;
+            return pos2;
+        }
+        if (List.of(Blocks.PISTON, Blocks.STICKY_PISTON).contains(type))
+            return null;
+        return pos;
+    }
+
     public static boolean onBreakBlock(BlockPos pos) {
         if (CodeClient.location instanceof Dev plot) {
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
