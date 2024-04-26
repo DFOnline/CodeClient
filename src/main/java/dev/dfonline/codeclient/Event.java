@@ -6,6 +6,7 @@ import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
 import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
 
@@ -13,8 +14,7 @@ import java.util.List;
  * Detects mode changes.
  */
 public class Event {
-    private static double x;
-    private static double z;
+    private static Vec3d tp;
     private static Sequence step = Sequence.WAIT_FOR_CLEAR;
     private static boolean switchingMode = false;
 
@@ -23,8 +23,7 @@ public class Event {
             if (clear.shouldReset()) step = Sequence.WAIT_FOR_POS;
         }
         if (packet instanceof PlayerPositionLookS2CPacket pos) {
-            x = pos.getX();
-            z = pos.getZ();
+            tp = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
             if (step == Sequence.WAIT_FOR_POS) step = Sequence.WAIT_FOR_MESSAGE;
         }
         if (packet instanceof OverlayMessageS2CPacket overlay) {
@@ -36,10 +35,10 @@ public class Event {
             if (step == Sequence.WAIT_FOR_MESSAGE) {
                 String content = message.content().getString();
                 if (content.equals("» You are now in dev mode.")) {
-                    updateLocation(new Dev(x, z));
+                    updateLocation(new Dev(tp.x, tp.z));
                 }
                 if (content.equals("» You are now in build mode.")) {
-                    updateLocation(new Build());
+                    updateLocation(new Build(tp));
                 }
                 if (content.startsWith("» Joined game: ")) {
                     updateLocation(new Play());
@@ -70,6 +69,7 @@ public class Event {
         } else CodeClient.LOGGER.info("Changed location: " + location.name());
         step = Sequence.WAIT_FOR_CLEAR;
         CodeClient.LOGGER.info("" + Config.getConfig().InvisibleBlocksInDev);
+        CodeClient.onModeChange(location);
         if (Config.getConfig().InvisibleBlocksInDev) CodeClient.shouldReload = true;
     }
 

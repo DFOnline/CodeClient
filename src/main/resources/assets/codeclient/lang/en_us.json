@@ -10,6 +10,9 @@
   "key.codeclient.tp.backward": "Teleport Backwards",
   "key.codeclient.open_action": "Open Action",
 
+  "codeclient.config.dev_for_build": "Dev mode for build",
+  "codeclient.config.dev_for_build.description": "Uses dev mode instead of build mode, clearing your inventory and teleporting you.",
+
   "codeclient.parse_db": "Could not parse ActionDump. Go to %s to find out how to fix this.",
 
   "codeclient.phaser.plot_origin": "CodeClient doesn't know the plot origin.",

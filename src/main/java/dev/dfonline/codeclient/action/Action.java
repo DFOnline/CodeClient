@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.action;
 
 import dev.dfonline.codeclient.Callback;
+import dev.dfonline.codeclient.location.Location;
 import net.minecraft.network.packet.Packet;
 
 public abstract class Action {
@@ -21,6 +22,10 @@ public abstract class Action {
     }
 
     public void onTick() {
+    }
+
+    public void onModeChange(Location location) {
+
     }
 
     protected void callback() {

@@ -18,6 +18,9 @@ import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
+/**
+ * Uses handlePacket, sendPacket and tick.
+ */
 public class GoTo extends Action {
     public final Vec3d target;
     boolean doNotSuppress = false;

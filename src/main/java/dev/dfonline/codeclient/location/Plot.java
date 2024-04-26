@@ -22,6 +22,7 @@ public abstract class Plot extends Location {
     protected String owner;
     protected Integer originX;
     protected Integer originZ;
+    protected Vec3d buildPos;
     protected boolean hasUnderground = false;
     protected Boolean hasBuild;
     protected Boolean hasDev;
@@ -42,6 +43,7 @@ public abstract class Plot extends Location {
         if (plot.owner != null) this.owner = plot.owner;
         if (plot.originX != null) this.originX = plot.originX;
         if (plot.originZ != null) this.originZ = plot.originZ;
+        if (plot.buildPos != null) this.buildPos = plot.buildPos;
         if (plot.hasBuild != null) this.hasBuild = plot.hasBuild;
         if (plot.hasDev != null) this.hasDev = plot.hasDev;
         if (plot.size != null) this.size = plot.size;
@@ -71,6 +73,10 @@ public abstract class Plot extends Location {
 
     public Integer getZ() {
         return originZ;
+    }
+
+    public Vec3d getBuildPos() {
+        return buildPos;
     }
 
     public int getFloorY() {

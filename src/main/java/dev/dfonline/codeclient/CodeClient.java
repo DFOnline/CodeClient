@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
+import dev.dfonline.codeclient.action.impl.DevForBuild;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.dev.BuildPhaser;
@@ -12,10 +13,7 @@ import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.dev.RecentChestInsert;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
-import dev.dfonline.codeclient.location.Dev;
-import dev.dfonline.codeclient.location.Location;
-import dev.dfonline.codeclient.location.Plot;
-import dev.dfonline.codeclient.location.Spawn;
+import dev.dfonline.codeclient.location.*;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ModInitializer;
@@ -23,7 +21,6 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -175,6 +172,14 @@ public class CodeClient implements ModInitializer {
         Config.clear();
     }
 
+    public static void onModeChange(Location location) {
+        if(Config.getConfig().DevForBuild && (currentAction instanceof None || currentAction instanceof DevForBuild) && location instanceof Build) {
+            currentAction = new DevForBuild(() -> currentAction = new None());
+            currentAction.init();
+        }
+        currentAction.onModeChange(location);
+    }
+
     /**
      * Registers barriers as visible.
      * Starts the API.
@@ -211,6 +216,8 @@ public class CodeClient implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             Commands.register(dispatcher);
         });
+
+        CodeClient.LOGGER.info("CodeClient, making it easier to wipe your plot and get banned for hacks since 2022");
     }
 
     public enum AutoJoin {

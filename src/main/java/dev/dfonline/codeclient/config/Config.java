@@ -63,6 +63,7 @@ public class Config {
     public boolean SignPeeker = true;
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
     public boolean PickAction = true;
+    public boolean DevForBuild = false;
 
     public Config() {
     }
@@ -130,6 +131,7 @@ public class Config {
             object.addProperty("SignPeeker", SignPeeker);
             object.addProperty("CustomCodeChest", CustomCodeChest.name());
             object.addProperty("PickAction", PickAction);
+            object.addProperty("DevForBuild", DevForBuild);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -184,14 +186,12 @@ public class Config {
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CharSetOption.class))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Auto Fly"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Automatically runs /fly when you go to spawn."))
-                                        .build())
+                                .name(Text.translatable("codeclient.config.dev_for_build"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.dev_for_build.description")))
                                 .binding(
                                         false,
-                                        () -> AutoFly,
-                                        opt -> AutoFly = opt
+                                        () -> DevForBuild,
+                                        opt -> DevForBuild = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
