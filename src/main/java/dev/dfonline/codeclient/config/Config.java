@@ -64,6 +64,7 @@ public class Config {
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
     public boolean PickAction = true;
     public boolean DevForBuild = false;
+    public boolean ChatEditsVars = true;
 
     public Config() {
     }
@@ -202,6 +203,16 @@ public class Config {
                                         false,
                                         () -> FocusSearch,
                                         opt -> FocusSearch = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.chat_edits_vars"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.chat_edits_vars.description")))
+                                .binding(
+                                        true,
+                                        () -> ChatEditsVars,
+                                        opt -> ChatEditsVars = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

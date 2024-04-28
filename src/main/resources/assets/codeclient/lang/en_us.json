@@ -12,6 +12,8 @@
 
   "codeclient.config.dev_for_build": "Dev mode for build",
   "codeclient.config.dev_for_build.description": "Uses dev mode instead of build mode, clearing your inventory and teleporting you.",
+  "codeclient.config.chat_edits_vars": "Auto edit values",
+  "codeclient.config.chat_edits_vars.description": "Opening chat whilst holding a value will automatically put the contents in chat.",
 
   "codeclient.parse_db": "Could not parse ActionDump. Go to %s to find out how to fix this.",
 
