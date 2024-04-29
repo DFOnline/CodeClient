@@ -16,6 +16,7 @@ public class Potion extends VarItem {
     private String potion;
     private int duration;
     private int amplifier;
+    public static final int INFINITE = 1000000;
 
     public Potion(Item material, JsonObject var) {
         super(material, var);
@@ -25,10 +26,10 @@ public class Potion extends VarItem {
     }
 
     public static String durationToString(int duration) {
-        if (duration >= 1000000) return "Infinite";
+        if (duration >= INFINITE) return "Infinite";
         if (duration % 20 != 0) return "%d ticks".formatted(duration);
         int seconds = duration / 20;
-        return "%d:%d".formatted(seconds / 60, seconds % 60);
+        return "%d:%02d".formatted(seconds / 60, seconds % 60);
     }
 
     public String getPotion() {

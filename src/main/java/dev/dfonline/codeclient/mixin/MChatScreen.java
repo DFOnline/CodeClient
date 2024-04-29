@@ -17,24 +17,26 @@ import java.text.DecimalFormat;
 @Mixin(ChatScreen.class)
 public abstract class MChatScreen {
 
-    @Shadow protected TextFieldWidget chatField;
+    @Shadow
+    protected TextFieldWidget chatField;
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onOpen(CallbackInfo ci) {
-        if (CodeClient.MC.player == null || !(CodeClient.location instanceof Dev) || !Config.getConfig().ChatEditsVars) return;
+        if (CodeClient.MC.player == null || !(CodeClient.location instanceof Dev) || !Config.getConfig().ChatEditsVars)
+            return;
         var item = VarItems.parse(CodeClient.MC.player.getMainHandStack());
         DecimalFormat format = new DecimalFormat("0.#");
-        if(item instanceof Variable var) {
-            this.chatField.setText(var.getName().replaceAll("§","&") + " -" + var.getScope().tag);
-        }
-        else if(item instanceof NamedItem named) {
-            this.chatField.setText(named.getName().replaceAll("§","&"));
-        }
-        else if(item instanceof Vector vec) {
+        if (item instanceof NamedItem named) {
+            this.chatField.setText(named.getName().replaceAll("§", "&"));
+        } else if (item instanceof Vector vec) {
             this.chatField.setText("%s %s %s".formatted(format.format(vec.getX()), format.format(vec.getY()), format.format(vec.getZ())));
-        }
-        else if(item instanceof Sound sound) {
-            this.chatField.setText("%s %s".formatted(format.format(sound.getPitch()), format.format(sound.getVolume())));
+        } else if (item instanceof Sound sound) {
+            if (sound.getVolume() != 2)
+                this.chatField.setText("%s %s".formatted(format.format(sound.getPitch()), format.format(sound.getVolume())));
+            else this.chatField.setText(format.format(sound.getPitch()));
+        } else if (item instanceof Potion pot) {
+            if(pot.getDuration() == Potion.INFINITE) this.chatField.setText(Integer.toString(pot.getAmplifier() + 1));
+            else this.chatField.setText("%o %s".formatted(pot.getAmplifier() + 1, pot.duration().replaceAll(" ticks","")));
         }
         else return;
         this.chatField.setCursorToStart(false);
