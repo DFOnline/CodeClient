@@ -221,6 +221,12 @@ public class SocketHandler {
         public void start(WebSocket responder) {
             ArrayList<ItemStack> items = new ArrayList<>();
             CodeClient.currentAction = new ScanPlot(() -> {
+                if(items.isEmpty()) {
+                    responder.send("empty");
+                    CodeClient.currentAction = new None();
+                    next();
+                    return;
+                }
                 var builder = new StringBuilder();
                 for (var item : items) {
                     var data = Utility.templateDataItem(item);
