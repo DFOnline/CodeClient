@@ -18,7 +18,7 @@
   "codeclient.parse_db": "Could not parse ActionDump. Go to %s to find out how to fix this.",
 
   "codeclient.phaser.plot_origin": "CodeClient doesn't know the plot origin.",
-  "codeclient.phaser.dev_mode1": "You cannot use phaser in dev mode since %s to teleport.",
+  "codeclient.phaser.dev_mode1": "You cannot use phaser in build mode since %s to teleport.",
   "codeclient.phaser.dev_mode2": "it uses location items",
 
   "codeclient.peeker.empty": "Empty",
