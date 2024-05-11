@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class Debug {
     private static Double CPU = null;
     private static List<Text> text = null;
-    private static HashMap<Vec3d,Text> locations = new HashMap<>();
+    private static HashMap<Vec3d, Text> locations = new HashMap<>();
     private static boolean active = false;
 
     public static void clean() {
@@ -40,17 +40,15 @@ public class Debug {
     }
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
-        if(CodeClient.location instanceof Plot plot) {
+        if (CodeClient.location instanceof Plot plot) {
             if (!Config.getConfig().CCDBUG) return false;
             if (packet instanceof OverlayMessageS2CPacket overlay) {
                 var txt = overlay.getMessage();
                 if (Text.empty().equals(txt)) {
-                    Utility.debug("empty");
                     return false;
                 }
                 var siblings = txt.getSiblings();
                 if (siblings.isEmpty()) {
-                    Utility.debug("no siblings");
                     return false;
                 }
                 var command = siblings.get(0);
@@ -67,7 +65,7 @@ public class Debug {
                     }
                 }
                 if (command.getContent().equals(new PlainTextContent.Literal("location"))) {
-                    var locList = new HashMap<Vec3d,Text>();
+                    var locList = new HashMap<Vec3d, Text>();
                     boolean first = true;
                     for (var part : siblings) {
                         if (first) {
@@ -128,6 +126,7 @@ public class Debug {
     }
 
     public static void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers) {
-        if(active) for (var entry : locations.entrySet()) DebugRenderer.drawString(matrices,vertexConsumers, entry.getValue().getString(), entry.getKey().x, entry.getKey().y, entry.getKey().z, 0xFFFFFF, 0.02F, true, 0, true);
+        if (active) for (var entry : locations.entrySet())
+            DebugRenderer.drawString(matrices, vertexConsumers, entry.getValue().getString(), entry.getKey().x, entry.getKey().y, entry.getKey().z, 0xFFFFFF, 0.02F, true, 0, true);
     }
 }
