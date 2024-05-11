@@ -22,7 +22,7 @@ public abstract class MChatScreen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onOpen(CallbackInfo ci) {
-        if (CodeClient.MC.player == null || !(CodeClient.location instanceof Dev) || !Config.getConfig().ChatEditsVars)
+        if (CodeClient.MC.player == null || !(CodeClient.location instanceof Dev) || !Config.getConfig().ChatEditsVars || !this.chatField.getText().isEmpty())
             return;
         var item = VarItems.parse(CodeClient.MC.player.getMainHandStack());
         DecimalFormat format = new DecimalFormat("0.#");

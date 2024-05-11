@@ -133,6 +133,7 @@ public class Config {
             object.addProperty("CustomCodeChest", CustomCodeChest.name());
             object.addProperty("PickAction", PickAction);
             object.addProperty("DevForBuild", DevForBuild);
+            object.addProperty("ChatEditsVars",ChatEditsVars);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
