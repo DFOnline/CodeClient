@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.mixin;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.location.Creator;
 import dev.dfonline.codeclient.location.Plot;
+import dev.dfonline.codeclient.location.Spawn;
 import dev.dfonline.codeclient.switcher.SpeedSwitcher;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import net.minecraft.client.Keyboard;
@@ -31,7 +32,7 @@ public class MKeyboard {
             }
         }
         if (key == speedSwitcherKey) {
-            if (CodeClient.location instanceof Creator) {
+            if (CodeClient.location instanceof Creator || CodeClient.location instanceof Spawn) {
                 CodeClient.MC.setScreen(new SpeedSwitcher());
                 cir.setReturnValue(true);
             }
