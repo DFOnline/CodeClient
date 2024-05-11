@@ -9,6 +9,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +28,7 @@ public abstract class Plot extends Location {
     protected Boolean hasBuild;
     protected Boolean hasDev;
     protected Size size;
+    protected HashMap<BlockPos, SignText> lineStarterCache = new HashMap<>();
 
     public void setOrigin(int x, int z) {
         this.originX = x;
@@ -43,7 +45,8 @@ public abstract class Plot extends Location {
         if (plot.owner != null) this.owner = plot.owner;
         if (plot.originX != null) this.originX = plot.originX;
         if (plot.originZ != null) this.originZ = plot.originZ;
-        if (plot.buildPos != null) this.buildPos = plot.buildPos;
+        // When going into a new build mode with updated build spawn, make sure the old buildPos doesn't interfere
+        if (plot.buildPos != null && this.buildPos == null) this.buildPos = plot.buildPos;
         if (plot.hasBuild != null) this.hasBuild = plot.hasBuild;
         if (plot.hasDev != null) this.hasDev = plot.hasDev;
         if (plot.size != null) this.size = plot.size;
@@ -121,7 +124,7 @@ public abstract class Plot extends Location {
     /**
      * Searches code space for all codeblocks which match the scan argument.
      * Checks both top and second sign.
-     * Returns null if the plot origin is unknown or world is null.
+     * Returns null if the plot origin is unknown.
      */
     @Nullable
     public HashMap<BlockPos, SignText> scanForSigns(Pattern name, Pattern scan) {
@@ -148,8 +151,24 @@ public abstract class Plot extends Location {
         return signs;
     }
 
+    /**
+     * Searches for all line starters which match the name argument.
+     * Returns null if the plot origin is unknown.
+     */
     public HashMap<BlockPos, SignText> scanForSigns(Pattern scan) {
         return scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"), scan);
+    }
+
+    public void clearLineStarterCache() {
+        lineStarterCache.clear();
+    }
+    private void fillLineStarterCache() {
+        clearLineStarterCache();
+        lineStarterCache = scanForSigns(Pattern.compile(".*"));
+    }
+    public Map<BlockPos, SignText> getLineStartCache() {
+        if(lineStarterCache.isEmpty()) fillLineStarterCache();
+        return lineStarterCache;
     }
 
     public BlockPos findFreePlacePos() {

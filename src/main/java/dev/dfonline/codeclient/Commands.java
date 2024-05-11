@@ -1,7 +1,6 @@
 package dev.dfonline.codeclient;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -31,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
+import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -195,7 +195,7 @@ public class Commands {
 //                return 1;
 //            }
 //        })
-                        .then(argument("folder", StringArgumentType.greedyString()).suggests(Commands::suggestDirectories).executes(context -> {
+                        .then(argument("folder", greedyString()).suggests(Commands::suggestDirectories).executes(context -> {
                             if (CodeClient.location instanceof Dev) {
                                 String arg = context.getArgument("folder", String.class);
                                 String[] path = arg.split("/");
@@ -272,7 +272,7 @@ public class Commands {
                             }
                         }))
         );
-        dispatcher.register(literal("scanfor").then(argument("name", StringArgumentType.greedyString()).executes(context -> {
+        dispatcher.register(literal("scanfor").then(argument("name", greedyString()).executes(context -> {
             if (CodeClient.location instanceof Dev dev) {
                 Pattern pattern = Pattern.compile(context.getArgument("name", String.class), Pattern.CASE_INSENSITIVE);
                 var scan = dev.scanForSigns(pattern);
@@ -285,6 +285,29 @@ public class Commands {
             Utility.sendMessage(Text.translatable("codeclient.action.scanfor.scan_fail"), ChatType.FAIL);
             return -1;
         })));
+
+        dispatcher.register(literal("jump")
+                .then(literal("player").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PLAYER_EVENT, context, builder)).executes(context -> {
+                    var name = context.getArgument("name", String.class);
+                    jump(JumpType.PLAYER_EVENT,name);
+                    return 0;
+                })))
+                .then(literal("entity").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.ENTITY_EVENT, context, builder)).executes(context -> {
+                    var name = context.getArgument("name", String.class);
+                    jump(JumpType.ENTITY_EVENT,name);
+                    return 0;
+                })))
+                .then(literal("func").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.FUNCTION, context, builder)).executes(context -> {
+                    var name = context.getArgument("name", String.class);
+                    jump(JumpType.FUNCTION,name);
+                    return 0;
+                })))
+                .then(literal("proc").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PROCESS, context, builder)).executes(context -> {
+                    var name = context.getArgument("name", String.class);
+                    jump(JumpType.PROCESS,name);
+                    return 0;
+                })))
+        );
 //        dispatcher.register(literal("swapininv").executes(context -> {
 //            if(CodeClient.location instanceof Dev) {
 //                PlaceTemplates action = Utility.createSwapper(Utility.templatesInInventory(), () -> {
@@ -308,7 +331,7 @@ public class Commands {
             }
             Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
             return -1;
-        }).then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+        }).then(argument("path", greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             try {
                 if (CodeClient.location instanceof Dev dev) {
                     var map = new HashMap<BlockPos, ItemStack>();
@@ -327,7 +350,7 @@ public class Commands {
                 return -2;
             }
         })));
-        dispatcher.register(literal("save").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestDirectories).executes(context -> {
+        dispatcher.register(literal("save").then(argument("path", greedyString()).suggests(Commands::suggestDirectories).executes(context -> {
             String data = Utility.templateDataItem(CodeClient.MC.player.getMainHandStack());
             if (data == null) {
                 Utility.sendMessage(Text.translatable("codeclient.files.hold_template"), ChatType.FAIL);
@@ -362,7 +385,7 @@ public class Commands {
             }
             return 0;
         })));
-        dispatcher.register(literal("load").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+        dispatcher.register(literal("load").then(argument("path", greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             if (CodeClient.MC.player.isCreative()) {
                 String arg = context.getArgument("path", String.class);
                 Path path = FileManager.templatesPath().resolve(arg + ".dft");
@@ -385,7 +408,7 @@ public class Commands {
             Utility.sendMessage(Text.translatable("codeclient.warning.creative_mode"), ChatType.FAIL);
             return -1;
         })));
-        dispatcher.register(literal("swap").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+        dispatcher.register(literal("swap").then(argument("path", greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             Path path = FileManager.templatesPath().resolve(context.getArgument("path", String.class));
             try {
                 ArrayList<ItemStack> map = new ArrayList<>();
@@ -399,7 +422,7 @@ public class Commands {
             }
             return 0;
         })));
-        dispatcher.register(literal("delete").then(argument("path", StringArgumentType.greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
+        dispatcher.register(literal("delete").then(argument("path", greedyString()).suggests(Commands::suggestTemplates).executes(context -> {
             Path path = FileManager.templatesPath().resolve(context.getArgument("path", String.class));
             Path dft = path.getParent().resolve(path.getFileName() + ".dft");
             if (Files.notExists(path) && Files.exists(dft)) path = dft;
@@ -497,6 +520,43 @@ public class Commands {
         } else {
             byte[] data = Files.readAllBytes(path);
             return Collections.singletonList(new String(Base64.getEncoder().encode(data)));
+        }
+    }
+
+    private static enum JumpType {
+        PLAYER_EVENT("PLAYER EVENT"),
+        ENTITY_EVENT("ENTITY EVENT"),
+        FUNCTION("FUNCTION"),
+        PROCESS("PROCESS");
+
+        public final Pattern pattern;
+        JumpType(String scan) {
+            pattern = Pattern.compile("^" + scan + "$");
+        }
+    }
+    private static CompletableFuture<Suggestions> suggestJump(JumpType type, CommandContext<FabricClientCommandSource> ignored, SuggestionsBuilder builder) {
+        if(CodeClient.location instanceof Dev dev) {
+            var possibilities = new ArrayList<String>();
+
+            for (var lineStarter : dev.getLineStartCache().values()) {
+                if(type.pattern.matcher(lineStarter.getMessage(0,false).getString()).matches()) possibilities.add(lineStarter.getMessage(1,false).getString());
+            }
+
+            for (String possibility : possibilities) {
+                if (possibility.toLowerCase().contains(builder.getRemainingLowerCase()))
+                    builder.suggest(possibility, Text.literal(type.name().toLowerCase()));
+            }
+        }
+        return CompletableFuture.completedFuture(builder.build());
+    }
+    private static void jump(JumpType type, String name) {
+        if(CodeClient.location instanceof Dev dev && CodeClient.currentAction instanceof None) {
+            var results = dev.scanForSigns(type.pattern,Pattern.compile("^" + Pattern.quote(name) + "$"));
+            if(results == null) return;
+            var first = results.keySet().stream().findFirst();
+            if(first.isEmpty()) return;
+            CodeClient.currentAction = new GoTo(first.get().toCenterPos(), () -> CodeClient.currentAction = new None());
+            CodeClient.currentAction.init();
         }
     }
 }
