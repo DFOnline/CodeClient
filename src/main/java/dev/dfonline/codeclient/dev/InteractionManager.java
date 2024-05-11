@@ -94,6 +94,7 @@ public class InteractionManager {
 
     public static boolean onBreakBlock(BlockPos pos) {
         if (CodeClient.location instanceof Dev plot) {
+            plot.clearLineStarterCache();
             if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
             if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
                 ChestPeeker.invalidate();
@@ -129,79 +130,81 @@ public class InteractionManager {
     }
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-        if (!slot.hasStack()) return false;
-        ItemStack item = slot.getStack();
-        if (!item.hasNbt()) return false;
-        NbtCompound nbt = item.getNbt();
-        if (nbt != null && !nbt.contains("PublicBukkitValues")) return false;
-        if (nbt != null && nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
-            if (!bukkitValues.contains("hypercube:varitem")) return false;
-            try {
-                if (bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
-                    if (!Config.getConfig().CustomTagInteraction) return false;
-                    if (actionType == SlotActionType.PICKUP_ALL) return false;
-                    JsonElement varElement = JsonParser.parseString(varItem.asString());
-                    if (!varElement.isJsonObject()) return false;
-                    JsonObject varObject = (JsonObject) varElement;
-                    if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
+        if (CodeClient.location instanceof Dev) {
+            if (!slot.hasStack()) return false;
+            ItemStack item = slot.getStack();
+            if (!item.hasNbt()) return false;
+            NbtCompound nbt = item.getNbt();
+            if (nbt != null && !nbt.contains("PublicBukkitValues")) return false;
+            if (nbt != null && nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
+                if (!bukkitValues.contains("hypercube:varitem")) return false;
+                try {
+                    if (bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
+                        if (!Config.getConfig().CustomTagInteraction) return false;
+                        if (actionType == SlotActionType.PICKUP_ALL) return false;
+                        JsonElement varElement = JsonParser.parseString(varItem.asString());
+                        if (!varElement.isJsonObject()) return false;
+                        JsonObject varObject = (JsonObject) varElement;
+                        if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
 
-                    Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
-                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
+                        Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
+                        CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
 
-                    String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
-                    NbtCompound display = nbt.getCompound("display");
-                    NbtList lore = (NbtList) display.get("Lore");
-                    if (lore == null) return true;
+                        String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
+                        NbtCompound display = nbt.getCompound("display");
+                        NbtList lore = (NbtList) display.get("Lore");
+                        if (lore == null) return true;
 
-                    int i = 0;
-                    Integer tagStartIndex = null;
-                    Integer selectedIndex = null;
-                    List<String> options = new ArrayList<>();
+                        int i = 0;
+                        Integer tagStartIndex = null;
+                        Integer selectedIndex = null;
+                        List<String> options = new ArrayList<>();
 
-                    // TODO: Utility.getBlockTagLines
-                    for (NbtElement element : lore) {
-                        Text text = Text.Serialization.fromJson(element.asString());
-                        if (text == null) return false;
-                        TextColor color = text.getStyle().getColor();
-                        if (color == null) {
-                            List<Text> siblings = text.getSiblings();
-                            if (siblings.size() == 2)
-                                if (text.getSiblings().get(0).getStyle().getColor().equals(TextColor.fromFormatting(Formatting.DARK_AQUA))) {
-                                    if (tagStartIndex == null) tagStartIndex = i;
-                                    options.add(text.getSiblings().get(1).getString());
-                                    selectedIndex = i;
-                                }
-                        } else if (color.equals(TextColor.fromRgb(0x808080))) {
-                            if (tagStartIndex == null) tagStartIndex = i;
-                            options.add(text.getString());
+                        // TODO: Utility.getBlockTagLines
+                        for (NbtElement element : lore) {
+                            Text text = Text.Serialization.fromJson(element.asString());
+                            if (text == null) return false;
+                            TextColor color = text.getStyle().getColor();
+                            if (color == null) {
+                                List<Text> siblings = text.getSiblings();
+                                if (siblings.size() == 2)
+                                    if (text.getSiblings().get(0).getStyle().getColor().equals(TextColor.fromFormatting(Formatting.DARK_AQUA))) {
+                                        if (tagStartIndex == null) tagStartIndex = i;
+                                        options.add(text.getSiblings().get(1).getString());
+                                        selectedIndex = i;
+                                    }
+                            } else if (color.equals(TextColor.fromRgb(0x808080))) {
+                                if (tagStartIndex == null) tagStartIndex = i;
+                                options.add(text.getString());
+                            }
+                            i++;
                         }
-                        i++;
+
+                        if (selectedIndex == null) return true;
+
+                        int shift = button == 0 ? 1 : -1;
+                        int selectionIndex = selectedIndex - tagStartIndex;
+                        int newSelection = (selectionIndex + shift) % (options.size());
+                        if (newSelection < 0) newSelection = options.size() + newSelection;
+
+                        int optionIndex = 0;
+                        for (String option : options) {
+                            MutableText text = Text.empty();
+                            if (optionIndex == newSelection) {
+                                text.append(Text.literal("» ").formatted(Formatting.DARK_AQUA)).append(Text.literal(option).formatted(Formatting.AQUA));
+                            } else
+                                text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
+                            lore.set(tagStartIndex + optionIndex, Utility.nbtify(text));
+                            optionIndex++;
+                        }
+                        display.put("Lore", lore);
+                        item.setSubNbt("display", display);
+                        slot.setStack(item);
+                        return true;
                     }
-
-                    if (selectedIndex == null) return true;
-
-                    int shift = button == 0 ? 1 : -1;
-                    int selectionIndex = selectedIndex - tagStartIndex;
-                    int newSelection = (selectionIndex + shift) % (options.size());
-                    if (newSelection < 0) newSelection = options.size() + newSelection;
-
-                    int optionIndex = 0;
-                    for (String option : options) {
-                        MutableText text = Text.empty();
-                        if (optionIndex == newSelection) {
-                            text.append(Text.literal("» ").formatted(Formatting.DARK_AQUA)).append(Text.literal(option).formatted(Formatting.AQUA));
-                        } else
-                            text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
-                        lore.set(tagStartIndex + optionIndex, Utility.nbtify(text));
-                        optionIndex++;
-                    }
-                    display.put("Lore", lore);
-                    item.setSubNbt("display", display);
-                    slot.setStack(item);
-                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
         return false;
@@ -237,6 +240,7 @@ public class InteractionManager {
 
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
         if (CodeClient.location instanceof Dev plot) {
+            plot.getLineStartCache();
             ChestPeeker.invalidate();
             BlockPos pos = hitResult.getBlockPos();
             if (plot.isInDev(pos)) {
