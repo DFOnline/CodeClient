@@ -100,10 +100,7 @@ public abstract class MClientPlayerInteractionManager {
 
     @ModifyVariable(method = "interactBlock", at = @At("HEAD"), argsOnly = true)
     private BlockHitResult onBlockInteract(BlockHitResult hitResult) {
-        if (CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ())) {
-            return InteractionManager.onBlockInteract(hitResult);
-        }
-        return hitResult;
+        return InteractionManager.onBlockInteract(hitResult);
     }
 
     @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V", shift = At.Shift.AFTER))

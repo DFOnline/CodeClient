@@ -14,7 +14,9 @@ import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -83,11 +85,12 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
+
             final int x = Size.SLOT_X + 1;
             final int y = i * 18 + Size.SLOT_Y + 1;
+
             if (i + scroll < 27) {
-                context.drawItem(slot.getStack(), x, y);
-                context.drawItemInSlot(textRenderer, slot.getStack(), x, y);
+                drawSlot(context, new Slot(slot.inventory,slot.id,x,y));
                 int relX = mouseX - this.x;
                 int relY = mouseY - this.y;
                 if (

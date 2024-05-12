@@ -1,7 +1,11 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.Utility;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.LoyaltyEnchantment;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtIntArray;
@@ -172,34 +176,44 @@ public class Icon {
     }
 
     public enum Type {
-        TEXT(TextColor.fromFormatting(Formatting.AQUA), "Text"),
-        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text"),
-        NUMBER(TextColor.fromFormatting(Formatting.RED), "§cNumber"),
-        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "§aLocation"),
-        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector"),
-        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound"),
-        PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect"),
-        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect"),
-        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable"),
-        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value"),
-        ITEM(GOLD, "Item"),
-        BLOCK(GOLD, "Block"),
-        ENTITY_TYPE(GOLD, "Entity Type"),
-        SPAWN_EGG(GOLD, "Spawn Egg"),
-        VEHICLE(GOLD, "Vehicle"),
-        PROJECTILE(GOLD, "Projectile"),
-        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag"),
-        LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List"),
-        DICT(TextColor.fromRgb(0x55AAFF), "Dictionary"),
-        NONE(TextColor.fromRgb(0x808080), "None"),
+        TEXT(TextColor.fromFormatting(Formatting.AQUA), "String", Items.STRING),
+        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text", Items.BOOK),
+        NUMBER(TextColor.fromFormatting(Formatting.RED), "Number", Items.SLIME_BALL),
+        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "Location", Items.PAPER),
+        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD),
+        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound", Items.NAUTILUS_SHELL),
+        PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect", Items.DRAGON_BREATH),
+        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect", Items.WHITE_DYE),
+        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable", Items.MAGMA_CREAM),
+        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value", Items.POTATO),
+        ITEM(GOLD, "Item", Items.ITEM_FRAME),
+        BLOCK(GOLD, "Block", Items.OAK_LOG),
+        ENTITY_TYPE(GOLD, "Entity Type", Items.PIG_SPAWN_EGG),
+        SPAWN_EGG(GOLD, "Spawn Egg", Items.POLAR_BEAR_SPAWN_EGG), // Least consistent in df, all of sheep, polar bear, phantom, pig
+        VEHICLE(GOLD, "Vehicle", Items.OAK_BOAT),
+        PROJECTILE(GOLD, "Projectile", Items.ARROW),
+        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag", Items.CHAIN_COMMAND_BLOCK),
+        LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List", Items.SKULL_BANNER_PATTERN), // Ender chest or empty banner pattern
+        DICT(TextColor.fromRgb(0x55AAFF), "Dictionary", Items.KNOWLEDGE_BOOK), // Knowledge book or chest minecart
+        NONE(TextColor.fromRgb(0x808080), "None", Items.AIR),
         ;
 
         public final TextColor color;
         public final String display;
+        public final ItemStack icon;
 
-        Type(TextColor color, String display) {
+        Type(TextColor color, String display, Item icon) {
             this.color = color;
             this.display = display;
+            this.icon = icon.getDefaultStack();
+        }
+
+        Type(TextColor color, String display, Item icon, boolean shiny) {
+            this.color = color;
+            this.display = display;
+            var item = icon.getDefaultStack();
+            item.addEnchantment(new LoyaltyEnchantment(Enchantment.Rarity.VERY_RARE),0);
+            this.icon = item;
         }
     }
 

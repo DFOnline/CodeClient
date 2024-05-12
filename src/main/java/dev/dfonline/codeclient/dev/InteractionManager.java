@@ -239,7 +239,8 @@ public class InteractionManager {
     }
 
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
-        if (CodeClient.location instanceof Dev plot) {
+        SlotGhostManager.onClickChest(hitResult);
+        if (CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ())) {
             plot.getLineStartCache();
             ChestPeeker.invalidate();
             BlockPos pos = hitResult.getBlockPos();
