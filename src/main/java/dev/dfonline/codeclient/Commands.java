@@ -1,9 +1,12 @@
 package dev.dfonline.codeclient;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
@@ -13,6 +16,7 @@ import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
@@ -22,6 +26,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -286,7 +291,7 @@ public class Commands {
             return -1;
         })));
 
-        dispatcher.register(literal("jump")
+        LiteralCommandNode<FabricClientCommandSource> jumpCommand = dispatcher.register(literal("jump")
                 .then(literal("player").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PLAYER_EVENT, context, builder)).executes(context -> {
                     var name = context.getArgument("name", String.class);
                     jump(JumpType.PLAYER_EVENT,name);
@@ -308,6 +313,9 @@ public class Commands {
                     return 0;
                 })))
         );
+
+        dispatcher.register(literal("goto").redirect(jumpCommand));
+
 //        dispatcher.register(literal("swapininv").executes(context -> {
 //            if(CodeClient.location instanceof Dev) {
 //                PlaceTemplates action = Utility.createSwapper(Utility.templatesInInventory(), () -> {
@@ -551,10 +559,25 @@ public class Commands {
     }
     private static void jump(JumpType type, String name) {
         if(CodeClient.location instanceof Dev dev && CodeClient.currentAction instanceof None) {
-            var results = dev.scanForSigns(type.pattern,Pattern.compile("^" + Pattern.quote(name) + "$"));
+            @Nullable HashMap<BlockPos, SignText> results = null;
+            // functions/processes in diamondfire are case-sensitive, and you can have two functions with the same name if they have different cases.
+            if (type == JumpType.FUNCTION || type == JumpType.PROCESS) {
+                results = dev.scanForSigns(type.pattern,Pattern.compile("^" + Pattern.quote(name) + "$"));
+            } else {
+                // however, events do not have this problem and the case of what you type shouldn't matter.
+                results = dev.scanForSigns(type.pattern,Pattern.compile("^" + Pattern.quote(name) + "$", Pattern.CASE_INSENSITIVE));
+            }
+
             if(results == null) return;
             var first = results.keySet().stream().findFirst();
-            if(first.isEmpty()) return;
+
+            // no exact match exists in the plot, so we can run a less restrictive search.
+            if(first.isEmpty()) {
+                results = dev.scanForSigns(type.pattern,Pattern.compile("^.*"+Pattern.quote(name)+".*$", Pattern.CASE_INSENSITIVE));
+                if(results == null) return;
+                first = results.keySet().stream().findFirst();
+                if(first.isEmpty()) return; // there is no partial match, so the player doesn't get sent
+            }
             CodeClient.currentAction = new GoTo(first.get().toCenterPos(), () -> CodeClient.currentAction = new None());
             CodeClient.currentAction.init();
         }
