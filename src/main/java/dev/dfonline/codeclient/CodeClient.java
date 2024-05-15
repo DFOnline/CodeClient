@@ -132,11 +132,19 @@ public class CodeClient implements ModInitializer {
             var pos = new BlockPos(dev.getX() - 1, 49, dev.getZ());
             if (dev.getSize() == null) {
                 // TODO wait for plugin messages, or make a fix now.
-                if (!CodeClient.MC.world.getBlockState(pos.south(50)).isOf(CodeClient.MC.world.getBlockState(pos.south(51)).getBlock()))
+                var world = CodeClient.MC.world;
+                if(world == null) return;
+                var FIFTY = world.getBlockState(pos.south(50));
+                var FIFTY_ONE = world.getBlockState(pos.south(51));
+                var HUNDRED = CodeClient.MC.world.getBlockState(pos.south(100));
+                var HUNDRED_ONE = CodeClient.MC.world.getBlockState(pos.south(101));
+                var THREE_HUNDRED = CodeClient.MC.world.getBlockState(pos.south(300));
+                var THREE_HUNDRED_ONE = CodeClient.MC.world.getBlockState(pos.south(301));
+                if (!(FIFTY.isOf(Blocks.VOID_AIR) || FIFTY_ONE.isOf(Blocks.VOID_AIR)) && (!FIFTY.isOf(FIFTY_ONE.getBlock())))
                     dev.setSize(Plot.Size.BASIC);
-                else if (!CodeClient.MC.world.getBlockState(pos.south(100)).isOf(CodeClient.MC.world.getBlockState(pos.south(101)).getBlock()))
+                else if (!(HUNDRED.isOf(Blocks.VOID_AIR) || HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !HUNDRED.isOf(HUNDRED_ONE.getBlock()))
                     dev.setSize(Plot.Size.LARGE);
-                else if (!CodeClient.MC.world.getBlockState(pos.south(300)).isOf(CodeClient.MC.world.getBlockState(pos.south(301)).getBlock()))
+                else if (!(THREE_HUNDRED.isOf(Blocks.VOID_AIR) || THREE_HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !THREE_HUNDRED.isOf(THREE_HUNDRED_ONE.getBlock()))
                     dev.setSize(Plot.Size.MASSIVE);
             }
             dev.setHasUnderground(!CodeClient.MC.world.getBlockState(pos).isOf(Blocks.STONE));
