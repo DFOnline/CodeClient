@@ -8,11 +8,22 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(HandledScreen.class)
-public class MHandledScreen {
+public abstract class MHandledScreen {
     @Inject(method = "drawSlot", at = @At("TAIL"))
     private void drawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
         SlotGhostManager.drawSlot(context,slot);
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;pop()V"))
+    private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        SlotGhostManager.render(context,mouseX,mouseY,(HandledScreen<?>) (Object) this);
+    }
+
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+        if(SlotGhostManager.mouseClicked(mouseX,mouseY,button, (HandledScreen<?>) (Object) this)) cir.setReturnValue(true);
     }
 }
