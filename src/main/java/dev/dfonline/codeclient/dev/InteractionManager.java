@@ -273,23 +273,26 @@ public class InteractionManager {
     }
 
     public static boolean onItemInteract(PlayerEntity player, Hand hand) {
-        if (player.isSneaking() || !Config.getConfig().ScopeSwitcher) return false;
+        if (CodeClient.location instanceof Dev) {
+            if (player.isSneaking() || !Config.getConfig().ScopeSwitcher) return false;
 
-        ItemStack stack = player.getStackInHand(hand);
+            ItemStack stack = player.getStackInHand(hand);
 
-        NbtCompound nbt = stack.getNbt();
-        if (nbt == null) return false;
-        NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
-        if (pbv == null) return false;
-        NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
-        if (varItem == null) return false;
-        JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
-        if (!var.get("id").getAsString().equals("var")) return false;
-        JsonObject data = var.get("data").getAsJsonObject();
-        String scopeName = data.get("scope").getAsString();
+            NbtCompound nbt = stack.getNbt();
+            if (nbt == null) return false;
+            NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
+            if (pbv == null) return false;
+            NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
+            if (varItem == null) return false;
+            JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
+            if (!var.get("id").getAsString().equals("var")) return false;
+            JsonObject data = var.get("data").getAsJsonObject();
+            String scopeName = data.get("scope").getAsString();
 
-        CodeClient.MC.setScreen(new ScopeSwitcher(scopeName));
-        return true;
+            CodeClient.MC.setScreen(new ScopeSwitcher(scopeName));
+            return true;
+        }
+        return false;
     }
 
 //    public static boolean onBlockInteract(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult) {
