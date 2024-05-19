@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
 import dev.dfonline.codeclient.hypercube.actiondump.Action;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
@@ -20,9 +21,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SlotGhostManager {
     private static Action action;
-    private static Slot selectedSlot = null;
+    private static AddWidget selectedSlot = null;
 
     public static void onClickChest(BlockHitResult hitResult) {
         action = null;
@@ -60,8 +64,6 @@ public class SlotGhostManager {
             context.drawItemInSlot(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
 //        context.drawText(CodeClient.MC.textRenderer, Text.literal(arg.type),slot.x,slot.y,0xFFFFFF00,true);
             context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 822083583);
-            if (selectedSlot != null && selectedSlot.getIndex() == slot.getIndex()) {
-            }
         } catch (Exception e) {
             context.drawText(CodeClient.MC.textRenderer, Text.literal("Error."), slot.x, slot.y, 0xFF0000, true);
         }
@@ -69,31 +71,72 @@ public class SlotGhostManager {
 
     public static void render(DrawContext context, int mouseX, int mouseY, HandledScreen<?> handledScreen) {
         if (selectedSlot == null || !goodAction()) return;
-        context.getMatrices().push();
-        context.getMatrices().translate(0.0F, 0.0F, 900.0F);
-        context.drawGuiTexture(new Identifier("recipe_book/overlay_recipe"), selectedSlot.x, selectedSlot.y, 2 * 18 + 8, 1 * 18 + 8);
-//                new Identifier("recipe_book/crafting_overlay_highlighted")
-//                new Identifier("recipe_book/crafting_overlay")
-//                RecipeAlternativesWidget.CRAFTING_OVERLAY_HIGHLIGHTED_TEXTURE : RecipeAlternativesWidget.CRAFTING_OVERLAY_TEXTURE
-        var arg = action.icon.arguments[selectedSlot.getIndex()];
-        Icon.Type type = Icon.Type.valueOf(arg.type);
-        ItemStack itemStack = type.icon;
-        context.drawItem(Icon.Type.VARIABLE.icon, selectedSlot.x + 5, selectedSlot.y + 5);
-        context.drawItem(itemStack, selectedSlot.x + 23, selectedSlot.y + 5);
-        context.getMatrices().pop();
+        selectedSlot.render(context,mouseX,mouseY,handledScreen);
     }
 
     private static boolean goodAction() {
         return action != null && action.icon != null && action.icon.arguments != null;
     }
 
-    public static boolean mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen) {
+    public static boolean mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen, int x, int y) {
+        if(selectedSlot != null) {
+            selectedSlot.mouseClicked(mouseX,mouseY,button,screen,x,y);
+            selectedSlot = null;
+            return true;
+        }
         return false;
+    }
+
+    private static class AddWidget {
+        private int x;
+        private int y;
+        private List<ItemStack> options;
+        private Slot slot;
+
+        public AddWidget(Slot slot) {
+            this.slot = slot;
+            this.x = slot.x + 16;
+            this.y = slot.y - 5;
+            var arg = action.icon.arguments[slot.getIndex()];
+            var type = arg.getType();
+            var opt = new ArrayList<ItemStack>();
+            if(type != Icon.Type.VARIABLE && type != null) {
+                opt.add(type.icon);
+            }
+            opt.add(Icon.Type.VARIABLE.icon);
+            options = opt;
+        }
+
+        public void render(DrawContext context, int mouseX, int mouseY, HandledScreen<?> handledScreen) {
+            context.getMatrices().push();
+            context.getMatrices().translate(0.0F, 0.0F, 900.0F);
+            context.drawGuiTexture(new Identifier("recipe_book/overlay_recipe"), x, y, options.size() * 18 + 8, 26);
+//                new Identifier("recipe_book/crafting_overlay_highlighted")
+//                new Identifier("recipe_book/crafting_overlay")
+//                RecipeAlternativesWidget.CRAFTING_OVERLAY_HIGHLIGHTED_TEXTURE : RecipeAlternativesWidget.CRAFTING_OVERLAY_TEXTURE
+            int i = 0;
+            for(var option: options) {
+                context.drawItem(option, (x + 5) + (i * 18), y + 5);
+                i++;
+            }
+            context.getMatrices().pop();
+        }
+
+        public void mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen, int x, int y) {
+            if (mouseX > this.x + x && mouseY > this.y + y && mouseX < this.x + x + options.size() * 18 + 8 && mouseY < this.y + y + 26) {
+                for (var option: options) {
+                    if (mouseX > this.x + x && mouseY > this.y + y && mouseX < this.x + x + options.size() * 18 + 8 && mouseY < this.y + y + 26) {
+
+                    }
+                }
+                Utility.debug("inside!");
+            }
+        }
     }
 
     public static void clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
         if (!slot.hasStack() && CodeClient.MC.player.currentScreenHandler.getCursorStack().isEmpty() && goodAction() && slot.getIndex() < action.icon.arguments.length)
-            selectedSlot = slot;
+            selectedSlot = new AddWidget(slot);
         else selectedSlot = null;
     }
 }
