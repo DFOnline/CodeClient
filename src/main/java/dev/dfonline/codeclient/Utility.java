@@ -245,6 +245,7 @@ public class Utility {
     /**
      * @deprecated This uses literals, use translations when you can.
      */
+    @Deprecated
     public static void sendMessage(String message, ChatType type) {
         sendMessage(Text.literal(message), type);
     }
@@ -252,6 +253,7 @@ public class Utility {
     /**
      * @deprecated This uses literals, use translations when you can.
      */
+    @Deprecated
     public static void sendMessage(String message) {
         sendMessage(Text.literal(message), ChatType.INFO);
     }

@@ -37,8 +37,8 @@ public class Location extends VarItem {
     private double pitch;
     private double yaw;
 
-    public Location(Item material, JsonObject data) {
-        super(material, data);
+    public Location(JsonObject data) {
+        super(data);
         this.loc = this.data.getAsJsonObject("loc");
         this.x = loc.get("x").getAsDouble();
         this.y = loc.get("y").getAsDouble();
@@ -47,8 +47,23 @@ public class Location extends VarItem {
         this.yaw = loc.get("yaw").getAsDouble();
     }
 
+    @Override
+    public String getId() {
+        return "loc";
+    }
+
+    @Override
+    protected Item getIconItem() {
+        return Items.PAPER;
+    }
+
+    @Override
+    public JsonObject getDefaultData() {
+        return defaultObject;
+    }
+
     private Location() {
-        this(Items.PAPER, defaultObject);
+        this(defaultObject);
         // Make sure everything is init'd.
         setX(x);
         setY(y);

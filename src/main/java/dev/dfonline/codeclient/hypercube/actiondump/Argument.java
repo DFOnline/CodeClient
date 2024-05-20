@@ -23,6 +23,6 @@ public class Argument {
     public ItemStack getItem() {
         Icon.Type type = getType();
         if(type == null) return ItemStack.EMPTY;
-        return type.icon;
+        return type.getIcon();
     }
 }

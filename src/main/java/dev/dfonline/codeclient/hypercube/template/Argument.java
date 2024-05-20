@@ -3,7 +3,9 @@ package dev.dfonline.codeclient.hypercube.template;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,8 +42,23 @@ public class Argument {
     public static class MinecraftItem extends VarItem {
         public @NotNull ItemStack stack;
 
+        @Override
+        public String getId() {
+            return "item";
+        }
+
+        @Override
+        protected Item getIconItem() {
+            return Items.ITEM_FRAME;
+        }
+
+        @Override
+        public JsonObject getDefaultData() {
+            return null;
+        }
+
         public MinecraftItem(@NotNull ItemStack item) {
-            super("item");
+            super();
             stack = item;
         }
 
@@ -60,7 +77,7 @@ public class Argument {
 
         @Override
         public ItemStack toStack() {
-            return super.toStack();
+            return stack;
         }
     }
 }

@@ -67,7 +67,7 @@ public class Action implements Searchable {
         for (var tag : this.tags) {
             var defaultOption = Arrays.stream(tag.options).filter(tagOption -> tagOption.name.equals(tag.defaultOption)).findFirst();
             if (defaultOption.isPresent()) {
-                var blockTag = new BlockTag(defaultOption.get().icon.material.toLowerCase(), tag.defaultOption, tag.name, name, getCodeBlock().identifier);
+                var blockTag = new BlockTag(tag.defaultOption, tag.name, name, getCodeBlock().identifier);
                 items.add(new Argument(blockTag, tag.slot).toJsonObject());
             }
         }

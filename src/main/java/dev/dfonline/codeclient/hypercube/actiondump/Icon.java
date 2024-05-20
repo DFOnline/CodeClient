@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.hypercube.item.NamedItem;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.LoyaltyEnchantment;
 import net.minecraft.item.Item;
@@ -185,7 +186,7 @@ public class Icon {
         PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect", Items.DRAGON_BREATH),
         POTION(TextColor.fromRgb(0xFF557F), "Potion Effect", Items.WHITE_DYE),
         VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable", Items.MAGMA_CREAM),
-        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value", Items.POTATO),
+        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value", Items.POTATO, true),
         ITEM(GOLD, "Item", Items.ITEM_FRAME),
         BLOCK(GOLD, "Block", Items.OAK_LOG),
         ENTITY_TYPE(GOLD, "Entity Type", Items.PIG_SPAWN_EGG),
@@ -200,20 +201,27 @@ public class Icon {
 
         public final TextColor color;
         public final String display;
-        public final ItemStack icon;
+        private final ItemStack icon;
 
         Type(TextColor color, String display, Item icon) {
             this.color = color;
             this.display = display;
-            this.icon = icon.getDefaultStack();
+            var item = icon.getDefaultStack();
+            item.setSubNbt("CustomModelData",NbtInt.of(5000));
+            this.icon = item;
         }
 
         Type(TextColor color, String display, Item icon, boolean shiny) {
             this.color = color;
             this.display = display;
             var item = icon.getDefaultStack();
-            item.addEnchantment(new LoyaltyEnchantment(Enchantment.Rarity.VERY_RARE),0);
+            item.setSubNbt("CustomModelData",NbtInt.of(5000));
+//            item.addEnchantment(new LoyaltyEnchantment(Enchantment.Rarity.VERY_RARE),0);
             this.icon = item;
+        }
+
+        public ItemStack getIcon() {
+            return icon.copy();
         }
     }
 

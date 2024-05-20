@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -15,11 +16,34 @@ public class Vector extends VarItem {
     private Double y;
     private Double z;
 
-    public Vector(Item material, JsonObject var) {
-        super(material, var);
+    @Override
+    public String getId() {
+        return "vec";
+    }
+
+    @Override
+    protected Item getIconItem() {
+        return Items.PRISMARINE_SHARD;
+    }
+
+    @Override
+    public JsonObject getDefaultData() {
+        JsonObject object = new JsonObject();
+        object.addProperty("x",0);
+        object.addProperty("y",0);
+        object.addProperty("z",0);
+        return null;
+    }
+
+    public Vector(JsonObject var) {
+        super(var);
         this.x = data.get("x").getAsDouble();
         this.y = data.get("y").getAsDouble();
         this.z = data.get("z").getAsDouble();
+    }
+
+    public Vector() {
+        super();
     }
 
     public double getX() {

@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -18,11 +19,34 @@ public class Potion extends VarItem {
     private int amplifier;
     public static final int INFINITE = 1000000;
 
-    public Potion(Item material, JsonObject var) {
-        super(material, var);
+    @Override
+    public String getId() {
+        return "pot";
+    }
+
+    @Override
+    protected Item getIconItem() {
+        return Items.DRAGON_BREATH;
+    }
+
+    @Override
+    public JsonObject getDefaultData() {
+        JsonObject object = new JsonObject();
+        object.addProperty("pot","Sped");
+        object.addProperty("dur",1000000);
+        object.addProperty("amp",0);
+        return null;
+    }
+
+    public Potion(JsonObject var) {
+        super(var);
         this.potion = data.get("pot").getAsString();
         this.duration = data.get("dur").getAsInt();
         this.amplifier = data.get("amp").getAsInt();
+    }
+
+    public Potion() {
+        super();
     }
 
     public static String durationToString(int duration) {
