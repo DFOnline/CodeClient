@@ -244,7 +244,7 @@ public class DevInventoryGroup {
 
     public int getDisplayY(int originY, int menuHeight) {
         int multiplier = TAB_HEIGHT * (isTopHalf() ? -1 : 1);
-        int y =  originY + (isTopHalf() ? (TAB_HEIGHT * -1 - 4) + (getRow() * multiplier) : menuHeight);
+        int y = originY + (isTopHalf() ? (TAB_HEIGHT * -1 - 4) + (getRow() * multiplier) : menuHeight);
         return y;
     }
 
