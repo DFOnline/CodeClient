@@ -62,7 +62,7 @@ public class Location extends VarItem {
         return defaultObject;
     }
 
-    private Location() {
+    public Location() {
         this(defaultObject);
         // Make sure everything is init'd.
         setX(x);

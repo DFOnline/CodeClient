@@ -1,9 +1,11 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.Utility;
-import dev.dfonline.codeclient.hypercube.item.NamedItem;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.LoyaltyEnchantment;
+import dev.dfonline.codeclient.hypercube.item.*;
+import dev.dfonline.codeclient.hypercube.item.Number;
+import dev.dfonline.codeclient.hypercube.item.Potion;
+import dev.dfonline.codeclient.hypercube.item.Sound;
+import dev.dfonline.codeclient.hypercube.item.VarItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -18,6 +20,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -177,23 +180,23 @@ public class Icon {
     }
 
     public enum Type {
-        TEXT(TextColor.fromFormatting(Formatting.AQUA), "String", Items.STRING),
-        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text", Items.BOOK),
-        NUMBER(TextColor.fromFormatting(Formatting.RED), "Number", Items.SLIME_BALL),
-        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "Location", Items.PAPER),
-        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD),
-        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound", Items.NAUTILUS_SHELL),
+        TEXT(TextColor.fromFormatting(Formatting.AQUA), "String", Items.STRING, new dev.dfonline.codeclient.hypercube.item.Text()),
+        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text", Items.BOOK, new Component()),
+        NUMBER(TextColor.fromFormatting(Formatting.RED), "Number", Items.SLIME_BALL, new Number()),
+        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "Location", Items.PAPER, new Location()),
+        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD, new Vector()),
+        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound", Items.NAUTILUS_SHELL, new Sound()),
         PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect", Items.DRAGON_BREATH),
-        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect", Items.WHITE_DYE),
-        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable", Items.MAGMA_CREAM),
-        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value", Items.POTATO, true),
-        ITEM(GOLD, "Item", Items.ITEM_FRAME),
-        BLOCK(GOLD, "Block", Items.OAK_LOG),
+        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect", Items.WHITE_DYE, new Potion()),
+        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable", Items.MAGMA_CREAM, new Variable()),
+        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value", Items.POTATO),
+        ITEM(GOLD, "Item", Items.ITEM_FRAME, new dev.dfonline.codeclient.hypercube.item.Text()),
+        BLOCK(GOLD, "Block", Items.OAK_LOG, new dev.dfonline.codeclient.hypercube.item.Text()),
         ENTITY_TYPE(GOLD, "Entity Type", Items.PIG_SPAWN_EGG),
         SPAWN_EGG(GOLD, "Spawn Egg", Items.POLAR_BEAR_SPAWN_EGG), // Least consistent in df, all of sheep, polar bear, phantom, pig
         VEHICLE(GOLD, "Vehicle", Items.OAK_BOAT),
         PROJECTILE(GOLD, "Projectile", Items.ARROW),
-        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag", Items.CHAIN_COMMAND_BLOCK),
+        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag", Items.CHAIN_COMMAND_BLOCK, new dev.dfonline.codeclient.hypercube.item.Text()),
         LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List", Items.SKULL_BANNER_PATTERN), // Ender chest or empty banner pattern
         DICT(TextColor.fromRgb(0x55AAFF), "Dictionary", Items.KNOWLEDGE_BOOK), // Knowledge book or chest minecart
         NONE(TextColor.fromRgb(0x808080), "None", Items.AIR),
@@ -202,6 +205,7 @@ public class Icon {
         public final TextColor color;
         public final String display;
         private final ItemStack icon;
+        @Nullable public final VarItem defaultVarItem;
 
         Type(TextColor color, String display, Item icon) {
             this.color = color;
@@ -209,15 +213,16 @@ public class Icon {
             var item = icon.getDefaultStack();
             item.setSubNbt("CustomModelData",NbtInt.of(5000));
             this.icon = item;
+            defaultVarItem = null;
         }
 
-        Type(TextColor color, String display, Item icon, boolean shiny) {
+        Type(TextColor color, String display, Item icon, @Nullable VarItem defaultVarItem) {
             this.color = color;
             this.display = display;
             var item = icon.getDefaultStack();
             item.setSubNbt("CustomModelData",NbtInt.of(5000));
-//            item.addEnchantment(new LoyaltyEnchantment(Enchantment.Rarity.VERY_RARE),0);
             this.icon = item;
+            this.defaultVarItem = defaultVarItem;
         }
 
         public ItemStack getIcon() {

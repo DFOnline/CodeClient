@@ -18,6 +18,10 @@ public class Sound extends VarItem {
     private double pitch;
     private double volume;
 
+    public Sound() {
+        super();
+    }
+
     @Override
     public String getId() {
         return "snd";

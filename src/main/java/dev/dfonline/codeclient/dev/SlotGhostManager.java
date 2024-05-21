@@ -139,7 +139,7 @@ public class SlotGhostManager {
                         var player = mc.player;
                         var sync = screen.getScreenHandler().syncId;
                         manager.clickSlot(sync, slot.id, 0, SlotActionType.SWAP,player);
-                        mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, option.type.getIcon()));
+                        mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, option.type.defaultVarItem.toStack()));
                         manager.clickSlot(sync, slot.id, 0, SlotActionType.SWAP,player);
                         manager.clickSlot(sync, 54, 0, SlotActionType.QUICK_CRAFT,player);
                     }
