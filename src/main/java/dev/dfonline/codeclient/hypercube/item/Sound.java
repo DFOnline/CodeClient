@@ -18,10 +18,6 @@ public class Sound extends VarItem {
     private double pitch;
     private double volume;
 
-    public Sound() {
-        super();
-    }
-
     @Override
     public String getId() {
         return "snd";
@@ -47,6 +43,14 @@ public class Sound extends VarItem {
         this.pitch = data.get("pitch").getAsDouble();
         this.volume = data.get("vol").getAsDouble();
     }
+
+    public Sound() {
+        super();
+        this.sound = "Pling";
+        this.volume = 2;
+        this.pitch = 1;
+    }
+
 
     public String getSound() {
         return sound;

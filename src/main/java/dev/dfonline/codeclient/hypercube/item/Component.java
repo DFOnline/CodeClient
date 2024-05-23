@@ -10,7 +10,7 @@ public class Component extends NamedItem {
     }
 
     public Component() {
-        super();
+        super("Text");
     }
 
     @Override

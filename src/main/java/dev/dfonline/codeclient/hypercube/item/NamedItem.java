@@ -22,8 +22,7 @@ public abstract class NamedItem extends VarItem {
     }
 
     public NamedItem() {
-        super();
-        this.setName("name");
+        this("name");
     }
 
     public NamedItem(String name) {

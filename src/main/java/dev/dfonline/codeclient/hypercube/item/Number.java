@@ -22,8 +22,8 @@ public class Number extends NamedItem {
     @Override
     public JsonObject getDefaultData() {
         JsonObject object = new JsonObject();
-        object.addProperty("name",0);
-        return null;
+        object.addProperty("name","0");
+        return object;
     }
 
     public Number(JsonObject var) {
@@ -31,7 +31,7 @@ public class Number extends NamedItem {
     }
 
     public Number() {
-        super();
+        super("0");
     }
 
     @Override

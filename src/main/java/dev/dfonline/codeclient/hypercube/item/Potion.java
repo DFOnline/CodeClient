@@ -32,10 +32,10 @@ public class Potion extends VarItem {
     @Override
     public JsonObject getDefaultData() {
         JsonObject object = new JsonObject();
-        object.addProperty("pot","Sped");
+        object.addProperty("pot","Speed");
         object.addProperty("dur",1000000);
         object.addProperty("amp",0);
-        return null;
+        return object;
     }
 
     public Potion(JsonObject var) {
@@ -47,6 +47,9 @@ public class Potion extends VarItem {
 
     public Potion() {
         super();
+        this.potion = "Speed";
+        this.duration = 1000000;
+        this.amplifier = 0;
     }
 
     public static String durationToString(int duration) {

@@ -105,8 +105,10 @@ public class SlotGhostManager {
             var opt = new ArrayList<Option>();
             int i = 0;
             if(type != Icon.Type.VARIABLE && type != null) {
-                opt.add(new Option(type, x + 5,y + 5));
-                i++;
+                if(type.defaultVarItem != null) {
+                    opt.add(new Option(type, x + 5, y + 5));
+                    i++;
+                }
             }
             opt.add(new Option(Icon.Type.VARIABLE, x + 5 + i * 18,y + 5));
             options = opt;
@@ -120,28 +122,26 @@ public class SlotGhostManager {
 //                new Identifier("recipe_book/crafting_overlay_highlighted")
 //                new Identifier("recipe_book/crafting_overlay")
 //                RecipeAlternativesWidget.CRAFTING_OVERLAY_HIGHLIGHTED_TEXTURE : RecipeAlternativesWidget.CRAFTING_OVERLAY_TEXTURE
-            int i = 0;
             for(var option: options) {
                 context.drawItem(option.type.getIcon(), option.x, option.y);
-                i++;
             }
             context.getMatrices().pop();
         }
 
         public void mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen, int x, int y) {
             if (mouseX > this.x + x && mouseY > this.y + y && mouseX < this.x + x + width && mouseY < this.y + y + height) {
-                for (var option: options) {
+                for (var option : options) {
                     if (mouseX > option.x + x && mouseY > option.y + y && mouseX < option.x + x + 16 && mouseY < option.y + y + 21) {
                         var mc = CodeClient.MC;
                         var manager = mc.interactionManager;
                         Utility.debug("inside!");
-                        if(manager == null) return;
+                        if (manager == null) return;
                         var player = mc.player;
                         var sync = screen.getScreenHandler().syncId;
-                        manager.clickSlot(sync, slot.id, 0, SlotActionType.SWAP,player);
+                        manager.clickSlot(sync, slot.id, 0, SlotActionType.SWAP, player);
                         mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, option.type.defaultVarItem.toStack()));
-                        manager.clickSlot(sync, slot.id, 0, SlotActionType.SWAP,player);
-                        manager.clickSlot(sync, 54, 0, SlotActionType.QUICK_CRAFT,player);
+                        manager.clickSlot(sync, slot.id, 0, SlotActionType.SWAP, player);
+                        manager.clickSlot(sync, 54, 0, SlotActionType.QUICK_CRAFT, player);
                     }
                 }
             }

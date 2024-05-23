@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 
 public class Text extends NamedItem {
     @Override
@@ -16,16 +17,16 @@ public class Text extends NamedItem {
     }
 
     public Text() {
-        super();
+        super("string");
     }
 
     @Override
     public String getId() {
-        return null;
+        return "txt";
     }
 
     @Override
     protected Item getIconItem() {
-        return null;
+        return Items.STRING;
     }
 }
