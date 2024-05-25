@@ -29,10 +29,10 @@ public abstract class MChatScreen {
         if (item instanceof NamedItem named) {
             this.chatField.setText(named.getName().replaceAll("§", "&"));
         } else if (item instanceof Vector vec) {
-            this.chatField.setText("%s %s %s".formatted(format.format(vec.getX()), format.format(vec.getY()), format.format(vec.getZ())));
+            this.chatField.setText("%s %s %s".formatted(vec.getX(), vec.getY(), vec.getZ()));
         } else if (item instanceof Sound sound) {
             if (sound.getVolume() != 2)
-                this.chatField.setText("%s %s".formatted(format.format(sound.getPitch()), format.format(sound.getVolume())));
+                this.chatField.setText("%s %s".formatted(sound.getPitch(), format.format(sound.getVolume())));
             else this.chatField.setText(format.format(sound.getPitch()));
         } else if (item instanceof Potion pot) {
             if(pot.getDuration() == Potion.INFINITE) this.chatField.setText(Integer.toString(pot.getAmplifier() + 1));
