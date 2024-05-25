@@ -14,9 +14,7 @@ import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -181,14 +179,14 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                             && relY < y + 18
             ) {
                 if (button == 2) {
-                    this.onMouseClick(slot, slot.id, button, SlotActionType.CLONE);
+                    this.onMouseClick(new Slot(slot.inventory,slot.id,x,y), slot.id, button, SlotActionType.CLONE);
                     return true;
                 }
                 if (hasShiftDown()) {
-                    this.onMouseClick(slot, slot.id, button, SlotActionType.QUICK_MOVE);
+                    this.onMouseClick(new Slot(slot.inventory,slot.id,x,y), slot.id, button, SlotActionType.QUICK_MOVE);
                     return true;
                 }
-                this.onMouseClick(slot, slot.id, button, SlotActionType.PICKUP);
+                this.onMouseClick(new Slot(slot.inventory,slot.id,x,y), slot.id, button, SlotActionType.PICKUP);
                 return true;
             }
         }

@@ -125,16 +125,6 @@ public abstract class MClientPlayerInteractionManager {
         }
     }
 
-    @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
-    private void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
-        if (slotId < 0) return;
-        if (!player.isMainPlayer()) return;
-
-        ScreenHandler screenHandler = player.currentScreenHandler;
-        if (InteractionManager.onClickSlot(screenHandler.slots.get(slotId), button, actionType, syncId, screenHandler.getRevision()))
-            ci.cancel();
-    }
-
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void reachDistance(CallbackInfoReturnable<Float> cir) {
         if (CodeClient.location instanceof Dev) {
