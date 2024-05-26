@@ -180,23 +180,23 @@ public class Icon {
     }
 
     public enum Type {
-        TEXT(TextColor.fromFormatting(Formatting.AQUA), "String", Items.STRING, new dev.dfonline.codeclient.hypercube.item.Text()),
-        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text", Items.BOOK, new Component()),
-        NUMBER(TextColor.fromFormatting(Formatting.RED), "Number", Items.SLIME_BALL, new Number()),
-        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "Location", Items.PAPER, new Location()),
-        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD, new Vector()),
-        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound", Items.NAUTILUS_SHELL, new Sound()),
+        TEXT(TextColor.fromFormatting(Formatting.AQUA), "String", Items.STRING, dev.dfonline.codeclient.hypercube.item.Text::new),
+        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text", Items.BOOK, Component::new),
+        NUMBER(TextColor.fromFormatting(Formatting.RED), "Number", Items.SLIME_BALL, Number::new),
+        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "Location", Items.PAPER, Location::new),
+        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD, Vector::new),
+        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound", Items.NAUTILUS_SHELL, Sound::new),
         PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect", Items.WHITE_DYE),
-        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect", Items.DRAGON_BREATH, new Potion()),
-        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable", Items.MAGMA_CREAM, new Variable()),
+        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect", Items.DRAGON_BREATH, Potion::new),
+        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable", Items.MAGMA_CREAM, Variable::new),
         ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value", Items.POTATO),
-        ITEM(GOLD, "Item", Items.ITEM_FRAME, new dev.dfonline.codeclient.hypercube.item.Text()),
-        BLOCK(GOLD, "Block", Items.OAK_LOG, new dev.dfonline.codeclient.hypercube.item.Text()),
+        ITEM(GOLD, "Item", Items.ITEM_FRAME, dev.dfonline.codeclient.hypercube.item.Text::new),
+        BLOCK(GOLD, "Block", Items.OAK_LOG, dev.dfonline.codeclient.hypercube.item.Text::new),
         ENTITY_TYPE(GOLD, "Entity Type", Items.PIG_SPAWN_EGG),
         SPAWN_EGG(GOLD, "Spawn Egg", Items.POLAR_BEAR_SPAWN_EGG), // Least consistent in df, all of sheep, polar bear, phantom, pig
         VEHICLE(GOLD, "Vehicle", Items.OAK_BOAT),
         PROJECTILE(GOLD, "Projectile", Items.ARROW),
-        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag", Items.CHAIN_COMMAND_BLOCK, new dev.dfonline.codeclient.hypercube.item.Text()),
+        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag", Items.CHAIN_COMMAND_BLOCK, dev.dfonline.codeclient.hypercube.item.Text::new),
         LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List", Items.SKULL_BANNER_PATTERN), // Ender chest or empty banner pattern
         DICT(TextColor.fromRgb(0x55AAFF), "Dictionary", Items.KNOWLEDGE_BOOK), // Knowledge book or chest minecart
         NONE(TextColor.fromRgb(0x808080), "None", Items.AIR),
@@ -205,7 +205,7 @@ public class Icon {
         public final TextColor color;
         public final String display;
         private final ItemStack icon;
-        @Nullable public final VarItem defaultVarItem;
+        @Nullable public final Icon.Type.getVarItem getVarItem;
 
         Type(TextColor color, String display, Item icon) {
             this.color = color;
@@ -213,16 +213,20 @@ public class Icon {
             var item = icon.getDefaultStack();
             item.setSubNbt("CustomModelData",NbtInt.of(5000));
             this.icon = item;
-            defaultVarItem = null;
+            getVarItem = null;
         }
 
-        Type(TextColor color, String display, Item icon, @Nullable VarItem defaultVarItem) {
+        public interface getVarItem {
+            VarItem run();
+        }
+
+        Type(TextColor color, String display, Item icon, @Nullable Icon.Type.getVarItem getVarItem) {
             this.color = color;
             this.display = display;
             var item = icon.getDefaultStack();
             item.setSubNbt("CustomModelData",NbtInt.of(5000));
             this.icon = item;
-            this.defaultVarItem = defaultVarItem;
+            this.getVarItem = getVarItem;
         }
 
         public ItemStack getIcon() {

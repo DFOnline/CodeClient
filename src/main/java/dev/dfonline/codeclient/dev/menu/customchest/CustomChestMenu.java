@@ -112,6 +112,9 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         context.getMatrices().pop();
     }
 
+    public void update() {
+        update((int) scroll);
+    }
     private void update(int previousScroll) {
         Integer focused = null;
         for (int i = 0; i < widgets.size(); i++) {
@@ -137,7 +140,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 //                widget.setMaxLength(10_000);
 //                widget.setText(named.getName());
 //                widget.setFocused(Objects.equals(i,focused));
-                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.getId()), stack, varItem, this.handler);
+                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.getId()), varItem);
                 widgets.put(i, widget);
                 varItems.add(varItem);
                 continue;
@@ -170,6 +173,8 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             var slot = subList.get(i);
             final int x = 8;
             final int y = i * 18 - 11 + 25;
+            var customSlot = new Slot(slot.inventory,slot.getIndex(),x,y);
+            customSlot.id = slot.id;
             double relX = mouseX - this.x;
             double relY = mouseY - this.y;
             if (
@@ -179,14 +184,14 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                             && relY < y + 18
             ) {
                 if (button == 2) {
-                    this.onMouseClick(new Slot(slot.inventory,slot.id,x,y), slot.id, button, SlotActionType.CLONE);
+                    this.onMouseClick(customSlot, slot.id, button, SlotActionType.CLONE);
                     return true;
                 }
                 if (hasShiftDown()) {
-                    this.onMouseClick(new Slot(slot.inventory,slot.id,x,y), slot.id, button, SlotActionType.QUICK_MOVE);
+                    this.onMouseClick(customSlot, slot.id, button, SlotActionType.QUICK_MOVE);
                     return true;
                 }
-                this.onMouseClick(new Slot(slot.inventory,slot.id,x,y), slot.id, button, SlotActionType.PICKUP);
+                this.onMouseClick(customSlot, slot.id, button, SlotActionType.PICKUP);
                 return true;
             }
         }

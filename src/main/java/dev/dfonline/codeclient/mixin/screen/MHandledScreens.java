@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.mixin;
+package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.InteractionManager;

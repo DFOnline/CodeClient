@@ -6,11 +6,8 @@ import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
-import dev.dfonline.codeclient.dev.BuildPhaser;
+import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.Debug.Debug;
-import dev.dfonline.codeclient.dev.LastPos;
-import dev.dfonline.codeclient.dev.NoClip;
-import dev.dfonline.codeclient.dev.RecentChestInsert;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
@@ -124,6 +121,7 @@ public class CodeClient implements ModInitializer {
         ChestPeeker.tick();
         RecentChestInsert.tick();
         KeyBinds.tick();
+        SlotGhostManager.tick();
 
         if (location instanceof Dev dev) {
             if (MC.player == null) return;
@@ -169,6 +167,7 @@ public class CodeClient implements ModInitializer {
         BuildPhaser.disableClipping();
         Commands.confirm = null;
         Debug.clean();
+        SlotGhostManager.reset();
     }
 
     /**

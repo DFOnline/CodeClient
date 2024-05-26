@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.mixin.render;
+package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.SlotGhostManager;
@@ -36,6 +36,13 @@ public abstract class MHandledScreen {
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         if(SlotGhostManager.mouseClicked(mouseX,mouseY,button, (HandledScreen<?>) (Object) this, this.x, this.y)) cir.setReturnValue(true);
+    }
+
+    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+        if(SlotGhostManager.keyPressed(keyCode,scanCode,modifiers)) {
+            cir.setReturnValue(true);
+        }
     }
 
     @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;clickSlot(IIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/entity/player/PlayerEntity;)V"), cancellable = true)
