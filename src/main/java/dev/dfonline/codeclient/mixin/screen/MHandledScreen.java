@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.mixin.screen;
 
+import dev.dfonline.codeclient.dev.InsertOverlay;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.SlotGhostManager;
 import net.minecraft.client.gui.DrawContext;
@@ -30,17 +31,17 @@ public abstract class MHandledScreen {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;pop()V"))
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        SlotGhostManager.render(context,mouseX,mouseY,(HandledScreen<?>) (Object) this);
+        InsertOverlay.render(context,mouseX,mouseY,(HandledScreen<?>) (Object) this);
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        if(SlotGhostManager.mouseClicked(mouseX,mouseY,button, (HandledScreen<?>) (Object) this, this.x, this.y)) cir.setReturnValue(true);
+        if(InsertOverlay.mouseClicked(mouseX,mouseY,button, (HandledScreen<?>) (Object) this, this.x, this.y)) cir.setReturnValue(true);
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
-        if(SlotGhostManager.keyPressed(keyCode,scanCode,modifiers)) {
+        if(InsertOverlay.keyPressed(keyCode,scanCode,modifiers)) {
             cir.setReturnValue(true);
         }
     }

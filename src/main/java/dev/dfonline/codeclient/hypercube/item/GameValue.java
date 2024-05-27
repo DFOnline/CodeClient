@@ -32,7 +32,7 @@ public class GameValue extends VarItem {
         JsonObject object = new JsonObject();
         object.addProperty("type","Location");
         object.addProperty("target","Default");
-        return null;
+        return object;
     }
 
     public GameValue(JsonObject var) {
@@ -43,6 +43,8 @@ public class GameValue extends VarItem {
 
     public GameValue() {
         super();
+        this.type = "Location";
+        this.target = Target.Default;
     }
 
     public String getType() {

@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.dev.SlotGhostManager;
+import dev.dfonline.codeclient.dev.InsertOverlay;
 import dev.dfonline.codeclient.location.Creator;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.location.Spawn;
@@ -46,11 +46,11 @@ public class MKeyboard {
     // guys i gotta love mixing into lambda methods.
     @Redirect(method = "method_1458", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Element;charTyped(CI)Z"))
     private static boolean charTyped(Element instance, char chr, int modifiers) {
-        return SlotGhostManager.charTyped(chr, modifiers) || instance.charTyped(chr,modifiers);
+        return InsertOverlay.charTyped(chr, modifiers) || instance.charTyped(chr,modifiers);
     }
 
     @Redirect(method = "method_1454", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;keyReleased(III)Z"))
     private static boolean keyReleased(Screen instance, int keyCode, int scanCode, int modifiers) {
-        return SlotGhostManager.keyReleased(keyCode, scanCode, modifiers) || instance.keyReleased(keyCode,scanCode,modifiers);
+        return InsertOverlay.keyReleased(keyCode, scanCode, modifiers) || instance.keyReleased(keyCode,scanCode,modifiers);
     }
 }

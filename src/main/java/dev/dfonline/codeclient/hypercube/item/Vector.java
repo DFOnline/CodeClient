@@ -32,7 +32,7 @@ public class Vector extends VarItem {
         object.addProperty("x",0);
         object.addProperty("y",0);
         object.addProperty("z",0);
-        return null;
+        return object;
     }
 
     public Vector(JsonObject var) {
@@ -44,6 +44,9 @@ public class Vector extends VarItem {
 
     public Vector() {
         super();
+        x = 0d;
+        y = 0d;
+        z = 0d;
     }
 
     public double getX() {

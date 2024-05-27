@@ -65,6 +65,7 @@ public class Config {
     public boolean PickAction = true;
     public boolean DevForBuild = false;
     public boolean ChatEditsVars = true;
+    public boolean InsertOverlay = true;
 
     public Config() {
     }
@@ -134,6 +135,7 @@ public class Config {
             object.addProperty("PickAction", PickAction);
             object.addProperty("DevForBuild", DevForBuild);
             object.addProperty("ChatEditsVars",ChatEditsVars);
+            object.addProperty("InsertOverlay",InsertOverlay);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -411,6 +413,19 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.insert_overlay"))
+                                .description(OptionDescription.of(
+                                        Text.translatable("codeclient.config.insert_overlay.description")
+                                ))
+                                .binding(
+                                        true,
+                                        () -> InsertOverlay,
+                                        opt -> InsertOverlay = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build()
+                        )
                         .option(Option.createBuilder(CustomChestMenuType.class)
                                 .name(Text.literal("Custom Code Chest Menu"))
                                 .description(OptionDescription.createBuilder()

@@ -131,7 +131,7 @@ public class InteractionManager {
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
-            SlotGhostManager.clickSlot(slot,button,actionType,syncId,revision);
+            InsertOverlay.clickSlot(slot, actionType);
             if (!slot.hasStack()) return false;
             ItemStack item = slot.getStack();
             if (!item.hasNbt()) return false;

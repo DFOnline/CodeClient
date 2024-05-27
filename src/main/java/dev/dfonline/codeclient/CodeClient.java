@@ -23,6 +23,7 @@ import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
@@ -123,6 +124,10 @@ public class CodeClient implements ModInitializer {
         KeyBinds.tick();
         SlotGhostManager.tick();
 
+        if(!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
+            InsertOverlay.reset();
+        }
+
         if (location instanceof Dev dev) {
             if (MC.player == null) return;
             MC.player.getAbilities().allowFlying = true;
@@ -168,6 +173,7 @@ public class CodeClient implements ModInitializer {
         Commands.confirm = null;
         Debug.clean();
         SlotGhostManager.reset();
+        InsertOverlay.reset();
     }
 
     /**
