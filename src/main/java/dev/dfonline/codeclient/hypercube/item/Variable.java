@@ -19,7 +19,7 @@ public class Variable extends NamedItem {
 
     public Variable() {
         super();
-        this.setScope(Scope.local);
+        this.setScope(Scope.unsaved);
     }
 
     public Scope getScope() {

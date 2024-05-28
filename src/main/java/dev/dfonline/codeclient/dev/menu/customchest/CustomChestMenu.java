@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
@@ -88,7 +89,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             final int y = i * 18 + Size.SLOT_Y + 1;
 
             if (i + scroll < 27) {
-                drawSlot(context, new Slot(slot.inventory,slot.id,x,y));
+                drawSlot(context, new Slot(slot.inventory, slot.id, x, y));
                 int relX = mouseX - this.x;
                 int relY = mouseY - this.y;
                 if (
@@ -115,6 +116,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     public void update() {
         update((int) scroll);
     }
+
     private void update(int previousScroll) {
         Integer focused = null;
         for (int i = 0; i < widgets.size(); i++) {
@@ -152,11 +154,11 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        for (var widget : widgets.entrySet()) {
-            if (widget.getValue() instanceof ClickableWidget click
-                    && click.isMouseOver(mouseX - this.x, mouseY - this.y)
+        for (var i : widgets.keySet()) {
+            var widget = widgets.get(i);
+            if (widget instanceof ClickableWidget click && click.isMouseOver(mouseX - this.x, mouseY - this.y)
                     && click.mouseScrolled(mouseX - this.x, mouseY - this.y, horizontalAmount, verticalAmount)) {
-                updateItem(widget.getKey());
+                updateItem(i);
                 return true;
             }
         }
@@ -173,7 +175,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             var slot = subList.get(i);
             final int x = 8;
             final int y = i * 18 - 11 + 25;
-            var customSlot = new Slot(slot.inventory,slot.getIndex(),x,y);
+            var customSlot = new Slot(slot.inventory, slot.getIndex(), x, y);
             customSlot.id = slot.id;
             double relX = mouseX - this.x;
             double relY = mouseY - this.y;
@@ -239,7 +241,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            for (int i = 0; i < widgets.size(); i++) {
+            for (var i : widgets.keySet()) {
                 Widget widget = widgets.get(i);
                 if (widget instanceof ClickableWidget clickable) {
                     if (clickable.isFocused()) {
@@ -251,7 +253,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             }
         }
         if (keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
-            for (int i = 0; i < widgets.size(); i++) {
+            for (var i : widgets.keySet()) {
                 Widget widget = widgets.get(i);
                 if (widget instanceof ClickableWidget clickable) {
                     if (clickable.isFocused()) {
@@ -298,7 +300,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        for (int i = 0; i < widgets.size(); i++) {
+        for (var i : widgets.keySet()) {
             Widget widget = widgets.get(i);
             if (widget instanceof ClickableWidget clickable) {
                 if (clickable.isFocused()) {
@@ -313,7 +315,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean charTyped(char chr, int modifiers) {
-        for (int i = 0; i < widgets.size(); i++) {
+        for (var i : widgets.keySet()) {
             Widget widget = widgets.get(i);
             if (widget instanceof ClickableWidget clickable) {
                 if (clickable.isFocused()) {

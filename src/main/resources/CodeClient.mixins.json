@@ -6,6 +6,7 @@
   "client": [
     "MChatScreen",
     "MKeyboard",
+    "MMouse",
     "entity.MEntity",
     "entity.MLivingEntity",
     "entity.player.ClientPlayerInteractionManagerAccessor",

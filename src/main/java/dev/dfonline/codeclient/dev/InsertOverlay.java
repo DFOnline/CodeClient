@@ -21,21 +21,33 @@ import java.util.List;
 
 public class InsertOverlay {
     private static AddWidget selectedSlot = null;
+    public static boolean isCodeChest = false;
+    private static int screenX = 0;
+    private static int screenY = 0;
 
     public static void reset() {
         selectedSlot = null;
+        isCodeChest = false;
+        screenX = 0;
+        screenY = 0;
     }
 
-    public static void render(DrawContext context, int mouseX, int mouseY, HandledScreen<?> handledScreen) {
-        if (Config.getConfig().InsertOverlay && selectedSlot != null)
+    private static boolean overlayOpen() {
+        return Config.getConfig().InsertOverlay && isCodeChest && selectedSlot != null;
+    }
+
+    public static void render(DrawContext context, int mouseX, int mouseY, HandledScreen<?> handledScreen, int x, int y) {
+        screenX = x;
+        screenY = y;
+        if (overlayOpen())
             selectedSlot.render(context, mouseX, mouseY, handledScreen);
     }
 
-    public static boolean mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen, int x, int y) {
-        if (Config.getConfig().InsertOverlay && selectedSlot != null) {
-            boolean stayOpen = selectedSlot.mouseClicked(mouseX, mouseY, button, screen, x, y);
+    public static boolean mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen) {
+        if (overlayOpen()) {
+            boolean stayOpen = selectedSlot.mouseClicked(mouseX, mouseY, button, screen);
             if (!stayOpen) {
-                selectedSlot = null;
+                selectedSlot.close();
             }
             return true;
         }
@@ -43,28 +55,29 @@ public class InsertOverlay {
     }
 
     public static boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (Config.getConfig().InsertOverlay && selectedSlot != null) {
+        if (overlayOpen()) {
             return selectedSlot.keyPressed(keyCode, scanCode, modifiers);
         }
         return false;
     }
 
     public static boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (Config.getConfig().InsertOverlay && selectedSlot != null) {
-            return selectedSlot.keyReleased(keyCode, scanCode, modifiers);
-        }
+        if (overlayOpen()) return selectedSlot.keyReleased(keyCode, scanCode, modifiers);
         return false;
     }
 
     public static boolean charTyped(char chr, int modifiers) {
-        if (Config.getConfig().InsertOverlay && selectedSlot != null) {
-            return selectedSlot.charTyped(chr, modifiers);
-        }
+        if (overlayOpen()) return selectedSlot.charTyped(chr, modifiers);
+        return false;
+    }
+
+    public static boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if(overlayOpen()) return selectedSlot.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
         return false;
     }
 
     public static void clickSlot(Slot slot, SlotActionType actionType) {
-        if (Config.getConfig().InsertOverlay && actionType == SlotActionType.PICKUP && !slot.hasStack() && CodeClient.MC.player.currentScreenHandler.getCursorStack().isEmpty())
+        if (Config.getConfig().InsertOverlay && isCodeChest && actionType == SlotActionType.PICKUP && !slot.hasStack() && CodeClient.MC.player.currentScreenHandler.getCursorStack().isEmpty())
             selectedSlot = new AddWidget(slot, () -> selectedSlot = null);
         else if (selectedSlot != null) selectedSlot.close();
     }
@@ -154,7 +167,9 @@ public class InsertOverlay {
 //                RecipeAlternativesWidget.CRAFTING_OVERLAY_HIGHLIGHTED_TEXTURE : RecipeAlternativesWidget.CRAFTING_OVERLAY_TEXTURE
         }
 
-        public boolean mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen, int x, int y) {
+        public boolean mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen) {
+            int x = screenX;
+            int y = screenY;
             if (mouseX > this.x + x && mouseY > this.y + y && mouseX < this.x + x + width && mouseY < this.y + y + height) {
                 if (field != null) {
                     boolean b = field.mouseClicked(mouseX - x, mouseY - y, button);
@@ -174,7 +189,6 @@ public class InsertOverlay {
                         this.width = 150;
                         this.height = 26;
                         field = new CustomChestField<>(CodeClient.MC.textRenderer, this.x + 5, this.y + 5, this.width - 10, this.height - 10, Text.literal(""), varItem);
-                        field.setFocused(true);
                         return true;
                     }
                 }
@@ -200,9 +214,12 @@ public class InsertOverlay {
         }
 
         public boolean charTyped(char chr, int modifiers) {
-            if (field != null) {
-                return field.charTyped(chr, modifiers);
-            }
+            if (field != null) return field.charTyped(chr, modifiers);
+            return false;
+        }
+
+        public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+            if (field != null) return field.mouseScrolled(mouseX - screenX, mouseY - screenY, horizontalAmount, verticalAmount);
             return false;
         }
 
