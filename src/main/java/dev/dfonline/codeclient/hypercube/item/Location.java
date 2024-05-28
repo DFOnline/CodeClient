@@ -12,24 +12,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 
 public class Location extends VarItem {
-    private static final JsonObject defaultObject;
-
-    static {
-        var obj = new JsonObject();
-        obj.addProperty("id", "loc");
-        var data = new JsonObject();
-        data.addProperty("isBlock", false);
-        var loc = new JsonObject();
-        loc.addProperty("x", 0);
-        loc.addProperty("y", 0);
-        loc.addProperty("z", 0);
-        loc.addProperty("pitch", 0);
-        loc.addProperty("yaw", 0);
-        data.add("loc", loc);
-        obj.add("data", data);
-        defaultObject = obj;
-    }
-
     private JsonObject loc;
     private double x;
     private double y;
@@ -59,17 +41,29 @@ public class Location extends VarItem {
 
     @Override
     public JsonObject getDefaultData() {
-        return defaultObject;
+        var obj = new JsonObject();
+        obj.addProperty("id", "loc");
+        var data = new JsonObject();
+        data.addProperty("isBlock", false);
+        var loc = new JsonObject();
+        loc.addProperty("x", 0);
+        loc.addProperty("y", 0);
+        loc.addProperty("z", 0);
+        loc.addProperty("pitch", 0);
+        loc.addProperty("yaw", 0);
+        data.add("loc", loc);
+        obj.add("data", data);
+        return obj;
     }
 
     public Location() {
-        this(defaultObject);
+        super();
         // Make sure everything is init'd.
-        setX(x);
-        setY(y);
-        setZ(z);
-        setPitch(pitch);
-        setYaw(yaw);
+        setX(0);
+        setY(0);
+        setZ(0);
+        setPitch(0);
+        setYaw(0);
     }
 
     public Location(double x, double y, double z, double pitch, double yaw) {
