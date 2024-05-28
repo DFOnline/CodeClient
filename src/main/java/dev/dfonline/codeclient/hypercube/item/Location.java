@@ -41,29 +41,26 @@ public class Location extends VarItem {
 
     @Override
     public JsonObject getDefaultData() {
-        var obj = new JsonObject();
-        obj.addProperty("id", "loc");
-        var data = new JsonObject();
-        data.addProperty("isBlock", false);
+        var object = new JsonObject();
+        object.addProperty("isBlock", false);
         var loc = new JsonObject();
         loc.addProperty("x", 0);
         loc.addProperty("y", 0);
         loc.addProperty("z", 0);
         loc.addProperty("pitch", 0);
         loc.addProperty("yaw", 0);
-        data.add("loc", loc);
-        obj.add("data", data);
-        return obj;
+        object.add("loc", loc);
+        return object;
     }
 
     public Location() {
         super();
-        // Make sure everything is init'd.
-        setX(0);
-        setY(0);
-        setZ(0);
-        setPitch(0);
-        setYaw(0);
+        this.loc = this.data.getAsJsonObject("loc");
+        this.x = loc.get("x").getAsDouble();
+        this.y = loc.get("y").getAsDouble();
+        this.z = loc.get("z").getAsDouble();
+        this.pitch = loc.get("pitch").getAsDouble();
+        this.yaw = loc.get("yaw").getAsDouble();
     }
 
     public Location(double x, double y, double z, double pitch, double yaw) {
@@ -166,8 +163,8 @@ public class Location extends VarItem {
                 Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x)),
                 Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y)),
                 Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z)),
-                Text.empty().append(Text.literal("p: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z)),
-                Text.empty().append(Text.literal("y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))
+                Text.empty().append(Text.literal("p: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.pitch)),
+                Text.empty().append(Text.literal("y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.yaw))
         );
         return stack;
     }

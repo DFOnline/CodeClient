@@ -71,7 +71,10 @@ public class NumberFieldWidget extends TextFieldWidget {
     @Override
     public void write(String text) {
         super.write(text.replaceAll(regex, ""));
-        this.setText(this.getText());
+        try {
+            setValue(Double.parseDouble(this.getText()));
+        } catch (Exception ignored) {
+        }
     }
 
     @Override

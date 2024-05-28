@@ -198,7 +198,7 @@ public class InsertOverlay {
 
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             if (field != null) {
-                field.keyPressed(keyCode, scanCode, modifiers);
+                if(keyCode != GLFW.GLFW_KEY_ENTER) field.keyPressed(keyCode, scanCode, modifiers);
                 return true;
             }
             return false;
