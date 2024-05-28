@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -17,12 +18,39 @@ public class Sound extends VarItem {
     private double pitch;
     private double volume;
 
-    public Sound(Item material, JsonObject var) {
-        super(material, var);
+    @Override
+    public String getId() {
+        return "snd";
+    }
+
+    @Override
+    protected Item getIconItem() {
+        return Items.NAUTILUS_SHELL;
+    }
+
+    @Override
+    public JsonObject getDefaultData() {
+        JsonObject object = new JsonObject();
+        object.addProperty("pitch",1);
+        object.addProperty("vol",2);
+        object.addProperty("sound","Pling");
+        return object;
+    }
+
+    public Sound(JsonObject var) {
+        super(var);
         this.sound = data.get("sound").getAsString();
         this.pitch = data.get("pitch").getAsDouble();
         this.volume = data.get("vol").getAsDouble();
     }
+
+    public Sound() {
+        super();
+        this.sound = "Pling";
+        this.volume = 2;
+        this.pitch = 1;
+    }
+
 
     public String getSound() {
         return sound;

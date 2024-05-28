@@ -10,11 +10,10 @@ import dev.dfonline.codeclient.hypercube.template.Bracket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Action implements Searchable {
     public String name;
@@ -24,23 +23,21 @@ public class Action implements Searchable {
     public Icon icon;
     public String[] subActionBlocks;
 
-    public CodeBlock getCodeBlock() {
-        try {
-            for (CodeBlock codeBlock : ActionDump.getActionDump().codeblocks) {
-                if (codeblockName.equals(codeBlock.name)) return codeBlock;
-            }
-        } catch (IOException exception) {
-            CodeClient.LOGGER.error(exception.toString());
-        }
-        return null;
-    }
-
     @Override
     public List<String> getTerms() {
         ArrayList<String> terms = new ArrayList<>(Arrays.stream(aliases).toList());
         terms.add(name);
         terms.add(icon.name.replace("§.", ""));
         return terms;
+    }
+
+    @Nullable
+    public CodeBlock getCodeBlock() {
+        try {
+            return ActionDump.getActionDump().getCodeBlock(codeblockName,false);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     @Override
@@ -70,7 +67,7 @@ public class Action implements Searchable {
         for (var tag : this.tags) {
             var defaultOption = Arrays.stream(tag.options).filter(tagOption -> tagOption.name.equals(tag.defaultOption)).findFirst();
             if (defaultOption.isPresent()) {
-                var blockTag = new BlockTag(defaultOption.get().icon.material.toLowerCase(), tag.defaultOption, tag.name, name, getCodeBlock().identifier);
+                var blockTag = new BlockTag(tag.defaultOption, tag.name, name, getCodeBlock().identifier);
                 items.add(new Argument(blockTag, tag.slot).toJsonObject());
             }
         }

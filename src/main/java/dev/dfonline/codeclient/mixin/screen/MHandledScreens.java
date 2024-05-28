@@ -1,6 +1,7 @@
-package dev.dfonline.codeclient.mixin;
+package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.InsertOverlay;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestHandler;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
@@ -27,9 +28,12 @@ public class MHandledScreens {
     private static <T extends ScreenHandler> Provider<?, ?> overrideProvider(ScreenHandlerType<T> type) {
         boolean open = InteractionManager.isOpeningCodeChest;
         InteractionManager.isOpeningCodeChest = false;
-        if (open && Config.getConfig().CustomCodeChest != Config.CustomChestMenuType.OFF && type == ScreenHandlerType.GENERIC_9X3) {
-            //noinspection rawtypes
-            return (Provider) (handler, playerInventory, title) -> new CustomChestMenu(new CustomChestHandler(handler.syncId), playerInventory, title);
+        if(open && type == ScreenHandlerType.GENERIC_9X3) {
+            InsertOverlay.isCodeChest = true;
+            if (Config.getConfig().CustomCodeChest != Config.CustomChestMenuType.OFF) {
+                //noinspection rawtypes
+                return (Provider) (handler, playerInventory, title) -> new CustomChestMenu(new CustomChestHandler(handler.syncId), playerInventory, title);
+            }
         }
         return PROVIDERS.get(type);
     }

@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "MChatScreen",
-    "MHandledScreens",
     "MKeyboard",
     "MMouse",
     "entity.MEntity",
@@ -22,6 +21,8 @@
     "render.hud.MInGameHud",
     "render.hud.MInGameOverlayRenderer",
     "render.hud.MTitleScreen",
+    "screen.MHandledScreen",
+    "screen.MHandledScreens",
     "world.MWorldRenderer",
     "world.block.MAbstractBlockState",
     "world.block.MBarrierBlock",

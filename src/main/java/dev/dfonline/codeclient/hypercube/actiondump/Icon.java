@@ -1,7 +1,14 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.hypercube.item.*;
+import dev.dfonline.codeclient.hypercube.item.Number;
+import dev.dfonline.codeclient.hypercube.item.Potion;
+import dev.dfonline.codeclient.hypercube.item.Sound;
+import dev.dfonline.codeclient.hypercube.item.VarItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtIntArray;
@@ -13,6 +20,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -172,34 +180,57 @@ public class Icon {
     }
 
     public enum Type {
-        TEXT(TextColor.fromFormatting(Formatting.AQUA), "Text"),
-        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text"),
-        NUMBER(TextColor.fromFormatting(Formatting.RED), "§cNumber"),
-        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "§aLocation"),
-        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector"),
-        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound"),
-        PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect"),
-        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect"),
-        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable"),
-        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value"),
-        ITEM(GOLD, "Item"),
-        BLOCK(GOLD, "Block"),
-        ENTITY_TYPE(GOLD, "Entity Type"),
-        SPAWN_EGG(GOLD, "Spawn Egg"),
-        VEHICLE(GOLD, "Vehicle"),
-        PROJECTILE(GOLD, "Projectile"),
-        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag"),
-        LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List"),
-        DICT(TextColor.fromRgb(0x55AAFF), "Dictionary"),
-        NONE(TextColor.fromRgb(0x808080), "None"),
+        TEXT(TextColor.fromFormatting(Formatting.AQUA), "String", Items.STRING, dev.dfonline.codeclient.hypercube.item.Text::new),
+        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text", Items.BOOK, Component::new),
+        NUMBER(TextColor.fromFormatting(Formatting.RED), "Number", Items.SLIME_BALL, Number::new),
+        LOCATION(TextColor.fromFormatting(Formatting.GREEN), "Location", Items.PAPER, Location::new),
+        VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD, Vector::new),
+        SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound", Items.NAUTILUS_SHELL, Sound::new),
+        PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect", Items.WHITE_DYE),
+        POTION(TextColor.fromRgb(0xFF557F), "Potion Effect", Items.DRAGON_BREATH, Potion::new),
+        VARIABLE(TextColor.fromFormatting(Formatting.YELLOW), "Variable", Items.MAGMA_CREAM, Variable::new),
+        ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value", Items.POTATO),
+        ITEM(GOLD, "Item", Items.ITEM_FRAME, dev.dfonline.codeclient.hypercube.item.Text::new),
+        BLOCK(GOLD, "Block", Items.OAK_LOG, dev.dfonline.codeclient.hypercube.item.Text::new),
+        ENTITY_TYPE(GOLD, "Entity Type", Items.PIG_SPAWN_EGG),
+        SPAWN_EGG(GOLD, "Spawn Egg", Items.POLAR_BEAR_SPAWN_EGG), // Least consistent in df, all of sheep, polar bear, phantom, pig
+        VEHICLE(GOLD, "Vehicle", Items.OAK_BOAT),
+        PROJECTILE(GOLD, "Projectile", Items.ARROW),
+        BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag", Items.CHAIN_COMMAND_BLOCK, dev.dfonline.codeclient.hypercube.item.Text::new),
+        LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List", Items.SKULL_BANNER_PATTERN), // Ender chest or empty banner pattern
+        DICT(TextColor.fromRgb(0x55AAFF), "Dictionary", Items.KNOWLEDGE_BOOK), // Knowledge book or chest minecart
+        NONE(TextColor.fromRgb(0x808080), "None", Items.AIR),
         ;
 
         public final TextColor color;
         public final String display;
+        private final ItemStack icon;
+        @Nullable public final Icon.Type.getVarItem getVarItem;
 
-        Type(TextColor color, String display) {
+        Type(TextColor color, String display, Item icon) {
             this.color = color;
             this.display = display;
+            var item = icon.getDefaultStack();
+            item.setSubNbt("CustomModelData",NbtInt.of(5000));
+            this.icon = item;
+            getVarItem = null;
+        }
+
+        public interface getVarItem {
+            VarItem run();
+        }
+
+        Type(TextColor color, String display, Item icon, @Nullable Icon.Type.getVarItem getVarItem) {
+            this.color = color;
+            this.display = display;
+            var item = icon.getDefaultStack();
+            item.setSubNbt("CustomModelData",NbtInt.of(5000));
+            this.icon = item;
+            this.getVarItem = getVarItem;
+        }
+
+        public ItemStack getIcon() {
+            return icon.copy();
         }
     }
 

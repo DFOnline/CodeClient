@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -16,10 +17,34 @@ public class GameValue extends VarItem {
     private String type;
     private Target target;
 
-    public GameValue(Item material, JsonObject var) {
-        super(material, var);
+    @Override
+    public String getId() {
+        return "g_val";
+    }
+
+    @Override
+    protected Item getIconItem() {
+        return Items.NAME_TAG;
+    }
+
+    @Override
+    public JsonObject getDefaultData() {
+        JsonObject object = new JsonObject();
+        object.addProperty("type","Location");
+        object.addProperty("target","Default");
+        return object;
+    }
+
+    public GameValue(JsonObject var) {
+        super(var);
         this.type = data.get("type").getAsString();
         this.target = Target.valueOf(data.get("target").getAsString());
+    }
+
+    public GameValue() {
+        super();
+        this.type = "Location";
+        this.target = Target.Default;
     }
 
     public String getType() {

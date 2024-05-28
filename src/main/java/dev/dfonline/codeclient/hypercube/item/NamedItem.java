@@ -6,12 +6,28 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
-public class NamedItem extends VarItem {
+public abstract class NamedItem extends VarItem {
     private String name;
 
-    public NamedItem(Item material, JsonObject var) {
-        super(material, var);
+    @Override
+    public JsonObject getDefaultData() {
+        JsonObject object = new JsonObject();
+        object.addProperty("name","name");
+        return object;
+    }
+
+    public NamedItem(JsonObject var) {
+        super(var);
         this.name = this.data.get("name").getAsString();
+    }
+
+    public NamedItem() {
+        this("name");
+    }
+
+    public NamedItem(String name) {
+        super();
+        this.setName(name);
     }
 
     public String getName() {

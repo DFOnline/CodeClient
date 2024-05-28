@@ -6,11 +6,8 @@ import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
-import dev.dfonline.codeclient.dev.BuildPhaser;
+import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.Debug.Debug;
-import dev.dfonline.codeclient.dev.LastPos;
-import dev.dfonline.codeclient.dev.NoClip;
-import dev.dfonline.codeclient.dev.RecentChestInsert;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
@@ -26,6 +23,7 @@ import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
@@ -124,6 +122,11 @@ public class CodeClient implements ModInitializer {
         ChestPeeker.tick();
         RecentChestInsert.tick();
         KeyBinds.tick();
+        SlotGhostManager.tick();
+
+        if(!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
+            InsertOverlay.reset();
+        }
 
         if (location instanceof Dev dev) {
             if (MC.player == null) return;
@@ -177,6 +180,8 @@ public class CodeClient implements ModInitializer {
         BuildPhaser.disableClipping();
         Commands.confirm = null;
         Debug.clean();
+        SlotGhostManager.reset();
+        InsertOverlay.reset();
     }
 
     /**

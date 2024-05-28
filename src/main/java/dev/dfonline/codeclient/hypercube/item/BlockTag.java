@@ -35,18 +35,37 @@ public class BlockTag extends VarItem {
     @Nullable
     private Variable variable;
 
-    public BlockTag(String material, String option, String tag, String action, String block) {
-        this(Registries.ITEM.get(new Identifier("minecraft", material.toLowerCase())), makeVar(option, tag, action, block));
+    @Override
+    public String getId() {
+        return "bl_tag";
     }
 
-    public BlockTag(Item material, JsonObject var) {
-        super(material, var);
+    @Override
+    protected Item getIconItem() {
+        return null;
+    }
+
+    @Override
+    public JsonObject getDefaultData() {
+        return null;
+    }
+
+    public BlockTag(String option, String tag, String action, String block) {
+        this(makeVar(option, tag, action, block));
+    }
+
+    public BlockTag(JsonObject var) {
+        super(var);
         option = this.data.get("option").getAsString();
         tag = this.data.get("tag").getAsString();
         action = this.data.get("action").getAsString();
         block = this.data.get("block").getAsString();
         if (this.data.has("variable"))
-            variable = new Variable(Items.MAGMA_CREAM, this.data.get("variable").getAsJsonObject());
+            variable = new Variable(this.data.get("variable").getAsJsonObject());
+    }
+
+    public BlockTag() {
+        super();
     }
 
     private static JsonObject makeVar(String option, String tag, String action, String block) {

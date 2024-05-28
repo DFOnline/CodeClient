@@ -60,7 +60,8 @@ public class NumberFieldWidget extends TextFieldWidget {
 
     public void setNumber(double number) {
         setValue(number);
-        this.setText((isInt ? "%.0f" : "%.2f").formatted(this.number));
+        if(isInt) this.setText("%.0f".formatted(this.number));
+        else this.setText("%s".formatted(this.number));
     }
 
     public int getInt() {
@@ -70,6 +71,10 @@ public class NumberFieldWidget extends TextFieldWidget {
     @Override
     public void write(String text) {
         super.write(text.replaceAll(regex, ""));
+        try {
+            setValue(Double.parseDouble(this.getText()));
+        } catch (Exception ignored) {
+        }
     }
 
     @Override

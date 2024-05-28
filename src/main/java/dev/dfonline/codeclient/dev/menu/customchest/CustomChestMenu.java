@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
@@ -83,11 +84,12 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
+
             final int x = Size.SLOT_X + 1;
             final int y = i * 18 + Size.SLOT_Y + 1;
+
             if (i + scroll < 27) {
-                context.drawItem(slot.getStack(), x, y);
-                context.drawItemInSlot(textRenderer, slot.getStack(), x, y);
+                drawSlot(context, new Slot(slot.inventory, slot.id, x, y));
                 int relX = mouseX - this.x;
                 int relY = mouseY - this.y;
                 if (
@@ -109,6 +111,10 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 context.drawItemTooltip(textRenderer, focusedSlot.getStack(), mouseX - this.x, mouseY - this.y);
         }
         context.getMatrices().pop();
+    }
+
+    public void update() {
+        update((int) scroll);
     }
 
     private void update(int previousScroll) {
@@ -136,7 +142,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 //                widget.setMaxLength(10_000);
 //                widget.setText(named.getName());
 //                widget.setFocused(Objects.equals(i,focused));
-                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.id), stack, varItem, this.handler);
+                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.getId()), varItem);
                 widgets.put(i, widget);
                 varItems.add(varItem);
                 continue;
@@ -148,11 +154,11 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        for (var widget : widgets.entrySet()) {
-            if (widget.getValue() instanceof ClickableWidget click
-                    && click.isMouseOver(mouseX - this.x, mouseY - this.y)
+        for (var i : widgets.keySet()) {
+            var widget = widgets.get(i);
+            if (widget instanceof ClickableWidget click && click.isMouseOver(mouseX - this.x, mouseY - this.y)
                     && click.mouseScrolled(mouseX - this.x, mouseY - this.y, horizontalAmount, verticalAmount)) {
-                updateItem(widget.getKey());
+                updateItem(i);
                 return true;
             }
         }
@@ -169,6 +175,8 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             var slot = subList.get(i);
             final int x = 8;
             final int y = i * 18 - 11 + 25;
+            var customSlot = new Slot(slot.inventory, slot.getIndex(), x, y);
+            customSlot.id = slot.id;
             double relX = mouseX - this.x;
             double relY = mouseY - this.y;
             if (
@@ -178,14 +186,14 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                             && relY < y + 18
             ) {
                 if (button == 2) {
-                    this.onMouseClick(slot, slot.id, button, SlotActionType.CLONE);
+                    this.onMouseClick(customSlot, slot.id, button, SlotActionType.CLONE);
                     return true;
                 }
                 if (hasShiftDown()) {
-                    this.onMouseClick(slot, slot.id, button, SlotActionType.QUICK_MOVE);
+                    this.onMouseClick(customSlot, slot.id, button, SlotActionType.QUICK_MOVE);
                     return true;
                 }
-                this.onMouseClick(slot, slot.id, button, SlotActionType.PICKUP);
+                this.onMouseClick(customSlot, slot.id, button, SlotActionType.PICKUP);
                 return true;
             }
         }
@@ -233,7 +241,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            for (int i = 0; i < widgets.size(); i++) {
+            for (var i : widgets.keySet()) {
                 Widget widget = widgets.get(i);
                 if (widget instanceof ClickableWidget clickable) {
                     if (clickable.isFocused()) {
@@ -245,7 +253,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             }
         }
         if (keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
-            for (int i = 0; i < widgets.size(); i++) {
+            for (var i : widgets.keySet()) {
                 Widget widget = widgets.get(i);
                 if (widget instanceof ClickableWidget clickable) {
                     if (clickable.isFocused()) {
@@ -292,7 +300,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        for (int i = 0; i < widgets.size(); i++) {
+        for (var i : widgets.keySet()) {
             Widget widget = widgets.get(i);
             if (widget instanceof ClickableWidget clickable) {
                 if (clickable.isFocused()) {
@@ -307,7 +315,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean charTyped(char chr, int modifiers) {
-        for (int i = 0; i < widgets.size(); i++) {
+        for (var i : widgets.keySet()) {
             Widget widget = widgets.get(i);
             if (widget instanceof ClickableWidget clickable) {
                 if (clickable.isFocused()) {

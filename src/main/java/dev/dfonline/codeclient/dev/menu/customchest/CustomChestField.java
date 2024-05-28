@@ -26,7 +26,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
     private final List<Drawable> widgets;
     public ItemType item;
 
-    public CustomChestField(TextRenderer textRender, int x, int y, int width, int height, Text message, ItemStack stack, ItemType item, ScreenHandler handler) {
+    public CustomChestField(TextRenderer textRender, int x, int y, int width, int height, Text message, ItemType item) {
         super(x, y, width, height, message);
         this.item = item;
         var widgets = new ArrayList<Drawable>();

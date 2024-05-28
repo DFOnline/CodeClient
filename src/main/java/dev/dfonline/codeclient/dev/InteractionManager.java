@@ -131,6 +131,7 @@ public class InteractionManager {
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
+            InsertOverlay.clickSlot(slot, actionType);
             if (!slot.hasStack()) return false;
             ItemStack item = slot.getStack();
             if (!item.hasNbt()) return false;
@@ -239,7 +240,8 @@ public class InteractionManager {
     }
 
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
-        if (CodeClient.location instanceof Dev plot) {
+        SlotGhostManager.onClickChest(hitResult);
+        if (CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ())) {
             plot.getLineStartCache();
             ChestPeeker.invalidate();
             BlockPos pos = hitResult.getBlockPos();
