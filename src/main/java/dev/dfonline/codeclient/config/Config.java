@@ -9,6 +9,7 @@ import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
@@ -66,6 +67,7 @@ public class Config {
     public boolean DevForBuild = false;
     public boolean ChatEditsVars = true;
     public boolean InsertOverlay = true;
+    public boolean ParameterGhosts = FabricLoader.getInstance().isDevelopmentEnvironment();
 
     public Config() {
     }
@@ -136,6 +138,7 @@ public class Config {
             object.addProperty("DevForBuild", DevForBuild);
             object.addProperty("ChatEditsVars",ChatEditsVars);
             object.addProperty("InsertOverlay",InsertOverlay);
+            object.addProperty("ParameterGhosts",ParameterGhosts);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);

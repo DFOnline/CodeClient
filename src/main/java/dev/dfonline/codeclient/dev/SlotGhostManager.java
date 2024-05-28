@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
 import dev.dfonline.codeclient.hypercube.actiondump.Action;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
@@ -10,7 +11,6 @@ import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -33,7 +33,7 @@ public class SlotGhostManager {
 
     public static void onClickChest(BlockHitResult hitResult) {
         action = null;
-        if (CodeClient.MC.world == null) return;
+        if (CodeClient.MC.world == null || !Config.getConfig().ParameterGhosts) return;
         var pos = hitResult.getBlockPos();
         if (CodeClient.location instanceof Dev dev && dev.isInDev(pos) && CodeClient.MC.world.getBlockEntity(pos) instanceof ChestBlockEntity) {
             var signEntity = CodeClient.MC.world.getBlockEntity(hitResult.getBlockPos().down().west());
@@ -71,7 +71,7 @@ public class SlotGhostManager {
     }
 
     private static boolean goodAction() {
-        return action != null && action.icon != null && action.icon.arguments != null;
+        return Config.getConfig().ParameterGhosts && action != null && action.icon != null && action.icon.arguments != null;
     }
 
 
