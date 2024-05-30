@@ -5,6 +5,7 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
 import dev.dfonline.codeclient.hypercube.actiondump.Action;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
+import dev.dfonline.codeclient.hypercube.actiondump.Argument;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.entity.ChestBlockEntity;
@@ -17,6 +18,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 public class SlotGhostManager {
     private static Action action;
@@ -26,9 +30,22 @@ public class SlotGhostManager {
     }
 
     public static void tick() {
-        if(CodeClient.MC.currentScreen == null) {
-//            reset();
+        if(CodeClient.MC.currentScreen == null && !InteractionManager.isOpeningCodeChest) {
+            reset();
         }
+    }
+
+    @Nullable
+    public static Argument getArgument(Slot slot) {
+        var args = new ArrayList<Argument>();
+
+        for (var group: action.icon.getArgGroups()) {
+            args.addAll(group.getPossibilities().get(0).arguments());
+        }
+
+        if (slot.getIndex() >= args.size()) return null;
+
+        return args.get(slot.getIndex());
     }
 
     public static void onClickChest(BlockHitResult hitResult) {
@@ -51,11 +68,11 @@ public class SlotGhostManager {
             if (!(CodeClient.MC.currentScreen instanceof GenericContainerScreen || CodeClient.MC.currentScreen instanceof CustomChestMenu)) {
                 action = null;
             }
-            if (!goodAction() || slot.inventory instanceof PlayerInventory)
+            if (badAction() || slot.inventory instanceof PlayerInventory)
                 return;
-            if (slot.getIndex() >= action.icon.arguments.length) return;
             if (slot.hasStack()) return;
-            var arg = action.icon.arguments[slot.getIndex()];
+            var arg = getArgument(slot);
+            if(arg == null) return;
             Icon.Type type = Icon.Type.valueOf(arg.type);
             ItemStack itemStack = type.getIcon();
             if (itemStack.isEmpty()) return;
@@ -70,9 +87,17 @@ public class SlotGhostManager {
         }
     }
 
-    private static boolean goodAction() {
-        return Config.getConfig().ParameterGhosts && action != null && action.icon != null && action.icon.arguments != null;
+    @Nullable
+    public static ItemStack getHoverItem(Slot slot) {
+        if (badAction() || slot.inventory instanceof PlayerInventory)
+            return null;
+        if (slot.hasStack()) return null;
+        var arg = getArgument(slot);
+        if(arg == null) return null;
+        return arg.getItem();
     }
 
-
+    private static boolean badAction() {
+        return !Config.getConfig().ParameterGhosts || action == null || action.icon == null || action.icon.arguments == null;
+    }
 }

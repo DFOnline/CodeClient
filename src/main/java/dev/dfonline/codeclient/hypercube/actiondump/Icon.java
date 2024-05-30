@@ -22,7 +22,9 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Icon {
     private static TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
@@ -179,9 +181,23 @@ public class Icon {
         lore.add(Utility.nbtify(Utility.textFromString(text)));
     }
 
+    public List<ArgumentGroup> getArgGroups() {
+        var groups = new ArrayList<ArgumentGroup>();
+        var group = new ArrayList<Argument>();
+        for(var arg: arguments) {
+            if(!Objects.equals(arg.text, Argument.SPLITTER.text)) group.add(arg);
+            else {
+                groups.add(new ArgumentGroup(group));
+                group = new ArrayList<>();
+            }
+        }
+        groups.add(new ArgumentGroup(group));
+        return groups;
+    }
+
     public enum Type {
         TEXT(TextColor.fromFormatting(Formatting.AQUA), "String", Items.STRING, dev.dfonline.codeclient.hypercube.item.Text::new),
-        COMPONENT(TextColor.fromRgb(0x7fd42a), "Rich Text", Items.BOOK, Component::new),
+        COMPONENT(TextColor.fromRgb(0x7fd42a), "Styled Text", Items.BOOK, Component::new),
         NUMBER(TextColor.fromFormatting(Formatting.RED), "Number", Items.SLIME_BALL, Number::new),
         LOCATION(TextColor.fromFormatting(Formatting.GREEN), "Location", Items.PAPER, Location::new),
         VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD, Vector::new),
@@ -231,6 +247,26 @@ public class Icon {
 
         public ItemStack getIcon() {
             return icon.copy();
+        }
+    }
+
+    public record ArgumentGroup(List<Argument> arguments) {
+        public List<ArgumentPossibilities> getPossibilities() {
+            var groups = new ArrayList<ArgumentPossibilities>();
+            var group = new ArrayList<Argument>();
+            for(var arg: arguments) {
+                if(!Objects.equals(arg.text, Argument.OR.text)) group.add(arg);
+                else {
+                    groups.add(new ArgumentPossibilities(group));
+                    group = new ArrayList<>();
+                }
+            }
+            groups.add(new ArgumentPossibilities(group));
+            return groups;
+        }
+
+        public record ArgumentPossibilities(List<Argument> arguments) {
+
         }
     }
 
