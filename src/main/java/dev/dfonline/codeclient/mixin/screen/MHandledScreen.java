@@ -33,6 +33,7 @@ public abstract class MHandledScreen {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;pop()V"))
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        SlotGhostManager.render(delta);
         InsertOverlay.render(context,mouseX,mouseY,(HandledScreen<?>) (Object) this, this.x, this.y);
     }
 

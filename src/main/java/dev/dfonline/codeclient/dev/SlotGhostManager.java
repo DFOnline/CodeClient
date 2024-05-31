@@ -11,6 +11,7 @@ import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerInventory;
@@ -24,9 +25,11 @@ import java.util.ArrayList;
 
 public class SlotGhostManager {
     private static Action action;
+    private static float time = 0.0F;
 
     public static void reset() {
         action = null;
+        time = 0;
     }
 
     public static void tick() {
@@ -35,12 +38,22 @@ public class SlotGhostManager {
         }
     }
 
+    /**
+     * Named render since that's where it hooks, only to get delta time.
+     */
+    public static void render(float delta) {
+        if(!Screen.hasControlDown()) {
+            time += delta;
+        }
+    }
+
     @Nullable
     public static Argument getArgument(Slot slot) {
         var args = new ArrayList<Argument>();
 
         for (var group: action.icon.getArgGroups()) {
-            args.addAll(group.getPossibilities().get(0).arguments());
+            var pos = group.getPossibilities();
+            args.addAll(pos.get((int) (time / 30F) % pos.size()).arguments());
         }
 
         if (slot.getIndex() >= args.size()) return null;
