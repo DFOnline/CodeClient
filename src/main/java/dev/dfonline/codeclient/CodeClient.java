@@ -124,6 +124,7 @@ public class CodeClient implements ModInitializer {
         RecentChestInsert.tick();
         KeyBinds.tick();
         SlotGhostManager.tick();
+        Commands.tick();
 
         if(!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
             InsertOverlay.reset();
@@ -180,6 +181,7 @@ public class CodeClient implements ModInitializer {
         CodeClient.location = null;
         BuildPhaser.disableClipping();
         Commands.confirm = null;
+        Commands.screen = null;
         Debug.clean();
         SlotGhostManager.reset();
         InsertOverlay.reset();

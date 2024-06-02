@@ -90,7 +90,7 @@ public class Config {
         instance = null;
     }
 
-    private void save() {
+    public void save() {
         try {
             JsonObject object = new JsonObject();
             object.addProperty("NoClipEnabled", NoClipEnabled);

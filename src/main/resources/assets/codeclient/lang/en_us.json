@@ -17,6 +17,14 @@
   "codeclient.config.insert_overlay": "Click to insert value",
   "codeclient.config.insert_overlay.description": "Click on an empty slot in a code chest to insert a value.",
 
+  "codeclient.config.command.query": "Option %s is set to %s.",
+  "codeclient.config.command.query.fail": "There is no option with name %s.",
+  "codeclient.config.command.enable": "Enabled option %s.",
+  "codeclient.config.command.disable": "Disabled option %s.",
+  "codeclient.config.command.enum": "Set option %s to %s.",
+  "codeclient.config.command.enum.fail": "Couldn't set option %s to %s.",
+  "codeclient.config.command.fail": "You cannot set this config option.",
+
   "codeclient.parse_db": "Could not parse ActionDump. Go to %s to find out how to fix this.",
 
   "codeclient.phaser.plot_origin": "CodeClient doesn't know the plot origin.",

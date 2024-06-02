@@ -8,6 +8,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.Debug.Debug;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.Dev;
@@ -16,6 +17,7 @@ import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -34,19 +36,97 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
+import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class Commands {
     private static final Text DONE = Text.translatable("gui.done");
     public static Action confirm = null;
+    public static Screen screen = null;
 
     private static void actionCallback() {
         CodeClient.currentAction = new None();
         Utility.sendMessage(DONE, ChatType.SUCCESS);
     }
 
+    public static void tick() {
+        if(screen != null) {
+            CodeClient.MC.setScreen(screen);
+            screen = null;
+        }
+    }
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        dispatcher.register(literal("ccconfig").executes(context -> {
+            screen = Config.getConfig().getLibConfig().generateScreen(null);
+            return 0;
+        }).then(argument("option", string()).suggests((context, builder) -> {
+            var option = builder.getRemaining();
+            for (var field : Config.class.getFields()) {
+                if(field.getName().toLowerCase().startsWith(option.toLowerCase())) builder.suggest(field.getName());
+            }
+            return builder.buildFuture();
+        }).executes(context -> {
+            var option = context.getArgument("option",String.class);
+            try {
+                Utility.sendMessage(
+                        Text.translatable("codeclient.config.command.query",
+                                Text.literal(option).formatted(Formatting.AQUA),
+                                Text.literal(String.valueOf(Config.class.getField(option).get(Config.getConfig()))).formatted(Formatting.AQUA)));
+            } catch (Exception e) {
+                Utility.sendMessage(Text.translatable("codeclient.config.command.query.fail",Text.literal(option).formatted(Formatting.YELLOW)),ChatType.FAIL);
+            }
+            return 0;
+        }).then(argument("value",greedyString()).suggests((context, builder) -> {
+            var option = context.getArgument("option",String.class);
+            try {
+            var value = builder.getRemaining();
+            var field = Config.class.getField(option);
+            List<String> options;
+            if(field.getType().equals(boolean.class)) {
+                options = List.of("true","false");
+            }
+            else if(field.getType().isEnum()) {
+                options = new ArrayList<>();
+                for(Object member : field.getType().getEnumConstants()) {
+                    options.add(((Enum<?>) member).name());
+                }
+            }
+            else options = List.of();
+            for (var possibility : options) {
+                if(possibility.toLowerCase().startsWith(value.toLowerCase())) builder.suggest(possibility);
+            }
+            } catch (Exception ignored) {}
+            return builder.buildFuture();
+        }).executes(context -> {
+            var option = context.getArgument("option",String.class);
+            try {
+            var value = context.getArgument("value",String.class);
+            var field = Config.class.getField(option);
+            if(field.getType().equals(boolean.class)) {
+                var bool = Boolean.valueOf(value);
+                field.set(Config.getConfig(),bool);
+                Utility.sendMessage(Text.translatable(bool ? "codeclient.config.command.enable" : "codeclient.config.command.disable",Text.literal(option).formatted(Formatting.AQUA)),ChatType.SUCCESS);
+                Config.getConfig().save();
+            }
+            else if(field.getType().isEnum()) {
+                for(Object member : field.getType().getEnumConstants()) {
+                    if(((Enum<?>) member).name().equalsIgnoreCase(value)) {
+                        field.set(Config.getConfig(),member);
+                        Utility.sendMessage(Text.translatable("codeclient.config.command.enum",Text.literal(option).formatted(Formatting.AQUA),Text.literal(value).formatted(Formatting.AQUA)),ChatType.SUCCESS);
+                        Config.getConfig().save();
+                        return 0;
+                    }
+                }
+                Utility.sendMessage(Text.translatable("codeclient.config.command.enum.fail",Text.literal(option).formatted(Formatting.YELLOW),Text.literal(value).formatted(Formatting.YELLOW)),ChatType.FAIL);
+                return -1;
+            }
+            Utility.sendMessage(Text.translatable("codeclient.config.command.fail"),ChatType.FAIL);
+            } catch (Exception ignored) {}
+            return 0;
+        }))));
+
         dispatcher.register(literal("auth").executes(context -> {
             SocketHandler.setAuthorised(true);
             Utility.sendMessage(Text.translatable("codeclient.api.authorised")
