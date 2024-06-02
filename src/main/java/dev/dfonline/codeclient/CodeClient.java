@@ -75,6 +75,7 @@ public class CodeClient implements ModInitializer {
 
         if (CodeClient.location instanceof Dev dev &&
                 packet instanceof BlockEntityUpdateS2CPacket beu &&
+                dev.isInDev(beu.getPos()) &&
                 MC.world != null &&
                 MC.world.getBlockEntity(beu.getPos()) instanceof SignBlockEntity) {
             dev.clearLineStarterCache();
