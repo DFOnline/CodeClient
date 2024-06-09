@@ -3,7 +3,6 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 import dev.dfonline.codeclient.CodeClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
@@ -15,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class CustomChestHandler extends ScreenHandler {
     private static final int Size = 9 * 3;
     public final CustomChestNumbers numbers = CustomChestNumbers.getSize();
-    private final Inventory inventory;
+    public final SimpleInventory inventory;
     public @NotNull Callback callback = (int slot, int revision, ItemStack stack) -> {
 
     };
@@ -24,7 +23,7 @@ public class CustomChestHandler extends ScreenHandler {
         this(syncId, CodeClient.MC.player.getInventory(), new SimpleInventory(Size));
     }
 
-    public CustomChestHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
+    public CustomChestHandler(int syncId, PlayerInventory playerInventory, SimpleInventory inventory) {
         super(new ScreenHandlerType<>((syncId1, playerInventory1) -> new CustomChestHandler(syncId1), FeatureFlags.DEFAULT_ENABLED_FEATURES), syncId);
         this.inventory = inventory;
         checkSize(inventory, Size);
