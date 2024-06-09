@@ -95,7 +95,7 @@ public class InteractionManager {
     public static boolean onBreakBlock(BlockPos pos) {
         if (CodeClient.location instanceof Dev plot) {
             plot.clearLineStarterCache();
-            if (!plot.isInCodeSpace(pos.getX(), pos.getZ())) return false;
+            if (!plot.isInDev(pos)) return false;
             if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
                 ChestPeeker.invalidate();
                 if ((!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir) && Config.getConfig().RecentChestInsert) {
@@ -241,7 +241,7 @@ public class InteractionManager {
 
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
         SlotGhostManager.onClickChest(hitResult);
-        if (CodeClient.location instanceof Dev plot && plot.isInCodeSpace(hitResult.getBlockPos().getX(), hitResult.getPos().getZ())) {
+        if (CodeClient.location instanceof Dev plot && plot.isInDev(hitResult.getBlockPos())) {
             plot.getLineStartCache();
             ChestPeeker.invalidate();
             BlockPos pos = hitResult.getBlockPos();
@@ -361,18 +361,19 @@ public class InteractionManager {
         if (CodeClient.MC != null && CodeClient.MC.player != null && CodeClient.location instanceof Dev plot) {
             Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
             Boolean isInDev = plot.isInDev(pos);
+            var size = plot.assumeSize();
             if (isInDev == null) return null;
             if (!isInDev) {
                 var player = CodeClient.MC.player;
                 boolean playerIsOutside = player.getEyeY() < 50
-                        && ((player.getX() <= plot.getX() - 20)
+                        && ((player.getX() <= plot.getX() - size.codeWidth)
                         || player.getZ() <= (plot.getZ())
-                        || (player.getZ() >= plot.getZ() + plot.assumeSize().size)
+                        || (player.getZ() >= plot.getZ() + size.codeLength)
                 );
                 if (!playerIsOutside) return null;
                 boolean blockIsOutside = pos.getY() < 50
-                        && (pos.getX() < plot.getX()) && (pos.getX() >= plot.getX() - 22)
-                        && (pos.getZ() >= (plot.getZ() - 2)) && (pos.getZ() <= plot.getZ() + plot.assumeSize().size + 2);
+                        && (pos.getX() < plot.getX()) && (pos.getX() >= plot.getX() - (size.codeWidth + NoClip.FREEDOM))
+                        && (pos.getZ() >= (plot.getZ() - 2)) && (pos.getZ() <= plot.getZ() + plot.assumeSize().codeLength + NoClip.FREEDOM);
                 if (blockIsOutside) return VoxelShapes.empty();
                 return null;
             }

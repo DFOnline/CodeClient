@@ -30,7 +30,7 @@ public class GetPlotSize extends Action {
         ItemStack item = Items.PAPER.getDefaultStack();
         NbtCompound compound = new NbtCompound();
         NbtCompound publicBukkitValues = new NbtCompound();
-        publicBukkitValues.put("hypercube:varitem", NbtString.of("{\"id\":\"loc\",\"data\":{\"isBlock\":false,\"loc\":{\"x\":0.0,\"y\":256.0,\"z\":300.0,\"pitch\":0.0,\"yaw\":0.0}}}"));
+        publicBukkitValues.put("hypercube:varitem", NbtString.of("{\"id\":\"loc\",\"data\":{\"isBlock\":false,\"loc\":{\"x\":0.0,\"y\":256.0,\"z\":1000.0,\"pitch\":0.0,\"yaw\":0.0}}}"));
         compound.put("PublicBukkitValues", publicBukkitValues);
         item.setNbt(compound);
         Utility.makeHolding(item);
@@ -62,6 +62,9 @@ public class GetPlotSize extends Action {
                 }
                 if (size > 299) {
                     plot.setSize(Plot.Size.MASSIVE);
+                }
+                if(size > 999) {
+                    plot.setSize(Plot.Size.MEGA);
                 }
                 callback();
             }

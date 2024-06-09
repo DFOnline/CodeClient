@@ -15,6 +15,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class NoClip {
     public static final double PLAYER_FREEDOM = 0.621;
+    /**
+     * The extra blocks the player can fly outside in.
+     */
+    public static final double FREEDOM = 2;
     public static LineType display = null;
     public static Vec3d lastPos = null;
     public static float lastYaw = 0;
@@ -26,26 +30,35 @@ public class NoClip {
     }
 
     public static boolean isInDevSpace() {
-        return CodeClient.location instanceof Dev plot && plot.getX() != null && CodeClient.MC.player.getX() <= plot.getX() && CodeClient.MC.player.getY() >= plot.getFloorY() && CodeClient.MC.player.getY() < 256;
+        if(CodeClient.location instanceof Dev plot) {
+            assert CodeClient.MC.player != null;
+            var size = plot.assumeSize();
+            if (plot.getX() == null) return false;
+            return CodeClient.MC.player.getX() <= plot.getX() &&
+                    CodeClient.MC.player.getZ() >= plot.getZ() - FREEDOM && CodeClient.MC.player.getZ() <= plot.getZ() + size.codeLength + 1 + FREEDOM &&
+                    CodeClient.MC.player.getY() >= plot.getFloorY() && CodeClient.MC.player.getY() < 256;
+            }
+        return false;
     }
 
     public static Vec3d handleClientPosition(Vec3d movement) {
         if (CodeClient.location instanceof Dev plot) {
+            final int FREEDOM = 2;
+
             ClientPlayerEntity player = CodeClient.MC.player;
 
             double nearestFloor = Math.floor(player.getY() / 5) * 5;
             Vec3d velocity = player.getVelocity();
 
-            double x = Math.max(player.getX() + movement.x * 1.3, plot.getX() - 22);
+            var size = plot.assumeSize();
+            double x = Math.max(player.getX() + movement.x * 1.3, plot.getX() - (size.codeWidth + FREEDOM));
             double y = Math.max(player.getY() + movement.y * 1, plot.getFloorY());
-            double z = Math.max(player.getZ() + movement.z * 1.3, plot.getZ() - 2);
-            if (plot.getSize() != null) {
-                z = Math.min(z, plot.getZ() + plot.getSize().size + 3);
-                if (z == plot.getZ() + plot.getSize().size + 3 && velocity.getZ() > 0)
-                    player.setVelocityClient(velocity.x, velocity.y, 0);
-            }
+            double z = Math.max(player.getZ() + movement.z * 1.3, plot.getZ() - FREEDOM);
+            z = Math.min(z, plot.getZ() + size.codeLength + 1 + FREEDOM);
+            if (z == plot.getZ() + size.codeLength + 1 + FREEDOM && velocity.getZ() > 0)
+                player.setVelocityClient(velocity.x, velocity.y, 0);
             if (z == plot.getZ() - 2 && velocity.getZ() < 0) player.setVelocityClient(velocity.x, velocity.y, 0);
-            if (x == plot.getX() - 22 && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
+            if (x == plot.getX() - (size.codeWidth + FREEDOM) && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
 
             player.setOnGround(false);
             boolean wantsToFall = !Config.getConfig().TeleportDown && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle);
@@ -70,10 +83,10 @@ public class NoClip {
 
             double z = Math.max(player.getZ(), plot.getZ() + PLAYER_FREEDOM);
             if (plot.getSize() != null) {
-                z = Math.min(z, plot.getZ() + plot.getSize().size + PLAYER_FREEDOM);
+                z = Math.min(z, plot.getZ() + plot.getSize().codeLength + PLAYER_FREEDOM);
             }
 
-            Vec3d pos = new Vec3d(Math.max(player.getX(), plot.getX() - (20 - PLAYER_FREEDOM)),
+            Vec3d pos = new Vec3d(Math.max(player.getX(), plot.getX() - (plot.assumeSize().codeWidth - PLAYER_FREEDOM)),
                     player.getY(),
                     z);
 

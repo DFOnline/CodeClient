@@ -57,6 +57,7 @@ public abstract class Plot extends Location {
         this.hasUnderground = hasUnderground;
     }
 
+    @Nullable
     public Size getSize() {
         return size;
     }
@@ -106,7 +107,15 @@ public abstract class Plot extends Location {
     }
 
     public Boolean isInDev(BlockPos pos) {
-        return isInDev(new Vec3d(pos.getX() + 1, pos.getY(), pos.getZ()));
+        var size = assumeSize();
+        var x = pos.getX();
+        var z = pos.getZ();
+
+        return
+                (x < originX) && (x >= originX - size.codeWidth)
+                        &&
+                        (z >= originZ) && (z <= originZ + size.codeLength)
+                ;
     }
 
     public Boolean isInDev(Vec3d pos) {
@@ -115,8 +124,8 @@ public abstract class Plot extends Location {
         int x = (int) pos.getX();
         int z = (int) pos.getZ();
 
-        boolean inX = (x <= originX) && (x >= originX - 19);
-        boolean inZ = (z >= originZ) && (z <= originZ + size.size);
+        boolean inX = (x <= originX) && (x >= originX - (size.codeLength - 1));
+        boolean inZ = (z >= originZ) && (z <= originZ + size.codeWidth);
 
         return inX && inZ;
     }
@@ -131,10 +140,11 @@ public abstract class Plot extends Location {
         if (CodeClient.MC.world == null || originX == null || originZ == null || !(CodeClient.location instanceof Plot))
             return null;
         HashMap<BlockPos, SignText> signs = new HashMap<>();
+        var size = assumeSize();
         for (int y = ((Plot) CodeClient.location).getFloorY(); y < 255; y += 5) {
             int xEnd = originX + 1;
-            for (int x = originX - 20; x < xEnd; x++) {
-                int zEnd = originZ + assumeSize().size;
+            for (int x = originX - size.codeWidth; x < xEnd; x++) {
+                int zEnd = originZ + size.codeLength;
                 for (int z = originZ; z < zEnd; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockEntity block = CodeClient.MC.world.getBlockEntity(pos);
@@ -162,12 +172,14 @@ public abstract class Plot extends Location {
     public void clearLineStarterCache() {
         lineStarterCache.clear();
     }
+
     private void fillLineStarterCache() {
         clearLineStarterCache();
         lineStarterCache = scanForSigns(Pattern.compile(".*"));
     }
+
     public Map<BlockPos, SignText> getLineStartCache() {
-        if(lineStarterCache.isEmpty()) fillLineStarterCache();
+        if (lineStarterCache.isEmpty()) fillLineStarterCache();
         return lineStarterCache;
     }
 
@@ -195,12 +207,23 @@ public abstract class Plot extends Location {
     public enum Size {
         BASIC(50),
         LARGE(100),
-        MASSIVE(300);
+        MASSIVE(300),
+        MEGA(1000, 300, 300);
 
         public final int size;
+        public final int codeLength;
+        public final int codeWidth;
 
         Size(int size) {
             this.size = size;
+            this.codeLength = size;
+            this.codeWidth = 20;
+        }
+
+        Size(int size, int codeLength, int codeWidth) {
+            this.size = size;
+            this.codeLength = codeLength;
+            this.codeWidth = codeWidth;
         }
     }
 }

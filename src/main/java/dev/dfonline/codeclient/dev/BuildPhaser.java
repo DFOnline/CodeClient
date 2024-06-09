@@ -53,8 +53,9 @@ public class BuildPhaser {
             if (!clipping && KeyBinds.clipBind.isPressed() && plot.getX() != null) startClipping();
             if (clipping) {
                 var player = CodeClient.MC.player;
+                var size = plot.assumeSize();
                 player.setPos(
-                        Math.min(Math.max(player.getX(), plot.getX() - 20), plot.getX() + plot.assumeSize().size + 1),
+                        Math.min(Math.max(player.getX(), plot.getX()), plot.getX() + plot.assumeSize().size + 1),
                         player.getY(),
                         Math.min(Math.max(player.getZ(), plot.getZ()), plot.getZ() + plot.assumeSize().size + 1)
                 );

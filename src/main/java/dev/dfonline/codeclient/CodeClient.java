@@ -33,6 +33,8 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,18 +143,35 @@ public class CodeClient implements ModInitializer {
                 if(world == null) return;
                 var FIFTY = world.getBlockState(pos.south(50));
                 var FIFTY_ONE = world.getBlockState(pos.south(51));
-                var HUNDRED = CodeClient.MC.world.getBlockState(pos.south(100));
-                var HUNDRED_ONE = CodeClient.MC.world.getBlockState(pos.south(101));
-                var THREE_HUNDRED = CodeClient.MC.world.getBlockState(pos.south(300));
-                var THREE_HUNDRED_ONE = CodeClient.MC.world.getBlockState(pos.south(301));
-                if (!(FIFTY.isOf(Blocks.VOID_AIR) || FIFTY_ONE.isOf(Blocks.VOID_AIR)) && (!FIFTY.isOf(FIFTY_ONE.getBlock())))
+                var HUNDRED = world.getBlockState(pos.south(100));
+                var HUNDRED_ONE = world.getBlockState(pos.south(101));
+                var THREE_HUNDRED = world.getBlockState(pos.south(300));
+                var THREE_HUNDRED_ONE = world.getBlockState(pos.south(301));
+                var MEGA = world.getBlockState(pos.add(-19,0,10));
+                var MEGA_ONE = world.getBlockState(pos.add(-20,0,10));
+                if(MEGA_ONE.isOf(Blocks.GRASS_BLOCK) && MEGA.isOf(Blocks.GRASS_BLOCK)) {
+                    dev.setSize(Plot.Size.MEGA);
+                }
+                else if (MEGA.isOf(Blocks.GRASS_BLOCK) && !MEGA_ONE.isOf(Blocks.VOID_AIR)) {
+                    dev.setSize(Plot.Size.MEGA);
+                }
+                else if (!(FIFTY.isOf(Blocks.VOID_AIR) || FIFTY_ONE.isOf(Blocks.VOID_AIR)) && (!FIFTY.isOf(FIFTY_ONE.getBlock())))
                     dev.setSize(Plot.Size.BASIC);
                 else if (!(HUNDRED.isOf(Blocks.VOID_AIR) || HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !HUNDRED.isOf(HUNDRED_ONE.getBlock()))
                     dev.setSize(Plot.Size.LARGE);
                 else if (!(THREE_HUNDRED.isOf(Blocks.VOID_AIR) || THREE_HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !THREE_HUNDRED.isOf(THREE_HUNDRED_ONE.getBlock()))
                     dev.setSize(Plot.Size.MASSIVE);
+
             }
-            dev.setHasUnderground(!CodeClient.MC.world.getBlockState(pos).isOf(Blocks.STONE));
+            var size = dev.assumeSize();
+            assert CodeClient.MC.world != null;
+            var groundCheck = MC.world.getBlockState(new BlockPos(
+                    Math.max(Math.min((int) MC.player.getX(),dev.getX() - 1),dev.getX() - (size.codeWidth)),
+                    49,
+                    Math.max(Math.min((int) MC.player.getZ(),dev.getZ() + size.codeLength), dev.getZ())
+            ));
+            if(!groundCheck.isOf(Blocks.VOID_AIR))
+                dev.setHasUnderground(!groundCheck.isOf(Blocks.GRASS_BLOCK) && !groundCheck.isOf(Blocks.STONE));
         }
         if (CodeClient.location instanceof Spawn spawn && spawn.consumeHasJustJoined()) {
             if (autoJoin == AutoJoin.PLOT) {

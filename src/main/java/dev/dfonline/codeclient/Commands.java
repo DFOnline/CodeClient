@@ -156,6 +156,9 @@ public class Commands {
         })).then(literal("massive").executes(context -> {
             if (CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.MASSIVE);
             return 0;
+        })).then(literal("mega").executes(context -> {
+            if (CodeClient.location instanceof Plot plot) plot.setSize(Plot.Size.MEGA);
+            return 0;
         })));
 
 

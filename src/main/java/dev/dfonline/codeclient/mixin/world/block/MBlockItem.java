@@ -18,7 +18,7 @@ public class MBlockItem {
     private void onPlace(ItemPlacementContext context, BlockState state, CallbackInfoReturnable<Boolean> cir) {
         if (CodeClient.location instanceof Dev dev && Config.getConfig().CustomBlockInteractions) {
             BlockPos pos = context.getBlockPos();
-            if (dev.isInCodeSpace(pos.getX(), pos.getZ())) cir.setReturnValue(true);
+            if (dev.isInDev(pos)) cir.setReturnValue(true);
         }
     }
 }
