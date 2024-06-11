@@ -376,11 +376,11 @@ public class Commands {
                         var results = dev.scanForSigns(JumpType.ANY.pattern,Pattern.compile("^.*"+Pattern.quote(query)+".*$", Pattern.CASE_INSENSITIVE));
 
                         if (results == null || results.isEmpty()) {
-                            Utility.sendMessage(Text.literal("No results."), ChatType.INFO);
+                            Utility.sendMessage(Text.translatable("codeclient.search.no_results"), ChatType.INFO);
                             return 0;
                         }
 
-                        var message = Text.empty().append("Search Results:");
+                        var message = Text.translatable("codeclient.search.results");
                         results.forEach((pos,text) -> {
                             var type = text.getMessage(0, false).getString();
                             var name = text.getMessage(1, false).getString();
@@ -395,7 +395,7 @@ public class Commands {
                             var action = Text.empty().append(" [⏼]").setStyle(Style.EMPTY
                                     .withColor(Formatting.GREEN)
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/jump %s %s", sub, name)))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("Click to Teleport\nx: "+pos.getX()+", y: "+pos.getY()+", z: "+pos.getZ())))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.teleport", String.format("x: %s, y: %s, z: %s", pos.getX(), pos.getY(), pos.getZ()))))
                             );
                             var entry = Text.empty().append("\n • ").formatted(Formatting.GREEN)
                                     .append(Text.empty().append(name).formatted(Formatting.WHITE))
@@ -405,7 +405,7 @@ public class Commands {
 
                         Utility.sendMessage(message, ChatType.SUCCESS);
                     } else {
-                        Utility.sendMessage(Text.of("Could not execute search."), ChatType.FAIL);
+                        Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
                     }
                     return 0;
                 })
