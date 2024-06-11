@@ -395,7 +395,7 @@ public class Commands {
                             var action = Text.empty().append(" [⏼]").setStyle(Style.EMPTY
                                     .withColor(Formatting.GREEN)
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/jump %s %s", sub, name)))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.teleport", String.format("x: %s, y: %s, z: %s", pos.getX(), pos.getY(), pos.getZ()))))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.teleport", pos.getX(), pos.getY(), pos.getZ())))
                             );
                             var entry = Text.empty().append("\n • ").formatted(Formatting.GREEN)
                                     .append(Text.empty().append(name).formatted(Formatting.WHITE))

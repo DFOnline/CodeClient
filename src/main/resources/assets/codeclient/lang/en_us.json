@@ -69,7 +69,7 @@
 
   "codeclient.search.results": "Search Results:",
   "codeclient.search.no_results": "No results.",
-  "codeclient.search.hover.teleport": "Click to teleport\n%s",
+  "codeclient.search.hover.teleport": "Click to teleport\nx: %s, y: %s, z: %s",
 
   "codeclient.files.template_fail": "Couldn't load templates.",
   "codeclient.files.hold_template": "You need to hold a template to save.",
