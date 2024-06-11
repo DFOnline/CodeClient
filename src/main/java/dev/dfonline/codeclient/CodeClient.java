@@ -152,7 +152,7 @@ public class CodeClient implements ModInitializer {
                 if(MEGA_ONE.isOf(Blocks.GRASS_BLOCK) && MEGA.isOf(Blocks.GRASS_BLOCK)) {
                     dev.setSize(Plot.Size.MEGA);
                 }
-                else if (MEGA.isOf(Blocks.GRASS_BLOCK) && !MEGA_ONE.isOf(Blocks.VOID_AIR)) {
+                else if (!MEGA.isOf(Blocks.VOID_AIR) && !MEGA_ONE.isOf(Blocks.VOID_AIR) && !MEGA.isOf(Blocks.GRASS_BLOCK) && !MEGA.isOf(Blocks.STONE) && !MEGA_ONE.isOf(Blocks.GRASS_BLOCK)) {
                     dev.setSize(Plot.Size.MEGA);
                 }
                 else if (!(FIFTY.isOf(Blocks.VOID_AIR) || FIFTY_ONE.isOf(Blocks.VOID_AIR)) && (!FIFTY.isOf(FIFTY_ONE.getBlock())))
