@@ -184,7 +184,7 @@ public abstract class Plot extends Location {
     }
 
     public BlockPos findFreePlacePos() {
-        return findFreePlacePos(new BlockPos(originX - 1, 5, originZ));
+        return findFreePlacePos(new BlockPos(originX - 1,  hasUnderground ? 5 : 50, originZ));
     }
 
     public BlockPos findFreePlacePos(BlockPos origin) {
@@ -193,7 +193,7 @@ public abstract class Plot extends Location {
         int y = Math.max(origin.getY(), 5);
         int x = origin.getX();
         while (y < 255) {
-            while (originX - x <= 18) {
+            while (originX - x <= assumeSize().codeWidth - 2) {
                 x--;
                 BlockPos pos = new BlockPos(x, y, originZ);
                 if (world.getBlockState(pos.east()).isAir() && world.getBlockState(pos.west()).isAir()) return pos;

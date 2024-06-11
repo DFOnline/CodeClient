@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class PlaceTemplates extends Action {
-    public static final int rowSize = 6;
     private final ArrayList<Operation> operations;
     private int cooldown = 0;
     private ItemStack recoverMainHand;
@@ -37,6 +36,7 @@ public class PlaceTemplates extends Action {
         if (CodeClient.location instanceof Dev plot) {
             int i = 0;
             ArrayList<Operation> templatesToPlace = new ArrayList<>();
+            var rowSize = plot.assumeSize().codeWidth / 2 + 1;
             for (ItemStack template : templates) {
                 int row = i % rowSize;
                 int level = i / rowSize;
