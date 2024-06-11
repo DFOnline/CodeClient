@@ -394,7 +394,7 @@ public class Commands {
 
                             var action = Text.empty().append(" [⏼]").setStyle(Style.EMPTY
                                     .withColor(Formatting.GREEN)
-                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/jump "+sub+" "+name))
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/jump %s %s", sub, name)))
                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("Click to Teleport\nx: "+pos.getX()+", y: "+pos.getY()+", z: "+pos.getZ())))
                             );
                             var entry = Text.empty().append("\n • ").formatted(Formatting.GREEN)
