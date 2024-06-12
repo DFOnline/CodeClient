@@ -369,6 +369,48 @@ public class Commands {
             return -1;
         })));
 
+        dispatcher.register(literal("search")
+                .then(argument("query",greedyString()).suggests((context,builder) -> suggestJump(JumpType.ANY, context, builder)).executes(context -> {
+                    if(CodeClient.location instanceof Dev dev) {
+                        var query = context.getArgument("query", String.class);
+                        var results = dev.scanForSigns(JumpType.ANY.pattern,Pattern.compile("^.*"+Pattern.quote(query)+".*$", Pattern.CASE_INSENSITIVE));
+
+                        if (results == null || results.isEmpty()) {
+                            Utility.sendMessage(Text.translatable("codeclient.search.no_results"), ChatType.INFO);
+                            return 0;
+                        }
+
+                        var message = Text.translatable("codeclient.search.results");
+                        results.forEach((pos,text) -> {
+                            var type = text.getMessage(0, false).getString();
+                            var name = text.getMessage(1, false).getString();
+
+                            String sub = null;
+                            if (JumpType.PLAYER_EVENT.pattern.matcher(type).matches()) sub = "player";
+                            else if (JumpType.ENTITY_EVENT.pattern.matcher(type).matches()) sub = "entity";
+                            else if (JumpType.FUNCTION.pattern.matcher(type).matches()) sub = "func";
+                            else if (JumpType.PROCESS.pattern.matcher(type).matches()) sub = "proc";
+                            else return;
+
+                            var action = Text.empty().append(" [⏼]").setStyle(Style.EMPTY
+                                    .withColor(Formatting.GREEN)
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/jump %s %s", sub, name)))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.teleport", pos.getX(), pos.getY(), pos.getZ())))
+                            );
+                            var entry = Text.empty().append("\n • ").formatted(Formatting.GREEN)
+                                    .append(Text.empty().append(name).formatted(Formatting.WHITE))
+                                    .append(action);
+                            message.append(entry);
+                        });
+
+                        Utility.sendMessage(message, ChatType.SUCCESS);
+                    } else {
+                        Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
+                    }
+                    return 0;
+                })
+        ));
+
         LiteralCommandNode<FabricClientCommandSource> jumpCommand = dispatcher.register(literal("jump")
                 .then(literal("player").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PLAYER_EVENT, context, builder)).executes(context -> {
                     var name = context.getArgument("name", String.class);
@@ -613,7 +655,8 @@ public class Commands {
         PLAYER_EVENT("PLAYER EVENT"),
         ENTITY_EVENT("ENTITY EVENT"),
         FUNCTION("FUNCTION"),
-        PROCESS("PROCESS");
+        PROCESS("PROCESS"),
+        ANY("(((PLAYER)|(ENTITY)) EVENT)|(FUNCTION)|(PROCESS)");
 
         public final Pattern pattern;
         JumpType(String scan) {
