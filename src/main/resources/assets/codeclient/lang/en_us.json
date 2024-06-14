@@ -67,6 +67,10 @@
   "codeclient.warning.dev_mode": "You must be in dev mode!",
   "codeclient.warning.creative_mode": "You must be in creative mode!",
 
+  "codeclient.search.results": "Search Results:",
+  "codeclient.search.no_results": "No results.",
+  "codeclient.search.hover.teleport": "Click to teleport\nx: %s, y: %s, z: %s",
+
   "codeclient.files.template_fail": "Couldn't load templates.",
   "codeclient.files.hold_template": "You need to hold a template to save.",
   "codeclient.files.empty_dir": "Please use an empty folder to save into.",
