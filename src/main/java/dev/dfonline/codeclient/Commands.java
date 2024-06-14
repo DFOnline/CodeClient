@@ -109,6 +109,7 @@ public class Commands {
                 field.set(Config.getConfig(),bool);
                 Utility.sendMessage(Text.translatable(bool ? "codeclient.config.command.enable" : "codeclient.config.command.disable",Text.literal(option).formatted(Formatting.AQUA)),ChatType.SUCCESS);
                 Config.getConfig().save();
+                return 0;
             }
             else if(field.getType().isEnum()) {
                 for(Object member : field.getType().getEnumConstants()) {

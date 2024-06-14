@@ -67,7 +67,7 @@ public class Config {
     public boolean DevForBuild = false;
     public boolean ChatEditsVars = true;
     public boolean InsertOverlay = true;
-    public boolean ParameterGhosts = FabricLoader.getInstance().isDevelopmentEnvironment();
+    public boolean ParameterGhosts = true;
 
     public Config() {
     }
@@ -553,6 +553,16 @@ public class Config {
                                         true,
                                         () -> SignPeeker,
                                         opt -> SignPeeker = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.param_ghosts"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.param_ghosts.description")))
+                                .binding(
+                                        true,
+                                        () -> ParameterGhosts,
+                                        opt -> ParameterGhosts = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

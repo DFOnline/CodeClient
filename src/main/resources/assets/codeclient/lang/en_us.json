@@ -16,6 +16,8 @@
   "codeclient.config.chat_edits_vars.description": "Opening chat whilst holding a value will automatically put the contents in chat.",
   "codeclient.config.insert_overlay": "Click to insert value",
   "codeclient.config.insert_overlay.description": "Click on an empty slot in a code chest to insert a value.",
+  "codeclient.config.param_ghosts": "Parameter Ghosts",
+  "codeclient.config.param_ghosts.description": "See and be able to hover parameter information in chest slots.",
 
   "codeclient.config.command.query": "Option %s is set to %s.",
   "codeclient.config.command.query.fail": "There is no option with name %s.",
