@@ -36,24 +36,22 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     private final HashMap<Integer, Widget> widgets = new HashMap<>();
     private final ArrayList<VarItem> varItems = new ArrayList<>();
     private double scroll = 0;
+    private boolean doNotUpdate = false;
     private boolean update = true;
 
     public CustomChestMenu(CustomChestHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
+        this.handler.inventory.addListener(ignored -> {
+            if(!doNotUpdate) {
+                update();
+                doNotUpdate = false;
+            }
+        });
         Size = handler.numbers;
         this.titleY = 4;
         this.playerInventoryTitleY = 123;
         this.backgroundHeight = Size.MENU_HEIGHT;
         this.backgroundWidth = Size.MENU_WIDTH;
-        this.handler.addListener(new ScreenHandlerListener() {
-            public void onSlotUpdate(ScreenHandler handler, int slotId, ItemStack stack) {
-                update = true;
-            }
-
-            public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
-                update = true;
-            }
-        });
     }
 
     @Override
@@ -230,9 +228,13 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
                 CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.nextRevision(), slot.getIndex(), 0, SlotActionType.PICKUP, item.toStack(), int2ObjectMap));
             } else {
+                doNotUpdate = true;
                 super.onMouseClick(slot, slot.id, 0, SlotActionType.SWAP);
+                doNotUpdate = true;
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, item.toStack()));
+                doNotUpdate = true;
                 super.onMouseClick(slot, slot.id, 0, SlotActionType.SWAP);
+                doNotUpdate = true;
                 super.onMouseClick(slot, 54, 0, SlotActionType.QUICK_CRAFT);
             }
         }

@@ -11,6 +11,7 @@ import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerInventory;
@@ -24,9 +25,11 @@ import java.util.ArrayList;
 
 public class SlotGhostManager {
     private static Action action;
+    private static float time = 0.0F;
 
     public static void reset() {
         action = null;
+        time = 0;
     }
 
     public static void tick() {
@@ -35,12 +38,22 @@ public class SlotGhostManager {
         }
     }
 
+    /**
+     * Named render since that's where it hooks, only to get delta time.
+     */
+    public static void render(float delta) {
+        if(!Screen.hasControlDown()) {
+            time += delta;
+        }
+    }
+
     @Nullable
     public static Argument getArgument(Slot slot) {
         var args = new ArrayList<Argument>();
 
         for (var group: action.icon.getArgGroups()) {
-            args.addAll(group.getPossibilities().get(0).arguments());
+            var pos = group.getPossibilities();
+            args.addAll(pos.get((int) (time / 30F) % pos.size()).arguments());
         }
 
         if (slot.getIndex() >= args.size()) return null;
@@ -77,11 +90,11 @@ public class SlotGhostManager {
             ItemStack itemStack = type.getIcon();
             if (itemStack.isEmpty()) return;
 //        itemStack.setCount(slot.id);
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, 0x30ff0000);
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0x50__90_90_ff : 0x30__ff_00_00);
             context.drawItem(itemStack, slot.x, slot.y);
             context.drawItemInSlot(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
 //        context.drawText(CodeClient.MC.textRenderer, Text.literal(arg.type),slot.x,slot.y,0xFFFFFF00,true);
-            context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 822083583);
+            context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 0x30ffffff);
         } catch (Exception e) {
             context.drawText(CodeClient.MC.textRenderer, Text.literal("Error."), slot.x, slot.y, 0xFF0000, true);
         }
