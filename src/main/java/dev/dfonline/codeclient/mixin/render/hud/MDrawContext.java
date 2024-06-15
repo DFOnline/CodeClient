@@ -1,6 +1,5 @@
 package dev.dfonline.codeclient.mixin.render.hud;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.item.Scope;
@@ -31,19 +30,25 @@ public abstract class MDrawContext {
 
     @Inject(method = "drawItemInSlot(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;push()V", shift = At.Shift.AFTER))
     private void additionalItemRendering(TextRenderer textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo ci) {
-        NbtCompound nbt = stack.getNbt();
+        var nbt = stack.getNbt();
         if (nbt == null) return;
-        NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
+        var pbv = (NbtCompound) nbt.get("PublicBukkitValues");
         if (pbv == null) return;
-        NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
+        var varItem = (NbtString) pbv.get("hypercube:varitem");
         if (varItem == null) return;
-        JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
-        JsonObject data = var.get("data").getAsJsonObject();
-        Text text = null;
-        switch (var.get("id").getAsString()) {
+        var var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
+        var anyData = var.get("data");
+        if (anyData == null) return;
+        var data = anyData.getAsJsonObject();
+        var anyId = var.get("id");
+        if (anyId == null) return;
+        Text text;
+        switch (anyId.getAsString()) {
             case "var": {
                 try {
-                    Scope scope = Scope.valueOf(data.get("scope").getAsString());
+                    var anyScope = data.get("scope");
+                    if (anyScope == null) return;
+                    var scope = Scope.valueOf(anyScope.getAsString());
                     text = Text.literal((Config.getConfig().UseIForLineScope && scope == Scope.line) ? "I" : scope.shortName).setStyle(Style.EMPTY.withColor(scope.color));
                 } catch (Exception ignored) {
                     text = Text.literal("?").formatted(Formatting.DARK_RED);
@@ -51,7 +56,9 @@ public abstract class MDrawContext {
                 break;
             }
             case "num": {
-                String name = data.get("name").getAsString();
+                var anyName = data.get("name");
+                if (anyName == null) return;
+                var name = anyName.getAsString();
                 if (textRenderer.getWidth(Text.of(name)) > 16) {
                     var avail = textRenderer.trimToWidth(name, 16 - 2);
                     text = Text.literal(avail).formatted(Formatting.RED).append(Text.literal(".".repeat((16 - textRenderer.getWidth(Text.of(avail))) / 2)).formatted(Formatting.WHITE));
