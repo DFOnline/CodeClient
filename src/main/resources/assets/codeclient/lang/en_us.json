@@ -92,12 +92,34 @@
   "codeclient.files.open_native": "Click to open it in file explorer.",
   "codeclient.files.not_in_templates": "That is not in the templates directory.",
 
-  "codeclient.api.connect": "An app connected to codeclient.",
+  "codeclient.api.connect": "An app connected to CodeClient.",
   "codeclient.api.run_auth": "Run /auth to authorize it.",
-  "codeclient.api.authorised": "The connecting app has now been authorized.",
-  "codeclient.api.warning": "Authorizing apps allows them to do anything to your plot code, such as clearing and writing code.",
+  "codeclient.api.scope.prompt": "The connected application has requested the following permissions:",
+
+  "codeclient.api.scope.type.default": "Give items",
+  "codeclient.api.scope.type.read_plot": "Scan plot code & get plot size",
+  "codeclient.api.scope.type.movement": "Teleport to plot spawn & switch modes",
+  "codeclient.api.scope.type.inventory": "Read & write the entire inventory",
+  "codeclient.api.scope.type.write_code": "Place templates in the plot",
+  "codeclient.api.scope.type.clear_plot": "Clear the entirety of your plot's codespace",
+
+
+  "codeclient.api.danger.default": "Default",
+  "codeclient.api.danger.default.description": "Assigned by default to all applications.",
+  "codeclient.api.danger.safe": "Safe",
+  "codeclient.api.danger.safe.description": "Can be granted safely.",
+  "codeclient.api.danger.caution": "Caution",
+  "codeclient.api.danger.caution.description": "Grant to trusted applications.",
+  "codeclient.api.danger.risky": "Risky",
+  "codeclient.api.danger.risky.description": "Grant with caution.",
+  "codeclient.api.danger.dangerous": "Dangerous",
+  "codeclient.api.danger.dangerous.description": "Very risky; accept with extreme caution.",
+
+  "codeclient.api.authorised": "The connected application is now authorized with the requested permissions.",
   "codeclient.api.remove": "You can remove the app by running /auth remove.",
-  "codeclient.api.removed": "The connected app is no longer authorized.",
+  "codeclient.api.removed": "Removed extra permissions from the connected app.",
+  "codeclient.api.disconnected": "The connected app can no longer interact with CodeClient.",
+  "codeclient.api.scope.invalid": "The connected app requested an invalid permission.",
 
   "codeclient.interaction.broke": "You just broke %s."
 }

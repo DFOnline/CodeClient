@@ -129,17 +129,17 @@ public class Commands {
         }))));
 
         dispatcher.register(literal("auth").executes(context -> {
-            SocketHandler.setAuthorised(true);
+            SocketHandler.setAcceptedScopes(true);
             Utility.sendMessage(Text.translatable("codeclient.api.authorised")
-                            .append(Text.literal("\n")).append(Text.translatable("codeclient.api.warning").formatted(Formatting.BOLD))
                             .append(Text.literal("\n")).append(Text.translatable("codeclient.api.remove"))
                     , ChatType.SUCCESS);
             return 0;
         }).then(literal("remove").executes(context -> {
-            SocketHandler.setAuthorised(false);
+            SocketHandler.setAcceptedScopes(false);
             Utility.sendMessage(Text.translatable("codeclient.api.removed"), ChatType.SUCCESS);
             return 0;
         })).then(literal("disconnect").executes(context -> {
+            Utility.sendMessage(Text.translatable("codeclient.api.disconnected"), ChatType.SUCCESS);
             SocketHandler.setConnection(null);
             return 0;
         })));
