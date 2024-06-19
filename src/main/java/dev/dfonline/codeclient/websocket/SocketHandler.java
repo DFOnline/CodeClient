@@ -68,13 +68,10 @@ public class SocketHandler {
 
     public static void setConnection(WebSocket socket) {
         if (socket != null) actionQueue.clear();
-        if (connection != null) connection.send("disconnected");
+        if (connection != null) connection.close(); // Close the old connection
         connection = socket;
     }
 
-    public static boolean isSameConnection(WebSocket conn) {
-        return conn == connection;
-    }
 
     public static void onMessage(String message) {
         String[] arguments = message.split(" ");

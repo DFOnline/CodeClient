@@ -31,11 +31,7 @@ public class SocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        // Ignore messages from other connections
-        if (!SocketHandler.isSameConnection(conn)) {
-            conn.send("disconnected");
-            return;
-        }
+        if (conn == null) return;
         SocketHandler.onMessage(message);
     }
 
