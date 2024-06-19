@@ -68,6 +68,7 @@ public class Config {
     public boolean ChatEditsVars = true;
     public boolean InsertOverlay = true;
     public boolean ParameterGhosts = true;
+    public boolean ActionViewer = false;
 
     public Config() {
     }
@@ -139,6 +140,7 @@ public class Config {
             object.addProperty("ChatEditsVars",ChatEditsVars);
             object.addProperty("InsertOverlay",InsertOverlay);
             object.addProperty("ParameterGhosts",ParameterGhosts);
+            object.addProperty("ActionViewer",ActionViewer);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -563,6 +565,16 @@ public class Config {
                                         true,
                                         () -> ParameterGhosts,
                                         opt -> ParameterGhosts = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.action_viewer"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer.description")))
+                                .binding(
+                                        false,
+                                        () -> ActionViewer,
+                                        opt -> ActionViewer = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

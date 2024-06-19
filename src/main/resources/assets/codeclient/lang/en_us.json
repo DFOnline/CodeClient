@@ -18,6 +18,8 @@
   "codeclient.config.insert_overlay.description": "Click on an empty slot in a code chest to insert a value.",
   "codeclient.config.param_ghosts": "Parameter Ghosts",
   "codeclient.config.param_ghosts.description": "See and be able to hover parameter information in chest slots.",
+  "codeclient.config.action_viewer": "Action Viewer",
+  "codeclient.config.action_viewer.description": "Pin code block description to the inventory while inside code chests.",
 
   "codeclient.config.command.query": "Option %s is set to %s.",
   "codeclient.config.command.query.fail": "There is no option with name %s.",
