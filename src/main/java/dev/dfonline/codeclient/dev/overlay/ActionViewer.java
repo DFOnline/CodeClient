@@ -16,9 +16,14 @@ import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.WrittenBookItem;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.thread.ThreadExecutor;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
@@ -27,9 +32,13 @@ import java.util.List;
 
 public class ActionViewer {
     private static Action action;
+    private static boolean reference = false;
+    private static ItemStack book;
 
     public static void invalidate() {
         action = null;
+        reference = false;
+        book = null;
     }
     public static void onClickChest(BlockHitResult hitResult) {
         invalidate();
@@ -39,6 +48,10 @@ public class ActionViewer {
         if (CodeClient.location instanceof Dev dev && dev.isInDev(position) && world.getBlockEntity(position) instanceof ChestBlockEntity) {
             var signEntity = world.getBlockEntity(position.down().west());
             if (signEntity instanceof SignBlockEntity sign) {
+                if (sign.getFrontText().getMessage(0, true).contains(Text.literal("CALL FUNCTION"))) {
+                    reference = true;
+                    return;
+                }
                 try {
                     action = ActionDump.getActionDump().findAction(sign.getFrontText());
                 } catch (Exception ignored) {
@@ -48,10 +61,48 @@ public class ActionViewer {
         }
     }
 
+    public static ItemStack getReferenceBook() {
+        var player = CodeClient.MC.player;
+        if (player == null) return null;
+        var inventory = player.getInventory();
+
+        ItemStack referenceBook = null;
+        for (int index = 0; index < inventory.size(); index++) {
+            var itemStack = inventory.getStack(index);
+            if (itemStack.isEmpty()) continue;
+            if (itemStack.getItem() instanceof WrittenBookItem item) {
+                NbtCompound nbt = itemStack.getNbt();
+                if (nbt == null) continue;
+                var data = nbt.getCompound("PublicBukkitValues");
+                var instance = data.getString("hypercube:item_instance");
+                if (instance == null) continue;
+                referenceBook = itemStack;
+                break;
+            }
+        }
+        if (referenceBook == null || referenceBook.getName().getString().contains("◆ Reference Book ◆")) return null;
+        return referenceBook;
+    }
+
     public static List<Text> getOverlayText() {
         if (CodeClient.location instanceof Dev dev) {
-            if (!Config.getConfig().ActionViewer || action == null) return null;
-            var item = action.icon.getItem();
+            if (!Config.getConfig().ActionViewer) return null;
+            ItemStack item;
+            if (action == null) {
+                if (!reference) return null;
+                if (book == null) {
+                    item = getReferenceBook();
+                    if (item == null) return null;
+                    var displayBook = item.copy();
+                    var name = displayBook.getName().copy().withColor(0xFFFFFF);
+                    displayBook.setCustomName(name); // continuity with actions
+                    book = displayBook;
+                } else {
+                    item = book;
+                }
+            } else {
+                item = action.icon.getItem();
+            }
             return item.getTooltip(null, TooltipContext.BASIC);
         }
         return null;
