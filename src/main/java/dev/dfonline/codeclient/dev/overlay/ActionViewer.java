@@ -61,29 +61,6 @@ public class ActionViewer {
         }
     }
 
-    public static ItemStack getReferenceBook() {
-        var player = CodeClient.MC.player;
-        if (player == null) return null;
-        var inventory = player.getInventory();
-
-        ItemStack referenceBook = null;
-        for (int index = 0; index < inventory.size(); index++) {
-            var itemStack = inventory.getStack(index);
-            if (itemStack.isEmpty()) continue;
-            if (itemStack.getItem() instanceof WrittenBookItem item) {
-                NbtCompound nbt = itemStack.getNbt();
-                if (nbt == null) continue;
-                var data = nbt.getCompound("PublicBukkitValues");
-                var instance = data.getString("hypercube:item_instance");
-                if (instance == null) continue;
-                referenceBook = itemStack;
-                break;
-            }
-        }
-        if (referenceBook == null || referenceBook.getName().getString().contains("◆ Reference Book ◆")) return null;
-        return referenceBook;
-    }
-
     public static List<Text> getOverlayText() {
         if (CodeClient.location instanceof Dev dev) {
             if (!Config.getConfig().ActionViewer) return null;
@@ -91,15 +68,11 @@ public class ActionViewer {
             if (action == null) {
                 if (!reference) return null;
                 if (book == null) {
-                    item = getReferenceBook();
-                    if (item == null) return null;
-                    var displayBook = item.copy();
-                    var name = displayBook.getName().copy().withColor(0xFFFFFF);
-                    displayBook.setCustomName(name); // continuity with actions
-                    book = displayBook;
-                } else {
-                    item = book;
+                    var rb = dev.getReferenceBook();
+                    if (rb.isEmpty()) return null;
+                    book = rb.getItem();
                 }
+                item = book;
             } else {
                 item = action.icon.getItem();
             }
