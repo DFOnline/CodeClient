@@ -66,12 +66,13 @@ public class ActionViewer {
         return null;
     }
 
-    public static void render(DrawContext context, HandledScreen<?> handledScreen) {
+    public static void render(DrawContext context, int mouseX, int mouseY, HandledScreen<?> handledScreen) {
         if (!(handledScreen instanceof GenericContainerScreen || handledScreen instanceof CustomChestMenu))
             return;
         var text = getOverlayText();
         if (text == null) return;
 
+        ActionTooltipPositioner.INSTANCE.setMousePosition(mouseX,mouseY); // I would pass these through like normal, but draw tooltip might be moved to a utility class in the future.
         drawTooltip(context, handledScreen, transformText(text), 176, 0, 300);
     }
 
@@ -88,9 +89,11 @@ public class ActionViewer {
         if (handledScreen instanceof CustomChestMenu menu) {
             var handler = menu.getScreenHandler();
             positioner.setBackgroundHeight(handler.numbers.MENU_HEIGHT);
+            positioner.setBackgroundWidth(handler.numbers.MENU_WIDTH);
             x += handler.numbers.MENU_WIDTH - 176;
         } else {
             positioner.setBackgroundHeight(166);
+            positioner.setBackgroundWidth(176);
         }
 
         if (components.isEmpty()) return;
@@ -126,17 +129,57 @@ public class ActionViewer {
     private static class ActionTooltipPositioner implements TooltipPositioner {
         public static final ActionTooltipPositioner INSTANCE = new ActionTooltipPositioner();
         private int backgroundHeight = 166;
+        private int backgroundWidth = 176;
+
+        private int mouseX = 0, mouseY = 0;
 
         private ActionTooltipPositioner() {
         }
 
         public Vector2ic getPosition(int screenWidth, int screenHeight, int x, int y, int width, int height) {
-            int difference = (height - backgroundHeight) / 2;
-            return (new Vector2i(x, y)).add(6, -difference);
+            var vector = new Vector2i(x, y);
+
+            var difference = (height - backgroundHeight) / 2;
+            vector.add(6, -difference); // align to chest
+
+            int space = ((screenWidth - backgroundWidth) / 2) - 6 /* for padding */;
+            if (width > space + 4) {
+                if (isMouseInside(x+6, y-difference, width, height, screenWidth, screenHeight)) {
+                    vector.add(space-width - 5, 0);
+                }
+            }
+
+            return vector;
+        }
+
+        private boolean isMouseInside(int x, int y, int width, int height, int screenWidth, int screenHeight) {
+            // positioning changes
+            x += (screenWidth - backgroundWidth) / 2;
+            y += (screenHeight - backgroundHeight) / 2;
+
+            // tooltip padding changes
+            x -= 4;
+            y -= 5;
+            width += 6;
+            height += 6;
+            if (x <= mouseX && mouseX <= x+width) {
+                if (y <= mouseY && mouseY <= y+height) {
+                    return true;
+                };
+            }
+            return false;
         }
 
         public void setBackgroundHeight(int backgroundHeight) {
             this.backgroundHeight = backgroundHeight;
+        }
+        public void setBackgroundWidth(int backgroundWidth) {
+            this.backgroundWidth = backgroundWidth;
+        }
+
+        public void setMousePosition(int x, int y) {
+            mouseX = x;
+            mouseY = y;
         }
     }
 }

@@ -38,7 +38,7 @@ public abstract class MHandledScreen {
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         SlotGhostManager.render(delta);
         InsertOverlay.render(context,mouseX,mouseY,(HandledScreen<?>) (Object) this, this.x, this.y);
-        ActionViewer.render(context,(HandledScreen<?>) (Object) this);
+        ActionViewer.render(context, mouseX, mouseY,(HandledScreen<?>) (Object) this);
     }
 
     @Redirect(method = "drawMouseoverTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;hasStack()Z"))
