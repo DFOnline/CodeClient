@@ -143,7 +143,7 @@ public class ActionViewer {
             vector.add(6, -difference); // align to chest
 
             int space = ((screenWidth - backgroundWidth) / 2) - 6 /* for padding */;
-            if (width > space + 4) {
+            if (width + 6 > space) {
                 if (isMouseInside(x+6, y-difference, width, height, screenWidth, screenHeight)) {
                     vector.add(space-width - 5, 0);
                 }
