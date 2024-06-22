@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
+import dev.dfonline.codeclient.hypercube.ReferenceBook;
 import dev.dfonline.codeclient.hypercube.actiondump.Action;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.Dev;
@@ -16,14 +17,8 @@ import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.WrittenBookItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.thread.ThreadExecutor;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
@@ -32,12 +27,10 @@ import java.util.List;
 
 public class ActionViewer {
     private static Action action;
-    private static boolean reference = false;
-    private static ItemStack book;
+    private static ReferenceBook book;
 
     public static void invalidate() {
         action = null;
-        reference = false;
         book = null;
     }
     public static void onClickChest(BlockHitResult hitResult) {
@@ -48,10 +41,6 @@ public class ActionViewer {
         if (CodeClient.location instanceof Dev dev && dev.isInDev(position) && world.getBlockEntity(position) instanceof ChestBlockEntity) {
             var signEntity = world.getBlockEntity(position.down().west());
             if (signEntity instanceof SignBlockEntity sign) {
-                if (sign.getFrontText().getMessage(0, true).contains(Text.literal("CALL FUNCTION"))) {
-                    reference = true;
-                    return;
-                }
                 try {
                     action = ActionDump.getActionDump().findAction(sign.getFrontText());
                 } catch (Exception ignored) {
@@ -64,18 +53,14 @@ public class ActionViewer {
     public static List<Text> getOverlayText() {
         if (CodeClient.location instanceof Dev dev) {
             if (!Config.getConfig().ActionViewer) return null;
-            ItemStack item;
+            if (book != null) return book.getTooltip();
             if (action == null) {
-                if (!reference) return null;
-                if (book == null) {
-                    var rb = dev.getReferenceBook();
-                    if (rb.isEmpty()) return null;
-                    book = rb.getItem();
-                }
-                item = book;
-            } else {
-                item = action.icon.getItem();
+                var book = dev.getReferenceBook();
+                if (book == null || book.isEmpty()) return null;
+                ActionViewer.book = book;
+                return book.getTooltip();
             }
+            var item = action.icon.getItem();
             return item.getTooltip(null, TooltipContext.BASIC);
         }
         return null;
