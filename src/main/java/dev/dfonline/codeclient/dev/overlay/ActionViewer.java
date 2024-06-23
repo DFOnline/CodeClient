@@ -32,12 +32,14 @@ public class ActionViewer {
 
     private static int scroll = 0;
     private static boolean tall = false;
+    private static boolean hover = false;
 
     public static void invalidate() {
         action = null;
         book = null;
         scroll = 0;
         tall = false;
+        hover = false;
     }
     public static boolean isValid() {
         return action != null || book != null;
@@ -84,12 +86,13 @@ public class ActionViewer {
 
         ActionTooltipPositioner.INSTANCE.setMousePosition(mouseX,mouseY); // I would pass these through like normal, but draw tooltip might be moved to a utility class in the future.
 
-        drawTooltip(context, handledScreen, transformText(text), 176, scroll, 300);
+        var z = hover ? 500 : 300;
+        drawTooltip(context, handledScreen, transformText(text), 176, scroll, z);
     }
 
     public static boolean scroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (!(screen instanceof GenericContainerScreen || screen instanceof CustomChestMenu)) return false;
-        if (isValid() && tall) {
+        if (isValid() && tall && hover) {
             scroll -= 8 * (int) verticalAmount;
             return true;
         }
@@ -159,14 +162,25 @@ public class ActionViewer {
             var vector = new Vector2i(x, y);
 
             // can scroll or not.
-            if (screenHeight < height + 24) tall = true;
+            if (backgroundHeight < height + 6) {
+                if (!tall) tall = true;
+
+                var max = (height - backgroundHeight) / 2;
+                var actual_scroll = Math.max(-max, Math.min(max, scroll));
+                if (actual_scroll != scroll) {
+                    var change = actual_scroll - scroll;
+                    vector.add(0, change);
+                    scroll = actual_scroll;
+                }
+            }
 
             var difference = (height - backgroundHeight) / 2;
             vector.add(6, -difference); // align to chest
 
             int space = ((screenWidth - backgroundWidth) / 2) - 6 /* for padding */;
             if (width + 6 > space) {
-                if (isMouseInside(x+6, y-difference, width, height, screenWidth, screenHeight)) {
+                hover = isMouseInside(x+6, y-difference, width, height, screenWidth, screenHeight);
+                if (hover) {
                     vector.add(space-width - 5, 0);
                 }
             }
