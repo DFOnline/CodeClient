@@ -68,9 +68,9 @@ public class Config {
     public boolean ChatEditsVars = true;
     public boolean InsertOverlay = true;
     public boolean ParameterGhosts = true;
-    public boolean ActionViewer = false;
+    public boolean ActionViewer = true;
     public boolean InvertActionViewerScroll = false;
-    public ActionViewerAlignment ActionViewerLocation = ActionViewerAlignment.CENTER;
+    public ActionViewerAlignment ActionViewerLocation = ActionViewerAlignment.TOP;
 
     public Config() {
     }
@@ -581,7 +581,7 @@ public class Config {
                                         .name(Text.translatable("codeclient.config.action_viewer"))
                                         .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer.description")))
                                         .binding(
-                                                false,
+                                                true,
                                                 () -> ActionViewer,
                                                 opt -> ActionViewer = opt
                                         )
@@ -601,7 +601,7 @@ public class Config {
                                         .name(Text.translatable("codeclient.config.action_viewer_alignment"))
                                         .description(OptionDescription.of(Text.translatable("codeclient.config.category.action_viewer.description")))
                                         .binding(
-                                                ActionViewerAlignment.CENTER,
+                                                ActionViewerAlignment.TOP,
                                                 () -> ActionViewerLocation,
                                                 opt -> ActionViewerLocation = opt
                                         )
