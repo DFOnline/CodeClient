@@ -575,8 +575,8 @@ public class Config {
                         //</editor-fold>
                         //<editor-fold desc="Action Viewer">
                         .group(OptionGroup.createBuilder()
-                                .name(Text.literal("Action Viewer"))
-                                .description(OptionDescription.of(Text.literal("Display a tooltip displaying the code blocks description.")))
+                                .name(Text.translatable("codeclient.config.category.action_viewer"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.category.action_viewer.description")))
                                 .option(Option.createBuilder(Boolean.class)
                                         .name(Text.translatable("codeclient.config.action_viewer"))
                                         .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer.description")))
@@ -599,7 +599,7 @@ public class Config {
                                         .build())
                                 .option(Option.createBuilder(ActionViewerAlignment.class)
                                         .name(Text.translatable("codeclient.config.action_viewer_alignment"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer_alignment.description")))
+                                        .description(OptionDescription.of(Text.translatable("codeclient.config.category.action_viewer.description")))
                                         .binding(
                                                 ActionViewerAlignment.CENTER,
                                                 () -> ActionViewerLocation,
@@ -815,13 +815,7 @@ public class Config {
     }
 
     public enum ActionViewerAlignment {
-        CENTER("Pins the tooltip to the center of the code chest."),
-        TOP("Pins the tooltip to the top of the code chest.");
-
-        public final String description;
-
-        ActionViewerAlignment(String description) {
-            this.description = description;
-        }
+        CENTER,
+        TOP;
     }
 }
