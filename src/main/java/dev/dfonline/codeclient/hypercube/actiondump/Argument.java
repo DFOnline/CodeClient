@@ -8,6 +8,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class Argument {
     public String type;
     public boolean plural;
@@ -15,19 +17,6 @@ public class Argument {
     public String[] description;
     public String[][] notes;
     public String text;
-
-    public static final Argument SPLITTER;
-    public static final Argument OR;
-
-    static {
-        var splitter = new Argument();
-        splitter.text = "";
-        SPLITTER = splitter;
-
-        var or = new Argument();
-        or.text = "§x§f§f§5§5§a§aOR";
-        OR = or;
-    }
 
     @Nullable
     public Icon.Type getType() {
@@ -99,6 +88,13 @@ public class Argument {
         }
 
         return lore;
+    }
+
+    public boolean isOr() {
+        return text != null && text.endsWith("OR");
+    }
+    public boolean isSplitter() {
+        return Objects.equals(text,"");
     }
 
     private void addToLore(NbtList lore, String text) {

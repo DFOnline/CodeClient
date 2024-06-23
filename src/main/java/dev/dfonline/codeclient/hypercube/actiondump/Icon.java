@@ -185,7 +185,7 @@ public class Icon {
         var groups = new ArrayList<ArgumentGroup>();
         var group = new ArrayList<Argument>();
         for(var arg: arguments) {
-            if(!Objects.equals(arg.text, Argument.SPLITTER.text)) group.add(arg);
+            if(!arg.isSplitter()) group.add(arg);
             else {
                 groups.add(new ArgumentGroup(group));
                 group = new ArrayList<>();
@@ -255,7 +255,7 @@ public class Icon {
             var groups = new ArrayList<ArgumentPossibilities>();
             var group = new ArrayList<Argument>();
             for(var arg: arguments) {
-                if(!Objects.equals(arg.text, Argument.OR.text)) group.add(arg);
+                if(!arg.isOr()) group.add(arg);
                 else {
                     groups.add(new ArgumentPossibilities(group));
                     group = new ArrayList<>();

@@ -269,15 +269,19 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     }
 
     private void populate() {
-        DevInventoryGroup group = GROUPS[selectedTab];
-//        if(group == INVENTORY) {
-//            searchResults = null;
-//            return;
-//        }
-        String text = searchBox.getText();
-        if (text.equals("")) text = null;
-        searchResults = group.searchItems(text);
-        if (searchResults != null) this.scroll();
+        try {
+            DevInventoryGroup group = GROUPS[selectedTab];
+    //        if(group == INVENTORY) {
+    //            searchResults = null;
+    //            return;
+    //        }
+            String text = searchBox.getText();
+            if (text.equals("")) text = null;
+            searchResults = group.searchItems(text);
+            if (searchResults != null) this.scroll();
+        } catch (Exception ignored) {
+            // Probably caught when we first load the menu.
+        }
     }
 
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {

@@ -45,7 +45,7 @@ public class GetActionDump extends Action {
                 isDone = true;
                 OverlayManager.setOverlayText(Text.translatable("codeclient.action.get_action_dump.error.could_not_start").formatted(Formatting.RED));
                 OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.error.beta_broke").formatted(Formatting.RED));
-                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort", Text.literal(" /abort ").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort", Text.literal("/abort").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
 
                 return true;
             }
@@ -75,7 +75,7 @@ public class GetActionDump extends Action {
                 isDone = true;
                 OverlayManager.addOverlayText(Text.literal(""));
                 OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.complete").formatted(Formatting.LIGHT_PURPLE));
-                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort", Text.literal(" /abort ").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort", Text.literal("/abort").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
                 OverlayManager.addOverlayText(Text.literal(""));
                 try {
                     Path path = FileManager.writeFile("actiondump.json", capturedData.toString());
