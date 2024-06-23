@@ -93,7 +93,9 @@ public class ActionViewer {
     public static boolean scroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (!(screen instanceof GenericContainerScreen || screen instanceof CustomChestMenu)) return false;
         if (isValid() && tall && hover) {
-            scroll -= 8 * (int) verticalAmount;
+            var modifier = Config.getConfig().InvertActionViewerScroll ? -8 : 8;
+
+            scroll += modifier * (int) verticalAmount;
             return true;
         }
         return false;
@@ -160,13 +162,15 @@ public class ActionViewer {
 
         public Vector2ic getPosition(int screenWidth, int screenHeight, int x, int y, int width, int height) {
             var vector = new Vector2i(x, y);
+            var centered = Config.getConfig().ActionViewerLocation == Config.ActionViewerAlignment.CENTER;
 
             // can scroll or not.
-            if (backgroundHeight < height + 6) {
+            var minHeight = Math.min(backgroundHeight, screenHeight - 8);
+            if (minHeight < height + 6) {
                 if (!tall) tall = true;
 
-                var max = (height - backgroundHeight) / 2;
-                var actual_scroll = Math.max(-max, Math.min(max, scroll));
+                var max = ((height + 8) - minHeight) / 2;
+                var actual_scroll = centered ? Math.max(-max, Math.min(max, scroll)) : Math.max(max*-2, Math.min(0, scroll));
                 if (actual_scroll != scroll) {
                     var change = actual_scroll - scroll;
                     vector.add(0, change);
@@ -174,15 +178,17 @@ public class ActionViewer {
                 }
             }
 
-            var difference = (height - backgroundHeight) / 2;
-            vector.add(6, -difference); // align to chest
+            var difference = centered ? (height - backgroundHeight) / 2 : -4;
+            vector.add(6, -difference); // alignment change
+
+            if (backgroundHeight > screenHeight) {
+                vector.add(0, (backgroundHeight - (screenHeight - 8)) / 2);
+            }
 
             int space = ((screenWidth - backgroundWidth) / 2) - 6 /* for padding */;
-            if (width + 6 > space) {
-                hover = isMouseInside(x+6, y-difference, width, height, screenWidth, screenHeight);
-                if (hover) {
-                    vector.add(space-width - 5, 0);
-                }
+            hover = isMouseInside(x+6, y-difference, width, height, screenWidth, screenHeight);
+            if (width + 6 > space && hover) {
+                vector.add(space-width - 5, 0);
             }
 
             return vector;
