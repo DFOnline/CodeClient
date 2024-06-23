@@ -11,6 +11,7 @@ import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
@@ -26,13 +27,22 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ActionViewer {
-    private static Action action;
-    private static ReferenceBook book;
+    private static Action action = null;
+    private static ReferenceBook book = null;
+
+    private static int scroll = 0;
+    private static boolean tall = false;
 
     public static void invalidate() {
         action = null;
         book = null;
+        scroll = 0;
+        tall = false;
     }
+    public static boolean isValid() {
+        return action != null || book != null;
+    }
+
     public static void onClickChest(BlockHitResult hitResult) {
         invalidate();
         var world = CodeClient.MC.world;
@@ -73,7 +83,17 @@ public class ActionViewer {
         if (text == null) return;
 
         ActionTooltipPositioner.INSTANCE.setMousePosition(mouseX,mouseY); // I would pass these through like normal, but draw tooltip might be moved to a utility class in the future.
-        drawTooltip(context, handledScreen, transformText(text), 176, 0, 300);
+
+        drawTooltip(context, handledScreen, transformText(text), 176, scroll, 300);
+    }
+
+    public static boolean scroll(Screen screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (!(screen instanceof GenericContainerScreen || screen instanceof CustomChestMenu)) return false;
+        if (isValid() && tall) {
+            scroll -= 8 * (int) verticalAmount;
+            return true;
+        }
+        return false;
     }
 
     private static List<TooltipComponent> transformText(List<Text> texts) {
@@ -130,7 +150,6 @@ public class ActionViewer {
         public static final ActionTooltipPositioner INSTANCE = new ActionTooltipPositioner();
         private int backgroundHeight = 166;
         private int backgroundWidth = 176;
-
         private int mouseX = 0, mouseY = 0;
 
         private ActionTooltipPositioner() {
@@ -138,6 +157,9 @@ public class ActionViewer {
 
         public Vector2ic getPosition(int screenWidth, int screenHeight, int x, int y, int width, int height) {
             var vector = new Vector2i(x, y);
+
+            // can scroll or not.
+            if (screenHeight < height + 24) tall = true;
 
             var difference = (height - backgroundHeight) / 2;
             vector.add(6, -difference); // align to chest
@@ -162,6 +184,8 @@ public class ActionViewer {
             y -= 5;
             width += 6;
             height += 6;
+
+            // check in range
             if (x <= mouseX && mouseX <= x+width) {
                 if (y <= mouseY && mouseY <= y+height) {
                     return true;
