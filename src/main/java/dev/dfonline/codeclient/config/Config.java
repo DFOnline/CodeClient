@@ -599,7 +599,7 @@ public class Config {
                                         .build())
                                 .option(Option.createBuilder(ActionViewerAlignment.class)
                                         .name(Text.translatable("codeclient.config.action_viewer_alignment"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.category.action_viewer.description")))
+                                        .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer_alignment.description")))
                                         .binding(
                                                 ActionViewerAlignment.TOP,
                                                 () -> ActionViewerLocation,

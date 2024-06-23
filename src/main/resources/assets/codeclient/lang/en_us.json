@@ -20,7 +20,7 @@
   "codeclient.config.param_ghosts.description": "See and be able to hover parameter information in chest slots.",
 
   "codeclient.config.category.action_viewer": "Action Viewer",
-  "codeclient.config.category.action_viewer.description": "Display a tooltip displaying the code blocks description.",
+  "codeclient.config.category.action_viewer.description": "Display a tooltip that shows the code block's description.",
   "codeclient.config.action_viewer": "Enable Action Viewer",
   "codeclient.config.action_viewer.description": "Pin code block description to the inventory while inside code chests.",
   "codeclient.config.invert_action_viewer_scroll": "Invert Scroll Direction",
