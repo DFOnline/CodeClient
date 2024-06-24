@@ -12,12 +12,11 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -228,6 +227,22 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
         super.setFocused(focused);
     }
 
+    public void select(boolean start) {
+        super.setFocused(true);
+        if(widgets.get(!start ? widgets.size() - 1 : 0) instanceof ClickableWidget next) {
+            next.setFocused(true);
+        }
+    }
+
+    public void selectAll() {
+        for (var widget: widgets) {
+            if(widget instanceof TextFieldWidget text) {
+                text.setCursorToStart(false);
+                text.setCursorToEnd(true);
+            }
+        }
+    }
+
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         for (var widget : widgets) {
@@ -272,6 +287,24 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if(keyCode == GLFW.GLFW_KEY_TAB) {
+            Integer selected = null;
+            for (int i = 0; i < widgets.size(); i++) {
+                var widget = widgets.get(i);
+                if (widget instanceof ClickableWidget clickable && clickable.isFocused()) {
+                    if(selected == null) selected = i;
+                    clickable.setFocused(false);
+                }
+            }
+            if(selected == null) return false;
+            var next = selected + ((modifiers & GLFW.GLFW_MOD_SHIFT) == 1 ? -1 : 1);
+            if(next < 0 || next == widgets.size()) return false;
+            if(widgets.get(next) instanceof ClickableWidget widget) {
+                widget.setFocused(true);
+                return true;
+            }
+            return false;
+        }
         for (var widget : widgets) {
             if (widget instanceof ClickableWidget click && click.isFocused()) {
                 return click.keyPressed(keyCode, scanCode, modifiers);

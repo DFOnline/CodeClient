@@ -55,9 +55,7 @@ public class InsertOverlay {
     }
 
     public static boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (overlayOpen()) {
-            return selectedSlot.keyPressed(keyCode, scanCode, modifiers);
-        }
+        if (overlayOpen()) return selectedSlot.keyPressed(keyCode, scanCode, modifiers);
         return false;
     }
 
@@ -189,6 +187,8 @@ public class InsertOverlay {
                         this.width = 150;
                         this.height = 26;
                         field = new CustomChestField<>(CodeClient.MC.textRenderer, this.x + 5, this.y + 5, this.width - 10, this.height - 10, Text.literal(""), varItem);
+                        field.select(true);
+                        field.selectAll();
                         return true;
                     }
                 }
@@ -198,7 +198,12 @@ public class InsertOverlay {
 
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             if (field != null) {
-                if(keyCode != GLFW.GLFW_KEY_ENTER) field.keyPressed(keyCode, scanCode, modifiers);
+                if(keyCode != GLFW.GLFW_KEY_ENTER) {
+                    var end = field.keyPressed(keyCode, scanCode, modifiers);
+                    if(!end && keyCode == GLFW.GLFW_KEY_TAB) {
+                        field.select((modifiers & GLFW.GLFW_MOD_SHIFT) != 1);
+                    }
+                }
                 return true;
             }
             return false;

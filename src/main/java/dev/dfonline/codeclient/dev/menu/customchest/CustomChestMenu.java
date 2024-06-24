@@ -242,19 +242,37 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            for (var i : widgets.keySet()) {
-                Widget widget = widgets.get(i);
-                if (widget instanceof ClickableWidget clickable) {
-                    if (clickable.isFocused()) {
-                        clickable.setFocused(false);
-                        updateItem(i);
-                        return false;
+        if (keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                for (var i : widgets.keySet()) {
+                    Widget widget = widgets.get(i);
+                    if (widget instanceof ClickableWidget clickable) {
+                        if (clickable.isFocused()) {
+                            clickable.setFocused(false);
+                            updateItem(i);
+                            return false;
+                        }
                     }
                 }
             }
-        }
-        if (keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
+            if(keyCode == GLFW.GLFW_KEY_TAB) {
+                for (var i : widgets.keySet()) {
+                    Widget widget = widgets.get(i);
+                    if (widget instanceof ClickableWidget clickable) {
+                        if (clickable.isFocused()) {
+                            if(!clickable.keyPressed(keyCode, scanCode, modifiers)) {
+                                if (widgets.get(hasShiftDown() ? --i :   ++i) instanceof CustomChestField<?> next) next.select(!hasShiftDown());
+                                clickable.setFocused(false);
+                            }
+                            return true;
+                        }
+                    }
+                }
+                if(widgets.get(hasShiftDown() ? widgets.size() - 1 : 0) instanceof CustomChestField<?> next) {
+                    next.select(!hasShiftDown());
+                }
+                return true;
+            }
             for (var i : widgets.keySet()) {
                 Widget widget = widgets.get(i);
                 if (widget instanceof ClickableWidget clickable) {

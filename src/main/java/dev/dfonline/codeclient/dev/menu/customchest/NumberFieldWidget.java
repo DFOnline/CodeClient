@@ -5,6 +5,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 public class NumberFieldWidget extends TextFieldWidget {
     @Nullable
@@ -17,6 +18,13 @@ public class NumberFieldWidget extends TextFieldWidget {
 
     public NumberFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, Text text) {
         super(textRenderer, x, y, width, height, text);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if(keyCode == GLFW.GLFW_KEY_UP) setNumber(getNumber() + 1);
+        if(keyCode == GLFW.GLFW_KEY_DOWN) setNumber(getNumber() - 1);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     public NumberFieldWidget integer() {
