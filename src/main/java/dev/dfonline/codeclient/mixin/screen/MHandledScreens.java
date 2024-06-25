@@ -5,6 +5,7 @@ import dev.dfonline.codeclient.dev.InsertOverlay;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestHandler;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
+import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -34,6 +35,8 @@ public class MHandledScreens {
                 //noinspection rawtypes
                 return (Provider) (handler, playerInventory, title) -> new CustomChestMenu(new CustomChestHandler(handler.syncId), playerInventory, title);
             }
+        } else if (Config.getConfig().ActionViewer) {
+            ActionViewer.invalidate();
         }
         return PROVIDERS.get(type);
     }

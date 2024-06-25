@@ -3,7 +3,10 @@ package dev.dfonline.codeclient.mixin.screen;
 import dev.dfonline.codeclient.dev.InsertOverlay;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.SlotGhostManager;
+import dev.dfonline.codeclient.dev.overlay.ActionViewer;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -35,6 +38,7 @@ public abstract class MHandledScreen {
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         SlotGhostManager.render(delta);
         InsertOverlay.render(context,mouseX,mouseY,(HandledScreen<?>) (Object) this, this.x, this.y);
+        ActionViewer.render(context, mouseX, mouseY,(HandledScreen<?>) (Object) this);
     }
 
     @Redirect(method = "drawMouseoverTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;hasStack()Z"))

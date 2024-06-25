@@ -14,7 +14,8 @@
     "sources": "https://github.com/DFOnline/CodeClient"
   },
   "contributors": [
-    "RedVortex"
+    "RedVortex",
+    "msvae"
   ],
   "license": "MIT",
   "icon": "assets/codeclient/icon.png",

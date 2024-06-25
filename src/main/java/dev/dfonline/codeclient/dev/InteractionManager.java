@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.switcher.ScopeSwitcher;
@@ -241,6 +242,7 @@ public class InteractionManager {
 
     public static BlockHitResult onBlockInteract(BlockHitResult hitResult) {
         SlotGhostManager.onClickChest(hitResult);
+        ActionViewer.onClickChest(hitResult);
         if (CodeClient.location instanceof Dev plot && plot.isInDev(hitResult.getBlockPos())) {
             plot.getLineStartCache();
             ChestPeeker.invalidate();

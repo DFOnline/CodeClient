@@ -68,6 +68,9 @@ public class Config {
     public boolean ChatEditsVars = true;
     public boolean InsertOverlay = true;
     public boolean ParameterGhosts = true;
+    public boolean ActionViewer = true;
+    public boolean InvertActionViewerScroll = false;
+    public ActionViewerAlignment ActionViewerLocation = ActionViewerAlignment.TOP;
 
     public Config() {
     }
@@ -139,6 +142,9 @@ public class Config {
             object.addProperty("ChatEditsVars",ChatEditsVars);
             object.addProperty("InsertOverlay",InsertOverlay);
             object.addProperty("ParameterGhosts",ParameterGhosts);
+            object.addProperty("ActionViewer",ActionViewer);
+            object.addProperty("InvertActionViewerScroll",InvertActionViewerScroll);
+            object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -567,6 +573,42 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         //</editor-fold>
+                        //<editor-fold desc="Action Viewer">
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.translatable("codeclient.config.category.action_viewer"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.category.action_viewer.description")))
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.translatable("codeclient.config.action_viewer"))
+                                        .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer.description")))
+                                        .binding(
+                                                true,
+                                                () -> ActionViewer,
+                                                opt -> ActionViewer = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.translatable("codeclient.config.invert_action_viewer_scroll"))
+                                        .description(OptionDescription.of(Text.translatable("codeclient.config.invert_action_viewer_scroll.description")))
+                                        .binding(
+                                                false,
+                                                () -> InvertActionViewerScroll,
+                                                opt -> InvertActionViewerScroll = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(ActionViewerAlignment.class)
+                                        .name(Text.translatable("codeclient.config.action_viewer_alignment"))
+                                        .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer_alignment.description")))
+                                        .binding(
+                                                ActionViewerAlignment.TOP,
+                                                () -> ActionViewerLocation,
+                                                opt -> ActionViewerLocation = opt
+                                        )
+                                        .controller(nodeOption -> () -> new EnumController<>(nodeOption, ActionViewerAlignment.class))
+                                        .build())
+                                .build())
+                        //</editor-fold>
                         //<editor-fold desc="Chest Preview">
                         .group(OptionGroup.createBuilder()
                                 .name(Text.literal("Chest Preview"))
@@ -770,5 +812,10 @@ public class Config {
             this.description = description;
             this.size = size;
         }
+    }
+
+    public enum ActionViewerAlignment {
+        CENTER,
+        TOP;
     }
 }
