@@ -18,6 +18,10 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -31,12 +35,13 @@ import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 public class CodeClient implements ModInitializer {
     public static final String MOD_NAME = "CodeClient";
@@ -223,11 +228,52 @@ public class CodeClient implements ModInitializer {
     }
 
     /**
+     * Gets the mod container needed for registering resources like data packs and resource packs to CodeClient.
+     * @return the mod container.
+     * @throws NullPointerException the mod's container was not found.
+     */
+    public static ModContainer getModContainer() throws NullPointerException {
+        var container = FabricLoader.getInstance().getModContainer(CodeClient.MOD_ID);
+        if (container.isEmpty()) throw new NullPointerException("Could not get mod container.");
+        return container.get();
+    }
+
+    /**
+     * Registers a resource pack with a normal activation type.
+     * @param id the resource id
+     * @param name the resource pack's display name
+     * @return if the resource pack was created
+     * @throws NullPointerException if the mod container is not found
+     */
+    private boolean registerResourcePack(String id, Text name) throws NullPointerException {
+        return registerResourcePack(id, name, ResourcePackActivationType.NORMAL);
+    }
+
+    /**
+     * Registers a resource pack with the given activation type.
+     * @param id the resource id
+     * @param name the resource pack's display name
+     * @param type the resource pack's activation type
+     * @return if the resource pack was created
+     * @throws NullPointerException if the mod container is not found
+     */
+    private boolean registerResourcePack(String id, Text name, ResourcePackActivationType type) throws NullPointerException {
+        var prefix = String.format("[%s] ", MOD_NAME);
+        return ResourceManagerHelper.registerBuiltinResourcePack(
+                new Identifier(CodeClient.MOD_ID, id),
+                getModContainer(),
+                Text.literal(prefix).formatted(Formatting.GRAY).append(name),
+                type
+        );
+    }
+
+    /**
      * Registers barriers as visible.
      * Starts the API.
      * Sets up auto join if enabled.
      * Setups the edit bind.
      * Registers command callback.
+     * Registers dark mode resource pack.
      */
     @Override
     public void onInitialize() {
@@ -258,6 +304,12 @@ public class CodeClient implements ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             Commands.register(dispatcher);
         });
+
+        try {
+            registerResourcePack("dark_mode", Text.literal("Dark Mode").formatted(Formatting.WHITE));
+        } catch (NullPointerException exception) {
+            CodeClient.LOGGER.warn("Could not load dark mode resource pack!");
+        }
 
         CodeClient.LOGGER.info("CodeClient, making it easier to wipe your plot and get banned for hacks since 2022");
     }
