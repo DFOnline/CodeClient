@@ -106,8 +106,18 @@ public class InteractionManager {
             BlockPos breakPos = isBlockBreakable(pos);
             if (breakPos != null) {
                 if (Config.getConfig().ReportBrokenBlock && validBlocks.contains(CodeClient.MC.world.getBlockState(breakPos).getBlock()) && CodeClient.MC.world.getBlockEntity(breakPos.west()) instanceof SignBlockEntity sign) {
-                    if (!sign.getFrontText().getMessage(1, false).equals(Text.empty()))
-                        Utility.sendMessage(Text.translatable("codeclient.interaction.broke", Text.empty().formatted(Formatting.WHITE).append(sign.getFrontText().getMessage(1, false))).formatted(Formatting.AQUA), ChatType.INFO);
+                    Text signText = sign.getFrontText().getMessage(1, false);
+                    boolean isSignTextEmpty = signText.getString().isEmpty();
+
+                    Utility.sendMessage(
+                        isSignTextEmpty
+                                ? Text.translatable("codeclient.interaction.broke_empty", Text.translatable("hypercube.codeblock." +
+                                    sign.getFrontText().getMessage(0, false).getString().toLowerCase().replace(' ', '_'))).formatted(Formatting.AQUA)
+                                : Text.translatable("codeclient.interaction.broke", Text.empty().formatted(Formatting.WHITE).append(signText)).formatted(Formatting.AQUA)
+                    );
+
+
+
                 }
                 BlockBreakDeltaCalculator.breakBlock(pos);
             }
