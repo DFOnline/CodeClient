@@ -130,5 +130,11 @@
   "codeclient.api.disconnected": "The connected app can no longer interact with CodeClient.",
   "codeclient.api.scope.invalid": "The connected app requested an invalid permission.",
 
-  "codeclient.interaction.broke": "You just broke %s."
+  "codeclient.interaction.broke": "You just broke %s.",
+  "codeclient.interaction.broke_empty": "You just broke an empty %s.",
+
+  "hypercube.codeblock.function": "Function",
+  "hypercube.codeblock.call_function": "Call Function",
+  "hypercube.codeblock.process": "Process",
+  "hypercube.codeblock.start_process": "Start Process"
 }
