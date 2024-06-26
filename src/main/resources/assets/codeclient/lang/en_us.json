@@ -10,10 +10,27 @@
   "key.codeclient.tp.backward": "Teleport Backwards",
   "key.codeclient.open_action": "Open Action",
 
+  "codeclient.config.tab.general": "General",
+
+  "codeclient.config.api": "CodeClient API",
+  "codeclient.config.api.description": "Allows external apps to add code to your plot.",
+  "codeclient.config.read_charset": "Read Charset",
+  "codeclient.config.read_charset.description": "Can fix artifacts in ActionDump loading.",
+  "codeclient.config.save_charset": "Save Charset",
+  "codeclient.config.save_charset.description": "When getting the actiondump get it in a needed format.",
+
+  "codeclient.config.requires_restart": "(requires restart)",
+  "codeclient.config.default_recommended": "Default recommended.",
+
   "codeclient.config.dev_for_build": "Dev mode for build",
   "codeclient.config.dev_for_build.description": "Uses dev mode instead of build mode, clearing your inventory and teleporting you.",
+  "codeclient.config.auto_focus_search": "Auto Focus Search",
+  "codeclient.config.auto_focus_search.description": "When opening the Code Palette (%s) automatically select the search bar.",
+  "codeclient.config.auto_focus_search.description.2": "This is disabled because it interferes with navigation binds.",
   "codeclient.config.chat_edits_vars": "Auto edit values",
   "codeclient.config.chat_edits_vars.description": "Opening chat whilst holding a value will automatically put the contents in chat.",
+  "codeclient.config.ccdbug": "CCDBUG",
+  "codeclient.config.ccdbug.description": "Toggle CCDBUG, which is a variable and entity watcher for debugging.",
   "codeclient.config.insert_overlay": "Click to insert value",
   "codeclient.config.insert_overlay.description": "Click on an empty slot in a code chest to insert a value.",
   "codeclient.config.param_ghosts": "Parameter Ghosts",
