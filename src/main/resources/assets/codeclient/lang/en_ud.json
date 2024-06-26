@@ -10,10 +10,27 @@
   "key.codeclient.tp.backward": "spɹɐʍʞɔɐq ʇɹodǝlǝ┴",
   "key.codeclient.open_action": "uoᴉʇɔ∀ uǝdO",
 
+  "codeclient.config.tab.general": "lɐɹǝuǝפ",
+
+  "codeclient.config.api": "IԀ∀ ʇuǝᴉlƆǝpoƆ",
+  "codeclient.config.api.description": "˙ʇold ɹnoʎ oʇ ǝpoɔ ppɐ oʇ sddɐ lɐuɹǝʇxǝ sʍoll∀",
+  "codeclient.config.read_charset": "ʇǝsɹɐɥƆ pɐǝɹ",
+  "codeclient.config.read_charset.description": "˙ƃuᴉpɐol dɯnpuoᴉʇɔ∀ uᴉ sʇɔɐɟᴉʇɹɐ xᴉɟ uɐƆ",
+  "codeclient.config.save_charset": "ʇǝsɹɐɥƆ ǝʌɐS",
+  "codeclient.config.save_charset.description": "˙ʇɐɯɹoɟ pǝpǝǝu ɐ uᴉ ʇᴉ ʇǝƃ dɯnpuoᴉʇɔɐ ǝɥʇ ƃuᴉʇʇǝƃ uǝɥM",
+
+  "codeclient.config.requires_restart": "(ʇɹɐʇsǝɹ sǝɹᴉnbǝɹ)",
+  "codeclient.config.default_recommended": "˙pǝpuǝɯɯoɔǝɹ ʇlnɐɟǝp",
+
   "codeclient.config.dev_for_build": "plᴉnq ɹoɟ ǝpoɯ ʌǝp",
   "codeclient.config.dev_for_build.description": "˙noʎ ƃuᴉʇɹodǝlǝʇ puɐ ʎɹoʇuǝʌuᴉ ɹnoʎ ƃuᴉɹɐǝlɔ 'ǝpoɯ plᴉnq ɟo pɐǝʇsuᴉ ǝpoɯ ʌǝp sǝs∩",
+  "codeclient.config.auto_focus_search": "ɥɔɹɐǝS snɔoℲ oʇn∀",
+  "codeclient.config.auto_focus_search.description": "˙ɹɐq ɥɔɹɐǝs ǝɥʇ ʇɔǝlǝs ʎllɐɔᴉʇɐɯoʇnɐ (s%) ǝʇʇǝlɐԀ ǝpoƆ ǝɥʇ ƃuᴉuǝdo uǝɥM",
+  "codeclient.config.auto_focus_search.description.2": "˙spuᴉq uoᴉʇɐƃᴉʌɐu ɥʇᴉʍ sǝɹǝɟɹǝʇuᴉ ʇᴉ ǝsnɐɔǝq pǝlqɐsᴉp sᴉ sᴉɥ┴",
   "codeclient.config.chat_edits_vars": "sǝnlɐʌ ʇᴉpǝ oʇn∀",
   "codeclient.config.chat_edits_vars.description": "˙ʇɐɥɔ uᴉ sʇuǝʇuoɔ ǝɥʇ ʇnd ʎllɐɔᴉʇɐɯoʇnɐ llᴉʍ ǝnlɐʌ ɐ ƃuᴉploɥ ʇslᴉɥʍ ʇɐɥɔ ƃuᴉuǝdO",
+  "codeclient.config.ccdbug": "פ∩qpƆƆ",
+  "codeclient.config.ccdbug.description": "˙ƃuᴉƃƃnqǝp ɹoɟ ɹǝɥɔʇɐʍ ʎʇᴉʇuǝ puɐ ǝlqɐᴉɹɐʌ ɐ sᴉ ɥɔᴉɥʍ 'פ∩qpƆƆ ǝlƃƃo┴",
   "codeclient.config.insert_overlay": "ǝnlɐʌ ʇɹǝsuᴉ oʇ ʞɔᴉlƆ",
   "codeclient.config.insert_overlay.description": "˙ǝnlɐʌ ɐ ʇɹǝsuᴉ oʇ ʇsǝɥɔ ǝpoɔ ɐ uᴉ ʇols ʎʇdɯǝ uɐ uo ʞɔᴉlƆ",
   "codeclient.config.param_ghosts": "sʇsoɥפ ɹǝʇǝɯɐɹɐԀ",
