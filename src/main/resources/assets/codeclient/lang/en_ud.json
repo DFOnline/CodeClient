@@ -130,5 +130,11 @@
   "codeclient.api.disconnected": "˙ʇuǝᴉlƆǝpoƆ ɥʇᴉʍ ʇɔɐɹǝʇuᴉ ɹǝƃuol ou uɐɔ ddɐ pǝʇɔǝuuoɔ ǝɥ┴",
   "codeclient.api.scope.invalid": "˙uoᴉssᴉɯɹǝd pᴉlɐʌuᴉ uɐ pǝʇsǝnbǝɹ ddɐ pǝʇɔǝuuoɔ ǝɥ┴",
 
-  "codeclient.interaction.broke": "˙%s ǝʞoɹq ʇsnɾ no⅄"
+  "codeclient.interaction.broke": "˙%s ǝʞoɹq ʇsnɾ no⅄",
+  "codeclient.interaction.broke_empty": "˙%s ʎʇdɯǝ uɐ ǝʞoɹq ʇsnɾ no⅄",
+
+  "hypercube.codeblock.function": "uoᴉʇɔunℲ",
+  "hypercube.codeblock.call_function": "uoᴉʇɔunℲ llɐƆ",
+  "hypercube.codeblock.process": "ssǝɔoɹԀ",
+  "hypercube.codeblock.start_process": "ssǝɔoɹԀ ʇɹɐʇS"
 }
