@@ -156,13 +156,13 @@ public class Config {
                 .title(Text.literal("CodeClient Config"))
                 //<editor-fold desc="General">
                 .category(ConfigCategory.createBuilder()
-                        .name(Text.literal("General"))
+                        .name(Text.translatable("codeclient.config.tab.general"))
                         .tooltip(Text.literal("General always specific options for CodeClient"))
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("CodeClient API"))
+                                .name(Text.translatable("codeclient.config.api"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Allows external apps to add code to your plot."))
-                                        .text(Text.literal("(requires restart)"))
+                                        .text(Text.translatable("codeclient.config.api.description"))
+                                        .text(Text.translatable("codeclient.config.requires_restart"))
                                         .build())
                                 .binding(
                                         false,
@@ -173,9 +173,9 @@ public class Config {
                                 .flag(OptionFlag.GAME_RESTART)
                                 .build())
                         .option(Option.createBuilder(CharSetOption.class)
-                                .name(Text.literal("Read Charset"))
+                                .name(Text.translatable("codeclient.config.read_charset"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Can fix artifacts in ActionDump loading."))
+                                        .text(Text.translatable("codeclient.config.read_charset.description"))
                                         .build())
                                 .binding(
                                         CharSetOption.UTF_8,
@@ -186,9 +186,9 @@ public class Config {
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CharSetOption.class))
                                 .build())
                         .option(Option.createBuilder(CharSetOption.class)
-                                .name(Text.literal("Save Charset"))
+                                .name(Text.translatable("codeclient.config.save_charset"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("When getting the actiondump get it in a needed format."), Text.literal("Default recommended."))
+                                        .text(Text.translatable("codeclient.config.save_charset.description"), Text.translatable("codeclient.config.default_recommended"))
                                         .build())
                                 .binding(
                                         CharSetOption.UTF_8,
@@ -209,8 +209,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Auto Focus Search"))
-                                .description(OptionDescription.of(Text.literal("When opening the Code Palette (").append(Text.keybind("key.codeclient.codepalette")).append(") automatically select the search bar."), Text.literal("This is disabled because it interferes with navigation binds.")))
+                                .name(Text.translatable("codeclient.config.auto_focus_search"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.auto_focus_search.description", Text.keybind("key.codeclient.codepalette")), Text.translatable("codeclient.config.auto_focus_search.description.2")))
                                 .binding(
                                         false,
                                         () -> FocusSearch,
@@ -229,9 +229,9 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("CCDBUG"))
+                                .name(Text.translatable("codeclient.config.ccdbug"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("Toggle CCDBUG, which is a variable and entity watcher for debugging."))
+                                        .text(Text.translatable("codeclient.config.ccdbug.description"))
                                         .build())
                                 .binding(
                                         true,
