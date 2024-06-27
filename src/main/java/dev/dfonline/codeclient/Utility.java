@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
@@ -352,5 +353,27 @@ public class Utility {
         }
 
         return options;
+    }
+
+    public static void textToString(Text content, StringBuilder build, GetActionDump.ColorMode colorMode) {
+        TextColor lastColor = null;
+        for (Text text : content.getSiblings()) {
+            TextColor color = text.getStyle().getColor();
+            if (color != null && (lastColor != color) && (colorMode != GetActionDump.ColorMode.NONE)) {
+                lastColor = color;
+                if (color.getName().contains("#")) {
+                    build.append(String.join(colorMode.text, color.getName().split("")).replace("#", colorMode.text + "x").toLowerCase());
+                } else {
+                    build.append(Formatting.valueOf(String.valueOf(color).toUpperCase()).toString().replace("§", colorMode.text));
+                }
+            }
+            build.append(text.getString());
+        }
+    }
+
+    public static String textToString(Text content) {
+        var builder = new StringBuilder();
+        textToString(content, builder, GetActionDump.ColorMode.SECTION);
+        return builder.toString();
     }
 }

@@ -1,14 +1,10 @@
 package dev.dfonline.codeclient.action.impl;
 
-import dev.dfonline.codeclient.Callback;
-import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.FileManager;
-import dev.dfonline.codeclient.OverlayManager;
+import dev.dfonline.codeclient.*;
 import dev.dfonline.codeclient.action.Action;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 
 import java.io.IOException;
@@ -49,19 +45,7 @@ public class GetActionDump extends Action {
 
                 return true;
             }
-            TextColor lastColor = null;
-            for (Text text : message.content().getSiblings()) {
-                TextColor color = text.getStyle().getColor();
-                if (color != null && (lastColor != color) && (colorMode != ColorMode.NONE)) {
-                    lastColor = color;
-                    if (color.getName().contains("#")) {
-                        capturedData.append(String.join(colorMode.text, color.getName().split("")).replace("#", colorMode.text + "x").toLowerCase());
-                    } else {
-                        capturedData.append(Formatting.valueOf(String.valueOf(color).toUpperCase()).toString().replace("§", colorMode.text));
-                    }
-                }
-                capturedData.append(text.getString());
-            }
+            Utility.textToString(message.content(), capturedData, colorMode);
             String content = message.content().getString();
             capturedData.append("\n");
             lines += 1;
