@@ -150,6 +150,8 @@
   "codeclient.interaction.broke": "You just broke %s.",
   "codeclient.interaction.broke_empty": "You just broke an empty %s.",
 
+  "hypercube.codeblock.player_event": "Player Event",
+  "hypercube.codeblock.entity_event": "Entity Event",
   "hypercube.codeblock.function": "Function",
   "hypercube.codeblock.call_function": "Call Function",
   "hypercube.codeblock.process": "Process",
