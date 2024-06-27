@@ -22,6 +22,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 
 import java.nio.file.Files;
@@ -78,8 +79,15 @@ public class RecentValues {
                 if (!(CodeClient.location instanceof Dev)) return;
 
                 ScreenEvents.afterRender(screen).register((screen1, ctx, mouseX, mouseY, tickDelta) -> {
+                    if(recent.isEmpty() && pinned.isEmpty()) return;
+
                     int y = (int) (scaledHeight * 0.25);
                     int xEnd = (int) (scaledWidth * 0.25);
+
+                    ctx.drawGuiTexture(new Identifier("recipe_book/overlay_recipe"), 5, y - 5,
+                            Math.min(Math.max(pinned.size(), recent.size()),16) * 15 + 10,
+                            (((int) Math.ceil((double) pinned.size() / 16)) + ((int) Math.ceil((double) recent.size() / 16))) * 16 + 10
+                            );
 
                     hoveredItem = null;
                     hoveredOrigin = null;
@@ -112,7 +120,7 @@ public class RecentValues {
                             CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(
                                     SoundEvents.ENTITY_ITEM_PICKUP,
                                     SoundCategory.PLAYERS,
-                                    2, 0.8f, Random.create(),
+                                    2, 1f, Random.create(),
                                     CodeClient.MC.player.getBlockPos()
                             ));
 
@@ -130,17 +138,17 @@ public class RecentValues {
                         hoveredOrigin.remove(hoveredItem);
                         if (hoveredOrigin == pinned) {
                             CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(
-                                    SoundEvents.ENTITY_ARROW_HIT,
+                                    SoundEvents.UI_BUTTON_CLICK.value(),
                                     SoundCategory.PLAYERS,
-                                    2, 0.8f, Random.create(),
+                                    2, 0.5f, Random.create(),
                                     CodeClient.MC.player.getBlockPos()
                             ));
                             return;
                         }
                         CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(
-                                SoundEvents.ENTITY_SHULKER_BULLET_HIT,
+                                SoundEvents.UI_BUTTON_CLICK.value(),
                                 SoundCategory.PLAYERS,
-                                2, 0.8f, Random.create(),
+                                2, 0.6f, Random.create(),
                                 CodeClient.MC.player.getBlockPos()
                         ));
                         pinned.add(hoveredItem);
