@@ -13,6 +13,7 @@
     "entity.player.MAbstractClientPlayerEntity",
     "entity.player.MClientPlayerEntity",
     "entity.player.MClientPlayerInteractionManager",
+    "entity.player.MPlayerInventory",
     "entity.player.MPlayerEntity",
     "network.MClientCommonPlayNetworkHandler",
     "network.MClientConnection",
