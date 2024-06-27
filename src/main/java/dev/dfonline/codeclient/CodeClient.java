@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
@@ -70,13 +71,12 @@ public class CodeClient implements ModInitializer {
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         if (currentAction.onReceivePacket(packet)) return true;
         if (Debug.handlePacket(packet)) return true;
-        if (BuildPhaser.handlePacket(packet)) return true;
         if (ChestPeeker.handlePacket(packet)) return true;
         Event.handlePacket(packet);
         LastPos.handlePacket(packet);
 
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.", "");
-//        if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
+        //if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
 
         if (CodeClient.location instanceof Dev dev &&
                 packet instanceof BlockEntityUpdateS2CPacket beu &&
@@ -110,7 +110,6 @@ public class CodeClient implements ModInitializer {
      */
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
         if (CodeClient.currentAction.onSendPacket(packet)) return true;
-        if (BuildPhaser.onPacket(packet)) return true;
         Event.onSendPacket(packet);
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.", "");
 //        LOGGER.info(name);
@@ -201,7 +200,6 @@ public class CodeClient implements ModInitializer {
     public static void clean() {
         CodeClient.currentAction = new None();
         CodeClient.location = null;
-        BuildPhaser.disableClipping();
         Commands.confirm = null;
         Commands.screen = null;
         Debug.clean();
@@ -268,6 +266,7 @@ public class CodeClient implements ModInitializer {
     }
 
     /**
+     * Registers tick and chat events
      * Registers barriers as visible.
      * Starts the API.
      * Sets up auto join if enabled.
@@ -280,6 +279,10 @@ public class CodeClient implements ModInitializer {
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (MC.player == null || MC.world == null) clean();
         });
+
+        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> (
+                !BuildPhaser.shouldCancelMessage(message))
+        );
 
         MC = MinecraftClient.getInstance();
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());

@@ -16,10 +16,4 @@ public class MMouse {
     private boolean mouseScrolled(Screen instance, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         return InsertOverlay.mouseScrolled(mouseX,mouseY,horizontalAmount,verticalAmount) || ActionViewer.scroll(instance,mouseX,mouseY,horizontalAmount,verticalAmount) || instance.mouseScrolled(mouseX,mouseY,horizontalAmount,verticalAmount);
     }
-
-    @Redirect(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z"))
-    public boolean spectator(ClientPlayerEntity instance) {
-        if(BuildPhaser.isClipping()) return false;
-        else return instance.isSpectator();
-    }
 }
