@@ -71,6 +71,7 @@ public class Config {
     public boolean ActionViewer = true;
     public boolean InvertActionViewerScroll = false;
     public ActionViewerAlignment ActionViewerLocation = ActionViewerAlignment.TOP;
+    public int RecentValues = 0;
 
     public Config() {
     }
@@ -145,6 +146,7 @@ public class Config {
             object.addProperty("ActionViewer",ActionViewer);
             object.addProperty("InvertActionViewerScroll",InvertActionViewerScroll);
             object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
+            object.addProperty("RecentValues", RecentValues);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -521,6 +523,16 @@ public class Config {
                                         opt -> PickAction = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(int.class)
+                                .name(Text.literal("Recent Values"))
+                                .description(OptionDescription.of(Text.literal("Amount of recently used values to remember.")))
+                                .binding(
+                                        0,
+                                        () -> RecentValues,
+                                        opt -> RecentValues = opt
+                                )
+                                .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(0, 100))
                                 .build())
                         .build())
                 //</editor-fold>
