@@ -100,7 +100,7 @@ public class PlaceTemplates extends Action {
     }
 
     @Override
-    public void onTick() {
+    public void tick() {
         if (CodeClient.MC.interactionManager == null) return;
         if (CodeClient.location instanceof Dev) {
             if (operations.isEmpty()) {
@@ -108,7 +108,7 @@ public class PlaceTemplates extends Action {
                 return;
             }
             if (goTo != null) {
-                goTo.onTick();
+                goTo.tick();
             }
             if (cooldown > 0) cooldown--;
             Operation closestOperation = null;

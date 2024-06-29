@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.hypercube.item.Location;
@@ -29,19 +30,19 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-public class BuildPhaser {
-    private static boolean clipping = false;
-    private static boolean wasFlying = true;
-    private static Vec3d lastPos = new Vec3d(0, 0, 0);
-    private static boolean allowPacket = false;
-    private static boolean waitForTP = false;
-    private static boolean dontSpamBuildWarn = false;
+public class BuildPhaser extends Feature {
+    private boolean clipping = false;
+    private boolean wasFlying = true;
+    private Vec3d lastPos = new Vec3d(0, 0, 0);
+    private boolean allowPacket = false;
+    private boolean waitForTP = false;
+    private boolean dontSpamBuildWarn = false;
 
-    public static boolean isClipping() {
+    public boolean isClipping() {
         return clipping;
     }
 
-    public static void tick() {
+    public void tick() {
 //        CodeClient.LOGGER.info(String.valueOf(CodeClient.MC.player.getPos()));
 
         if (CodeClient.location instanceof Dev plot) {
@@ -83,7 +84,7 @@ public class BuildPhaser {
         }
     }
 
-    public static <T extends PacketListener> boolean onPacket(Packet<T> packet) {
+    public boolean onSendPacket(Packet<?> packet) {
         if (allowPacket) {
             allowPacket = false;
             return false;
@@ -91,7 +92,7 @@ public class BuildPhaser {
         return clipping && (packet instanceof PlayerMoveC2SPacket || packet instanceof ClientCommandC2SPacket);
     }
 
-    public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+    public boolean onReceivePacket(Packet<?> packet) {
         if (!waitForTP) return false;
         if (packet instanceof PlayerPositionLookS2CPacket move) {
             CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.getTeleportId()));
@@ -105,7 +106,7 @@ public class BuildPhaser {
         return false;
     }
 
-    private static void startClipping() {
+    private void startClipping() {
         PlayerAbilities abilities = CodeClient.MC.player.getAbilities();
         lastPos = CodeClient.MC.player.getPos();
         wasFlying = abilities.flying;
@@ -114,7 +115,7 @@ public class BuildPhaser {
         abilities.allowFlying = false;
     }
 
-    private static void finishClipping() {
+    private void finishClipping() {
         disableClipping();
         if (CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
@@ -139,10 +140,17 @@ public class BuildPhaser {
                 net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 
             Utility.sendHandItem(lastItem);
+
+            final int MAX_SPEED = 2;
+
+            var velocity = CodeClient.MC.player.getVelocity();
+            if(velocity.length() > MAX_SPEED) {
+                CodeClient.MC.player.setVelocity(velocity.normalize().multiply(MAX_SPEED));
+            }
         }
     }
 
-    public static void disableClipping() {
+    public void disableClipping() {
         clipping = false;
         waitForTP = false;
     }

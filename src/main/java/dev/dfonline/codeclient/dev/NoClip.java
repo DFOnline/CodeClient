@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.BlockState;
@@ -13,35 +14,28 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
 
-public class NoClip {
+public class NoClip extends Feature {
     public static final double PLAYER_FREEDOM = 0.621;
     /**
      * The extra blocks the player can fly outside in.
      */
     public static final double FREEDOM = 2;
-    public static LineType display = null;
-    public static Vec3d lastPos = null;
-    public static float lastYaw = 0;
-    public static float lastPitch = 0;
-    public static int timesSinceMoved = 0;
+    public LineType display = null;
+    public Vec3d lastPos = null;
+    public float lastYaw = 0;
+    public float lastPitch = 0;
+    public int timesSinceMoved = 0;
 
-    public static boolean isIgnoringWalls() {
-        return CodeClient.noClipOn() && isInDevSpace();
+    @Override
+    public boolean enabled() {
+        return Config.getConfig().NoClipEnabled;
     }
 
-    public static boolean isInDevSpace() {
-        if(CodeClient.location instanceof Dev plot) {
-            assert CodeClient.MC.player != null;
-            var size = plot.assumeSize();
-            if (plot.getX() == null) return false;
-            return CodeClient.MC.player.getX() <= plot.getX() &&
-                    CodeClient.MC.player.getZ() >= plot.getZ() - FREEDOM && CodeClient.MC.player.getZ() <= plot.getZ() + size.codeLength + 1 + FREEDOM &&
-                    CodeClient.MC.player.getY() >= plot.getFloorY() && CodeClient.MC.player.getY() < 256;
-            }
-        return false;
+    public boolean isIgnoringWalls() {
+        return CodeClient.location instanceof Dev dev && CodeClient.noClipOn() && dev.isInDevSpace();
     }
 
-    public static Vec3d handleClientPosition(Vec3d movement) {
+    public Vec3d handleClientPosition(Vec3d movement) {
         if (CodeClient.location instanceof Dev plot) {
             final int FREEDOM = 2;
 
@@ -73,11 +67,7 @@ public class NoClip {
         return null;
     }
 
-    public static float getJumpHeight() {
-        return 0.91f;
-    }
-
-    public static Vec3d handleSeverPosition() {
+    public Vec3d handleSeverPosition() {
         if (CodeClient.location instanceof Dev plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
 
@@ -99,7 +89,7 @@ public class NoClip {
         return null;
     }
 
-    public static boolean isInsideWall(Vec3d playerPos) {
+    public boolean isInsideWall(Vec3d playerPos) {
         Vec3d middlePos = playerPos.add(0, 1.8 / 2, 0);
         float f = 0.6F + 0.1F * 0.8F;
         Box box = Box.of(middlePos, f, (1.799 + 1.0E-6 * 0.8F), f);
@@ -110,7 +100,7 @@ public class NoClip {
     }
 
     @Nullable
-    public static BlockState replaceBlockAt(BlockPos pos) {
+    public BlockState replaceBlockAt(BlockPos pos) {
         if (CodeClient.location instanceof Dev plot) {
             Boolean isInDev = plot.isInDev(pos.toCenterPos());
             if (isInDev == null || !isInDev) return null;
@@ -125,6 +115,11 @@ public class NoClip {
             return Blocks.RED_STAINED_GLASS.getDefaultState();
         }
         return null;
+    }
+
+    @Override
+    public void tick() {
+        if(isIgnoringWalls()) CodeClient.MC.player.noClip = true;
     }
 
     enum LineType {

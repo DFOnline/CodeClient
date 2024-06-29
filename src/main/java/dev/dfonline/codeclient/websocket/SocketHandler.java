@@ -1,7 +1,9 @@
 package dev.dfonline.codeclient.websocket;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.dfonline.codeclient.Callback;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
@@ -23,19 +25,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class SocketHandler {
     public static final int PORT = 31375;
-    private static final ArrayList<Action> actionQueue = new ArrayList<>();
-    private static WebSocket connection = null;
+    private final ArrayList<Action> actionQueue = new ArrayList<>();
+    private WebSocket connection = null;
     private static final List<AuthScope> defaultAuthScopes = List.of(AuthScope.DEFAULT);
-    private static List<AuthScope> unapprovedAuthScopes = List.of();
-    private static List<AuthScope> authScopes = defaultAuthScopes;
-    private static SocketServer websocket;
+    private List<AuthScope> unapprovedAuthScopes = List.of();
+    private List<AuthScope> authScopes = defaultAuthScopes;
+    private SocketServer websocket;
 
-    public static void start() {
+    public void start() {
         try {
-            websocket = new SocketServer(new InetSocketAddress("localhost", PORT));
+            websocket = new SocketServer(new InetSocketAddress("localhost", PORT), this);
             Thread socketThread = new Thread(websocket, "CodeClient-API");
             socketThread.start();
             CodeClient.LOGGER.info("Socket opened");
@@ -44,14 +48,14 @@ public class SocketHandler {
         }
     }
 
-    public static void stop() {
+    public void stop() {
         try {
             websocket.stop();
         } catch (Exception ignored) {
         }
     }
 
-    public static void setAcceptedScopes(boolean accepted) {
+    public void setAcceptedScopes(boolean accepted) {
         actionQueue.clear();
         if (accepted) {
             // Add the unapproved scopes & the default scopes
@@ -66,14 +70,14 @@ public class SocketHandler {
         unapprovedAuthScopes = List.of();
     }
 
-    public static void setConnection(WebSocket socket) {
+    public void setConnection(WebSocket socket) {
         if (socket != null) actionQueue.clear();
         if (connection != null) connection.close(); // Close the old connection
         connection = socket;
     }
 
 
-    public static void onMessage(String message) {
+    public void onMessage(String message) {
         String[] arguments = message.split(" ");
         Action topAction = getTopAction();
         if (arguments[0] == null) return;
@@ -106,12 +110,12 @@ public class SocketHandler {
         next();
     }
 
-    private static Action getTopAction() {
+    private Action getTopAction() {
         if (actionQueue.isEmpty()) return null;
         return actionQueue.get(actionQueue.size() - 1);
     }
 
-    private static void handleScopeRequest(String[] argumets) {
+    private void handleScopeRequest(String[] argumets) {
         List<String> args = Arrays.asList(argumets).subList(1, argumets.length);
 
         // Send the currently approved scopes if no args are provided
@@ -148,15 +152,15 @@ public class SocketHandler {
         promptUserAcceptScopes();
     }
 
-    private static void assertScopeLevel(SocketHandler.Action commandClass) {
+    private void assertScopeLevel(SocketHandler.Action commandClass) {
         if (!authScopes.contains(commandClass.authScope)) {
             connection.send("unauthed");
             return;
         }
-        SocketHandler.actionQueue.add(commandClass);
+        actionQueue.add(commandClass);
     }
 
-    private static void promptUserAcceptScopes() {
+    private void promptUserAcceptScopes() {
         if (unapprovedAuthScopes.isEmpty()) return;
         if (CodeClient.MC.player == null) return;
 
@@ -190,7 +194,7 @@ public class SocketHandler {
         Utility.sendMessage(Text.translatable("codeclient.api.run_auth"));
     }
 
-    private static void next() {
+    private void next() {
         if (actionQueue.isEmpty()) return;
         Action firstAction = actionQueue.get(0);
         if (firstAction == null) return;
@@ -231,7 +235,7 @@ public class SocketHandler {
         public abstract void message(WebSocket responder, String message);
     }
 
-    private static class Clear extends SocketHandler.Action {
+    private class Clear extends SocketHandler.Action {
         Clear() {
             super("clear", AuthScope.CLEAR_PLOT);
         }
@@ -242,7 +246,7 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            CodeClient.currentAction = new ClearPlot(SocketHandler::next);
+            CodeClient.currentAction = new ClearPlot(SocketHandler.this::next);
             CodeClient.currentAction.init();
         }
 
@@ -251,7 +255,7 @@ public class SocketHandler {
         }
     }
 
-    private static class Spawn extends SocketHandler.Action {
+    private class Spawn extends SocketHandler.Action {
         Spawn() {
             super("spawn", AuthScope.MOVEMENT);
         }
@@ -262,7 +266,7 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            CodeClient.currentAction = new MoveToSpawn(SocketHandler::next);
+            CodeClient.currentAction = new MoveToSpawn(SocketHandler.this::next);
             CodeClient.currentAction.init();
         }
 
@@ -271,7 +275,7 @@ public class SocketHandler {
         }
     }
 
-    private static class Size extends SocketHandler.Action {
+    private class Size extends SocketHandler.Action {
         Size() {
             super("size", AuthScope.READ_PLOT);
         }
@@ -300,7 +304,7 @@ public class SocketHandler {
         }
     }
 
-    private static class Scan extends SocketHandler.Action {
+    private class Scan extends SocketHandler.Action {
         Scan() {
             super("scan", AuthScope.READ_PLOT);
         }
@@ -340,7 +344,7 @@ public class SocketHandler {
         }
     }
 
-    private static class Place extends SocketHandler.Action {
+    private class Place extends SocketHandler.Action {
         private final ArrayList<ItemStack> templates = new ArrayList<>();
         public boolean ready = false;
         private Method method = Method.DEFAULT;
@@ -355,7 +359,7 @@ public class SocketHandler {
         @Override
         public void start(WebSocket responder) {
             if (!ready) return;
-            var placer = method.createPlacer.run(templates, responder);
+            var placer = method.createPlacer.run(templates, SocketHandler.this::next, responder);
             if (placer == null) return;
             CodeClient.currentAction = placer;
             CodeClient.currentAction.init();
@@ -384,20 +388,20 @@ public class SocketHandler {
         }
 
         private enum Method {
-            DEFAULT((ArrayList<ItemStack> templates, WebSocket responder) -> Utility.createPlacer(templates, () -> {
+            DEFAULT((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> Utility.createPlacer(templates, () -> {
                 CodeClient.currentAction = new None();
                 if (responder.isOpen()) responder.send("place done");
-                next();
+                next.run();
             })),
-            COMPACT((ArrayList<ItemStack> templates, WebSocket responder) -> Utility.createPlacer(templates, () -> {
+            COMPACT((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> Utility.createPlacer(templates, () -> {
                 CodeClient.currentAction = new None();
                 if (responder.isOpen()) responder.send("place done");
-                next();
+                next.run();
             }, true)),
-            SWAP((ArrayList<ItemStack> templates, WebSocket responder) -> Utility.createSwapper(templates, () -> {
+            SWAP((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> Utility.createSwapper(templates, () -> {
                 CodeClient.currentAction = new None();
                 if (responder.isOpen()) responder.send("place done");
-                next();
+                next.run();
             }).swap()),
             ;
 
@@ -409,11 +413,11 @@ public class SocketHandler {
         }
 
         private interface CreatePlacer {
-            PlaceTemplates run(ArrayList<ItemStack> templates, WebSocket responder);
+            PlaceTemplates run(ArrayList<ItemStack> templates, Callback next, WebSocket responder);
         }
     }
 
-    private static class SendInventory extends SocketHandler.Action {
+    private class SendInventory extends SocketHandler.Action {
         SendInventory() {
             super("inv", AuthScope.INVENTORY);
         }
@@ -436,7 +440,7 @@ public class SocketHandler {
         }
     }
 
-    private static class SetInventory extends SocketHandler.Action {
+    private class SetInventory extends SocketHandler.Action {
         private final String content;
 
         SetInventory(String content) {
@@ -474,7 +478,7 @@ public class SocketHandler {
         }
     }
 
-    private static class Give extends SocketHandler.Action {
+    private class Give extends SocketHandler.Action {
         private final String content;
 
         Give(String content) {
@@ -509,7 +513,7 @@ public class SocketHandler {
         }
     }
 
-    private static class Mode extends SocketHandler.Action {
+    private class Mode extends SocketHandler.Action {
         private static final List<String> commands = List.of("play", "build", "code", "dev");
         private final String command;
 

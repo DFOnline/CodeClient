@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.mixin;
 
+import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.BuildPhaser;
 import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import net.minecraft.client.Mouse;
@@ -19,7 +20,8 @@ public class MMouse {
 
     @Redirect(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z"))
     public boolean spectator(ClientPlayerEntity instance) {
-        if(BuildPhaser.isClipping()) return false;
+        var feat = CodeClient.getFeature(BuildPhaser.class);
+        if (feat.isPresent() && feat.get().isClipping()) return false;
         else return instance.isSpectator();
     }
 }

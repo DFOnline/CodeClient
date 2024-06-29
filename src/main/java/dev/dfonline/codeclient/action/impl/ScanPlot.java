@@ -97,9 +97,9 @@ public class ScanPlot extends Action {
     }
 
     @Override
-    public void onTick() {
+    public void tick() {
         if (blocks == null) return;
-        if (step != null) step.onTick();
+        if (step != null) step.tick();
         else {
             next();
         }
@@ -144,7 +144,7 @@ public class ScanPlot extends Action {
         }
 
         @Override
-        public void onTick() {
+        public void tick() {
             ticks += 1;
             if (ticks == 10) {
                 ticks = 0;
@@ -175,7 +175,7 @@ public class ScanPlot extends Action {
 //                goTo = new GoTo(blocks.get(progress).toCenterPos().add(goToOffset), () -> {});
 //                goTo.init();
 //            }
-//            goTo.onTick();
+//            goTo.tick();
 //        }
 //    }
     }

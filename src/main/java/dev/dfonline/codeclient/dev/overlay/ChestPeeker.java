@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.dev.overlay;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
@@ -12,7 +13,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket;
@@ -31,13 +31,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ChestPeeker {
-    private static BlockPos currentBlock = null;
-    private static NbtList items = null;
-    private static boolean shouldClearChest = false;
-    private static int timeOut = 0;
+public class ChestPeeker extends Feature {
+    private BlockPos currentBlock = null;
+    private NbtList items = null;
+    private boolean shouldClearChest = false;
+    private int timeOut = 0;
 
-    public static void tick() {
+    public void tick() {
         if (timeOut > 0) {
             timeOut--;
             return;
@@ -79,10 +79,7 @@ public class ChestPeeker {
         items = null;
     }
 
-    /**
-     * @return true to cancel packet.
-     */
-    public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+    public boolean onReceivePacket(Packet<?> packet) {
         if (CodeClient.MC.currentScreen != null) return false;
         if (CodeClient.MC.getNetworkHandler() == null) return false;
         if (!Config.getConfig().ChestPeeker) return false;
@@ -91,7 +88,7 @@ public class ChestPeeker {
                 if (!Objects.equals(currentBlock, block.getPos())) return false;
                 if (block.getType() != 1) return false;
                 if (block.getData() != 0) return false;
-                invalidate();
+                reset();
             }
             if (packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
                 var nbt = slot.getStack().getNbt();
@@ -112,7 +109,7 @@ public class ChestPeeker {
         return false;
     }
 
-    public static List<Text> getOverlayText() {
+    public List<Text> getOverlayText() {
         if (!Config.getConfig().ChestPeeker) return null;
         if (CodeClient.location instanceof Dev && currentBlock != null && items != null) {
             ArrayList<Text> texts = new ArrayList<>();
@@ -200,7 +197,7 @@ public class ChestPeeker {
         return null;
     }
 
-    public static void invalidate() {
+    public void reset() {
         items = null;
         shouldClearChest = true;
         currentBlock = null;

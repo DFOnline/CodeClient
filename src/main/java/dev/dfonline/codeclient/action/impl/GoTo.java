@@ -73,7 +73,7 @@ public class GoTo extends Action {
     }
 
     @Override
-    public void onTick() {
+    public void tick() {
         thisTickPackets = 0;
         if (CodeClient.MC.player == null || CodeClient.MC.getNetworkHandler() == null) {
             callback();

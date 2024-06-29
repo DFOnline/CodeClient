@@ -1,7 +1,9 @@
 package dev.dfonline.codeclient.location;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.hypercube.ReferenceBook;
+import net.minecraft.util.math.Vec3d;
 
 public class Dev extends Creator {
     public Dev(double x, double z) {
@@ -27,6 +29,19 @@ public class Dev extends Creator {
             }
         }
         return null;
+    }
+
+    public boolean isInDevSpace() {
+        return isInDevSpace(CodeClient.MC.player.getPos());
+    }
+
+    public boolean isInDevSpace(Vec3d pos) {
+            assert CodeClient.MC.player != null;
+            var size = assumeSize();
+            if (getX() == null) return false;
+            return pos.getX() <= getX() &&
+                    pos.getZ() >= getZ() - NoClip.FREEDOM && pos.getZ() <= getZ() + size.codeLength + 1 + NoClip.FREEDOM &&
+                    pos.getY() >= getFloorY() && pos.getY() < 256;
     }
 
     @Override

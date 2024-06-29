@@ -166,7 +166,8 @@ public abstract class MClientPlayerInteractionManager {
                 CodeClient.MC.interactionManager.attackBlock(pos, direction);
                 return;
             }
-            this.currentBreakingProgress += BlockBreakDeltaCalculator.calculateBlockDelta(breakPos);
+            CodeClient.getFeature(BlockBreakDeltaCalculator.class)
+                    .ifPresent(feat -> this.currentBreakingProgress += feat.calculateBlockDelta(breakPos));
             if (this.currentBreakingProgress >= 1.0F) {
                 this.breakingBlock = false;
                 this.sendSequencedPacket(this.client.world, (sequence) -> {

@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.mixin.render.hud;
 
+import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
@@ -42,7 +43,8 @@ public abstract class MInGameHud {
         int x = (scaledWidth / 2) + Config.getConfig().ChestPeekerX;
         int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;
         try {
-            List<Text> peeker = ChestPeeker.getOverlayText();
+            List<Text> peeker = CodeClient.getFeature(ChestPeeker.class)
+                    .map(ChestPeeker::getOverlayText).orElse(null);
             if (peeker == null) peeker = SignPeeker.getOverlayText();
             if (peeker != null && !peeker.isEmpty()) {
                 context.drawTooltip(textRenderer, peeker, x, yOrig);

@@ -4,8 +4,10 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.InteractionManager;
+import dev.dfonline.codeclient.dev.Navigation;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -36,6 +38,7 @@ public abstract class MClientPlayerEntity {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void tick(CallbackInfo ci) {
+        var inst = FabricLoader.getInstance().getAllMods();
         CodeClient.onTick();
     }
 
@@ -44,13 +47,8 @@ public abstract class MClientPlayerEntity {
         if (CodeClient.location instanceof Dev plot) {
             if (CodeClient.currentAction instanceof MoveToSpawn mts) if (mts.moveModifier()) ci.cancel();
             ClientPlayerEntity player = MC.player;
+            CodeClient.getFeature(Navigation.class).map(navigation -> navigation.onCrouch(lastSneaking));
             if (NoClip.isIgnoringWalls()) {
-                if (Config.getConfig().TeleportDown && player.getY() % 5 == 0 && !lastSneaking && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle)) {
-                    Vec3d move = CodeClient.MC.player.getPos().add(0, -5, 0);
-                    if (move.y < plot.getFloorY()) move = new Vec3d(move.x, plot.getFloorY(), move.z);
-                    if ((!NoClip.isIgnoringWalls()) && NoClip.isInsideWall(move)) move = move.add(0, 2, 0);
-                    CodeClient.MC.player.setPosition(move);
-                }
                 ci.cancel();
                 Vec3d pos = NoClip.handleSeverPosition();
                 boolean idle = NoClip.timesSinceMoved++ > 40;

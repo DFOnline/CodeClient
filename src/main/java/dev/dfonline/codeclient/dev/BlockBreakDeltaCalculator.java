@@ -1,5 +1,7 @@
 package dev.dfonline.codeclient.dev;
 
+import dev.dfonline.codeclient.Feature;
+import dev.dfonline.codeclient.config.Config;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -11,21 +13,26 @@ import java.util.stream.Stream;
 /**
  * Just a little insane.
  */
-public class BlockBreakDeltaCalculator {
-    private static RecentBlocks oldBlocks = new RecentBlocks();
+public class BlockBreakDeltaCalculator extends Feature {
+    private final RecentBlocks oldBlocks = new RecentBlocks();
 
     /**
      * Only invoked when a codeblock is broken.
      */
-    public static void breakBlock(BlockPos pos) {
+    public void breakBlock(BlockPos pos) {
         if (pos == null) return;
         oldBlocks.addBlock(pos);
+    }
+
+    @Override
+    public boolean enabled() {
+        return Config.getConfig().CustomBlockBreaking;
     }
 
     /**
      * The insanity previously mentioned.
      */
-    public static float calculateBlockDelta(BlockPos pos) {
+    public float calculateBlockDelta(BlockPos pos) {
         return 0.2F;
 //        AtomicReference<Float> speed = new AtomicReference<>(0F);
 //        oldBlocks.getBlocks().forEach(recentBlock -> {

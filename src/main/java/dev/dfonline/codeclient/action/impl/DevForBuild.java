@@ -26,8 +26,8 @@ public class DevForBuild extends Action {
     }
 
     @Override
-    public void onTick() {
-        if(move != null) move.onTick();
+    public void tick() {
+        if(move != null) move.tick();
         timeout += 1;
         if(timeout >= 30) {
             callback();

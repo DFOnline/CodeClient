@@ -3,7 +3,6 @@ package dev.dfonline.codeclient.dev;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
@@ -98,9 +97,10 @@ public class InteractionManager {
             plot.clearLineStarterCache();
             if (!plot.isInDev(pos)) return false;
             if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
-                ChestPeeker.invalidate();
-                if ((!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir) && Config.getConfig().RecentChestInsert) {
-                    RecentChestInsert.setLastChest(pos);
+                CodeClient.getFeature(ChestPeeker.class).ifPresent(ChestPeeker::reset);
+                if ((!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir)) {
+                    CodeClient.getFeature(RecentChestInsert.class)
+                            .ifPresent(recentChestInsert -> recentChestInsert.setLastChest(pos));
                 }
             }
             BlockPos breakPos = isBlockBreakable(pos);
@@ -115,11 +115,9 @@ public class InteractionManager {
                                     sign.getFrontText().getMessage(0, false).getString().toLowerCase().replace(' ', '_'))).formatted(Formatting.AQUA)
                                 : Text.translatable("codeclient.interaction.broke", Text.empty().formatted(Formatting.WHITE).append(signText)).formatted(Formatting.AQUA)
                     );
-
-
-
                 }
-                BlockBreakDeltaCalculator.breakBlock(pos);
+                CodeClient.getFeature(BlockBreakDeltaCalculator.class)
+                        .ifPresent(blockBreakDeltaCalculator -> blockBreakDeltaCalculator.breakBlock(pos));
             }
             if (Config.getConfig().CustomBlockInteractions) {
                 if (breakPos != null) {
@@ -255,7 +253,7 @@ public class InteractionManager {
         ActionViewer.onClickChest(hitResult);
         if (CodeClient.location instanceof Dev plot && plot.isInDev(hitResult.getBlockPos())) {
             plot.getLineStartCache();
-            ChestPeeker.invalidate();
+            CodeClient.getFeature(ChestPeeker.class).ifPresent(ChestPeeker::reset);
             BlockPos pos = hitResult.getBlockPos();
             if (plot.isInDev(pos)) {
                 if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
@@ -279,9 +277,9 @@ public class InteractionManager {
     }
 
     public static boolean shouldTeleportUp() {
-        if (CodeClient.location instanceof Dev) {
+        if (CodeClient.location instanceof Dev dev) {
             ClientPlayerEntity pl = CodeClient.MC.player;
-            return NoClip.isInDevSpace() && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
+            return dev.isInDevSpace() && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
         }
         return false;
     }

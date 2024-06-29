@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.render.RenderLayer;
@@ -11,16 +12,21 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 
-public class RecentChestInsert {
-    private static float alpha = 0;
-    private static BlockPos lastChest = null;
+public class RecentChestInsert extends Feature {
+    private float alpha = 0;
+    private BlockPos lastChest = null;
 
-    public static void setLastChest(BlockPos pos) {
+    public void setLastChest(BlockPos pos) {
         lastChest = pos;
         alpha = Config.getConfig().HighlightChestDuration;
     }
 
-    public static void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
+    @Override
+    public boolean enabled() {
+        return Config.getConfig().RecentChestInsert;
+    }
+
+    public void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         if (CodeClient.location instanceof Dev) {
             if (lastChest == null) return;
             VoxelShape shape = CodeClient.MC.world.getBlockState(lastChest).getOutlineShape(CodeClient.MC.world, lastChest).offset(lastChest.getX(), lastChest.getY(), lastChest.getZ());
@@ -30,7 +36,7 @@ public class RecentChestInsert {
         }
     }
 
-    public static void tick() {
+    public void tick() {
         if (lastChest != null) alpha -= 0.05F;
         if (alpha <= 0) lastChest = null;
     }

@@ -23,9 +23,6 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.dfonline.codeclient.client.CodeClientClient"
-    ],
-    "main": [
       "dev.dfonline.codeclient.CodeClient"
     ],
     "modmenu": [

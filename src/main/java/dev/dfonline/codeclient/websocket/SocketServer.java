@@ -11,28 +11,31 @@ import org.java_websocket.server.WebSocketServer;
 import java.net.InetSocketAddress;
 
 public class SocketServer extends WebSocketServer {
-    public SocketServer(InetSocketAddress address) {
+    private SocketHandler handler;
+
+    public SocketServer(InetSocketAddress address, SocketHandler socketHandler) {
         super(address);
+        handler = socketHandler;
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         CodeClient.LOGGER.info("connection");
-        SocketHandler.setConnection(conn);
-        CodeClient.LOGGER.info(conn.getRemoteSocketAddress().toString() + " has just connected to the CodeClient API.");
+        handler.setConnection(conn);
+        CodeClient.LOGGER.info("{} has just connected to the CodeClient API.", conn.getRemoteSocketAddress().toString());
         Utility.sendMessage(Text.translatable("codeclient.api.connect"), ChatType.INFO);
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        CodeClient.LOGGER.info(conn.getRemoteSocketAddress().toString() + " has just disconnected from the CodeClient API.");
-        SocketHandler.setConnection(null);
+        CodeClient.LOGGER.info("{} has just disconnected from the CodeClient API.", conn.getRemoteSocketAddress().toString());
+        handler.setConnection(null);
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
         if (conn == null) return;
-        SocketHandler.onMessage(message);
+        handler.onMessage(message);
     }
 
     @Override

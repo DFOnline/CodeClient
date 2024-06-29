@@ -37,7 +37,7 @@ public class GetPlotSize extends Action {
     }
 
     @Override
-    public void onTick() {
+    public void tick() {
         if (step == Step.WAIT) {
             step = Step.TP;
             CodeClient.MC.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(CodeClient.MC.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));

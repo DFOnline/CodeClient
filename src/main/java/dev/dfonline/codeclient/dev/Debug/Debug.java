@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev.Debug;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
@@ -26,7 +27,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Debug {
+public class Debug extends Feature {
     private static Double CPU = null;
     private static List<Text> text = null;
     private static HashMap<Vec3d, Text> locations = new HashMap<>();
@@ -39,7 +40,7 @@ public class Debug {
         active = false;
     }
 
-    public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+    public boolean onReceivePacket(Packet<?> packet) {
         if (CodeClient.location instanceof Plot plot) {
             if (!Config.getConfig().CCDBUG) return false;
             if (packet instanceof OverlayMessageS2CPacket overlay) {
@@ -103,7 +104,7 @@ public class Debug {
         return false;
     }
 
-    public static void updateDisplay() {
+    public void updateDisplay() {
         if (!active) return;
         if (text == null) return;
         OverlayManager.setOverlayText();
@@ -117,7 +118,7 @@ public class Debug {
         }
     }
 
-    public static void tick() {
+    public void tick() {
         if (Config.getConfig().CCDBUG && active && CodeClient.location instanceof Plot) {
             updateDisplay();
         } else {
@@ -125,7 +126,7 @@ public class Debug {
         }
     }
 
-    public static void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers) {
+    public void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         if (active) for (var entry : locations.entrySet())
             DebugRenderer.drawString(matrices, vertexConsumers, entry.getValue().getString(), entry.getKey().x, entry.getKey().y, entry.getKey().z, 0xFFFFFF, 0.02F, true, 0, true);
     }

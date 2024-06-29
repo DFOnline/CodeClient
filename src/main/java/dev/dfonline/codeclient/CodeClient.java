@@ -13,7 +13,7 @@ import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import dev.dfonline.codeclient.websocket.SocketHandler;
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -43,7 +43,10 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CodeClient implements ModInitializer {
+import java.util.HashMap;
+import java.util.Optional;
+
+public class CodeClient implements ClientModInitializer {
     public static final String MOD_NAME = "CodeClient";
     public static final String MOD_ID = "codeclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
@@ -52,26 +55,81 @@ public class CodeClient implements ModInitializer {
 
     public static AutoJoin autoJoin = AutoJoin.NONE;
 
-    /**
-     * One at a time actions to do things like placing templates, or clearing a plot.
-     */
     @NotNull
     public static Action currentAction = new None();
     public static Location lastLocation = null;
     public static Location location = null;
     public static boolean shouldReload = false;
+    private static final HashMap<Class<? extends Feature>, Feature> features = new HashMap<>();
+    public static SocketHandler API = new SocketHandler();
 
-    /**
-     * For all receiving packet events and debugging.
-     *
-     * @param <T> Server2Client
-     * @return If the packet should be cancelled and not acted on. True to ignore.
-     */
+    @Override
+    public void onInitializeClient() {
+        loadFeatures();
+
+        ClientTickEvents.START_CLIENT_TICK.register(client -> {
+            if (MC.player == null || MC.world == null) clean();
+        });
+
+        MC = MinecraftClient.getInstance();
+        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(new Identifier(MOD_ID, "close"), client -> API.stop());
+
+        if (Config.getConfig().CodeClientAPI) {
+            try {
+                API.start();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+            }
+        }
+        if (Config.getConfig().AutoJoin) {
+            autoJoin = AutoJoin.GAME;
+        }
+
+        KeyBinds.init();
+
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            Commands.register(dispatcher);
+        });
+
+        try {
+            registerResourcePack("dark_mode", Text.literal("Dark Mode").formatted(Formatting.WHITE));
+        } catch (NullPointerException exception) {
+            LOGGER.warn("Could not load dark mode resource pack!");
+        }
+
+        LOGGER.info("CodeClient, making it easier to wipe your plot and get banned for hacks since 2022");
+    }
+
+    private static void feat(Feature feature) {
+        features.put(feature.getClass(), feature);
+    }
+    private static void loadFeatures() {
+        features.clear();
+
+        feat(new BuildPhaser());
+        feat(new ChestPeeker());
+        feat(new Debug());
+        feat(new RecentChestInsert());
+        feat(new BlockBreakDeltaCalculator());
+        feat(new Navigation());
+    }
+
+
+    public static <T extends Feature> Optional<T> getFeature(Class<T> clazz) {
+        var feat = features.get(clazz);
+        if(feat != null && feat.enabled()) return Optional.of(clazz.cast(feat));
+        return Optional.empty();
+    }
+
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
         if (currentAction.onReceivePacket(packet)) return true;
-        if (Debug.handlePacket(packet)) return true;
-        if (BuildPhaser.handlePacket(packet)) return true;
-        if (ChestPeeker.handlePacket(packet)) return true;
+        for (var feature: features.values()) {
+            if(feature.enabled() && feature.onReceivePacket(packet)) return true;
+        }
         Event.handlePacket(packet);
         LastPos.handlePacket(packet);
 
@@ -89,20 +147,6 @@ public class CodeClient implements ModInitializer {
     }
 
     /**
-     * This needs to be true for NoClip to work.
-     * Whilst this should be the first source to check if NoClip is on, keep in mind there is NoClip#isIgnoringWalls
-     * Useful for fallback checks and preventing noclip packet spam screwing you over.
-     */
-    public static boolean noClipOn() {
-        if (MC.player == null) return false;
-        if (!Config.getConfig().NoClipEnabled) return false;
-        if (!(location instanceof Dev)) return false;
-        if (!(currentAction instanceof None)) return false;
-        if (!MC.player.getAbilities().creativeMode) return false;
-        return true;
-    }
-
-    /**
      * All outgoing packet events and debugging.
      *
      * @param <T> ClientToServer
@@ -110,23 +154,20 @@ public class CodeClient implements ModInitializer {
      */
     public static <T extends PacketListener> boolean onSendPacket(Packet<T> packet) {
         if (CodeClient.currentAction.onSendPacket(packet)) return true;
-        if (BuildPhaser.onPacket(packet)) return true;
+        for (var feature : features.values()) {
+            if(feature.enabled() && feature.onSendPacket(packet)) return true;
+        }
         Event.onSendPacket(packet);
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.", "");
 //        LOGGER.info(name);
         return false;
     }
 
-    /**
-     * All tick events and debugging.
-     */
     public static void onTick() {
-
-        currentAction.onTick();
-        Debug.tick();
-        BuildPhaser.tick();
-        ChestPeeker.tick();
-        RecentChestInsert.tick();
+        currentAction.tick();
+        for (var feature : features.values()) {
+            if(feature.enabled()) feature.tick();
+        }
         KeyBinds.tick();
         SlotGhostManager.tick();
         Commands.tick();
@@ -138,7 +179,6 @@ public class CodeClient implements ModInitializer {
         if (location instanceof Dev dev) {
             if (MC.player == null) return;
             MC.player.getAbilities().allowFlying = true;
-            if (NoClip.isIgnoringWalls()) MC.player.noClip = true;
             var pos = new BlockPos(dev.getX() - 1, 49, dev.getZ());
             if (dev.getSize() == null) {
                 // TODO wait for plugin messages, or make a fix now.
@@ -187,8 +227,10 @@ public class CodeClient implements ModInitializer {
     }
 
     public static void onRender(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
-        Debug.render(matrices, vertexConsumers);
-        RecentChestInsert.render(matrices, vertexConsumers, cameraX, cameraY, cameraZ);
+        for (var feature: features.values()) {
+            if(feature.enabled()) feature.render(matrices,vertexConsumers,cameraX,cameraY,cameraZ);
+        }
+
         if (shouldReload) {
             MC.worldRenderer.reload();
             shouldReload = false;
@@ -196,12 +238,28 @@ public class CodeClient implements ModInitializer {
     }
 
     /**
+     * This needs to be true for NoClip to work.
+     * Whilst this should be the first source to check if NoClip is on, keep in mind there is NoClip#isIgnoringWalls
+     * Useful for fallback checks and preventing noclip packet spam screwing you over.
+     */
+    public static boolean noClipOn() {
+        if (MC.player == null) return false;
+        if (!Config.getConfig().NoClipEnabled) return false;
+        if (!(location instanceof Dev)) return false;
+        if (!(currentAction instanceof None)) return false;
+        if (!MC.player.getAbilities().creativeMode) return false;
+        return true;
+    }
+
+    /**
      * Remove all state from being on DF.
      */
     public static void clean() {
+        for (var feature : features.values()) {
+            feature.reset();
+        }
         CodeClient.currentAction = new None();
         CodeClient.location = null;
-        BuildPhaser.disableClipping();
         Commands.confirm = null;
         Commands.screen = null;
         Debug.clean();
@@ -214,7 +272,7 @@ public class CodeClient implements ModInitializer {
      */
     public static void reset() {
         clean();
-        SocketHandler.setConnection(null);
+        API.setConnection(null);
         ActionDump.clear();
         Config.clear();
     }
@@ -265,53 +323,6 @@ public class CodeClient implements ModInitializer {
                 Text.literal(prefix).formatted(Formatting.GRAY).append(name),
                 type
         );
-    }
-
-    /**
-     * Registers barriers as visible.
-     * Starts the API.
-     * Sets up auto join if enabled.
-     * Setups the edit bind.
-     * Registers command callback.
-     * Registers dark mode resource pack.
-     */
-    @Override
-    public void onInitialize() {
-        ClientTickEvents.START_CLIENT_TICK.register(client -> {
-            if (MC.player == null || MC.world == null) clean();
-        });
-
-        MC = MinecraftClient.getInstance();
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
-
-        ClientLifecycleEvents.CLIENT_STOPPING.register(new Identifier(MOD_ID, "close"), client -> SocketHandler.stop());
-
-        if (Config.getConfig().CodeClientAPI) {
-            try {
-                SocketHandler.start();
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage());
-            }
-        }
-        if (Config.getConfig().AutoJoin) {
-            autoJoin = AutoJoin.GAME;
-        }
-
-        KeyBinds.init();
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            Commands.register(dispatcher);
-        });
-
-        try {
-            registerResourcePack("dark_mode", Text.literal("Dark Mode").formatted(Formatting.WHITE));
-        } catch (NullPointerException exception) {
-            CodeClient.LOGGER.warn("Could not load dark mode resource pack!");
-        }
-
-        CodeClient.LOGGER.info("CodeClient, making it easier to wipe your plot and get banned for hacks since 2022");
     }
 
     public enum AutoJoin {
