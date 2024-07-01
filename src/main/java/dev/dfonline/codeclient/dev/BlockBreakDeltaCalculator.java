@@ -2,7 +2,10 @@ package dev.dfonline.codeclient.dev;
 
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,12 +19,9 @@ import java.util.stream.Stream;
 public class BlockBreakDeltaCalculator extends Feature {
     private final RecentBlocks oldBlocks = new RecentBlocks();
 
-    /**
-     * Only invoked when a codeblock is broken.
-     */
-    public void breakBlock(BlockPos pos) {
-        if (pos == null) return;
-        oldBlocks.addBlock(pos);
+    @Override
+    public void onBreakBlock(@NotNull Dev dev, @NotNull BlockPos pos, @Nullable BlockPos breakPos) {
+        if(breakPos != null) oldBlocks.addBlock(pos);
     }
 
     @Override

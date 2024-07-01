@@ -47,8 +47,9 @@ public abstract class MClientPlayerEntity {
         if (CodeClient.location instanceof Dev plot) {
             if (CodeClient.currentAction instanceof MoveToSpawn mts) if (mts.moveModifier()) ci.cancel();
             ClientPlayerEntity player = MC.player;
-            CodeClient.getFeature(Navigation.class).map(navigation -> navigation.onCrouch(lastSneaking));
-            if (NoClip.isIgnoringWalls()) {
+            if(player.isSneaking())  CodeClient.getFeature(Navigation.class).map(navigation -> navigation.onCrouch(lastSneaking));
+            var NoClip = CodeClient.getFeature(NoClip.class).orElse(null);
+            if (NoClip != null && NoClip.isIgnoringWalls()) {
                 ci.cancel();
                 Vec3d pos = NoClip.handleSeverPosition();
                 boolean idle = NoClip.timesSinceMoved++ > 40;
@@ -84,17 +85,17 @@ public abstract class MClientPlayerEntity {
 
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double z, CallbackInfo ci) {
-        if (NoClip.isIgnoringWalls()) ci.cancel();
+        if (CodeClient.getFeature(NoClip.class).map(NoClip::isIgnoringWalls).orElse(false)) ci.cancel();
     }
 
     @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
     private void slowDown(CallbackInfoReturnable<Boolean> cir) {
-        if (NoClip.isIgnoringWalls()) cir.setReturnValue(false);
+        if (CodeClient.getFeature(NoClip.class).map(NoClip::isIgnoringWalls).orElse(false)) cir.setReturnValue(false);
     }
 
     @Inject(method = "shouldAutoJump", at = @At("HEAD"), cancellable = true)
     private void autoJump(CallbackInfoReturnable<Boolean> cir) {
-        if (NoClip.isIgnoringWalls()) cir.setReturnValue(false);
+        if (CodeClient.getFeature(NoClip.class).map(NoClip::isIgnoringWalls).orElse(false)) cir.setReturnValue(false);
     }
 
     @Redirect(method = "tickMovement", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerAbilities;allowFlying:Z", opcode = Opcodes.GETFIELD))

@@ -15,7 +15,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
@@ -51,7 +50,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class InteractionManager {
-    private static final List<Block> validBlocks = List.of(Blocks.LAPIS_BLOCK, Blocks.LAPIS_ORE, Blocks.EMERALD_BLOCK, Blocks.EMERALD_ORE, Blocks.DIAMOND_BLOCK, Blocks.GOLD_BLOCK);
+
     public static boolean isOpeningCodeChest = false;
 
     /**
@@ -93,32 +92,11 @@ public class InteractionManager {
     }
 
     public static boolean onBreakBlock(BlockPos pos) {
-        if (CodeClient.location instanceof Dev plot) {
-            plot.clearLineStarterCache();
-            if (!plot.isInDev(pos)) return false;
-            if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
-                CodeClient.getFeature(ChestPeeker.class).ifPresent(ChestPeeker::reset);
-                if ((!CodeClient.MC.player.getMainHandStack().isEmpty() || Config.getConfig().HighlightChestsWithAir)) {
-                    CodeClient.getFeature(RecentChestInsert.class)
-                            .ifPresent(recentChestInsert -> recentChestInsert.setLastChest(pos));
-                }
-            }
+        if (CodeClient.location instanceof Dev dev) {
+            dev.clearLineStarterCache();
+            if (!dev.isInDev(pos)) return false;
             BlockPos breakPos = isBlockBreakable(pos);
-            if (breakPos != null) {
-                if (Config.getConfig().ReportBrokenBlock && validBlocks.contains(CodeClient.MC.world.getBlockState(breakPos).getBlock()) && CodeClient.MC.world.getBlockEntity(breakPos.west()) instanceof SignBlockEntity sign) {
-                    Text signText = sign.getFrontText().getMessage(1, false);
-                    boolean isSignTextEmpty = signText.getString().isEmpty();
-
-                    Utility.sendMessage(
-                        isSignTextEmpty
-                                ? Text.translatable("codeclient.interaction.broke_empty", Text.translatable("hypercube.codeblock." +
-                                    sign.getFrontText().getMessage(0, false).getString().toLowerCase().replace(' ', '_'))).formatted(Formatting.AQUA)
-                                : Text.translatable("codeclient.interaction.broke", Text.empty().formatted(Formatting.WHITE).append(signText)).formatted(Formatting.AQUA)
-                    );
-                }
-                CodeClient.getFeature(BlockBreakDeltaCalculator.class)
-                        .ifPresent(blockBreakDeltaCalculator -> blockBreakDeltaCalculator.breakBlock(pos));
-            }
+            CodeClient.onBreakBlock(dev,pos,breakPos);
             if (Config.getConfig().CustomBlockInteractions) {
                 if (breakPos != null) {
                     breakCodeBlock(breakPos);

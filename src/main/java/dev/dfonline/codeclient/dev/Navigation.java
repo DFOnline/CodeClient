@@ -11,7 +11,9 @@ public class Navigation extends Feature {
     public boolean onJump() {
         if (InteractionManager.shouldTeleportUp()) {
             Vec3d move = CodeClient.MC.player.getPos().add(0, 5, 0);
-            if ((!NoClip.isIgnoringWalls()) && NoClip.isInsideWall(move)) move = move.add(0, 2, 0);
+            var noClip = CodeClient.getFeature(NoClip.class).orElse(null);
+            if (noClip != null && !noClip.isIgnoringWalls() && noClip.isInsideWall(move))
+                move = move.add(0, 2, 0);
             CodeClient.MC.player.setPosition(move);
             return true;
         }
@@ -30,7 +32,8 @@ public class Navigation extends Feature {
         ) {
             Vec3d move = CodeClient.MC.player.getPos().add(0, -5, 0);
             if (move.y < dev.getFloorY()) move = new Vec3d(move.x, dev.getFloorY(), move.z);
-            if ((!NoClip.isIgnoringWalls()) && NoClip.isInsideWall(move)) move = move.add(0, 2, 0);
+            var noClip = CodeClient.getFeature(NoClip.class).orElse(null);
+            if (noClip != null && !noClip.isIgnoringWalls() && noClip.isInsideWall(move)) move = move.add(0, 2, 0);
             CodeClient.MC.player.setPosition(move);
             return true;
         }

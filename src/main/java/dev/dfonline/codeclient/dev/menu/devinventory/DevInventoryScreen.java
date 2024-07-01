@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.dev.menu.DevInventory;
+package dev.dfonline.codeclient.dev.menu.devinventory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import static dev.dfonline.codeclient.dev.menu.DevInventory.DevInventoryGroup.*;
+import static dev.dfonline.codeclient.dev.menu.devinventory.DevInventoryGroup.*;
 
 @Environment(EnvType.CLIENT)
 public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler> {

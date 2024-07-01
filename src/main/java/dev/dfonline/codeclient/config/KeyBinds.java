@@ -2,7 +2,7 @@ package dev.dfonline.codeclient.config;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.InteractionManager;
-import dev.dfonline.codeclient.dev.menu.DevInventory.DevInventoryScreen;
+import dev.dfonline.codeclient.dev.menu.devinventory.DevInventoryScreen;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.block.Blocks;

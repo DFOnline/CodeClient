@@ -4,6 +4,8 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -11,6 +13,12 @@ import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 public class RecentChestInsert extends Feature {
     private float alpha = 0;
@@ -26,6 +34,7 @@ public class RecentChestInsert extends Feature {
         return Config.getConfig().RecentChestInsert;
     }
 
+    @Override
     public void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         if (CodeClient.location instanceof Dev) {
             if (lastChest == null) return;
@@ -36,8 +45,17 @@ public class RecentChestInsert extends Feature {
         }
     }
 
+    @Override
     public void tick() {
         if (lastChest != null) alpha -= 0.05F;
         if (alpha <= 0) lastChest = null;
+    }
+
+    @Override
+    public void onBreakBlock(@NotNull Dev dev, @NotNull BlockPos pos, @Nullable BlockPos breakPos) {
+        if(CodeClient.MC.world.getBlockState(pos).getBlock() != Blocks.CHEST) return;
+        if(Config.getConfig().HighlightChestsWithAir || !CodeClient.MC.player.getMainHandStack().isEmpty()) {
+            setLastChest(pos);
+        }
     }
 }

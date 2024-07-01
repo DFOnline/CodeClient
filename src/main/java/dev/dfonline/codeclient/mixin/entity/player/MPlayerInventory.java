@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.mixin.entity.player;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.dev.RecentValues;
+import dev.dfonline.codeclient.dev.menu.RecentValues;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;

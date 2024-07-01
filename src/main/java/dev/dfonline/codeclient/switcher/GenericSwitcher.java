@@ -64,6 +64,12 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     @Override
+    protected void clearChildren() {
+        super.clearChildren();
+        this.buttons.clear();
+    }
+
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if (checkFinished()) return;
         context.getMatrices().push();

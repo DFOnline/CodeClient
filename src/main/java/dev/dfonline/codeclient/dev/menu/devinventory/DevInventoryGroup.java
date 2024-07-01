@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.dev.menu.DevInventory;
+package dev.dfonline.codeclient.dev.menu.devinventory;
 
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.Utility;

@@ -1,4 +1,4 @@
-package dev.dfonline.codeclient.dev;
+package dev.dfonline.codeclient.dev.menu;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.InsertOverlay;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;

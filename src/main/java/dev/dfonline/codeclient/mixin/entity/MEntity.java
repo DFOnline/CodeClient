@@ -23,17 +23,24 @@ public abstract class MEntity {
     @Shadow
     public abstract void setPosition(Vec3d pos);
 
+    @Shadow public boolean noClip;
+
     @Inject(method = "isInsideWall", at = @At("HEAD"), cancellable = true)
     private void insideWall(CallbackInfoReturnable<Boolean> cir) {
-        if (NoClip.isIgnoringWalls()) cir.setReturnValue(false);
+        if (CodeClient.getFeature(NoClip.class).map(NoClip::isIgnoringWalls).orElse(false)) {
+            cir.setReturnValue(false);
+        }
     }
 
     @Inject(method = "move", at = @At("HEAD"), cancellable = true)
     private void onMove(MovementType movementType, Vec3d movement, CallbackInfo ci) {
-        if (!NoClip.isIgnoringWalls()) return;
+        var feat = CodeClient.getFeature(NoClip.class);
+        if(feat.isEmpty()) return;
+        var noClip = feat.get();
+        if (!noClip.isIgnoringWalls()) return;
         if (CodeClient.MC.player == null) return;
         if (this.getId() != CodeClient.MC.player.getId()) return;
-        Vec3d pos = NoClip.handleClientPosition(movement);
+        Vec3d pos = noClip.handleClientPosition(movement);
         if (pos != null) {
             this.setPosition(pos);
             ci.cancel();

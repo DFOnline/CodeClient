@@ -1,16 +1,13 @@
-package dev.dfonline.codeclient.dev.Debug;
+package dev.dfonline.codeclient.dev.debug;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.OverlayManager;
-import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.debug.DebugRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.OverlayMessageS2CPacket;
 import net.minecraft.text.PlainTextContent;
@@ -25,7 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Debug extends Feature {
     private static Double CPU = null;

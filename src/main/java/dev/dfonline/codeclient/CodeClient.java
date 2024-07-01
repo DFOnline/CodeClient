@@ -7,7 +7,7 @@ import dev.dfonline.codeclient.action.impl.DevForBuild;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.dev.*;
-import dev.dfonline.codeclient.dev.Debug.Debug;
+import dev.dfonline.codeclient.dev.debug.Debug;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
@@ -61,6 +61,7 @@ public class CodeClient implements ClientModInitializer {
     public static Location location = null;
     public static boolean shouldReload = false;
     private static final HashMap<Class<? extends Feature>, Feature> features = new HashMap<>();
+    private static final HashMap<Class<? extends ChestFeature>, ChestFeature> chestFeatures = new HashMap<>();
     public static SocketHandler API = new SocketHandler();
 
     @Override
@@ -107,6 +108,9 @@ public class CodeClient implements ClientModInitializer {
     private static void feat(Feature feature) {
         features.put(feature.getClass(), feature);
     }
+    private static void feat(ChestFeature feature) {
+        chestFeatures.put(feature.getClass(),feature);
+    }
     private static void loadFeatures() {
         features.clear();
 
@@ -116,6 +120,10 @@ public class CodeClient implements ClientModInitializer {
         feat(new RecentChestInsert());
         feat(new BlockBreakDeltaCalculator());
         feat(new Navigation());
+        feat(new NoClip());
+        feat(new ReportBrokenBlocks());
+
+
     }
 
 
@@ -237,11 +245,12 @@ public class CodeClient implements ClientModInitializer {
         }
     }
 
-    /**
-     * This needs to be true for NoClip to work.
-     * Whilst this should be the first source to check if NoClip is on, keep in mind there is NoClip#isIgnoringWalls
-     * Useful for fallback checks and preventing noclip packet spam screwing you over.
-     */
+    public static void onBreakBlock(Dev dev, BlockPos pos, BlockPos breakPos) {
+        for(var feature: features.values()) {
+            if(feature.enabled()) feature.onBreakBlock(dev,pos,breakPos);
+        }
+    }
+
     public static boolean noClipOn() {
         if (MC.player == null) return false;
         if (!Config.getConfig().NoClipEnabled) return false;
@@ -272,6 +281,7 @@ public class CodeClient implements ClientModInitializer {
      */
     public static void reset() {
         clean();
+        loadFeatures();
         API.setConnection(null);
         ActionDump.clear();
         Config.clear();
