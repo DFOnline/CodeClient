@@ -1,7 +1,8 @@
-package dev.dfonline.codeclient.dev;
+package dev.dfonline.codeclient.dev.menu;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
 import dev.dfonline.codeclient.hypercube.actiondump.Action;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;

@@ -2,6 +2,8 @@ package dev.dfonline.codeclient;
 
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.packet.Packet;
@@ -36,7 +38,15 @@ public abstract class Feature {
      * @param pos The blockPos of the broken block.
      * @param breakPos The origin of the given code block broken. May be null.
      */
-    public void onBreakBlock(@NotNull Dev dev, @NotNull BlockPos pos, @Nullable BlockPos breakPos) {
+    public void onBreakBlock(@NotNull Dev dev, @NotNull BlockPos pos, @Nullable BlockPos breakPos) {}
 
+    /**
+     * Load a chest feature.
+     * @param screen The chest opened.
+     * @return ChestFeature instance.
+     */
+    @Nullable
+    public ChestFeature getChestFeature(HandledScreen<?> screen) {
+        return null;
     }
 }

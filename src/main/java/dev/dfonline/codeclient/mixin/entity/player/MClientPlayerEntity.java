@@ -100,7 +100,7 @@ public abstract class MClientPlayerEntity {
 
     @Redirect(method = "tickMovement", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerAbilities;allowFlying:Z", opcode = Opcodes.GETFIELD))
     private boolean canFly(PlayerAbilities instance) {
-        if (InteractionManager.shouldTeleportUp()) return false;
+        if (CodeClient.getFeature(Navigation.class).map(Navigation::shouldTeleportUp).orElse(false)) return false;
         return instance.allowFlying;
     }
 }

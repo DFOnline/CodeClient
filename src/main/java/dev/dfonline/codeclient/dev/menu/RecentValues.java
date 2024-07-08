@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.InsertOverlay;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -76,7 +75,10 @@ public class RecentValues {
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof GenericContainerScreen container) {
-                if (!InsertOverlay.isCodeChest) return;
+                // TODO: don't rely on other features like this.
+                if (!CodeClient.getFeature(InsertOverlayFeature.class)
+                        .map(insertOverlayFeature -> insertOverlayFeature.isCodeChest)
+                        .orElse(false)) return;
                 if (!(CodeClient.location instanceof Dev)) return;
 
                 ScreenEvents.afterRender(screen).register((screen1, ctx, mouseX, mouseY, tickDelta) -> {

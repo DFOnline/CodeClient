@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
 import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.location.Dev;
@@ -15,7 +16,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityDimensions;
@@ -118,7 +118,7 @@ public class InteractionManager {
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
-            InsertOverlay.clickSlot(slot, actionType);
+            CodeClient.onClickSlot(slot,button,actionType,syncId,revision);
             if (!slot.hasStack()) return false;
             ItemStack item = slot.getStack();
             if (!item.hasNbt()) return false;
@@ -252,14 +252,6 @@ public class InteractionManager {
             }
         }
         return hitResult;
-    }
-
-    public static boolean shouldTeleportUp() {
-        if (CodeClient.location instanceof Dev dev) {
-            ClientPlayerEntity pl = CodeClient.MC.player;
-            return dev.isInDevSpace() && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
-        }
-        return false;
     }
 
     public static boolean onItemInteract(PlayerEntity player, Hand hand) {

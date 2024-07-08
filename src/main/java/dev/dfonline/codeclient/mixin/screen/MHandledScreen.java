@@ -1,12 +1,10 @@
 package dev.dfonline.codeclient.mixin.screen;
 
-import dev.dfonline.codeclient.dev.InsertOverlay;
+import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.InteractionManager;
-import dev.dfonline.codeclient.dev.SlotGhostManager;
+import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
 import dev.dfonline.codeclient.dev.overlay.ActionViewer;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -34,10 +32,15 @@ public abstract class MHandledScreen {
         SlotGhostManager.drawSlot(context,slot);
     }
 
+    @Inject(method = "init", at = @At("TAIL"))
+    public void init(CallbackInfo ci) {
+        CodeClient.onScreenInit((HandledScreen<?>) (Object) this);
+    }
+
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;pop()V"))
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        CodeClient.onRender(context,mouseX,mouseY,this.x,this.y);
         SlotGhostManager.render(delta);
-        InsertOverlay.render(context,mouseX,mouseY,(HandledScreen<?>) (Object) this, this.x, this.y);
         ActionViewer.render(context, mouseX, mouseY,(HandledScreen<?>) (Object) this);
     }
 
@@ -55,14 +58,12 @@ public abstract class MHandledScreen {
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        if(InsertOverlay.mouseClicked(mouseX,mouseY,button, (HandledScreen<?>) (Object) this)) cir.setReturnValue(true);
+        if(CodeClient.onMouseClicked(mouseX,mouseY,button)) cir.setReturnValue(true);
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
-        if(InsertOverlay.keyPressed(keyCode,scanCode,modifiers)) {
-            cir.setReturnValue(true);
-        }
+        if(CodeClient.onKeyPressed(keyCode,scanCode,modifiers)) cir.setReturnValue(true);
     }
 
     @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;clickSlot(IIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/entity/player/PlayerEntity;)V"), cancellable = true)

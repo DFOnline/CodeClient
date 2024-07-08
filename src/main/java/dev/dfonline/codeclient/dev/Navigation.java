@@ -4,12 +4,13 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 public class Navigation extends Feature {
     public boolean onJump() {
-        if (InteractionManager.shouldTeleportUp()) {
+        if (shouldTeleportUp()) {
             Vec3d move = CodeClient.MC.player.getPos().add(0, 5, 0);
             var noClip = CodeClient.getFeature(NoClip.class).orElse(null);
             if (noClip != null && !noClip.isIgnoringWalls() && noClip.isInsideWall(move))
@@ -20,12 +21,20 @@ public class Navigation extends Feature {
         return false;
     }
 
+    public boolean shouldTeleportUp() {
+        if (CodeClient.location instanceof Dev dev) {
+            ClientPlayerEntity pl = CodeClient.MC.player;
+            return dev.isInDevSpace() && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
+        }
+        return false;
+    }
+
     public boolean onCrouch(boolean lastSneaking) {
         var player = CodeClient.MC.player;
         if (CodeClient.location instanceof Dev dev
                 && Config.getConfig().TeleportDown
                 && player != null
-                && dev.isInDev(player.getPos())
+                && dev.isInDevSpace()
                 && player.getY() % 5 == 0
                 && !lastSneaking && player.isSneaking()
                 && (player.getPitch() >= 90 - Config.getConfig().DownAngle)

@@ -8,6 +8,8 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
+import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
+import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
@@ -25,6 +27,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -35,6 +38,8 @@ import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -60,8 +65,10 @@ public class CodeClient implements ClientModInitializer {
     public static Location lastLocation = null;
     public static Location location = null;
     public static boolean shouldReload = false;
+
     private static final HashMap<Class<? extends Feature>, Feature> features = new HashMap<>();
     private static final HashMap<Class<? extends ChestFeature>, ChestFeature> chestFeatures = new HashMap<>();
+
     public static SocketHandler API = new SocketHandler();
 
     @Override
@@ -122,7 +129,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new Navigation());
         feat(new NoClip());
         feat(new ReportBrokenBlocks());
-
+        feat(new InsertOverlayFeature());
 
     }
 
@@ -181,7 +188,7 @@ public class CodeClient implements ClientModInitializer {
         Commands.tick();
 
         if(!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
-            InsertOverlay.reset();
+            CodeClient.chestFeatures.clear();
         }
 
         if (location instanceof Dev dev) {
@@ -251,6 +258,63 @@ public class CodeClient implements ClientModInitializer {
         }
     }
 
+    public static void onScreenInit(HandledScreen<?> screen) {
+        chestFeatures.clear();
+        for(var feature: features.values()) {
+            if(feature.enabled()) {
+                var feat = feature.getChestFeature(screen);
+                if(feat != null) chestFeatures.put(feat.getClass(), feat);
+            }
+        }
+    }
+
+    public static void onRender(DrawContext context, int mouseX, int mouseY, int x, int y) {
+        for(var feature: chestFeatures.values()) {
+            feature.render(context,mouseX,mouseY,x,y);
+        }
+    }
+
+    public static boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        for(var feature: chestFeatures.values()) {
+            if(feature.mouseClicked(mouseX,mouseY,button)) return true;
+        }
+        return false;
+    }
+
+    public static boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
+        for(var feature: chestFeatures.values()) {
+            if(feature.keyPressed(keyCode,scanCode,modifiers)) return true;
+        }
+        return false;
+    }
+
+    public static boolean onKeyReleased(int keyCode, int scanCode, int modifiers) {
+        for(var feature: chestFeatures.values()) {
+            if(feature.keyReleased(keyCode,scanCode,modifiers)) return true;
+        }
+        return false;
+    }
+
+    public static boolean onCharTyped(char chr, int modifiers) {
+        for(var feature: chestFeatures.values()) {
+            if(feature.charTyped(chr,modifiers)) return true;
+        }
+        return false;
+    }
+
+    public static void onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+        for(var feature: chestFeatures.values()) {
+            feature.clickSlot(slot,button,actionType,syncId,revision);
+        }
+    }
+
+    public static boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        for(var feature: chestFeatures.values()) {
+            if(feature.mouseScrolled(mouseX,mouseY,horizontalAmount,verticalAmount)) return true;
+        }
+        return false;
+    }
+
     public static boolean noClipOn() {
         if (MC.player == null) return false;
         if (!Config.getConfig().NoClipEnabled) return false;
@@ -273,7 +337,6 @@ public class CodeClient implements ClientModInitializer {
         Commands.screen = null;
         Debug.clean();
         SlotGhostManager.reset();
-        InsertOverlay.reset();
     }
 
     /**

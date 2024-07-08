@@ -32,6 +32,7 @@ public class ReportBrokenBlocks extends Feature {
 
     @Override
     public void onBreakBlock(@NotNull Dev dev, @NotNull BlockPos pos, @Nullable BlockPos breakPos) {
+        if(breakPos == null) return;
         if (VALID_BLOCKS.contains(CodeClient.MC.world.getBlockState(breakPos).getBlock())
                 && CodeClient.MC.world.getBlockEntity(breakPos.west()) instanceof SignBlockEntity sign) {
             Text signText = sign.getFrontText().getMessage(1, false);
