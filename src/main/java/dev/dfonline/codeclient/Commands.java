@@ -172,7 +172,7 @@ public class Commands {
         dispatcher.register(literal("abort").executes(context -> {
             confirm = null;
             CodeClient.currentAction = new None();
-            Debug.clean();
+            CodeClient.getFeature(Debug.class).ifPresent(Debug::reset);
             return 0;
         }));
 

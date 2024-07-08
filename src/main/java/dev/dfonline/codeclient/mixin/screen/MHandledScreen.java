@@ -29,7 +29,7 @@ public abstract class MHandledScreen {
 
     @Inject(method = "drawSlot", at = @At("TAIL"))
     private void drawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
-        SlotGhostManager.drawSlot(context,slot);
+        CodeClient.onDrawSlot(context,slot);
     }
 
     @Inject(method = "init", at = @At("TAIL"))
@@ -39,20 +39,18 @@ public abstract class MHandledScreen {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;pop()V"))
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        CodeClient.onRender(context,mouseX,mouseY,this.x,this.y);
-        SlotGhostManager.render(delta);
-        ActionViewer.render(context, mouseX, mouseY,(HandledScreen<?>) (Object) this);
+        CodeClient.onRender(context,mouseX,mouseY,this.x,this.y,delta);
     }
 
     @Redirect(method = "drawMouseoverTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;hasStack()Z"))
     private boolean hasStack(Slot instance) {
-        var hover = SlotGhostManager.getHoverItem(instance);
+        ItemStack hover = CodeClient.onGetHoverStack(instance);
         return (hover != null && !hover.isEmpty()) || instance.hasStack();
     }
 
     @Redirect(method = "drawMouseoverTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;getStack()Lnet/minecraft/item/ItemStack;"))
     private ItemStack getStack(Slot instance) {
-        var hover = SlotGhostManager.getHoverItem(instance);
+        ItemStack hover = CodeClient.onGetHoverStack(instance);
         return hover == null || hover.isEmpty() ? instance.getStack() : hover;
     }
 

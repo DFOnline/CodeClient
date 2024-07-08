@@ -75,10 +75,6 @@ public class RecentValues {
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof GenericContainerScreen container) {
-                // TODO: don't rely on other features like this.
-                if (!CodeClient.getFeature(InsertOverlayFeature.class)
-                        .map(insertOverlayFeature -> insertOverlayFeature.isCodeChest)
-                        .orElse(false)) return;
                 if (!(CodeClient.location instanceof Dev)) return;
 
                 ScreenEvents.afterRender(screen).register((screen1, ctx, mouseX, mouseY, tickDelta) -> {

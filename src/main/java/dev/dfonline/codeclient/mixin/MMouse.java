@@ -16,7 +16,6 @@ public class MMouse {
     @Redirect(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseScrolled(DDDD)Z"))
     private boolean mouseScrolled(Screen instance, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         return CodeClient.onMouseScrolled(mouseX,mouseY,horizontalAmount,verticalAmount)
-                || ActionViewer.scroll(instance,mouseX,mouseY,horizontalAmount,verticalAmount)
                 || instance.mouseScrolled(mouseX,mouseY,horizontalAmount,verticalAmount);
     }
 

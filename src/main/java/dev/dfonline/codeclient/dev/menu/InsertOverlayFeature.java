@@ -27,28 +27,26 @@ public class InsertOverlayFeature extends Feature {
         return Config.getConfig().InsertOverlay;
     }
 
-    public boolean isCodeChest = false;
-
     @Override
-    public ChestFeature getChestFeature(HandledScreen<?> screen) {
+    public ChestFeature makeChestFeature(HandledScreen<?> screen) {
         return new InsertOverlay(screen);
     }
 
     private class InsertOverlay extends ChestFeature {
-        private static AddWidget selectedSlot = null;
-        private static int screenX = 0;
-        private static int screenY = 0;
+        private AddWidget selectedSlot = null;
+        private int screenX = 0;
+        private int screenY = 0;
 
         public InsertOverlay(HandledScreen<?> screen) {
             super(screen);
         }
 
         private boolean overlayOpen() {
-            return Config.getConfig().InsertOverlay && isCodeChest && selectedSlot != null;
+            return selectedSlot != null;
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, int x, int y) {
+        public void render(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
             screenX = x;
             screenY = y;
             if (overlayOpen())
@@ -93,12 +91,12 @@ public class InsertOverlayFeature extends Feature {
 
         @Override
         public void clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-            if (Config.getConfig().InsertOverlay && isCodeChest && actionType == SlotActionType.PICKUP && !slot.hasStack() && CodeClient.MC.player.currentScreenHandler.getCursorStack().isEmpty())
+            if (actionType == SlotActionType.PICKUP && !slot.hasStack() && CodeClient.MC.player.currentScreenHandler.getCursorStack().isEmpty())
                 selectedSlot = new AddWidget(slot, () -> selectedSlot = null);
             else if (selectedSlot != null) selectedSlot.close();
         }
 
-        private static class AddWidget {
+        private class AddWidget {
             private final int x;
             private final int y;
             private int width;

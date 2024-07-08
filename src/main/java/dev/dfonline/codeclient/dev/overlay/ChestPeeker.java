@@ -204,6 +204,11 @@ public class ChestPeeker extends Feature {
         reset();
     }
 
+    @Override
+    public void onClickChest(BlockHitResult hitResult) {
+        reset();
+    }
+
     public void reset() {
         items = null;
         shouldClearChest = true;

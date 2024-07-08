@@ -10,6 +10,7 @@ import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
 import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
+import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
@@ -34,6 +35,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -43,8 +45,10 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +71,7 @@ public class CodeClient implements ClientModInitializer {
     public static boolean shouldReload = false;
 
     private static final HashMap<Class<? extends Feature>, Feature> features = new HashMap<>();
-    private static final HashMap<Class<? extends ChestFeature>, ChestFeature> chestFeatures = new HashMap<>();
+    private static @Nullable HashMap<Class<? extends ChestFeature>, ChestFeature> chestFeatures = null;
 
     public static SocketHandler API = new SocketHandler();
 
@@ -112,12 +116,7 @@ public class CodeClient implements ClientModInitializer {
         LOGGER.info("CodeClient, making it easier to wipe your plot and get banned for hacks since 2022");
     }
 
-    private static void feat(Feature feature) {
-        features.put(feature.getClass(), feature);
-    }
-    private static void feat(ChestFeature feature) {
-        chestFeatures.put(feature.getClass(),feature);
-    }
+    private static void feat(Feature feature) { features.put(feature.getClass(), feature); }
     private static void loadFeatures() {
         features.clear();
 
@@ -130,9 +129,13 @@ public class CodeClient implements ClientModInitializer {
         feat(new NoClip());
         feat(new ReportBrokenBlocks());
         feat(new InsertOverlayFeature());
-
+        feat(new SlotGhostManager());
+        feat(new ActionViewer());
     }
 
+    public static void isCodeChest() {
+        chestFeatures = new HashMap<>();
+    }
 
     public static <T extends Feature> Optional<T> getFeature(Class<T> clazz) {
         var feat = features.get(clazz);
@@ -184,11 +187,13 @@ public class CodeClient implements ClientModInitializer {
             if(feature.enabled()) feature.tick();
         }
         KeyBinds.tick();
-        SlotGhostManager.tick();
         Commands.tick();
 
         if(!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
-            CodeClient.chestFeatures.clear();
+            if(CodeClient.chestFeatures != null) {
+                CodeClient.chestFeatures.clear();
+            }
+            CodeClient.chestFeatures = null;
         }
 
         if (location instanceof Dev dev) {
@@ -252,6 +257,12 @@ public class CodeClient implements ClientModInitializer {
         }
     }
 
+    public static void onClickChest(BlockHitResult hitResult) {
+        for(var feature: features.values()) {
+            feature.onClickChest(hitResult);
+        }
+    }
+
     public static void onBreakBlock(Dev dev, BlockPos pos, BlockPos breakPos) {
         for(var feature: features.values()) {
             if(feature.enabled()) feature.onBreakBlock(dev,pos,breakPos);
@@ -259,22 +270,40 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static void onScreenInit(HandledScreen<?> screen) {
-        chestFeatures.clear();
+        if(chestFeatures == null) return;
         for(var feature: features.values()) {
             if(feature.enabled()) {
-                var feat = feature.getChestFeature(screen);
+                var feat = feature.makeChestFeature(screen);
                 if(feat != null) chestFeatures.put(feat.getClass(), feat);
             }
         }
     }
 
-    public static void onRender(DrawContext context, int mouseX, int mouseY, int x, int y) {
+    public static void onRender(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
+        if(chestFeatures == null) return;
         for(var feature: chestFeatures.values()) {
-            feature.render(context,mouseX,mouseY,x,y);
+            feature.render(context,mouseX,mouseY,x,y,delta);
         }
     }
 
+    public static void onDrawSlot(DrawContext context, Slot slot) {
+        if(chestFeatures == null) return;
+        for (var value : chestFeatures.values()) {
+            value.drawSlot(context,slot);
+        }
+    }
+
+    public static ItemStack onGetHoverStack(Slot instance) {
+        if(chestFeatures == null) return null;
+        for (var value: chestFeatures.values()) {
+            var re = value.getHoverStack(instance);
+            if(re != null) return re;
+        }
+        return null;
+    }
+
     public static boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if(chestFeatures == null) return false;
         for(var feature: chestFeatures.values()) {
             if(feature.mouseClicked(mouseX,mouseY,button)) return true;
         }
@@ -282,6 +311,7 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
+        if(chestFeatures == null) return false;
         for(var feature: chestFeatures.values()) {
             if(feature.keyPressed(keyCode,scanCode,modifiers)) return true;
         }
@@ -289,6 +319,7 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static boolean onKeyReleased(int keyCode, int scanCode, int modifiers) {
+        if(chestFeatures == null) return false;
         for(var feature: chestFeatures.values()) {
             if(feature.keyReleased(keyCode,scanCode,modifiers)) return true;
         }
@@ -296,6 +327,7 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static boolean onCharTyped(char chr, int modifiers) {
+        if(chestFeatures == null) return false;
         for(var feature: chestFeatures.values()) {
             if(feature.charTyped(chr,modifiers)) return true;
         }
@@ -303,12 +335,14 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static void onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+        if(chestFeatures == null) return;
         for(var feature: chestFeatures.values()) {
             feature.clickSlot(slot,button,actionType,syncId,revision);
         }
     }
 
     public static boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if(chestFeatures == null) return false;
         for(var feature: chestFeatures.values()) {
             if(feature.mouseScrolled(mouseX,mouseY,horizontalAmount,verticalAmount)) return true;
         }
@@ -335,8 +369,6 @@ public class CodeClient implements ClientModInitializer {
         CodeClient.location = null;
         Commands.confirm = null;
         Commands.screen = null;
-        Debug.clean();
-        SlotGhostManager.reset();
     }
 
     /**

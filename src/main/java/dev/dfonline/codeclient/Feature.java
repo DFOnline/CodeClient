@@ -2,11 +2,11 @@ package dev.dfonline.codeclient;
 
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,7 @@ public abstract class Feature {
     }
     public void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {}
     public void onModeChange(Location location) {}
-
+    public void onClickChest(BlockHitResult hitResult) {}
     /**
      * When you break a block in the dev area.
      * @param dev The plot instance.
@@ -46,7 +46,7 @@ public abstract class Feature {
      * @return ChestFeature instance.
      */
     @Nullable
-    public ChestFeature getChestFeature(HandledScreen<?> screen) {
+    public ChestFeature makeChestFeature(HandledScreen<?> screen) {
         return null;
     }
 }

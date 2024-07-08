@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Map;
@@ -32,15 +33,12 @@ public class MHandledScreens {
         InteractionManager.isOpeningCodeChest = false;
         if(open && type == ScreenHandlerType.GENERIC_9X3) {
             CodeClient.getFeature(InsertOverlayFeature.class).ifPresent(insertOverlayFeature -> {
-                // TODO: make this a part of ChestFeature
-                insertOverlayFeature.isCodeChest = true;
+                CodeClient.isCodeChest();
             });
             if (Config.getConfig().CustomCodeChest != Config.CustomChestMenuType.OFF) {
                 //noinspection rawtypes
                 return (Provider) (handler, playerInventory, title) -> new CustomChestMenu(new CustomChestHandler(handler.syncId), playerInventory, title);
             }
-        } else if (Config.getConfig().ActionViewer) {
-            ActionViewer.invalidate();
         }
         return PROVIDERS.get(type);
     }

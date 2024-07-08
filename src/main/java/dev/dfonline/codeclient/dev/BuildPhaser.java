@@ -38,6 +38,16 @@ public class BuildPhaser extends Feature {
     private boolean waitForTP = false;
     private boolean dontSpamBuildWarn = false;
 
+    @Override
+    public void reset() {
+        clipping = false;
+        wasFlying = true;
+        lastPos = new Vec3d(0,0,0);
+        allowPacket = false;
+        waitForTP = false;
+        dontSpamBuildWarn = false;
+    }
+
     public boolean isClipping() {
         return clipping;
     }

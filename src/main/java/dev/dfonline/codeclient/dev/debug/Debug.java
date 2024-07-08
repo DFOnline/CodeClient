@@ -24,12 +24,13 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 public class Debug extends Feature {
-    private static Double CPU = null;
-    private static List<Text> text = null;
-    private static HashMap<Vec3d, Text> locations = new HashMap<>();
-    private static boolean active = false;
+    private Double CPU = null;
+    private List<Text> text = null;
+    private HashMap<Vec3d, Text> locations = new HashMap<>();
+    private boolean active = false;
 
-    public static void clean() {
+    @Override
+    public void reset() {
         CPU = null;
         text = null;
         locations = new HashMap<>();
