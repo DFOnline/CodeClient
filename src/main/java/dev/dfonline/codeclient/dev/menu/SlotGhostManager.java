@@ -28,8 +28,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 
 public class SlotGhostManager extends Feature {
-    private static Action action;
-    private static float time = 0.0F;
+    private Action action;
+    private float time = 0.0F;
 
     @Override
     public void reset() {
@@ -75,10 +75,8 @@ public class SlotGhostManager extends Feature {
             super(screen);
         }
 
-        /**
-         * Named render since that's where it hooks, only to get delta time.
-         */
-        public static void render(float delta) {
+        @Override
+        public void render(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
             if (!Screen.hasControlDown()) {
                 time += delta;
             }

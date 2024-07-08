@@ -23,9 +23,13 @@ public class FileManager {
     }
 
     public static Path templatesPath() {
-        Path path = CodeClient.MC.runDirectory.toPath().resolve(CodeClient.MOD_ID).resolve("templates");
+        Path path = Path().resolve("templates");
         path.toFile().mkdir();
         return path;
+    }
+
+    public static Path recentValuesPath() {
+        return Path().resolve("recent_values.json");
     }
 
     public static Path writeFile(String fileName, String content) throws IOException {

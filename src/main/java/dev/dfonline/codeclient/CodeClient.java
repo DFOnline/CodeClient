@@ -9,6 +9,7 @@ import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
 import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
+import dev.dfonline.codeclient.dev.menu.RecentValues;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
 import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
@@ -77,13 +78,14 @@ public class CodeClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        MC = MinecraftClient.getInstance();
+
         loadFeatures();
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (MC.player == null || MC.world == null) clean();
         });
 
-        MC = MinecraftClient.getInstance();
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
@@ -131,6 +133,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new InsertOverlayFeature());
         feat(new SlotGhostManager());
         feat(new ActionViewer());
+        feat(new RecentValues());
     }
 
     public static void isCodeChest() {

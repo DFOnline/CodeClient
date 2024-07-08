@@ -19,7 +19,8 @@ public class MPlayerInventory {
 
     @Inject(method = "setStack", at = @At("HEAD"))
     public void onSetStack(int slot, ItemStack item, CallbackInfo ci) {
-        if (player == CodeClient.MC.player) RecentValues.remember(item);
+        if (player == CodeClient.MC.player) CodeClient.getFeature(RecentValues.class)
+                .ifPresent(recentValues -> recentValues.remember(item));
     }
 
 }

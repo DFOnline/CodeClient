@@ -91,6 +91,7 @@ public class InsertOverlayFeature extends Feature {
 
         @Override
         public void clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+            if(slot.inventory == CodeClient.MC.player.getInventory()) return;
             if (actionType == SlotActionType.PICKUP && !slot.hasStack() && CodeClient.MC.player.currentScreenHandler.getCursorStack().isEmpty())
                 selectedSlot = new AddWidget(slot, () -> selectedSlot = null);
             else if (selectedSlot != null) selectedSlot.close();
