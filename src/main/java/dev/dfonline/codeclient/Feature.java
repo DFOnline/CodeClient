@@ -11,7 +11,11 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public abstract class Feature {
+    private ChestFeature chest;
+
     public Feature() {}
 
     /**
@@ -46,7 +50,19 @@ public abstract class Feature {
      * @return ChestFeature instance.
      */
     @Nullable
-    public ChestFeature makeChestFeature(HandledScreen<?> screen) {
+    protected ChestFeature makeChestFeature(HandledScreen<?> screen) {
         return null;
+    }
+
+    public final void openChest(HandledScreen<?> screen) {
+        chest = makeChestFeature(screen);
+    }
+
+    public final void closeChest() {
+        chest = null;
+    }
+
+    public final Optional<ChestFeature> getChest() {
+        return Optional.ofNullable(chest);
     }
 }
