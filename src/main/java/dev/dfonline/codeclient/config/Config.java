@@ -72,6 +72,7 @@ public class Config {
     public boolean InvertActionViewerScroll = false;
     public ActionViewerAlignment ActionViewerLocation = ActionViewerAlignment.TOP;
     public int RecentValues = 0;
+    public Boolean ValueDetails = true;
 
     public Config() {
     }
@@ -584,6 +585,17 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.value_details"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.value_details.description")))
+                                .binding(
+                                        true,
+                                        () -> ValueDetails,
+                                        opt -> ValueDetails = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+
                         //</editor-fold>
                         //<editor-fold desc="Action Viewer">
                         .group(OptionGroup.createBuilder()

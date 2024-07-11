@@ -138,6 +138,8 @@ public class CodeClient implements ClientModInitializer {
         feat(new SlotGhostManager());
         feat(new ActionViewer());
         feat(new RecentValues());
+        feat(new ValueDetails());
+        feat(new ChatAutoEdit());
     }
 
     /**
