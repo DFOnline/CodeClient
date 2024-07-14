@@ -1,7 +1,9 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
+import com.google.common.primitives.Doubles;
 import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.item.*;
+import dev.dfonline.codeclient.hypercube.item.Number;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
@@ -18,6 +20,8 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -277,8 +281,19 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         for (var widget : widgets) {
-            if (widget instanceof ClickableWidget click && click.isMouseOver(mouseX, mouseY) && click.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
-                updateItem();
+            if (widget instanceof ClickableWidget click && click.isMouseOver(mouseX, mouseY)) {
+                if(click.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
+                    updateItem();
+                }
+                if(item instanceof Number && widget instanceof TextFieldWidget text) {
+                    var num = Doubles.tryParse(text.getText().isBlank() ? "0" : text.getText());
+                    if(num != null) {
+                        var format = new DecimalFormat("0.#");
+                        format.setMinimumFractionDigits(0);
+                        text.setText(format.format(num + (verticalAmount > 0 ? 1 : -1)));
+                        updateItem();
+                    }
+                }
                 return true;
             }
         }
