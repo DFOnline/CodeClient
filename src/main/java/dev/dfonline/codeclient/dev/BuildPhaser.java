@@ -38,7 +38,7 @@ public class BuildPhaser extends Feature {
     private boolean allowPacket = false;
     private boolean waitForTP = false;
     private boolean dontSpamBuildWarn = false;
-    private  boolean heldKeyCheck = false;
+    private boolean heldKeyCheck = false;
 
     @Override
     public void reset() {
@@ -59,7 +59,6 @@ public class BuildPhaser extends Feature {
 
     public void tick() {
 //        CodeClient.LOGGER.info(String.valueOf(CodeClient.MC.player.getPos()));
-
         if (CodeClient.location instanceof Dev plot) {
             if (plot.getX() == null) {
                 if (KeyBinds.clipBind.wasPressed())
