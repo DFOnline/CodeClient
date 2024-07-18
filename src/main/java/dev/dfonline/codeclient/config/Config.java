@@ -375,9 +375,9 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.literal("Build Phase Toggle"))
+                                .name(Text.translatable("codeclient.config.phasetoggle"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.literal("If Build Phaser should be a toggle instead of a hold."))
+                                        .text(Text.translatable("codeclient.config.phasetoggle.description"))
                                         .build())
                                 .binding(
                                         false,

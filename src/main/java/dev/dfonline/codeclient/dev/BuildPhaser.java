@@ -55,16 +55,16 @@ public class BuildPhaser extends Feature {
         return clipping;
     }
 
-    public boolean isPhaseToggleEnabled() { return Config.getConfig().PhaseToggle; }
+    private boolean isPhaseToggleEnabled() {
+        return Config.getConfig().PhaseToggle;
+    }
 
     public void tick() {
-//        CodeClient.LOGGER.info(String.valueOf(CodeClient.MC.player.getPos()));
         if (CodeClient.location instanceof Dev plot) {
             if (plot.getX() == null) {
                 if (KeyBinds.clipBind.wasPressed())
                     Utility.sendMessage(Text.translatable("codeclient.phaser.plot_origin"));
             }
-//            CodeClient.LOGGER.info("dev and X");
             boolean currentKeyPressed = KeyBinds.clipBind.isPressed();
             if (isPhaseToggleEnabled()) {
                 if (currentKeyPressed && !heldKeyCheck) {
