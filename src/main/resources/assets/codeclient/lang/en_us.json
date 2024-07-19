@@ -38,6 +38,9 @@
   "codeclient.config.value_details": "Value Details",
   "codeclient.config.value_details.description": "See text on the icons of values which give small amounts of information.",
 
+  "codeclient.config.phasetoggle": "Build Phase Toggle",
+  "codeclient.config.phasetoggle.description": "If Build Phaser should be a toggle instead of a hold.",
+
   "codeclient.config.category.action_viewer": "Action Viewer",
   "codeclient.config.category.action_viewer.description": "Display a tooltip that shows the code block's description.",
   "codeclient.config.action_viewer": "Enable Action Viewer",

@@ -235,13 +235,13 @@ public class CodeClient implements ClientModInitializer {
                     dev.setSize(Plot.Size.MEGA);
                 } else if (!MEGA.isOf(Blocks.VOID_AIR) && !MEGA_ONE.isOf(Blocks.VOID_AIR) && !MEGA.isOf(Blocks.GRASS_BLOCK) && !MEGA.isOf(Blocks.STONE) && !MEGA_ONE.isOf(Blocks.GRASS_BLOCK)) {
                     dev.setSize(Plot.Size.MEGA);
-                } else if (!(FIFTY.isOf(Blocks.VOID_AIR) || FIFTY_ONE.isOf(Blocks.VOID_AIR)) && (!FIFTY.isOf(FIFTY_ONE.getBlock())))
+                } else if (!(FIFTY.isOf(Blocks.VOID_AIR) || FIFTY_ONE.isOf(Blocks.VOID_AIR)) && (!FIFTY.isOf(FIFTY_ONE.getBlock()))) {
                     dev.setSize(Plot.Size.BASIC);
-                else if (!(HUNDRED.isOf(Blocks.VOID_AIR) || HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !HUNDRED.isOf(HUNDRED_ONE.getBlock()))
+                } else if (!(HUNDRED.isOf(Blocks.VOID_AIR) || HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !HUNDRED.isOf(HUNDRED_ONE.getBlock())) {
                     dev.setSize(Plot.Size.LARGE);
-                else if (!(THREE_HUNDRED.isOf(Blocks.VOID_AIR) || THREE_HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !THREE_HUNDRED.isOf(THREE_HUNDRED_ONE.getBlock()))
+                } else if (!(THREE_HUNDRED.isOf(Blocks.VOID_AIR) || THREE_HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !THREE_HUNDRED.isOf(THREE_HUNDRED_ONE.getBlock())) {
                     dev.setSize(Plot.Size.MASSIVE);
-
+                }
             }
             var size = dev.assumeSize();
             assert CodeClient.MC.world != null;

@@ -4,6 +4,7 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.hypercube.item.Location;
 import dev.dfonline.codeclient.location.Build;
@@ -37,6 +38,7 @@ public class BuildPhaser extends Feature {
     private boolean allowPacket = false;
     private boolean waitForTP = false;
     private boolean dontSpamBuildWarn = false;
+    private boolean heldKeyCheck = false;
 
     @Override
     public void reset() {
@@ -46,22 +48,39 @@ public class BuildPhaser extends Feature {
         allowPacket = false;
         waitForTP = false;
         dontSpamBuildWarn = false;
+        heldKeyCheck = false;
     }
 
     public boolean isClipping() {
         return clipping;
     }
 
-    public void tick() {
-//        CodeClient.LOGGER.info(String.valueOf(CodeClient.MC.player.getPos()));
+    private boolean isPhaseToggleEnabled() {
+        return Config.getConfig().PhaseToggle;
+    }
 
+    public void tick() {
         if (CodeClient.location instanceof Dev plot) {
             if (plot.getX() == null) {
                 if (KeyBinds.clipBind.wasPressed())
                     Utility.sendMessage(Text.translatable("codeclient.phaser.plot_origin"));
             }
-//            CodeClient.LOGGER.info("dev and X");
-            if (!clipping && KeyBinds.clipBind.isPressed() && plot.getX() != null) startClipping();
+            boolean currentKeyPressed = KeyBinds.clipBind.isPressed();
+            if (isPhaseToggleEnabled()) {
+                if (currentKeyPressed && !heldKeyCheck) {
+                    if (clipping) {
+                        finishClipping();
+                    } else if (!clipping && plot.getX() != null) {
+                        startClipping();
+                    }
+                    heldKeyCheck = true;
+                } else if (!currentKeyPressed && heldKeyCheck) {
+                    heldKeyCheck = false;
+                }
+            } else {
+                if (!clipping && currentKeyPressed && plot.getX() != null) startClipping();
+                if (clipping && !currentKeyPressed) finishClipping();
+            }
             if (clipping) {
                 var player = CodeClient.MC.player;
                 var size = plot.assumeSize();
@@ -73,7 +92,6 @@ public class BuildPhaser extends Feature {
                 allowPacket = true;
                 CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false));
                 CodeClient.MC.player.getAbilities().flying = true;
-                if (!KeyBinds.clipBind.isPressed()) finishClipping();
             }
         } else if (clipping || waitForTP) {
             disableClipping();

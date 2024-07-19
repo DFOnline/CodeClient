@@ -73,6 +73,7 @@ public class Config {
     public ActionViewerAlignment ActionViewerLocation = ActionViewerAlignment.TOP;
     public int RecentValues = 0;
     public Boolean ValueDetails = true;
+    public Boolean PhaseToggle = false;
 
     public Config() {
     }
@@ -148,6 +149,7 @@ public class Config {
             object.addProperty("InvertActionViewerScroll",InvertActionViewerScroll);
             object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
             object.addProperty("RecentValues", RecentValues);
+            object.addProperty("PhaseToggle", PhaseToggle);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -314,7 +316,7 @@ public class Config {
                                 .binding(
                                         true,
                                         () -> NoClipEnabled,
-                                        option -> NoClipEnabled = option
+                                        opt -> NoClipEnabled = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
@@ -369,6 +371,18 @@ public class Config {
                                         false,
                                         () -> TeleportDown,
                                         opt -> TeleportDown = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.phasetoggle"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.translatable("codeclient.config.phasetoggle.description"))
+                                        .build())
+                                .binding(
+                                        false,
+                                        () -> PhaseToggle,
+                                        opt -> PhaseToggle = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
