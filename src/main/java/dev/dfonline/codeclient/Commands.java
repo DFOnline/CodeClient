@@ -173,6 +173,7 @@ public class Commands {
             confirm = null;
             CodeClient.currentAction = new None();
             CodeClient.getFeature(Debug.class).ifPresent(Debug::reset);
+            CodeClient.API.abort();
             return 0;
         }));
 

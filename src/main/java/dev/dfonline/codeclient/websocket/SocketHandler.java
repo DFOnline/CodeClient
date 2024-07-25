@@ -3,7 +3,6 @@ package dev.dfonline.codeclient.websocket;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dfonline.codeclient.Callback;
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
@@ -19,6 +18,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.java_websocket.WebSocket;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import java.util.function.Function;
 public class SocketHandler {
     public static final int PORT = 31375;
     private final ArrayList<Action> actionQueue = new ArrayList<>();
+    @Nullable
     private WebSocket connection = null;
     private static final List<AuthScope> defaultAuthScopes = List.of(AuthScope.DEFAULT);
     private List<AuthScope> unapprovedAuthScopes = List.of();
@@ -56,6 +57,7 @@ public class SocketHandler {
     }
 
     public void setAcceptedScopes(boolean accepted) {
+        if(connection == null) return;
         actionQueue.clear();
         if (accepted) {
             // Add the unapproved scopes & the default scopes
@@ -78,6 +80,7 @@ public class SocketHandler {
 
 
     public void onMessage(String message) {
+        assert connection != null;
         String[] arguments = message.split(" ");
         Action topAction = getTopAction();
         if (arguments[0] == null) return;
@@ -115,8 +118,9 @@ public class SocketHandler {
         return actionQueue.get(actionQueue.size() - 1);
     }
 
-    private void handleScopeRequest(String[] argumets) {
-        List<String> args = Arrays.asList(argumets).subList(1, argumets.length);
+    private void handleScopeRequest(String[] arguments) {
+        assert connection != null;
+        List<String> args = Arrays.asList(arguments).subList(1, arguments.length);
 
         // Send the currently approved scopes if no args are provided
         if (args.isEmpty()) {
@@ -154,7 +158,7 @@ public class SocketHandler {
 
     private void assertScopeLevel(SocketHandler.Action commandClass) {
         if (!authScopes.contains(commandClass.authScope)) {
-            connection.send("unauthed");
+            if(connection != null) connection.send("unauthed");
             return;
         }
         actionQueue.add(commandClass);
@@ -207,6 +211,11 @@ public class SocketHandler {
         CodeClient.LOGGER.info("starting " + firstAction.name);
         firstAction.active = true;
         firstAction.start(connection);
+    }
+
+    public void abort() {
+        actionQueue.clear();
+        if(connection != null) connection.send("aborted");
     }
 
     private abstract static class Action {
@@ -529,7 +538,7 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            if (CodeClient.location instanceof Plot && !command.isEmpty()) {
+            if (CodeClient.location instanceof Plot && !command.isEmpty() && CodeClient.MC.getNetworkHandler() != null) {
                 CodeClient.MC.getNetworkHandler().sendCommand(command);
             } else {
                 responder.send(CodeClient.location.name());
