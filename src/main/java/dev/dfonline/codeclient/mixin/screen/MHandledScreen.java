@@ -37,6 +37,11 @@ public abstract class MHandledScreen {
         CodeClient.onScreenInit((HandledScreen<?>) (Object) this);
     }
 
+    @Inject(method = "removed", at = @At("TAIL"))
+    public void removed(CallbackInfo ci) {
+        CodeClient.onScreenClosed();
+    }
+
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;pop()V"))
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         CodeClient.onRender(context,mouseX,mouseY,this.x,this.y,delta);

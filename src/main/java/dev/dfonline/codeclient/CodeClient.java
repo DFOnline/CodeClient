@@ -281,8 +281,14 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static void onScreenInit(HandledScreen<?> screen) {
+        features().forEach(Feature::closeChest);
         if (!isCodeChest) return;
         features().forEach(feat -> feat.openChest(screen));
+    }
+
+    public static void onScreenClosed() {
+        isCodeChest = false;
+        features().forEach(Feature::closeChest);
     }
 
     public static void onRender(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
