@@ -36,8 +36,8 @@ public class Icon {
     public String[] example;
     public String[] worksWith;
     public String[][] additionalInfo;
-    public String requiredRank;
-    public String requireTokens;
+    public RequiredRank requiredRank;
+    public boolean requireTokens;
     public String requireRankAndTokens;
     public boolean advanced;
     public Boolean cancellable;
@@ -149,6 +149,20 @@ public class Icon {
             if (cancelledAutomatically) addToLore(lore, "§4∅ §cCancelled automatically");
             else addToLore(lore, "§4∅ §cCancellable");
         }
+        if(requireTokens) {
+            addToLore(lore,"");
+            lore.add(Utility.nbtify(Text.literal("Unlock with Tokens").withColor(0xffd42a)));
+        }
+        if(requiredRank != null) {
+            if(requireTokens) {
+                lore.add(Utility.nbtify(Text.literal("OR").withColor(0xff55aa)));
+                lore.add(Utility.nbtify(Text.literal( "Unlock with " + requiredRank.name).withColor(requiredRank.color.getRgb())));
+            }
+            else {
+                addToLore(lore,"");
+                lore.add(Utility.nbtify(Text.literal(requiredRank.name + " Exclusive").withColor(requiredRank.color.getRgb())));
+            }
+        }
         display.put("Lore", lore);
 
         display.put("Name", Utility.nbtify(Utility.textFromString(name)));
@@ -249,6 +263,21 @@ public class Icon {
         }
     }
 
+    public enum RequiredRank {
+        Noble("Noble",TextColor.fromRgb(0x7fff7f)),
+        Emperor("Emperor",TextColor.fromRgb(0x55aaff)),
+        Mythic("Mythic",TextColor.fromRgb(0xd42ad4)),
+        Overlord("Overlord",TextColor.fromFormatting(Formatting.RED)),
+        Dev("",TextColor.fromRgb(0));
+
+        public final String name;
+        public final TextColor color;
+        RequiredRank(String name, TextColor color) {
+            this.name = name;
+            this.color = color;
+        }
+    }
+
     public record ArgumentGroup(List<Argument> arguments) {
         public List<ArgumentPossibilities> getPossibilities() {
             var groups = new ArrayList<ArgumentPossibilities>();
@@ -269,7 +298,7 @@ public class Icon {
         }
     }
 
-    record ReturnValue(Type type, String[] description, String text) {
+    public record ReturnValue(Type type, String[] description, String text) {
     }
 
     public static class Color {
