@@ -166,7 +166,8 @@ public class Config {
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.api"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.api.description"))
+                                        .text(Text.translatable("codeclient.config.api.description1"))
+                                        .text(Text.translatable("codeclient.config.api.description2").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/api")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.config.click_to_open_link"))).withUnderline(true).withColor(Formatting.AQUA)))
                                         .text(Text.translatable("codeclient.config.requires_restart"))
                                         .build())
                                 .binding(
@@ -236,7 +237,10 @@ public class Config {
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.ccdbug"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.ccdbug.description"))
+                                        .text(Text.translatable("codeclient.config.ccdbug.description1"))
+                                        .text(Text.translatable("codeclient.config.ccdbug.description2"), Text.literal("#00ccdb").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "#00ccdb")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.config.click_to_copy"))).withColor(Formatting.AQUA).withUnderline(true)))
+                                        .text(Text.translatable("codeclient.config.ccdbug.description.text1").formatted(Formatting.BOLD), Text.translatable("codeclient.config.ccdbug.description.text2"), Text.literal("\"<#00ccdb>text</#00ccdb>\n<red>Line 1</red>\n<blue>Line 2</blue>\"").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "<#00ccdb>text</#00ccdb><red>Line 1</red><blue>Line 2</blue>")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.config.click_to_copy"))).withColor(Formatting.AQUA)), Text.translatable("codeclient.config.ccdbug.description.text3"))
+                                        .text(Text.translatable("codeclient.config.ccdbug.description.location1").formatted(Formatting.BOLD), Text.translatable("codeclient.config.ccdbug.description.location2"), Text.literal("\"<#00ccdb>location</#00ccdb>\n<i><red>[x, y, z, P, Y]</red>\n<blue>text to display</blue></i>\"").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "<#00ccdb>location</#00ccdb><i><red>[x, y, z, P, Y]</red><blue>text to display</blue></i>")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.config.click_to_copy"))).withColor(Formatting.AQUA)), Text.translatable("codeclient.config.ccdbug.description.location3"))
                                         .build())
                                 .binding(
                                         true,
@@ -530,7 +534,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.translatable("codeclient.config.pick_block_action"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.pick_block_action.description1"), Text.translatable("codeclient.config.pick_block_action.description2").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.config.pick_block_action.description3"))).withUnderline(true).withColor(Formatting.AQUA))))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.pick_block_action.description1"), Text.translatable("codeclient.config.pick_block_action.description2").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump")).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.config.click_to_open_link"))).withUnderline(true).withColor(Formatting.AQUA))))
                                 .binding(
                                         true,
                                         () -> PickAction,
