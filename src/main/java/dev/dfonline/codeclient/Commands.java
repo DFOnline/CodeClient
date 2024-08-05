@@ -26,6 +26,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -342,12 +343,12 @@ public class Commands {
                                         var template = Template.parse64(data);
                                         if (template == null) continue;
                                         var first = template.blocks.get(0);
-                                        String name = Objects.requireNonNullElse(first.action != null ? first.action : first.data, "unknown");
+                                        String name = Objects.requireNonNullElse(first.action != null ? first.action : first.data, "unknown").replaceAll(SystemUtils.IS_OS_WINDOWS ? "[<>:\"/|?*]" : "/", "");
                                         var filePath = finalCurrentPath.resolve(name + ".dft");
                                         try {
                                             Files.write(filePath, Base64.getDecoder().decode(data));
                                         } catch (Exception ignored) {
-                                            Utility.sendMessage(Text.translatable("codeclient.files.error.write_file", filePath), ChatType.FAIL);
+                                            Utility.sendMessage(Text.translatable("codeclient.files.error.write_file", filePath.toString()), ChatType.FAIL);
                                         }
                                     }
 
