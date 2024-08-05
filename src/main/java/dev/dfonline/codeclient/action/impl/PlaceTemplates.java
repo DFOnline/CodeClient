@@ -25,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.ObjectUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,8 +70,9 @@ public class PlaceTemplates extends Action {
 
     /**
      * Doesn't add .swap(), that needs to be added yourself.
+     * Will return <b>null</b> if there is no space.
      */
-    public static PlaceTemplates createSwapper(List<ItemStack> templates, Callback callback) {
+    public static @Nullable PlaceTemplates createSwapper(List<ItemStack> templates, Callback callback) {
         if (CodeClient.location instanceof Dev dev) {
             HashMap<BlockPos, ItemStack> map = new HashMap<>();
             var scan = dev.scanForSigns(Pattern.compile(".*"));
@@ -85,7 +87,7 @@ public class PlaceTemplates extends Action {
                 String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
                 try {
                     Template template = Template.parse64(JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString());
-                    if (template.blocks.isEmpty()) continue;
+                    if (template == null || template.blocks.isEmpty()) continue;
                     TemplateBlock block = template.blocks.get(0);
                     if (block.block == null) continue;
                     TemplateBlock.Block blockName = TemplateBlock.Block.valueOf(block.block.toUpperCase());
@@ -105,6 +107,7 @@ public class PlaceTemplates extends Action {
             if (!leftOvers.isEmpty()) {
                 BlockPos freePos = dev.findFreePlacePos();
                 for (var item : leftOvers) {
+                    if(freePos == null) return null;
                     map.put(freePos, item);
                     freePos = dev.findFreePlacePos(freePos.west(2));
                 }
@@ -117,6 +120,7 @@ public class PlaceTemplates extends Action {
     /**
      * A regular placer will always start from where code starts.
      * This will use any free spaces instead.
+     * Will return <b>null</b> if there is no space.
      */
     public static PlaceTemplates createPlacer(List<ItemStack> templates, Callback callback) {
         return createPlacer(templates, callback, false);
@@ -125,6 +129,7 @@ public class PlaceTemplates extends Action {
     /**
      * A regular placer will always start from where code starts.
      * This will use any free spaces instead.
+     * Will return <b>null</b> if there is no space or some other error occurs.
      */
     public static PlaceTemplates createPlacer(List<ItemStack> templates, Callback callback, boolean compacter) {
         if (CodeClient.location instanceof Dev dev) {
@@ -132,19 +137,24 @@ public class PlaceTemplates extends Action {
             if (!compacter) {
                 BlockPos lastPos = dev.findFreePlacePos();
                 for (var template : templates) {
+                    if(lastPos == null) return null;
                     map.put(lastPos, template);
                     lastPos = dev.findFreePlacePos(lastPos.west(2));
                 }
             } else {
                 BlockPos nextPos = dev.findFreePlacePos();
                 for (var template : templates) {
-                    int size = Template.parse64(Utility.templateDataItem(template)).getLength();
+                    Template parsed = Template.parse64(Utility.templateDataItem(template));
+                    if(parsed == null) return null;
+                    int size = parsed.getLength();
                     var placePos = nextPos;
+                    if(placePos == null) return null;
                     var templateEndPos = placePos.south(size);
                     if (dev.isInDev(templateEndPos)) {
                         nextPos = templateEndPos;
                     } else {
                         placePos = dev.findFreePlacePos(placePos.west(2));
+                        if(placePos == null) return null;
                         nextPos = placePos.south(size);
                     }
                     map.put(placePos, template);
@@ -166,6 +176,7 @@ public class PlaceTemplates extends Action {
     @Override
     public void init() {
         cooldown = 4;
+        assert CodeClient.MC.player != null;
         recoverMainHand = CodeClient.MC.player.getMainHandStack();
     }
 
@@ -197,7 +208,8 @@ public class PlaceTemplates extends Action {
 
     @Override
     public void tick() {
-        if (CodeClient.MC.interactionManager == null) return;
+        var net = CodeClient.MC.getNetworkHandler();
+        if (CodeClient.MC.interactionManager == null || CodeClient.MC.player == null || net == null) return;
         if (CodeClient.location instanceof Dev) {
             if (operations.isEmpty()) {
                 callback();
@@ -216,7 +228,6 @@ public class PlaceTemplates extends Action {
                         if (operation instanceof TemplateToPlace template) {
                             if (shouldBeSwapping) {
                                 var player = CodeClient.MC.player;
-                                var net = CodeClient.MC.getNetworkHandler();
                                 boolean sneaky = !player.isSneaking();
                                 if (sneaky)
                                     net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
@@ -246,7 +257,6 @@ public class PlaceTemplates extends Action {
                 goTo.init();
                 cooldown = 2;
             }
-            return;
         }
     }
 
