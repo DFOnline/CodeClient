@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MPlayerEntity {
     @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
     private void getAirSpeed(CallbackInfoReturnable<Float> cir) {
-        if (!CodeClient.MC.player.getAbilities().flying) {
+        if (!(CodeClient.MC.player != null && CodeClient.MC.player.getAbilities().flying)) {
             CodeClient.getFeature(Navigation.class).map(Navigation::getAirSpeed).ifPresent(cir::setReturnValue);
         }
     }
