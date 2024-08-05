@@ -448,7 +448,7 @@ public class Commands {
 
 //        dispatcher.register(literal("swapininv").executes(context -> {
 //            if(CodeClient.location instanceof Dev) {
-//                PlaceTemplates action = Utility.createSwapper(Utility.templatesInInventory(), () -> {
+//                PlaceTemplates action = PlaceTemplates.createSwapper(Utility.templatesInInventory(), () -> {
 //                    CodeClient.currentAction = new None();
 //                    Utility.sendMessage("Done!", ChatType.SUCCESS);
 //                });
@@ -461,7 +461,7 @@ public class Commands {
 //        }));
         dispatcher.register(literal("templateplacer").executes(context -> {
             if (CodeClient.location instanceof Dev) {
-                var action = Utility.createPlacer(Utility.templatesInInventory(), Commands::actionCallback);
+                var action = PlaceTemplates.createPlacer(Utility.templatesInInventory(), Commands::actionCallback);
                 if (action == null) return -1;
                 CodeClient.currentAction = action;
                 CodeClient.currentAction.init();
@@ -553,7 +553,7 @@ public class Commands {
                 for (var template : Objects.requireNonNull(getAllTemplates(path))) {
                     map.add(Utility.makeTemplate(template));
                 }
-                confirm = Utility.createSwapper(map, Commands::actionCallback).swap();
+                confirm = PlaceTemplates.createSwapper(map, Commands::actionCallback).swap();
                 Utility.sendMessage(Text.translatable("codeclient.action.confirmcc.use"), ChatType.INFO);
             } catch (IOException e) {
                 Utility.sendMessage(Text.translatable("codeclient.files.error.read_file", path), ChatType.FAIL);

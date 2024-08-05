@@ -1,13 +1,18 @@
 package dev.dfonline.codeclient.action.impl;
 
+import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.Callback;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.hypercube.template.Template;
+import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.mixin.entity.player.ClientPlayerInteractionManagerAccessor;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -19,10 +24,13 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class PlaceTemplates extends Action {
     private final ArrayList<Operation> operations;
@@ -57,6 +65,94 @@ public class PlaceTemplates extends Action {
             templatesToPlace.add(new TemplateToPlace(template.getKey(), template.getValue()));
         }
         this.operations = templatesToPlace;
+    }
+
+    /**
+     * Doesn't add .swap(), that needs to be added yourself.
+     */
+    public static PlaceTemplates createSwapper(List<ItemStack> templates, Callback callback) {
+        if (CodeClient.location instanceof Dev dev) {
+            HashMap<BlockPos, ItemStack> map = new HashMap<>();
+            var scan = dev.scanForSigns(Pattern.compile(".*"));
+            ArrayList<ItemStack> leftOvers = new ArrayList<>(templates);
+            for (ItemStack item : templates) {
+                if (!item.hasNbt()) continue;
+                NbtCompound nbt = item.getNbt();
+                if (nbt == null) continue;
+                if (!nbt.contains("PublicBukkitValues")) continue;
+                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
+                if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
+                String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
+                try {
+                    Template template = Template.parse64(JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString());
+                    if (template.blocks.isEmpty()) continue;
+                    TemplateBlock block = template.blocks.get(0);
+                    if (block.block == null) continue;
+                    TemplateBlock.Block blockName = TemplateBlock.Block.valueOf(block.block.toUpperCase());
+                    String name = ObjectUtils.firstNonNull(block.action, block.data);
+                    for (Map.Entry<BlockPos, SignText> sign : scan.entrySet()) { // Loop through scanned signs
+                        SignText text = sign.getValue();                        // ↓ If the blockName and name match
+                        if (text.getMessage(0, false).getString().equals(blockName.name) && text.getMessage(1, false).getString().equals(name)) {
+                            map.put(sign.getKey().east(), item);                // Put it into map
+                            leftOvers.remove(item);                             // Remove the template, so we can see if there's anything left over
+                            break;                                              // break out :D
+                        }
+                    }
+                } catch (Exception e) {
+                    CodeClient.LOGGER.warn(e.getMessage());
+                }
+            }
+            if (!leftOvers.isEmpty()) {
+                BlockPos freePos = dev.findFreePlacePos();
+                for (var item : leftOvers) {
+                    map.put(freePos, item);
+                    freePos = dev.findFreePlacePos(freePos.west(2));
+                }
+            }
+            return new PlaceTemplates(map, callback);
+        }
+        return null;
+    }
+
+    /**
+     * A regular placer will always start from where code starts.
+     * This will use any free spaces instead.
+     */
+    public static PlaceTemplates createPlacer(List<ItemStack> templates, Callback callback) {
+        return createPlacer(templates, callback, false);
+    }
+
+    /**
+     * A regular placer will always start from where code starts.
+     * This will use any free spaces instead.
+     */
+    public static PlaceTemplates createPlacer(List<ItemStack> templates, Callback callback, boolean compacter) {
+        if (CodeClient.location instanceof Dev dev) {
+            var map = new HashMap<BlockPos, ItemStack>();
+            if (!compacter) {
+                BlockPos lastPos = dev.findFreePlacePos();
+                for (var template : templates) {
+                    map.put(lastPos, template);
+                    lastPos = dev.findFreePlacePos(lastPos.west(2));
+                }
+            } else {
+                BlockPos nextPos = dev.findFreePlacePos();
+                for (var template : templates) {
+                    int size = Template.parse64(Utility.templateDataItem(template)).getLength();
+                    var placePos = nextPos;
+                    var templateEndPos = placePos.south(size);
+                    if (dev.isInDev(templateEndPos)) {
+                        nextPos = templateEndPos;
+                    } else {
+                        placePos = dev.findFreePlacePos(placePos.west(2));
+                        nextPos = placePos.south(size);
+                    }
+                    map.put(placePos, template);
+                }
+            }
+            return new PlaceTemplates(map, callback);
+        }
+        return null;
     }
 
     /**

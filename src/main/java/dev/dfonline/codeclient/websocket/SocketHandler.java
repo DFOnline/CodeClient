@@ -397,17 +397,17 @@ public class SocketHandler {
         }
 
         private enum Method {
-            DEFAULT((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> Utility.createPlacer(templates, () -> {
+            DEFAULT((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> PlaceTemplates.createPlacer(templates, () -> {
                 CodeClient.currentAction = new None();
                 if (responder.isOpen()) responder.send("place done");
                 next.run();
             })),
-            COMPACT((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> Utility.createPlacer(templates, () -> {
+            COMPACT((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> PlaceTemplates.createPlacer(templates, () -> {
                 CodeClient.currentAction = new None();
                 if (responder.isOpen()) responder.send("place done");
                 next.run();
             }, true)),
-            SWAP((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> Utility.createSwapper(templates, () -> {
+            SWAP((ArrayList<ItemStack> templates, Callback next, WebSocket responder) -> PlaceTemplates.createSwapper(templates, () -> {
                 CodeClient.currentAction = new None();
                 if (responder.isOpen()) responder.send("place done");
                 next.run();
