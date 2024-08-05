@@ -367,7 +367,7 @@ public class Commands {
                 var scan = dev.scanForSigns(pattern);
                 Utility.sendMessage(Text.translatable("codeclient.action.scanfor.scan_result"));
                 for (var res : scan.entrySet()) {
-                    Utility.sendMessage("- " + res.getKey() + ": " + res.getValue().getMessage(1, false).getString());
+                    Utility.sendMessage(Text.empty().append("- ").append(res.getKey().toString()).append(": ").append(res.getValue().getMessage(1,false)));
                 }
                 return 0;
             }

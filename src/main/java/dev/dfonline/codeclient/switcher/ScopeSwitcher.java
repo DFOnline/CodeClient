@@ -61,7 +61,7 @@ public class ScopeSwitcher extends GenericSwitcher {
         NbtCompound display = nbt.getCompound("display");
         if (display != null) {
             NbtList lore = display.getList("Lore", NbtElement.STRING_TYPE);
-            lore.set(0, Utility.nbtify(getSelected().text()));
+            lore.set(0, Utility.textToNBT(getSelected().text()));
             display.put("Lore", lore);
             nbt.put("display", display);
         }

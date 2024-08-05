@@ -11,7 +11,7 @@ import net.minecraft.util.Formatting;
 import java.util.Arrays;
 import java.util.List;
 
-import static dev.dfonline.codeclient.Utility.nbtify;
+import static dev.dfonline.codeclient.Utility.textToNBT;
 
 public class Particle extends VarItem implements Searchable {
     public String particle;
@@ -53,12 +53,12 @@ public class Particle extends VarItem implements Searchable {
 
         NbtCompound display = item.getSubNbt("display");
         NbtList Lore = (NbtList) display.get("Lore");
-        Lore.add(nbtify(Text.literal("")));
-        Lore.add(nbtify(Text.literal("Additional Fields:").formatted(Formatting.GRAY)));
-        if (optionFields.size() == 0) Lore.add(nbtify(Text.literal("None").formatted(Formatting.DARK_GRAY)));
+        Lore.add(textToNBT(Text.literal("")));
+        Lore.add(textToNBT(Text.literal("Additional Fields:").formatted(Formatting.GRAY)));
+        if (optionFields.size() == 0) Lore.add(textToNBT(Text.literal("None").formatted(Formatting.DARK_GRAY)));
         else for (ParticleField field : optionFields) {
-            if (field != null) Lore.add(nbtify(Text.literal("• " + field.displayName).formatted(Formatting.WHITE)));
-            else Lore.add(nbtify(Text.of("NULL?")));
+            if (field != null) Lore.add(textToNBT(Text.literal("• " + field.displayName).formatted(Formatting.WHITE)));
+            else Lore.add(textToNBT(Text.of("NULL?")));
         }
         display.put("Lore", Lore);
         item.setSubNbt("display", display);

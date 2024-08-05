@@ -44,6 +44,7 @@ public class Utility {
      * Be lazy, send your whole inventory!
      */
     public static void sendInventory() {
+        if(CodeClient.MC.getNetworkHandler() == null || CodeClient.MC.player == null) return;
         for (int i = 0; i <= 35; i++) {
             CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(getRemoteSlot(i), CodeClient.MC.player.getInventory().getStack(i)));
         }
@@ -55,18 +56,20 @@ public class Utility {
      * @param item Any item
      */
     public static void makeHolding(ItemStack item) {
+        if(CodeClient.MC.player == null) return;
         PlayerInventory inv = CodeClient.MC.player.getInventory();
         Utility.sendHandItem(item);
         inv.selectedSlot = 0;
         inv.setStack(0, item);
     }
 
+    @SuppressWarnings("unused")
     public static void debug(Object object) {
         debug(Objects.toString(object));
     }
 
     public static void debug(String message) {
-        CodeClient.LOGGER.info("%%% DEBUG: " + message);
+        CodeClient.LOGGER.info("%%% DEBUG: {}", message);
     }
 
     /**
@@ -102,14 +105,15 @@ public class Utility {
     }
 
     public static void addLore(ItemStack stack, Text... lore) {
-        var display = stack.getSubNbt("display");
+        var display = Objects.requireNonNullElse(stack.getSubNbt("display"), new NbtCompound());
         var loreList = new NbtList();
-        for (Text line : lore) loreList.add(Utility.nbtify(Text.empty().append(line)));
+        for (Text line : lore) loreList.add(Utility.textToNBT(Text.empty().append(line)));
         display.put("Lore", loreList);
         stack.setSubNbt("display", display);
     }
 
     public static void sendHandItem(ItemStack item) {
+        if(CodeClient.MC.getNetworkHandler() == null || CodeClient.MC.player == null) return;
         CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + CodeClient.MC.player.getInventory().selectedSlot, item));
     }
 
@@ -117,13 +121,14 @@ public class Utility {
      * Gets all templates in the players inventory.
      */
     public static List<ItemStack> templatesInInventory() {
+        if(CodeClient.MC.player == null) return null;
         PlayerInventory inv = CodeClient.MC.player.getInventory();
         ArrayList<ItemStack> templates = new ArrayList<>();
         for (int i = 0; i < (27 + 9); i++) {
             ItemStack item = inv.getStack(i);
             if (!item.hasNbt()) continue;
             NbtCompound nbt = item.getNbt();
-            if (!nbt.contains("PublicBukkitValues")) continue;
+            if (nbt == null || !nbt.contains("PublicBukkitValues")) continue;
             NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
             if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
             templates.add(item);
@@ -157,14 +162,6 @@ public class Utility {
         sendMessage(Text.literal(message), type);
     }
 
-    /**
-     * @deprecated This uses literals, use translations when you can.
-     */
-    @Deprecated
-    public static void sendMessage(String message) {
-        sendMessage(Text.literal(message), ChatType.INFO);
-    }
-
     public static void sendMessage(Text message) {
         sendMessage(message, ChatType.INFO);
     }
@@ -190,7 +187,7 @@ public class Utility {
      *
      * @return Usable in lore and as a name in nbt.
      */
-    public static NbtString nbtify(Text text) {
+    public static NbtString textToNBT(Text text) {
         JsonElement json = Text.Serialization.toJsonTree(text);
         if (json.isJsonObject()) {
             JsonObject obj = (JsonObject) json;

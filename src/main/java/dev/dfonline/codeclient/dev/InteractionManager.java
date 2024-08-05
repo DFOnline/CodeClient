@@ -179,7 +179,7 @@ public class InteractionManager {
                                 text.append(Text.literal("» ").formatted(Formatting.DARK_AQUA)).append(Text.literal(option).formatted(Formatting.AQUA));
                             } else
                                 text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
-                            lore.set(tagStartIndex + optionIndex, Utility.nbtify(text));
+                            lore.set(tagStartIndex + optionIndex, Utility.textToNBT(text));
                             optionIndex++;
                         }
                         display.put("Lore", lore);
