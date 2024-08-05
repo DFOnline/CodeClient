@@ -183,11 +183,17 @@ public abstract class Plot extends Location {
         return lineStarterCache;
     }
 
-    public BlockPos findFreePlacePos() {
+     /**
+     * Will return <b>null</b> when there is no room.
+     */
+    public @Nullable BlockPos findFreePlacePos() {
         return findFreePlacePos(new BlockPos(originX - 1,  hasUnderground ? 5 : 50, originZ));
     }
 
-    public BlockPos findFreePlacePos(BlockPos origin) {
+    /**
+     * Will return <b>null</b> when there is no room.
+     */
+    public @Nullable BlockPos findFreePlacePos(BlockPos origin) {
         if (originX == null || CodeClient.MC.world == null) return null;
         var world = CodeClient.MC.world;
         int y = Math.max(origin.getY(), 5);
