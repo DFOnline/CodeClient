@@ -52,6 +52,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
@@ -178,12 +179,17 @@ public class CodeClient implements ClientModInitializer {
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.", "");
 //        if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
 
-        if (CodeClient.location instanceof Dev dev &&
-                packet instanceof BlockEntityUpdateS2CPacket beu &&
-                dev.isInDev(beu.getPos()) &&
-                MC.world != null &&
-                MC.world.getBlockEntity(beu.getPos()) instanceof SignBlockEntity) {
-            dev.clearLineStarterCache();
+        if (CodeClient.location instanceof Dev dev) {
+            try {
+                if (packet instanceof BlockEntityUpdateS2CPacket beu && dev.isInDev(beu.getPos()) && MC.world != null && MC.world.getBlockEntity(beu.getPos()) instanceof SignBlockEntity) {
+                    dev.clearLineStarterCache();
+                }
+            } catch (ConcurrentModificationException exception) {
+                // Not sure how this comes to happen. My guess it's the getBlockEntity call.
+                // Unfortunately, I don't know what state the game has to be in to make it fail, maybe an unloaded chunk?
+                // It's hard to check for that, apparently.
+                dev.clearLineStarterCache();
+            }
         }
         return (MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen || MC.currentScreen instanceof StateSwitcher) && packet instanceof CloseScreenS2CPacket;
     }
