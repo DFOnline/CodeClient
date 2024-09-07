@@ -279,4 +279,19 @@ public class Utility {
         textToString(content, builder, GetActionDump.ColorMode.SECTION);
         return builder.toString();
     }
+
+    /**
+     * Generate a string of 32 random A-Z,a-z,0-9 characters that are used for authentication tokens in the API.
+     * @return A random authentication token.
+     */
+    public static String genAuthToken() {
+        String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder token = new StringBuilder();
+        Random random = new Random(System.currentTimeMillis());
+        for (int i = 0; i < 32; i++) {
+            // Get a random index from the chars string.
+            token.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return token.toString();
+    }
 }
