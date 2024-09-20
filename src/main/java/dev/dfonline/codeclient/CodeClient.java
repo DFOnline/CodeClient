@@ -27,7 +27,7 @@ import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -181,7 +181,7 @@ public class CodeClient implements ClientModInitializer {
 
         if (CodeClient.location instanceof Dev dev) {
             try {
-                if (packet instanceof BlockEntityUpdateS2CPacket beu && dev.isInDev(beu.getPos()) && MC.world != null && MC.world.getBlockEntity(beu.getPos()) instanceof SignBlockEntity) {
+                if (packet instanceof BlockEntityUpdateS2CPacket beu && dev.isInDev(beu.getPos()) && beu.getBlockEntityType() == BlockEntityType.SIGN) {
                     dev.clearLineStarterCache();
                 }
             } catch (ConcurrentModificationException exception) {
@@ -223,7 +223,6 @@ public class CodeClient implements ClientModInitializer {
 
         if (location instanceof Dev dev) {
             if (MC.player == null) return;
-            MC.player.getAbilities().allowFlying = true;
             var pos = new BlockPos(dev.getX() - 1, 49, dev.getZ());
             if (dev.getSize() == null) {
                 // TODO wait for plugin messages, or make a fix now.
