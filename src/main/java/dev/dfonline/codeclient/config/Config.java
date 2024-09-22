@@ -867,14 +867,8 @@ public class Config {
     }
 
     public enum DestroyItemReset {
-        OFF("codeclient.config.destroy_item_reset.off"),
-        STANDARD("codeclient.config.destroy_item_reset.standard"),
-        COMPACT("codeclient.config.destroy_item_reset.compact");
-
-        public final String description;
-
-        DestroyItemReset(String description) {
-            this.description = description;
-        }
+        OFF,
+        STANDARD,
+        COMPACT;
     }
 }
