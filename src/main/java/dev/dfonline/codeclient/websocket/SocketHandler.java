@@ -38,7 +38,7 @@ public class SocketHandler {
     // Map of tokens and their scopes
     private final HashMap<String, List<AuthScope>> tokenMap = new HashMap<>();
     // The active token, empty if none
-    private String activeToken = "";
+    private String activeToken = null;
     private SocketServer websocket;
 
     public void start() {
@@ -79,12 +79,12 @@ public class SocketHandler {
         if (socket != null) actionQueue.clear();
         if (connection != null) {
             connection.close(); // Close the old connection
-            if (!activeToken.isEmpty()) {
+            if (activeToken != null) {
                 // If we were using a token, save the scopes
                 tokenMap.put(activeToken, authScopes);
             }
             // Reset the active token and scopes
-            activeToken = "";
+            activeToken = null;
             authScopes = defaultAuthScopes;
             unapprovedAuthScopes = List.of();
         }
@@ -176,7 +176,7 @@ public class SocketHandler {
 
         if (args.isEmpty()) {
             // Send the active token if one is active, otherwise regenerate it.
-            String token = Objects.equals(activeToken, "") ? Utility.genAuthToken() : activeToken;
+            String token = activeToken == null ? Utility.genAuthToken() : activeToken;
             connection.send("token " + token);
             tokenMap.put(token, authScopes);
             activeToken = token;

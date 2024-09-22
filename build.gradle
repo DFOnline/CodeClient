@@ -21,6 +21,7 @@ repositories {
     maven {
         url 'https://maven.terraformersmc.com/'
     }
+    maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
 }
 
 dependencies {
@@ -35,6 +36,7 @@ dependencies {
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     implementation include("org.java-websocket:Java-WebSocket:1.5.3")
+    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
 }
 
 processResources {

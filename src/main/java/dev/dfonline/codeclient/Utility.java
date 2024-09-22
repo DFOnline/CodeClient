@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -285,13 +286,9 @@ public class Utility {
      * @return A random authentication token.
      */
     public static String genAuthToken() {
-        String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder token = new StringBuilder();
-        Random random = new Random(System.currentTimeMillis());
-        for (int i = 0; i < 32; i++) {
-            // Get a random index from the chars string.
-            token.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return token.toString();
+        SecureRandom random = new SecureRandom();
+        byte[] randomBytes = new byte[32];
+        random.nextBytes(randomBytes);
+        return HexFormat.of().formatHex(randomBytes);
     }
 }
