@@ -9,7 +9,6 @@ import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
@@ -74,6 +73,7 @@ public class Config {
     public int RecentValues = 0;
     public Boolean ValueDetails = true;
     public Boolean PhaseToggle = false;
+    public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
 
     public Config() {
     }
@@ -150,6 +150,7 @@ public class Config {
             object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
+            object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -548,6 +549,16 @@ public class Config {
                                 )
                                 .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(0, 100))
                                 .build())
+                        .option(Option.createBuilder(Config.DestroyItemReset.class)
+                                .name(Text.translatable("codeclient.config.destroy_item_reset.name"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.destroy_item_reset.description")))
+                                .binding(
+                                        DestroyItemReset.OFF,
+                                        () -> DestroyItemResetMode,
+                                        opt -> DestroyItemResetMode = opt
+                                )
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.DestroyItemReset.class))
+                                .build())
                         .build())
                 //</editor-fold>
                 //<editor-fold desc="Visual">
@@ -853,5 +864,17 @@ public class Config {
     public enum ActionViewerAlignment {
         CENTER,
         TOP;
+    }
+
+    public enum DestroyItemReset {
+        OFF("codeclient.config.destroy_item_reset.off"),
+        STANDARD("codeclient.config.destroy_item_reset.standard"),
+        COMPACT("codeclient.config.destroy_item_reset.compact");
+
+        public final String description;
+
+        DestroyItemReset(String description) {
+            this.description = description;
+        }
     }
 }
