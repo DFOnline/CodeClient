@@ -26,14 +26,7 @@ public abstract class MCreativeInventoryScreen {
                 && actionType == SlotActionType.QUICK_MOVE
                 && slot == this.deleteItemSlot) {
 
-            String cmd = switch (Config.DestroyItemResetMode) {
-                case OFF:
-                    yield null;
-                case STANDARD:
-                    yield "rs";
-                case COMPACT:
-                    yield "rc";
-            };
+            String cmd = Config.DestroyItemResetMode.command;
 
             if (cmd != null) {
                 CodeClient.MC.setScreen(null);

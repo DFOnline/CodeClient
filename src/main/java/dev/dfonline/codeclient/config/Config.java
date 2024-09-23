@@ -867,8 +867,13 @@ public class Config {
     }
 
     public enum DestroyItemReset {
-        OFF,
-        STANDARD,
-        COMPACT;
+        OFF(null),
+        STANDARD("rs"),
+        COMPACT("rc");
+
+        public String command;
+        DestroyItemReset(String command) {
+            this.command = command;
+        }
     }
 }
