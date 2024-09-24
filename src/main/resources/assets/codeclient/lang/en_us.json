@@ -2,6 +2,7 @@
   "category.codeclient.dev": "CodeClient",
   "key.codeclient.codepalette": "Code Palette",
   "key.codeclient.phaser": "Phaser",
+  "key.codeclient.preview_item_tags": "Preview Item Tags",
 
   "category.codeclient.navigation": "Code Navigation",
   "key.codeclient.tp.left": "Teleport Left",
