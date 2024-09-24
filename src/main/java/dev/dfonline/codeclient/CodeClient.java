@@ -22,6 +22,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
@@ -37,12 +38,17 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.AbstractNbtNumber;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -72,6 +78,7 @@ public class CodeClient implements ClientModInitializer {
     public static Location lastLocation = null;
     public static Location location = null;
     public static boolean shouldReload = false;
+    public static boolean isPreviewingItemTags = false;
 
     private static final HashMap<Class<? extends Feature>, Feature> features = new HashMap<>();
     private static boolean isCodeChest = false;
@@ -109,6 +116,33 @@ public class CodeClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             Commands.register(dispatcher);
+        });
+
+        ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
+            if (isPreviewingItemTags) {
+                if (!stack.hasNbt()) return;
+                NbtCompound nbt = stack.getNbt();
+                if (nbt == null) return;
+                if (!nbt.contains("PublicBukkitValues")) return;
+                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
+                for (var key : publicBukkit.getKeys()) {
+                    if (key.startsWith("hypercube:")) {
+                        NbtElement element = publicBukkit.get(key);
+
+                        // Any type = yellow, number = red, string = aqua.
+                        MutableText value = Text.literal(publicBukkit.get(key).toString()).formatted(Formatting.GREEN);
+                        if (element instanceof NbtString) value.formatted(Formatting.AQUA);
+                        if (element instanceof AbstractNbtNumber) value.formatted(Formatting.RED);
+
+                        lines.add(
+                                Text.literal(key.replace("hypercube:", ""))
+                                        .withColor(0xAAFF55)
+                                        .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
+                                        .append(value)
+                        );
+                    }
+                }
+            }
         });
 
         try {
