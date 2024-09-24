@@ -607,6 +607,15 @@ public class Commands {
             confirm = null;
             return 1;
         }));
+
+        dispatcher.register(literal("ping").executes(context -> {
+            if(CodeClient.MC.player == null) return 0;
+
+            int ping = CodeClient.MC.player.networkHandler.getPlayerListEntry(CodeClient.MC.player.getUuid()).getLatency();
+
+            Utility.sendMessage(Text.translatable("codeclient.command.ping", ping), ChatType.SUCCESS);
+            return 0;
+        }));
     }
 
     private static CompletableFuture<Suggestions> suggestDirectories(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {

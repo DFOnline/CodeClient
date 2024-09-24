@@ -269,5 +269,7 @@
   "hypercube.codeblock.function": "Function",
   "hypercube.codeblock.call_function": "Call Function",
   "hypercube.codeblock.process": "Process",
-  "hypercube.codeblock.start_process": "Start Process"
+  "hypercube.codeblock.start_process": "Start Process",
+
+  "codeclient.command.ping": "Your ping is %s ms."
 }
