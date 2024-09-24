@@ -609,7 +609,8 @@ public class Commands {
         }));
 
         dispatcher.register(literal("ping").executes(context -> {
-            assert CodeClient.MC.player != null;
+            if(CodeClient.MC.player == null) return 0;
+
             int ping = CodeClient.MC.player.networkHandler.getPlayerListEntry(CodeClient.MC.player.getUuid()).getLatency();
 
             Utility.sendMessage(Text.translatable("codeclient.command.ping", ping), ChatType.SUCCESS);
