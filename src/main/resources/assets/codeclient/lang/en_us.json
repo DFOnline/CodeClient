@@ -165,6 +165,9 @@
   "codeclient.config.command.enum.fail": "Couldn't set option %s to %s.",
   "codeclient.config.command.fail": "You cannot set this config option.",
 
+  "codeclient.config.destroy_item_reset.name": "Destroy Item Reset",
+  "codeclient.config.destroy_item_reset.description": "Whether in dev mode, when shift left-clicking the red X in the creative inventory, it should reset your dev layout.",
+
   "codeclient.parse_db": "Could not parse ActionDump. Go to %s to find out how to fix this.",
 
   "codeclient.phaser.plot_origin": "CodeClient doesn't know the plot origin.",
