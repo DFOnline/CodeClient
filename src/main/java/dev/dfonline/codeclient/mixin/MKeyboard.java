@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
+import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.location.Creator;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.location.Spawn;
@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Keyboard.class)
@@ -43,14 +44,22 @@ public class MKeyboard {
         }
     }
 
+    @Inject(method = "onKey", at = @At("HEAD"))
+    private void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
+        if (KeyBinds.previewItemTags.matchesKey(key, scancode)) {
+            // 1 = press, 2 = repeat, 0 = release
+            CodeClient.isPreviewingItemTags = action == 1 || action == 2;
+        }
+    }
+
     // guys i gotta love mixing into lambda methods.
     @Redirect(method = "method_1458", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Element;charTyped(CI)Z"))
     private static boolean charTyped(Element instance, char chr, int modifiers) {
-        return CodeClient.onCharTyped(chr, modifiers)  || instance.charTyped(chr,modifiers);
+        return CodeClient.onCharTyped(chr, modifiers) || instance.charTyped(chr, modifiers);
     }
 
     @Redirect(method = "method_1454", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;keyReleased(III)Z"))
     private static boolean keyReleased(Screen instance, int keyCode, int scanCode, int modifiers) {
-        return CodeClient.onKeyReleased(keyCode,scanCode,modifiers) || instance.keyReleased(keyCode,scanCode,modifiers);
+        return CodeClient.onKeyReleased(keyCode, scanCode, modifiers) || instance.keyReleased(keyCode, scanCode, modifiers);
     }
 }

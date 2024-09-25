@@ -30,6 +30,12 @@ public class KeyBinds {
 
     public static KeyBinding openAction;
 
+    /**
+     * Shows tags set with /item tag when held in creative mode.
+     * Handled in the Keyboard mixin as keybinds don't get set when pressed while in a screen.
+     */
+    public static KeyBinding previewItemTags;
+
     public static void init() {
         editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.codepalette", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Y, "category.codeclient.dev"));
         clipBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.phaser", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "category.codeclient.dev"));
@@ -40,6 +46,7 @@ public class KeyBinds {
         teleportForward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.forward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
         teleportBackward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.backward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
 
+        previewItemTags = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_item_tags", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
     }
 
     public static void tick() {
