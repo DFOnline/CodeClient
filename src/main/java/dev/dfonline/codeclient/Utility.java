@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -278,5 +279,16 @@ public class Utility {
         var builder = new StringBuilder();
         textToString(content, builder, GetActionDump.ColorMode.SECTION);
         return builder.toString();
+    }
+
+    /**
+     * Generate a string of 32 random A-Z,a-z,0-9 characters that are used for authentication tokens in the API.
+     * @return A random authentication token.
+     */
+    public static String genAuthToken() {
+        SecureRandom random = new SecureRandom();
+        byte[] randomBytes = new byte[32];
+        random.nextBytes(randomBytes);
+        return HexFormat.of().formatHex(randomBytes);
     }
 }
