@@ -104,6 +104,8 @@
   "codeclient.config.show_invisible_blocks": "Show Invisible Blocks",
   "codeclient.config.show_invisible_blocks.description1": "Show blocks like barriers and other invisible blocks whilst building or coding.",
   "codeclient.config.show_invisible_blocks.description2": "Laggy as of now",
+  "codeclient.config.show_variable_scope_below_name": "Show Variable Scope Below Name",
+  "codeclient.config.show_variable_scope_below_name.description": "Show the scope of a variable below its name when held, additionally stops the variable name from disappearing.",
   "codeclient.config.show_i_on_line_scope": "Show I On Line Scope",
   "codeclient.config.show_i_on_line_scope.description": "Whenever LINE is shortened, shorten it to I instead of L to avoid confusion with the LOCAL scope.",
   "codeclient.config.show_sign_text_from_behind": "Show sign text from behind",

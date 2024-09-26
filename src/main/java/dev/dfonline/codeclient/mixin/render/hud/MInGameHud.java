@@ -67,6 +67,7 @@ public abstract class MInGameHud {
     @Inject(method = "renderHeldItemTooltip", at = @At(value = "HEAD"), cancellable = true)
     public void renderHeldItemTooltip(DrawContext context, CallbackInfo ci) {
 
+        if (!Config.getConfig().ShowVariableScopeBelowName) return;
         if (!currentStack.hasNbt()) return;
         NbtCompound nbt = currentStack.getNbt();
         if (nbt == null) return;
@@ -75,37 +76,37 @@ public abstract class MInGameHud {
         if (!publicBukkit.contains("hypercube:varitem")) return;
         String varItem = publicBukkit.getString("hypercube:varitem");
 
-        JsonObject varItemJson;
         try {
-            varItemJson = JsonParser.parseString(varItem).getAsJsonObject();
-        } catch (JsonParseException ignored) {
-            // Invalid varitem json, do nothing.
-            return;
-        }
-        String type = varItemJson.get("id").getAsString();
+            JsonObject varItemJson = JsonParser.parseString(varItem).getAsJsonObject();
+            String type = varItemJson.get("id").getAsString();
 
-        JsonElement varName = varItemJson.getAsJsonObject("data").get("name");
-        if (varName == null) return;
+            JsonElement varName = varItemJson.getAsJsonObject("data").get("name");
+            if (varName == null) return;
 
-        if (type.equals("var")) {
-            ci.cancel();
+            if (type.equals("var")) {
+                // If an exception is thrown past this point, we can assure that at least
+                // the variable name has been drawn.
+                ci.cancel();
 
-            // Render variable name.
-            Text nameText = Text.literal(varName.getAsString());
-            int x1 = (scaledWidth - getTextRenderer().getWidth(nameText)) / 2;
-            int y1 = scaledHeight - 45;
-            context.drawTextWithShadow(getTextRenderer(), nameText, x1, y1, 0xffffff);
+                // Render variable name.
+                Text nameText = Text.literal(varName.getAsString());
+                int x1 = (scaledWidth - getTextRenderer().getWidth(nameText)) / 2;
+                int y1 = scaledHeight - 45;
+                context.drawTextWithShadow(getTextRenderer(), nameText, x1, y1, 0xffffff);
 
-            // Render variable scope, if this throws an exception it can only
-            // mean Scope.valueOf() failed, as such the scope is invalid.
-            try {
-                Scope scope = Scope.valueOf(varItemJson.getAsJsonObject("data").get("scope").getAsString());
-                int x2 = (scaledWidth - getTextRenderer().getWidth(scope.longName)) / 2;
-                int y2 = scaledHeight - 35;
-                context.drawTextWithShadow(getTextRenderer(), Text.literal(scope.longName).fillStyle(Style.EMPTY.withColor(scope.color)), x2, y2, 0xffffff);
-            } catch (IllegalArgumentException ignored2) {
-                // invalid scope, do nothing. (same behavior as scope on variable item)
+                // Render variable scope, if this throws an exception it can only
+                // mean Scope.valueOf() failed, as such the scope is invalid.
+                try {
+                    Scope scope = Scope.valueOf(varItemJson.getAsJsonObject("data").get("scope").getAsString());
+                    int x2 = (scaledWidth - getTextRenderer().getWidth(scope.longName)) / 2;
+                    int y2 = scaledHeight - 35;
+                    context.drawTextWithShadow(getTextRenderer(), Text.literal(scope.longName).fillStyle(Style.EMPTY.withColor(scope.color)), x2, y2, 0xffffff);
+                } catch (Exception ignored2) {
+                    // 'data' or 'scope' are invalid, do nothing. (same behavior as scope on variable item)
+                }
             }
+        } catch (Exception ignored) {
+            // invalid varitem tag, do nothing.
         }
     }
 }

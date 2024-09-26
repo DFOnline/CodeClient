@@ -74,6 +74,7 @@ public class Config {
     public Boolean ValueDetails = true;
     public Boolean PhaseToggle = false;
     public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
+    public boolean ShowVariableScopeBelowName = true;
 
     public Config() {
     }
@@ -151,6 +152,7 @@ public class Config {
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
             object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
+            object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -577,6 +579,16 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .available(true)
                                 .flag(OptionFlag.RELOAD_CHUNKS)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.show_variable_scope_below_name"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.show_variable_scope_below_name.description")))
+                                .binding(
+                                        true,
+                                        () -> ShowVariableScopeBelowName,
+                                        opt -> ShowVariableScopeBelowName = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.translatable("codeclient.config.show_i_on_line_scope"))
