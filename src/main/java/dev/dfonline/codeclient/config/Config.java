@@ -74,6 +74,7 @@ public class Config {
     public Boolean ValueDetails = true;
     public Boolean PhaseToggle = false;
     public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
+    public boolean DevNodes = false;
 
     public Config() {
     }
@@ -151,6 +152,7 @@ public class Config {
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
             object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
+            object.addProperty("DevNodes", DevNodes);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);

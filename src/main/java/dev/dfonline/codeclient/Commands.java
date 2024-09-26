@@ -46,6 +46,32 @@ public class Commands {
     public static Action confirm = null;
     public static Screen screen = null;
 
+    private static final Map<String, String> NODE_MAP = new HashMap<>();
+    static {
+        NODE_MAP.put("1", "node1");
+        NODE_MAP.put("2", "node2");
+        NODE_MAP.put("3", "node3");
+        NODE_MAP.put("4", "node4");
+        NODE_MAP.put("5", "node5");
+        NODE_MAP.put("6", "node6");
+        NODE_MAP.put("7", "node7");
+        NODE_MAP.put("beta", "beta");
+        NODE_MAP.put("b", "beta");
+        NODE_MAP.put("event", "event");
+
+        if(Config.getConfig().DevNodes) {
+            NODE_MAP.put("dev", "dev");
+            NODE_MAP.put("dev1", "dev");
+            NODE_MAP.put("dev2", "dev2");
+            NODE_MAP.put("dev3", "dev3");
+
+            NODE_MAP.put("d", "dev");
+            NODE_MAP.put("d1", "dev");
+            NODE_MAP.put("d2", "dev2");
+            NODE_MAP.put("d3", "dev3");
+        }
+    }
+
     private static void actionCallback() {
         CodeClient.currentAction = new None();
         Utility.sendMessage(DONE, ChatType.SUCCESS);
@@ -616,6 +642,22 @@ public class Commands {
             Utility.sendMessage(Text.translatable("codeclient.command.ping", ping), ChatType.SUCCESS);
             return 0;
         }));
+
+        dispatcher.register(literal("node")
+                .then(argument("node", greedyString())
+                .suggests((context, builder) -> {
+                    NODE_MAP.keySet().forEach(builder::suggest);
+                    return builder.buildFuture();
+                })
+                .executes(context -> {
+                    String key = context.getArgument("node", String.class);
+
+                    if(NODE_MAP.containsKey(key) && CodeClient.MC.getNetworkHandler() != null)
+                        CodeClient.MC.getNetworkHandler().sendCommand("server " + NODE_MAP.get(key));
+
+                    return 0;
+
+                })));
     }
 
     private static CompletableFuture<Suggestions> suggestDirectories(CommandContext<FabricClientCommandSource> context, SuggestionsBuilder builder) {
