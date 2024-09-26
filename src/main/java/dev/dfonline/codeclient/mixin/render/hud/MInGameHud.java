@@ -1,8 +1,6 @@
 package dev.dfonline.codeclient.mixin.render.hud;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.config.Config;
@@ -77,9 +75,15 @@ public abstract class MInGameHud {
         if (!publicBukkit.contains("hypercube:varitem")) return;
         String varItem = publicBukkit.getString("hypercube:varitem");
 
-        JsonObject varItemJson = JsonParser.parseString(varItem).getAsJsonObject();
-
+        JsonObject varItemJson;
+        try {
+            varItemJson = JsonParser.parseString(varItem).getAsJsonObject();
+        } catch (JsonParseException ignored) {
+            // Invalid varitem json, do nothing.
+            return;
+        }
         String type = varItemJson.get("id").getAsString();
+
         JsonElement varName = varItemJson.getAsJsonObject("data").get("name");
         if (varName == null) return;
 
@@ -99,7 +103,7 @@ public abstract class MInGameHud {
                 int x2 = (scaledWidth - getTextRenderer().getWidth(scope.longName)) / 2;
                 int y2 = scaledHeight - 35;
                 context.drawTextWithShadow(getTextRenderer(), Text.literal(scope.longName).fillStyle(Style.EMPTY.withColor(scope.color)), x2, y2, 0xffffff);
-            } catch (IllegalArgumentException ignored) {
+            } catch (IllegalArgumentException ignored2) {
                 // invalid scope, do nothing. (same behavior as scope on variable item)
             }
         }
