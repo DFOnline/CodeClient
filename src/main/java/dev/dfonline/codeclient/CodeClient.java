@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
+import dev.dfonline.codeclient.command.CommandManager;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.dev.*;
@@ -75,6 +76,7 @@ public class CodeClient implements ClientModInitializer {
 
     @NotNull
     public static Action currentAction = new None();
+    public static Action confirmingAction = null;
     public static Location lastLocation = null;
     public static Location location = null;
     public static boolean shouldReload = false;
@@ -114,9 +116,7 @@ public class CodeClient implements ClientModInitializer {
 
         KeyBinds.init();
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            Commands.register(dispatcher);
-        });
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher));
 
         ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
             if (isPreviewingItemTags) {
@@ -248,7 +248,6 @@ public class CodeClient implements ClientModInitializer {
         currentAction.tick();
         features().forEach(Feature::tick);
         KeyBinds.tick();
-        Commands.tick();
 
         if (!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
             isCodeChest = false;
@@ -382,9 +381,8 @@ public class CodeClient implements ClientModInitializer {
             feature.reset();
         }
         CodeClient.currentAction = new None();
+        CodeClient.confirmingAction = null;
         CodeClient.location = null;
-        Commands.confirm = null;
-        Commands.screen = null;
     }
 
     /**
