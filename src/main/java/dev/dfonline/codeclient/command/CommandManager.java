@@ -21,6 +21,7 @@ public class CommandManager {
             new CommandJump(),
             new CommandJumpToFreeSpot(),
             new CommandLoad(),
+            new CommandNode(),
             new CommandPing(),
             new CommandSave(),
             new CommandScanFor(),

@@ -75,6 +75,7 @@ public class Config {
     public Boolean PhaseToggle = false;
     public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
     public boolean ShowVariableScopeBelowName = true;
+    public boolean DevNodes = false;
 
     public Config() {
     }
@@ -153,6 +154,7 @@ public class Config {
             object.addProperty("PhaseToggle", PhaseToggle);
             object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
             object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
+            object.addProperty("DevNodes", DevNodes);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -875,7 +877,7 @@ public class Config {
 
     public enum ActionViewerAlignment {
         CENTER,
-        TOP;
+        TOP
     }
 
     public enum DestroyItemReset {
