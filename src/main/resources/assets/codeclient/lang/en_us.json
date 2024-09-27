@@ -274,5 +274,9 @@
   "hypercube.codeblock.process": "Process",
   "hypercube.codeblock.start_process": "Start Process",
 
-  "codeclient.command.ping": "Your ping is %s ms."
+  "codeclient.command.ping": "Your ping is %s ms.",
+  "codeclient.command.dfgive.count_above_max": "Maximum stack size of %s is %s",
+  "codeclient.command.dfgive.count_below_min": "Minimum stack size is 1",
+  "codeclient.command.dfgive.clipboard_unavailable": "Unable to access the clipboard",
+  "codeclient.command.dfgive.clipboard_invalid": "Please copy a valid give command to your clipboard"
 }
