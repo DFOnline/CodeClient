@@ -19,7 +19,6 @@ public class CPUDisplay extends Feature {
             OverlayManager.setCpuUsage(null);
             return false;
         }
-        if (!Config.getConfig().CCDBUG) return false;
         if (!(packet instanceof OverlayMessageS2CPacket overlay)) return false;
 
         String txt = overlay.getMessage().getString();
