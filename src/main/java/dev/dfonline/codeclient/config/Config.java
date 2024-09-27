@@ -76,6 +76,7 @@ public class Config {
     public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
     public boolean ShowVariableScopeBelowName = true;
     public boolean DevNodes = false;
+    public boolean GiveUuidNameStrings = true;
 
     public Config() {
     }
@@ -155,6 +156,7 @@ public class Config {
             object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
             object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
             object.addProperty("DevNodes", DevNodes);
+            object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -247,6 +249,18 @@ public class Config {
                                         true,
                                         () -> CCDBUG,
                                         opt -> CCDBUG = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.givestrings"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.translatable("codeclient.config.givestrings.description"))
+                                        .build())
+                                .binding(
+                                        true,
+                                        () -> GiveUuidNameStrings,
+                                        opt -> GiveUuidNameStrings = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

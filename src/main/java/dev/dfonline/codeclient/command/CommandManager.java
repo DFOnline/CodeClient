@@ -31,7 +31,9 @@ public class CommandManager {
             new CommandSwap(),
             new CommandTemplatePlacer(),
             new CommandWidthDump(),
-            new CommandWorldPlot()
+            new CommandWorldPlot(),
+            new CommandUuid(),
+            new CommandName()
     );
 
     public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
