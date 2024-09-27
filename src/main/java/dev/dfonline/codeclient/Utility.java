@@ -176,7 +176,7 @@ public class Utility {
             player.sendMessage(Text.empty()
                     .append(type.getText())
                     .append(Text.literal(" "))
-                    .append(Text.empty().formatted(Formatting.RESET, type.getTrailing()).append(message)), false);
+                    .append(message), false);
             if (type == ChatType.FAIL) {
                 player.playSound(SoundEvent.of(new Identifier("minecraft:block.note_block.didgeridoo")), SoundCategory.PLAYERS, 2, 0);
             }
