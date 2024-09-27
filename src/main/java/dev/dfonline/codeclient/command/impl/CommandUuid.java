@@ -73,9 +73,10 @@ public class CommandUuid extends Command {
                             .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, fullUUID)));
 
             Utility.sendMessage(message, ChatType.SUCCESS);
-            if (CodeClient.location.name().equals("code") && Config.getConfig().GiveUuidNameStrings) {
+
+            if (CodeClient.location.name().equals("code") && Config.getConfig().GiveUuidNameStrings)
                 mc.getNetworkHandler().sendCommand("str " + fullUUID);
-            }
+
         } catch (IOException e) {
             Utility.sendMessage(Text.translatable("codeclient.command.uuid.not_found", username), ChatType.FAIL);
         }
