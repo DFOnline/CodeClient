@@ -7,7 +7,9 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
+import dev.dfonline.codeclient.config.Config;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -35,6 +37,8 @@ public class CommandName extends Command {
         return cmd.then(argument("uuid", word())
                         .executes(context -> {
                             String uuid = context.getArgument("uuid", String.class);
+                            MinecraftClient mc = CodeClient.MC;
+                            if(mc.getNetworkHandler() == null) return -1;
 
                             String url = "https://sessionserver.mojang.com/session/minecraft/profile/" + uuid;
 
@@ -49,7 +53,7 @@ public class CommandName extends Command {
                                 JsonObject json = JsonParser.parseString(NameJson).getAsJsonObject();
                                 String fullName = json.get("name").getAsString();
 
-                                String localUsername = Objects.requireNonNull(CodeClient.MC.player).getGameProfile().getName();
+                                String localUsername = Objects.requireNonNull(mc.player).getGameProfile().getName();
 
                                 if(localUsername.equals(fullName)) {
                                     Utility.sendMessage(Text.translatable("codeclient.command.name.own"), ChatType.SUCCESS);
@@ -64,6 +68,10 @@ public class CommandName extends Command {
                                                     .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, fullName)));
 
                                     Utility.sendMessage(message, ChatType.SUCCESS);
+
+                                    if (CodeClient.location.name().equals("code") && Config.getConfig().GiveUuidNameStrings)
+                                        mc.getNetworkHandler().sendCommand("str " + fullName);
+                                    
                                     return 0;
                                 }
 
