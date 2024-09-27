@@ -252,18 +252,6 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.givestrings"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.givestrings.description"))
-                                        .build())
-                                .binding(
-                                        true,
-                                        () -> GiveUuidNameStrings,
-                                        opt -> GiveUuidNameStrings = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
                         //<editor-fold desc="AutoJoin">
                         .group(OptionGroup.createBuilder()
                                 .name(Text.translatable("codeclient.config.autojoin"))
@@ -576,6 +564,18 @@ public class Config {
                                         opt -> DestroyItemResetMode = opt
                                 )
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.DestroyItemReset.class))
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.givestrings"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.translatable("codeclient.config.givestrings.description"))
+                                        .build())
+                                .binding(
+                                        true,
+                                        () -> GiveUuidNameStrings,
+                                        opt -> GiveUuidNameStrings = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .build())
                 //</editor-fold>
