@@ -274,5 +274,9 @@
   "hypercube.codeblock.process": "Process",
   "hypercube.codeblock.start_process": "Start Process",
 
-  "codeclient.command.ping": "Your ping is %s ms."
+  "codeclient.command.ping": "Your ping is %s ms.",
+  "codeclient.config.cpu_display": "On-Screen CPU Display",
+  "codeclient.config.cpu_display.description": "Whether to show the plot's CPU usage onscreen separate from the actionbar.",
+  "codeclient.config.cpu_display_corner.name": "On-Screen CPU Display Corner",
+  "codeclient.config.cpu_display_corner.description": "Which corner to place the on-screen CPU display."
 }

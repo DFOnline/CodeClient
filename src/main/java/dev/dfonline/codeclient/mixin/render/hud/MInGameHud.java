@@ -1,6 +1,8 @@
 package dev.dfonline.codeclient.mixin.render.hud;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.config.Config;
@@ -20,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,13 +40,30 @@ public abstract class MInGameHud {
     private void onRender(DrawContext context, float tickDelta, CallbackInfo ci) {
         TextRenderer textRenderer = getTextRenderer();
 
-        List<Text> overlay = List.copyOf(OverlayManager.getOverlayText());
+        List<Text> overlay = new ArrayList<>(List.copyOf(OverlayManager.getOverlayText()));
+        Text cpuUsage = OverlayManager.getCpuUsage();
         if (!overlay.isEmpty()) {
+            if (cpuUsage != null && Config.getConfig().CPUDisplayCornerOption == Config.CPUDisplayCorner.TOP_LEFT) {
+                overlay.add(0, cpuUsage);
+                overlay.add(1, Text.empty());
+            }
             int index = 0;
             for (Text text : overlay) {
                 context.drawTextWithShadow(textRenderer, Objects.requireNonNullElseGet(text, () -> Text.literal("NULL")), 30, 30 + (index * 9), -1);
                 index++;
             }
+        }
+        if (cpuUsage != null && Config.getConfig().CPUDisplayCornerOption != Config.CPUDisplayCorner.TOP_LEFT) {
+            int margin = 30;
+            int x = switch (Config.getConfig().CPUDisplayCornerOption) {
+                case TOP_LEFT, BOTTOM_LEFT -> margin;
+                case TOP_RIGHT, BOTTOM_RIGHT -> scaledWidth - margin - textRenderer.getWidth(cpuUsage);
+            };
+            int y = switch (Config.getConfig().CPUDisplayCornerOption) {
+                case TOP_LEFT, TOP_RIGHT -> margin;
+                case BOTTOM_LEFT, BOTTOM_RIGHT -> scaledHeight - margin - 3;
+            };
+            context.drawTextWithShadow(textRenderer, cpuUsage, x, y, -1);
         }
         int x = (scaledWidth / 2) + Config.getConfig().ChestPeekerX;
         int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;
