@@ -14,6 +14,7 @@ public class CommandManager {
             new CommandCCConfig(),
             new CommandConfirmCC(),
             new CommandDelete(),
+            new CommandDFGive(),
             new CommandFixCC(),
             new CommandGetActionDump(),
             new CommandGetSize(),
