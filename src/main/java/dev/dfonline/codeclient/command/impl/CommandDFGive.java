@@ -53,9 +53,13 @@ public class CommandDFGive extends Command {
 
                             // Remove vanilla/dfgive command syntax, only leave the actual item and count arguments.
                             // Every character will match in: '/dfgive @a '
-                            clipboard = clipboard.replaceAll("^/?(df)?(give )?(@[parens] )?", "");
+                            clipboard = clipboard.replaceAll("^/?(df)?(give )?(@[parens] )?", "").trim();
+                            if (clipboard.isEmpty() || clipboard.equals("clipboard")) {
+                                Utility.sendMessage(Text.translatable("codeclient.command.dfgive.clipboard_invalid"), ChatType.FAIL);
+                                return -1;
+                            }
 
-                            CodeClient.MC.getNetworkHandler().sendCommand("dfgive " + clipboard.trim());
+                            CodeClient.MC.getNetworkHandler().sendCommand("dfgive " + clipboard);
                             return 1;
                         })
                 );
