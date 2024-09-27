@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.command.TemplateActionCommand;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
@@ -26,7 +27,7 @@ public class CommandSwap extends TemplateActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.then(argument("path", greedyString()).suggests(this::suggestTemplates).executes(context -> {
             Path path = FileManager.templatesPath().resolve(context.getArgument("path", String.class));
             try {

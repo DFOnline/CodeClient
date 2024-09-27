@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 
 public class CommandPing extends Command {
@@ -16,7 +17,7 @@ public class CommandPing extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.executes(context -> {
             if (CodeClient.MC.player == null) return 0;
 

@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.command.ActionCommand;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 
 public class CommandConfirmCC extends ActionCommand {
@@ -16,7 +17,7 @@ public class CommandConfirmCC extends ActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.executes(context -> {
             if (CodeClient.confirmingAction == null) {
                 Utility.sendMessage(Text.translatable("codeclient.action.confirmcc.nothing"), ChatType.INFO);

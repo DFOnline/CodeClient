@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.action.impl.GoTo;
 import dev.dfonline.codeclient.command.ActionCommand;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.util.math.BlockPos;
 
 public class CommandJumpToFreeSpot extends ActionCommand {
@@ -15,7 +16,7 @@ public class CommandJumpToFreeSpot extends ActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.executes(context -> {
             if (CodeClient.MC.player == null) return -1;
             if (CodeClient.location instanceof Dev dev) {

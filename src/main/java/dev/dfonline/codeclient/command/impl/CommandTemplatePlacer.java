@@ -9,6 +9,7 @@ import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.command.TemplateActionCommand;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -26,7 +27,7 @@ public class CommandTemplatePlacer extends TemplateActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.executes(context -> {
             if (CodeClient.location instanceof Dev) {
                 var action = PlaceTemplates.createPlacer(Utility.templatesInInventory(), this::actionCallback);

@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.config.Config;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -24,7 +25,7 @@ public class CommandCCConfig extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.executes(context -> {
             CodeClient.MC.setScreen(Config.getConfig().getLibConfig().generateScreen(null));
             return 0;

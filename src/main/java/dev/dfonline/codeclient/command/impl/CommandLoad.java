@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.TemplateActionCommand;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -25,7 +26,7 @@ public class CommandLoad extends TemplateActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.then(argument("path", greedyString()).suggests(this::suggestTemplates).executes(context -> {
             if (CodeClient.MC.player == null) return -1;
             if (CodeClient.MC.player.isCreative()) {

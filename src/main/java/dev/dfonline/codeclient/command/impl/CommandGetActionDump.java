@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -17,7 +18,7 @@ public class CommandGetActionDump extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.executes(context -> {
             CodeClient.currentAction = new GetActionDump(GetActionDump.ColorMode.NONE, () -> Utility.sendMessage(DONE, ChatType.SUCCESS));
             CodeClient.currentAction.init();

@@ -116,7 +116,7 @@ public class CodeClient implements ClientModInitializer {
 
         KeyBinds.init();
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher));
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher, registryAccess));
 
         ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
             if (isPreviewingItemTags) {

@@ -11,6 +11,7 @@ import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.entity.SignText;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
@@ -79,7 +80,7 @@ public class CommandJump extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.then(literal("player").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PLAYER_EVENT, context, builder)).executes(context -> {
                     var name = context.getArgument("name", String.class);
                     jump(JumpType.PLAYER_EVENT, name);

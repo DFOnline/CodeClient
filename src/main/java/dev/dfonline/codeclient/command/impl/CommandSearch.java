@@ -9,6 +9,7 @@ import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
@@ -28,17 +29,17 @@ public class CommandSearch extends Command {
     }
 
     @Override
-    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        super.register(dispatcher);
+    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        super.register(dispatcher, registryAccess);
 
         // Add 'search' alias if recode is not loaded.
         if (!FabricLoader.getInstance().isModLoaded("recode")) {
-            dispatcher.register(create(literal("search")));
+            dispatcher.register(create(literal("search"), registryAccess));
         }
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.then(argument("query", greedyString()).suggests((context, builder) -> CommandJump.suggestJump(CommandJump.JumpType.ANY, context, builder)).executes(context -> {
             if (CodeClient.location instanceof Dev dev) {
                 var query = context.getArgument("query", String.class);

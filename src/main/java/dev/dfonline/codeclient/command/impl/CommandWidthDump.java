@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 
@@ -20,7 +21,7 @@ public class CommandWidthDump extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.executes(context -> {
             StringBuilder data = new StringBuilder("CODECLIENT WIDTHDUMP\nFORMAT GOES AS\n<UNICODE> <WIDTH>\n");
             for (int codePoint = Character.MIN_CODE_POINT; codePoint <= Character.MAX_CODE_POINT; codePoint++) {

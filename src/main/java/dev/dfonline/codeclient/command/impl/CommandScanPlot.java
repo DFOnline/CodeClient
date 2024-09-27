@@ -10,6 +10,7 @@ import dev.dfonline.codeclient.command.TemplateActionCommand;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -34,7 +35,7 @@ public class CommandScanPlot extends TemplateActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.then(argument("folder", greedyString()).suggests(this::suggestDirectories).executes(context -> {
             if (CodeClient.location instanceof Dev) {
                 String arg = context.getArgument("folder", String.class);

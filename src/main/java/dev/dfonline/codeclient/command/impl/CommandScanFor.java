@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.ActionCommand;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 
 import java.util.regex.Pattern;
@@ -21,7 +22,7 @@ public class CommandScanFor extends ActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.then(argument("name", greedyString()).executes(context -> {
             if (CodeClient.location instanceof Dev dev) {
                 Pattern pattern = Pattern.compile(context.getArgument("name", String.class), Pattern.CASE_INSENSITIVE);

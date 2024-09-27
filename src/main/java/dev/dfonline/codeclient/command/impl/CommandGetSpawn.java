@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.action.impl.MoveToSpawn;
 import dev.dfonline.codeclient.command.ActionCommand;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 
 public class CommandGetSpawn extends ActionCommand {
     @Override
@@ -14,7 +15,7 @@ public class CommandGetSpawn extends ActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.executes(context -> {
             if (!(CodeClient.location instanceof Dev)) return 1;
             CodeClient.currentAction = new MoveToSpawn(this::actionCallback);

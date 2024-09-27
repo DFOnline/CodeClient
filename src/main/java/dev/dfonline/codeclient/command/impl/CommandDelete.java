@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.TemplateActionCommand;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import org.apache.commons.io.FileUtils;
 
@@ -22,7 +23,7 @@ public class CommandDelete extends TemplateActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.then(argument("path", greedyString()).suggests(this::suggestTemplates).executes(context -> {
             Path path = FileManager.templatesPath().resolve(context.getArgument("path", String.class));
             Path dft = path.getParent().resolve(path.getFileName() + ".dft");
