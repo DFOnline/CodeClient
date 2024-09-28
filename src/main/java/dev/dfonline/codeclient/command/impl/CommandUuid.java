@@ -20,7 +20,6 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 
@@ -59,18 +58,11 @@ public class CommandUuid extends Command {
             String uuid = json.get("id").getAsString();
             String fullUUID = Utility.fromTrimmed(uuid);
 
-            String localUsername = Objects.requireNonNull(mc.player).getGameProfile().getName();
-            Text displayMessage;
-            if(localUsername.equals(username))
-                displayMessage = Text.translatable("codeclient.command.uuid.own");
-            else displayMessage = Text.translatable("codeclient.command.uuid", username);
+            Text uuidDisplay = Text.literal(fullUUID).formatted(Formatting.AQUA, Formatting.UNDERLINE);
 
-            Text message = Text.empty()
-                    .append(displayMessage)
-                    .append(Text.literal(fullUUID).formatted(Formatting.AQUA, Formatting.UNDERLINE))
-                    .append(Text.literal("!").formatted(Formatting.RESET))
+            Text message = Text.translatable("codeclient.command.uuid", username, uuidDisplay)
                     .fillStyle(Style.EMPTY
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to copy to clipboard")))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.hover.click_to_copy")))
                             .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, fullUUID)));
 
             Utility.sendMessage(message, ChatType.SUCCESS);

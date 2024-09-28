@@ -215,6 +215,8 @@
   "codeclient.warning.dev_mode": "You must be in dev mode!",
   "codeclient.warning.creative_mode": "You must be in creative mode!",
 
+  "codeclient.hover.click_to_copy": "Click to copy to clipboard",
+
   "codeclient.search.results": "Search Results:",
   "codeclient.search.no_results": "No results.",
   "codeclient.search.hover.teleport": "Click to teleport\nx: %s, y: %s, z: %s",
@@ -282,9 +284,8 @@
   "codeclient.command.dfgive.clipboard_unavailable": "Unable to access the clipboard",
   "codeclient.command.dfgive.clipboard_invalid": "Please copy a valid give command to your clipboard",
   "codeclient.command.uuid.not_found": "Player %s was not found",
-  "codeclient.command.uuid": "UUID of %s is ",
-  "codeclient.command.uuid.own": "Your UUID is ",
+  "codeclient.command.uuid": "UUID of %s is %s!",
   "codeclient.command.name.not_found": "UUID %s was not found! Please check if you misspelled it and try again",
-  "codeclient.command.name": "Name of %s is ",
+  "codeclient.command.name": "Name of %s is %s!",
   "codeclient.command.name.own": "The UUID is yours! What a surprise!"
 }

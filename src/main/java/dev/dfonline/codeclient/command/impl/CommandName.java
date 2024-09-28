@@ -60,12 +60,11 @@ public class CommandName extends Command {
                                     Utility.sendMessage(Text.translatable("codeclient.command.name.own"), ChatType.SUCCESS);
                                     return 0;
                                 } else {
-                                    Text message = Text.empty()
-                                            .append(Text.translatable("codeclient.command.name", uuid))
-                                            .append(Text.literal(fullName).formatted(Formatting.AQUA, Formatting.UNDERLINE))
-                                            .append(Text.literal("!").formatted(Formatting.RESET))
+                                    Text nameDisplay = Text.literal(fullName).formatted(Formatting.AQUA, Formatting.UNDERLINE);
+
+                                    Text message = Text.translatable("codeclient.command.name", uuid, nameDisplay)
                                             .fillStyle(Style.EMPTY
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to copy to clipboard")))
+                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.hover.click_to_copy")))
                                                     .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, fullName)));
 
                                     Utility.sendMessage(message, ChatType.SUCCESS);
