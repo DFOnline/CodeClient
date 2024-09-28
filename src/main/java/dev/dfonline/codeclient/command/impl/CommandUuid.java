@@ -9,6 +9,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.command.argument.PlayerArgumentType;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
@@ -74,7 +75,7 @@ public class CommandUuid extends Command {
 
             Utility.sendMessage(message, ChatType.SUCCESS);
 
-            if (CodeClient.location.name().equals("code") && Config.getConfig().GiveUuidNameStrings)
+            if (CodeClient.location instanceof Dev && Config.getConfig().GiveUuidNameStrings)
                 mc.getNetworkHandler().sendCommand("str " + fullUUID);
 
         } catch (IOException e) {
