@@ -76,6 +76,8 @@ public class Config {
     public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
     public boolean ShowVariableScopeBelowName = true;
     public boolean DevNodes = false;
+    public boolean CPUDisplay = true;
+    public CPUDisplayCorner CPUDisplayCornerOption = CPUDisplayCorner.TOP_LEFT;
 
     public Config() {
     }
@@ -155,6 +157,8 @@ public class Config {
             object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
             object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
             object.addProperty("DevNodes", DevNodes);
+            object.addProperty("CPUDisplay", CPUDisplay);
+            object.addProperty("CPUDisplayCorner", CPUDisplayCornerOption.name());
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -632,7 +636,26 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.cpu_display"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.cpu_display.description")))
+                                .binding(
+                                        true,
+                                        () -> CPUDisplay,
+                                        opt -> CPUDisplay = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Config.CPUDisplayCorner.class)
+                                .name(Text.translatable("codeclient.config.cpu_display_corner.name"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.cpu_display_corner.description")))
+                                .binding(
+                                        CPUDisplayCorner.TOP_LEFT,
+                                        () -> CPUDisplayCornerOption,
+                                        opt -> CPUDisplayCornerOption = opt
+                                )
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.CPUDisplayCorner.class))
+                                .build())
                         //</editor-fold>
                         //<editor-fold desc="Action Viewer">
                         .group(OptionGroup.createBuilder()
@@ -889,5 +912,12 @@ public class Config {
         DestroyItemReset(String command) {
             this.command = command;
         }
+    }
+
+    public enum CPUDisplayCorner {
+        TOP_LEFT,
+        TOP_RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM_RIGHT
     }
 }

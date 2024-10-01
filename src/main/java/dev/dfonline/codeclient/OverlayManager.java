@@ -12,6 +12,8 @@ import java.util.List;
 public class OverlayManager {
     private static ArrayList<Text> overlayText = new ArrayList<>();
 
+    private static Text cpuUsage = null;
+
     public static List<Text> getOverlayText() {
         return overlayText;
     }
@@ -28,6 +30,14 @@ public class OverlayManager {
      */
     public static void setOverlayText(ArrayList<Text> overlayText) {
         OverlayManager.overlayText = overlayText;
+    }
+
+    public static Text getCpuUsage() {
+        return cpuUsage;
+    }
+
+    public static void setCpuUsage(Text cpuUsage) {
+        OverlayManager.cpuUsage = cpuUsage;
     }
 
     /**

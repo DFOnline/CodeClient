@@ -13,6 +13,7 @@ import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
 import dev.dfonline.codeclient.dev.menu.RecentValues;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
 import dev.dfonline.codeclient.dev.overlay.ActionViewer;
+import dev.dfonline.codeclient.dev.overlay.CPUDisplay;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
@@ -175,6 +176,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new RecentValues());
         feat(new ValueDetails());
         feat(new ChatAutoEdit());
+        feat(new CPUDisplay());
     }
 
     /**
