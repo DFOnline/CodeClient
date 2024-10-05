@@ -1,8 +1,9 @@
 package dev.dfonline.codeclient.hypercube;
 
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.WrittenBookItem;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 
 import java.util.List;
@@ -17,8 +18,11 @@ public class ReferenceBook {
 
     private boolean validate(ItemStack item) {
         if (item.getItem() instanceof WrittenBookItem) {
-            var nbt = item.getSubNbt("PublicBukkitValues");
-            return nbt != null && !nbt.getString("hypercube:item_instance").isEmpty();
+            var customData = item.get(DataComponentTypes.CUSTOM_DATA);
+            if (customData == null) return false;
+            var nbt = customData.copyNbt();
+            var publicBukkit = nbt.getCompound("PublicBukkitValues");
+            return publicBukkit != null && !publicBukkit.getString("hypercube:item_instance").isEmpty();
         }
         return false;
     }
@@ -32,7 +36,7 @@ public class ReferenceBook {
     }
 
     public List<Text> getTooltip() {
-        return book.getTooltip(null, TooltipContext.BASIC);
+        return book.getTooltip(null, null, TooltipType.BASIC);
     }
 
     // todo: parse into action?

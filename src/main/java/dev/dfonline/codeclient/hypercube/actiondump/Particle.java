@@ -2,16 +2,16 @@ package dev.dfonline.codeclient.hypercube.actiondump;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static dev.dfonline.codeclient.Utility.textToNBT;
+import static dev.dfonline.codeclient.Utility.removeDefaultStyle;
 
 public class Particle extends VarItem implements Searchable {
     public String particle;
@@ -51,17 +51,19 @@ public class Particle extends VarItem implements Searchable {
 
         ItemStack item = super.getItem("part", data);
 
-        NbtCompound display = item.getSubNbt("display");
-        NbtList Lore = (NbtList) display.get("Lore");
-        Lore.add(textToNBT(Text.literal("")));
-        Lore.add(textToNBT(Text.literal("Additional Fields:").formatted(Formatting.GRAY)));
-        if (optionFields.size() == 0) Lore.add(textToNBT(Text.literal("None").formatted(Formatting.DARK_GRAY)));
+        LoreComponent loreComponent = item.get(DataComponentTypes.LORE);
+        if (loreComponent == null) return item;
+        List<Text> lore = loreComponent.lines();
+        lore.add(removeDefaultStyle(Text.literal("")));
+        lore.add(removeDefaultStyle(Text.literal("Additional Fields:").formatted(Formatting.GRAY)));
+        if (optionFields.isEmpty())
+            lore.add(removeDefaultStyle(Text.literal("None").formatted(Formatting.DARK_GRAY)));
         else for (ParticleField field : optionFields) {
-            if (field != null) Lore.add(textToNBT(Text.literal("• " + field.displayName).formatted(Formatting.WHITE)));
-            else Lore.add(textToNBT(Text.of("NULL?")));
+            if (field != null)
+                lore.add(removeDefaultStyle(Text.literal("• " + field.displayName).formatted(Formatting.WHITE)));
+            else lore.add(removeDefaultStyle(Text.of("NULL?")));
         }
-        display.put("Lore", Lore);
-        item.setSubNbt("display", display);
+        item.set(DataComponentTypes.LORE, new LoreComponent(lore));
 
         return item;
     }

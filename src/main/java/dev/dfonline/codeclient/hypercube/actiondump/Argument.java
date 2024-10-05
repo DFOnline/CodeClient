@@ -74,8 +74,8 @@ public class Argument {
                 }
                 text.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
                 text.append(Utility.textFromString(line).formatted(Formatting.GRAY));
-                lore.add(Utility.textToNBT(text));
-            } else lore.add(Utility.textToNBT(Utility.textFromString(line).formatted(Formatting.GRAY)));
+                lore.add(Utility.removeDefaultStyle(text));
+            } else lore.add(Utility.removeDefaultStyle(Utility.textFromString(line).formatted(Formatting.GRAY)));
             i++;
         }
         if (this.notes != null) for (String[] lines : this.notes) {
@@ -98,5 +98,5 @@ public class Argument {
     }
 
     private void addToLore(NbtList lore, String text) {
-        lore.add(Utility.textToNBT(Utility.textFromString(text)));
+        lore.add(Utility.removeDefaultStyle(Utility.textFromString(text)));
     }}

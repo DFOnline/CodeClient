@@ -14,16 +14,15 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.network.SequencedPacketCreator;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -36,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
@@ -78,7 +76,10 @@ public abstract class MClientPlayerInteractionManager {
     @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V"))
     public void beforeSendPlace(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
         ItemStack handItem = player.getStackInHand(hand);
-        boolean isTemplate = handItem.hasNbt() && handItem.getNbt() != null && handItem.getNbt().contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && handItem.getNbt().getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE);
+        var customData = handItem.get(DataComponentTypes.CUSTOM_DATA);
+        if (customData == null) return;
+        var nbt = customData.copyNbt();
+        boolean isTemplate = nbt != null && nbt.contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE) && nbt.getCompound("PublicBukkitValues").contains("hypercube:codetemplatedata", NbtElement.STRING_TYPE);
         if (!isTemplate) return;
         BlockPos place = InteractionManager.getPlacePos(hitResult);
         if (place != null && CodeClient.MC.world.getBlockState(place).isSolidBlock(CodeClient.MC.world, place)) {
@@ -93,7 +94,7 @@ public abstract class MClientPlayerInteractionManager {
             }
         }
         ItemStack template = Items.ENDER_CHEST.getDefaultStack();
-        template.setNbt(handItem.getNbt());
+        template.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
         Utility.sendHandItem(template);
         item = handItem;
     }
@@ -111,10 +112,10 @@ public abstract class MClientPlayerInteractionManager {
         }
     }
 
-    @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
-    public void interactItemMovement(ClientPlayNetworkHandler instance, Packet<?> packet) {
+    @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V"))
+    public void interactItemMovement(ClientPlayerInteractionManager instance, ClientWorld world, SequencedPacketCreator packetCreator) {
         if (!CodeClient.getFeature(NoClip.class).map(NoClip::isIgnoringWalls).orElse(false)) {
-            instance.sendPacket(packet);
+            sendSequencedPacket(world, packetCreator);
         }
     }
 
@@ -125,6 +126,7 @@ public abstract class MClientPlayerInteractionManager {
         }
     }
 
+    // TODO: Use block interaction attribute.
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void reachDistance(CallbackInfoReturnable<Float> cir) {
         if (CodeClient.location instanceof Dev) {

@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.hypercube.item;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -12,7 +13,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 
 public class Location extends VarItem {
-    private JsonObject loc;
+    private final JsonObject loc;
     private double x;
     private double y;
     private double z;
@@ -157,7 +158,7 @@ public class Location extends VarItem {
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
-        stack.setCustomName(Text.literal("Location").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.LOCATION.color)));
+        stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Location").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.LOCATION.color)));
         Utility.addLore(
                 stack,
                 Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x)),

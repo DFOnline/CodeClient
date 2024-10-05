@@ -106,7 +106,7 @@ public class InteractionManager {
 
     private static void breakCodeBlock(BlockPos pos) {
         ClientWorld world = CodeClient.MC.world;
-        CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvent.of(new Identifier("minecraft:block.stone.break")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+        CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvent.of(Identifier.of("minecraft:block.stone.break")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
         world.setBlockState(pos, Blocks.AIR.getDefaultState());
         world.setBlockState(pos.add(0, 1, 0), Blocks.AIR.getDefaultState());
         world.setBlockState(pos.add(-1, 0, 0), Blocks.AIR.getDefaultState());
@@ -179,7 +179,7 @@ public class InteractionManager {
                                 text.append(Text.literal("» ").formatted(Formatting.DARK_AQUA)).append(Text.literal(option).formatted(Formatting.AQUA));
                             } else
                                 text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
-                            lore.set(tagStartIndex + optionIndex, Utility.textToNBT(text));
+                            lore.set(tagStartIndex + optionIndex, Utility.removeDefaultStyle(text));
                             optionIndex++;
                         }
                         display.put("Lore", lore);

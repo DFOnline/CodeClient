@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -89,7 +90,7 @@ public class Potion extends VarItem {
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
-        stack.setCustomName(Text.literal("Potion Effect").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.POTION.color)));
+        stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal("Potion Effect").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.POTION.color)));
         Text name;
         try {
             ActionDump db = ActionDump.getActionDump();

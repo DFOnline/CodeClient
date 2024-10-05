@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FakeSlot extends ClickableWidget {
-    public static final Identifier TEXTURE = new Identifier("minecraft", "textures/gui/sprites/container/slot.png");
+    public static final Identifier TEXTURE = Identifier.ofVanilla("textures/gui/sprites/container/slot.png");
     private final ScreenHandler handler;
     public boolean disabled = false;
     @NotNull

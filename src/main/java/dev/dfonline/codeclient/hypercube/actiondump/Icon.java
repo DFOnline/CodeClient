@@ -1,11 +1,11 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.Utility;
-import dev.dfonline.codeclient.hypercube.item.*;
 import dev.dfonline.codeclient.hypercube.item.Number;
 import dev.dfonline.codeclient.hypercube.item.Potion;
 import dev.dfonline.codeclient.hypercube.item.Sound;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
+import dev.dfonline.codeclient.hypercube.item.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Icon {
-    private static TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
+    private static final TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
     public String material;
     public String head;
     public String name;
@@ -93,8 +93,9 @@ public class Icon {
                         }
                         text.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
                         text.append(Utility.textFromString(line).formatted(Formatting.GRAY));
-                        lore.add(Utility.textToNBT(text));
-                    } else lore.add(Utility.textToNBT(Utility.textFromString(line).formatted(Formatting.GRAY)));
+                        lore.add(Utility.removeDefaultStyle(text));
+                    } else
+                        lore.add(Utility.removeDefaultStyle(Utility.textFromString(line).formatted(Formatting.GRAY)));
                     i++;
                 }
                 if (arg.notes != null) for (String[] lines : arg.notes) {
@@ -107,11 +108,11 @@ public class Icon {
                 }
             }
             if (tags != null && tags != 0) {
-                lore.add(Utility.textToNBT(Text.literal("# ").formatted(Formatting.DARK_AQUA).append(Text.literal(tags + " Tag" + (tags != 1 ? "s" : "")).formatted(Formatting.GRAY))));
+                lore.add(Utility.removeDefaultStyle(Text.literal("# ").formatted(Formatting.DARK_AQUA).append(Text.literal(tags + " Tag" + (tags != 1 ? "s" : "")).formatted(Formatting.GRAY))));
             }
             if (hasOptional) {
-                lore.add(Utility.textToNBT(Text.literal("")));
-                lore.add(Utility.textToNBT(Text.literal("*Optional").formatted(Formatting.GRAY)));
+                lore.add(Utility.removeDefaultStyle(Text.literal("")));
+                lore.add(Utility.removeDefaultStyle(Text.literal("*Optional").formatted(Formatting.GRAY)));
             }
         }
         if (returnValues != null && returnValues.length != 0) {
@@ -120,7 +121,7 @@ public class Icon {
             for (ReturnValue returnValue : returnValues) {
                 if (returnValue.text != null) addToLore(lore, returnValue.text);
                 else {
-                    lore.add(Utility.textToNBT(Text.empty().append(Text.literal(returnValue.type.display).setStyle(Style.EMPTY.withColor(returnValue.type.color))).append(Text.literal(" - ").formatted(Formatting.DARK_GRAY)).append(Text.literal(returnValue.description[0]).formatted(Formatting.GRAY))));
+                    lore.add(Utility.removeDefaultStyle(Text.empty().append(Text.literal(returnValue.type.display).setStyle(Style.EMPTY.withColor(returnValue.type.color))).append(Text.literal(" - ").formatted(Formatting.DARK_GRAY)).append(Text.literal(returnValue.description[0]).formatted(Formatting.GRAY))));
                     boolean first = true;
                     for (String description : returnValue.description) {
                         if (first) {
@@ -151,21 +152,21 @@ public class Icon {
         }
         if(requireTokens) {
             addToLore(lore,"");
-            lore.add(Utility.textToNBT(Text.literal("Unlock with Tokens").withColor(0xffd42a)));
+            lore.add(Utility.removeDefaultStyle(Text.literal("Unlock with Tokens").withColor(0xffd42a)));
         }
         if(requiredRank != null) {
             if(requireTokens) {
-                lore.add(Utility.textToNBT(Text.literal("OR").withColor(0xff55aa)));
-                lore.add(Utility.textToNBT(Text.literal( "Unlock with " + requiredRank.name).withColor(requiredRank.color.getRgb())));
+                lore.add(Utility.removeDefaultStyle(Text.literal("OR").withColor(0xff55aa)));
+                lore.add(Utility.removeDefaultStyle(Text.literal("Unlock with " + requiredRank.name).withColor(requiredRank.color.getRgb())));
             }
             else {
                 addToLore(lore,"");
-                lore.add(Utility.textToNBT(Text.literal(requiredRank.name + " Exclusive").withColor(requiredRank.color.getRgb())));
+                lore.add(Utility.removeDefaultStyle(Text.literal(requiredRank.name + " Exclusive").withColor(requiredRank.color.getRgb())));
             }
         }
         display.put("Lore", lore);
 
-        display.put("Name", Utility.textToNBT(Utility.textFromString(name)));
+        display.put("Name", Utility.removeDefaultStyle(Utility.textFromString(name)));
 
         nbt.put("display", display);
         nbt.put("HideFlags", NbtInt.of(127));
@@ -191,7 +192,7 @@ public class Icon {
     }
 
     private void addToLore(NbtList lore, String text) {
-        lore.add(Utility.textToNBT(Utility.textFromString(text)));
+        lore.add(Utility.removeDefaultStyle(Utility.textFromString(text)));
     }
 
     public List<ArgumentGroup> getArgGroups() {

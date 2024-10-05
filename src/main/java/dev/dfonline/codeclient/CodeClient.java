@@ -102,7 +102,7 @@ public class CodeClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
 
-        ClientLifecycleEvents.CLIENT_STOPPING.register(new Identifier(MOD_ID, "close"), client -> API.stop());
+        ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.of(MOD_ID, "close"), client -> API.stop());
 
         if (Config.getConfig().CodeClientAPI) {
             try {
@@ -442,7 +442,7 @@ public class CodeClient implements ClientModInitializer {
     private boolean registerResourcePack(String id, Text name, ResourcePackActivationType type) throws NullPointerException {
         var prefix = String.format("[%s] ", MOD_NAME);
         return ResourceManagerHelper.registerBuiltinResourcePack(
-                new Identifier(CodeClient.MOD_ID, id),
+                Identifier.of(CodeClient.MOD_ID, id),
                 getModContainer(),
                 Text.literal(prefix).formatted(Formatting.GRAY).append(name),
                 type

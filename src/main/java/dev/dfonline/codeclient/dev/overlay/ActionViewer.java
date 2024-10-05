@@ -13,13 +13,12 @@ import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -86,7 +85,7 @@ public class ActionViewer extends Feature {
                     return referenceBook.getTooltip();
                 }
                 var item = action.icon.getItem();
-                return item.getTooltip(null, TooltipContext.BASIC);
+                return item.getTooltip(null, null, TooltipType.BASIC);
             }
             return null;
         }
@@ -218,10 +217,7 @@ public class ActionViewer extends Feature {
 
                 // check in range
                 if (x <= mouseX && mouseX <= x + width) {
-                    if (y <= mouseY && mouseY <= y + height) {
-                        return true;
-                    }
-                    ;
+                    return y <= mouseY && mouseY <= y + height;
                 }
                 return false;
             }

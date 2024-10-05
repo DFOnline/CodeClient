@@ -21,13 +21,13 @@ public class CPUDisplay extends Feature {
         }
         if (!(packet instanceof OverlayMessageS2CPacket overlay)) return false;
 
-        String txt = overlay.getMessage().getString();
+        String txt = overlay.text().getString();
 
         Pattern pattern = Pattern.compile("CPU Usage: \\[" + "▮".repeat(20) + "] \\(\\d+\\.\\d+%\\)");
         if (!pattern.matcher(txt).matches()) return false;
 
         overlayTimeout = 2 * 20;
-        OverlayManager.setCpuUsage(overlay.getMessage());
+        OverlayManager.setCpuUsage(overlay.text());
 
         return true;
     }

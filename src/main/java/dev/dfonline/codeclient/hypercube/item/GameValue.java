@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -80,9 +81,9 @@ public class GameValue extends VarItem {
             ActionDump db = ActionDump.getActionDump();
             var value = Arrays.stream(db.gameValues).filter(gv -> gv.icon.getCleanName().equals(type)).findFirst();
             if (value.isEmpty()) throw new Exception("");
-            stack.setCustomName(Text.literal(value.get().icon.name));
+            stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(value.get().icon.name));
         } catch (Exception e) {
-            stack.setCustomName(Text.literal(type).setStyle(Style.EMPTY));
+            stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(type).setStyle(Style.EMPTY));
         }
         Utility.addLore(stack, Text.literal("Target: ").formatted(Formatting.GRAY).append(Text.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color))));
         return stack;

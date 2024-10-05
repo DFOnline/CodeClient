@@ -12,6 +12,7 @@ import dev.dfonline.codeclient.hypercube.item.Scope;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Style;
@@ -28,16 +29,15 @@ import java.util.Objects;
 
 @Mixin(InGameHud.class)
 public abstract class MInGameHud {
-    @Shadow
-    private int scaledHeight;
-    @Shadow
-    private int scaledWidth;
 
     @Shadow
     public abstract TextRenderer getTextRenderer();
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void onRender(DrawContext context, float tickDelta, CallbackInfo ci) {
+    private void onRender(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        var scaledWidth = context.getScaledWindowWidth();
+        var scaledHeight = context.getScaledWindowHeight();
+
         TextRenderer textRenderer = getTextRenderer();
 
         List<Text> overlay = new ArrayList<>(List.copyOf(OverlayManager.getOverlayText()));

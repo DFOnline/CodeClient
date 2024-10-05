@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.TemplateActionCommand;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -39,7 +40,7 @@ public class CommandLoad extends TemplateActionCommand {
                 try {
                     byte[] data = Files.readAllBytes(path);
                     ItemStack template = Utility.makeTemplate(new String(Base64.getEncoder().encode(data)));
-                    template.setCustomName(Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(FileManager.templatesPath().relativize(path))));
+                    template.set(DataComponentTypes.CUSTOM_NAME, Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(FileManager.templatesPath().relativize(path))));
                     CodeClient.MC.player.giveItemStack(template);
                     Utility.sendInventory();
                 } catch (Exception e) {

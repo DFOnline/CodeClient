@@ -1,14 +1,18 @@
 package dev.dfonline.codeclient.dev.menu;
 
-import dev.dfonline.codeclient.*;
+import dev.dfonline.codeclient.ChestFeature;
+import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
+import dev.dfonline.codeclient.ItemSelector;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestField;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
-import dev.dfonline.codeclient.hypercube.item.*;
 import dev.dfonline.codeclient.hypercube.item.Number;
+import dev.dfonline.codeclient.hypercube.item.*;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -41,7 +45,7 @@ public class InsertOverlayFeature extends Feature {
 
         static {
             searchIcon = Items.ITEM_FRAME.getDefaultStack();
-            searchIcon.setCustomName(Text.translatable("itemGroup.search"));
+            searchIcon.set(DataComponentTypes.CUSTOM_NAME, Text.translatable("itemGroup.search"));
         }
 
         public InsertOverlay(HandledScreen<?> screen) {

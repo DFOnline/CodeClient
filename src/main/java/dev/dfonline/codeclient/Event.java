@@ -27,7 +27,7 @@ public class Event {
             if (step == Sequence.WAIT_FOR_POS) step = Sequence.WAIT_FOR_MESSAGE;
         }
         if (packet instanceof OverlayMessageS2CPacket overlay) {
-            if (step == Sequence.WAIT_FOR_MESSAGE && overlay.getMessage().getString().startsWith("DiamondFire - ")) {
+            if (step == Sequence.WAIT_FOR_MESSAGE && overlay.text().getString().startsWith("DiamondFire - ")) {
                 updateLocation(new Spawn());
             }
         }

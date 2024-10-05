@@ -48,7 +48,7 @@ import static dev.dfonline.codeclient.dev.menu.devinventory.DevInventoryGroup.*;
 @Environment(EnvType.CLIENT)
 public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler> {
     static final SimpleInventory Inventory = new SimpleInventory(45);
-    private static final Identifier TEXTURE = new Identifier(CodeClient.MOD_ID, "textures/gui/container/dev_inventory/tabs.png");
+    private static final Identifier TEXTURE = Identifier.of(CodeClient.MOD_ID, "textures/gui/container/dev_inventory/tabs.png");
     private static final String TAB_TEXTURE_PREFIX = "textures/gui/container/creative_inventory/tab_";
     private static final Text DELETE_ITEM_SLOT_TEXT = Text.translatable("inventory.binSlot");
     private static int selectedTab;
@@ -380,7 +380,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         String texture = "item_search";
         if (!itemGroup.hasSearchBar()) texture = "items";
         if (itemGroup == INVENTORY) texture = "inventory";
-        context.drawTexture(new Identifier(TAB_TEXTURE_PREFIX + texture + ".png"), this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        context.drawTexture(Identifier.ofVanilla(TAB_TEXTURE_PREFIX + texture + ".png"), this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE);
