@@ -177,6 +177,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new ValueDetails());
         feat(new ChatAutoEdit());
         feat(new CPUDisplay());
+        feat(new MessageHiding());
     }
 
     /**

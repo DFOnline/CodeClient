@@ -122,6 +122,8 @@
   "codeclient.config.cpu_display.description": "Whether to show the plot's CPU usage onscreen separate from the actionbar.",
   "codeclient.config.cpu_display_corner.name": "On-Screen CPU Display Corner",
   "codeclient.config.cpu_display_corner.description": "Which corner to place the on-screen CPU display.",
+  "codeclient.config.hide_scope_change_messages": "Hide Scope Change Messages",
+  "codeclient.config.hide_scope_change_messages.description": "Hides the message sent when changing a variable's scope.",
   "codeclient.config.action_viewer": "Action Viewer",
   "codeclient.config.action_viewer.description": "Display a tooltip that shows the code block's description.",
   "codeclient.config.action_viewer.enable": "Enable Action Viewer",

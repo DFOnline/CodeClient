@@ -79,6 +79,7 @@ public class Config {
     public boolean GiveUuidNameStrings = true;
     public boolean CPUDisplay = true;
     public CPUDisplayCorner CPUDisplayCornerOption = CPUDisplayCorner.TOP_LEFT;
+    public boolean HideScopeChangeMessages = true;
 
     public Config() {
     }
@@ -161,6 +162,7 @@ public class Config {
             object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
             object.addProperty("CPUDisplay", CPUDisplay);
             object.addProperty("CPUDisplayCorner", CPUDisplayCornerOption.name());
+            object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -669,6 +671,16 @@ public class Config {
                                         opt -> CPUDisplayCornerOption = opt
                                 )
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.CPUDisplayCorner.class))
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.hide_scope_change_messages"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.hide_scope_change_messages.description")))
+                                .binding(
+                                        true,
+                                        () -> HideScopeChangeMessages,
+                                        opt -> HideScopeChangeMessages = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         //</editor-fold>
                         //<editor-fold desc="Action Viewer">
