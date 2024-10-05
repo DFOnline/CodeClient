@@ -296,7 +296,7 @@
   "codeclient.command.name.own": "The UUID is yours! What a surprise!",
   "codeclient.command.itemdata.no_nbt": "No NBT found on the item.",
   "codeclient.command.itemdata.header": "Item Data for %s",
-  "codeclient.command.itemdata.copy": "Click here to copy an %s or %s version!",
+  "codeclient.command.itemdata.copy": "Click here to copy an %s or %s version.",
   "codeclient.command.itemdata.copy.unformatted": "Unformatted",
   "codeclient.command.itemdata.copy.dfgive": "/dfgive"
 }
