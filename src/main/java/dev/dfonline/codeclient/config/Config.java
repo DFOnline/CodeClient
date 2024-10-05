@@ -76,6 +76,7 @@ public class Config {
     public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
     public boolean ShowVariableScopeBelowName = true;
     public boolean DevNodes = false;
+    public boolean GiveUuidNameStrings = true;
     public boolean CPUDisplay = true;
     public CPUDisplayCorner CPUDisplayCornerOption = CPUDisplayCorner.TOP_LEFT;
 
@@ -157,6 +158,7 @@ public class Config {
             object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
             object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
             object.addProperty("DevNodes", DevNodes);
+            object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
             object.addProperty("CPUDisplay", CPUDisplay);
             object.addProperty("CPUDisplayCorner", CPUDisplayCornerOption.name());
             FileManager.writeConfig(object.toString());
@@ -566,6 +568,18 @@ public class Config {
                                         opt -> DestroyItemResetMode = opt
                                 )
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.DestroyItemReset.class))
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.givestrings"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.translatable("codeclient.config.givestrings.description"))
+                                        .build())
+                                .binding(
+                                        true,
+                                        () -> GiveUuidNameStrings,
+                                        opt -> GiveUuidNameStrings = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .build())
                 //</editor-fold>

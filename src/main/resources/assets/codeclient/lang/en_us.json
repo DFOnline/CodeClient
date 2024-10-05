@@ -36,6 +36,8 @@
   "codeclient.config.chat_edits_vars.description": "Opening chat whilst holding a value will automatically put the contents in chat.",
   "codeclient.config.ccdbug": "CCDBUG",
   "codeclient.config.ccdbug.description": "Toggle CCDBUG, which is a variable and entity watcher for debugging.",
+  "codeclient.config.givestrings": "Give result",
+  "codeclient.config.givestrings.description": "If CodeClient should automatically give you result of /uuid and /name commands when in dev mode.",
   "codeclient.config.autojoin": "AutoJoin",
   "codeclient.config.autojoin.description": "If and where to auto join.",
   "codeclient.config.autojoin.enabled": "Enabled",
@@ -219,6 +221,8 @@
   "codeclient.warning.dev_mode": "You must be in dev mode!",
   "codeclient.warning.creative_mode": "You must be in creative mode!",
 
+  "codeclient.hover.click_to_copy": "Click to copy to clipboard",
+
   "codeclient.search.results": "Search Results:",
   "codeclient.search.no_results": "No results.",
   "codeclient.search.hover.teleport": "Click to teleport\nx: %s, y: %s, z: %s",
@@ -284,5 +288,10 @@
   "codeclient.command.dfgive.count_above_max": "Maximum stack size of %s is %s",
   "codeclient.command.dfgive.count_below_min": "Minimum stack size is 1",
   "codeclient.command.dfgive.clipboard_unavailable": "Unable to access the clipboard",
-  "codeclient.command.dfgive.clipboard_invalid": "Please copy a valid give command to your clipboard"
+  "codeclient.command.dfgive.clipboard_invalid": "Please copy a valid give command to your clipboard",
+  "codeclient.command.uuid.not_found": "Player %s was not found",
+  "codeclient.command.uuid": "UUID of %s is %s!",
+  "codeclient.command.name.not_found": "UUID %s was not found! Please check if you misspelled it and try again",
+  "codeclient.command.name": "Name of %s is %s!",
+  "codeclient.command.name.own": "The UUID is yours! What a surprise!"
 }
