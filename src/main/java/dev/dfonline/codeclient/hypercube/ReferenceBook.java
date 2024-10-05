@@ -31,8 +31,19 @@ public class ReferenceBook {
         return book;
     }
 
+    /**
+     * This function exists to fix a compatibility issue with previewing items tags.
+     * (e.g. the {@link dev.dfonline.codeclient.dev.overlay.ActionViewer}'s fallback tooltip)
+     * @return the reference book without any tags applied to it.
+     */
+    public ItemStack getTaglessItem() {
+        var tagless = book.copy();
+        tagless.setSubNbt("PublicBukkitValues", null);
+        return tagless;
+    }
+
     public List<Text> getTooltip() {
-        return book.getTooltip(null, TooltipContext.BASIC);
+        return getTaglessItem().getTooltip(null, TooltipContext.BASIC);
     }
 
     // todo: parse into action?
