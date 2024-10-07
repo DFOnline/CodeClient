@@ -34,6 +34,10 @@ dependencies {
     modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:${project.yacl_version}"
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
+    // adventure api for minimessage parsing (see ExpressionHighlighter)
+//    implementation "net.kyori:adventure-api:4.16.0"
+    modImplementation include("net.kyori:adventure-platform-fabric:5.12.0")
+
     implementation include("org.java-websocket:Java-WebSocket:1.5.3")
 }
 
