@@ -6,6 +6,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.OrderedText;
+import org.apache.commons.lang3.IntegerRange;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,13 +26,16 @@ public class MChatInputSuggester {
     private OrderedText preview = null;
 
     @Inject(method = "provideRenderText", at = @At("RETURN"), cancellable = true)
-    private void provideRenderText(String original, int firstCharacterIndex, CallbackInfoReturnable<OrderedText> cir) {
-        OrderedText originalValue = cir.getReturnValue();
-
+    private void provideRenderText(String partial, int position, CallbackInfoReturnable<OrderedText> cir) {
         CodeClient.getFeature(ExpressionHighlighter.class).ifPresent((action) -> {
             if (!action.enabled()) return;
 
-            ExpressionHighlighter.HighlightedExpression expression = action.format(textField.getText());
+            System.out.println(partial + " | "+ textField.getText());
+
+            var range = IntegerRange.of(position, position + partial.length());
+            ExpressionHighlighter.HighlightedExpression expression = action.format(textField.getText(), partial, range);
+
+            if (expression == null) return;
 
             preview = expression.preview();
             cir.setReturnValue(expression.text()); // todo: highlighting in the edit box
@@ -44,9 +48,8 @@ public class MChatInputSuggester {
             if (!action.enabled() || preview == null) return;
 
             action.draw(context, mouseX, mouseY, preview);
+            preview = null; // prevents a preview from showing if the player deletes all text
         });
     }
-
-
 
 }

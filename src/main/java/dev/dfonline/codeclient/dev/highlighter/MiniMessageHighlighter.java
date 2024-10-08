@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.dev.highlighter;
 
+import dev.dfonline.codeclient.CodeClient;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -27,8 +28,7 @@ import java.util.function.Consumer;
 public class MiniMessageHighlighter {
     public MiniMessage HIGHLIGHTER = MiniMessage.builder().tags(new ShownTagResolver()).build();
 
-
-    public Component highlight(String input) {
+    public Component highlight(String input, boolean useMiniMessage) {
         Node.Root root = HIGHLIGHTER.deserializeToTree(input);
 
         System.out.println(root.input());
@@ -39,7 +39,7 @@ public class MiniMessageHighlighter {
 
 
 
-        return Component.text(input).color(NamedTextColor.AQUA);
+        return Component.text(input);
     }
 
 
