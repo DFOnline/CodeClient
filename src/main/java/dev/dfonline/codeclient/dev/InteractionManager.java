@@ -131,6 +131,8 @@ public class InteractionManager {
                         if (!varElement.isJsonObject()) return false;
                         JsonObject varObject = (JsonObject) varElement;
                         if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
+                        if (actionType == SlotActionType.QUICK_MOVE && varObject.get("data").getAsJsonObject().has("variable"))
+                            return false;
 
                         Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
                         CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
