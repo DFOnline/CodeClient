@@ -160,9 +160,13 @@ public class ExpressionHighlighter extends Feature {
         // edit box
         Component highlighted;
         if (command.parseMinimessage) {
-            highlighted = highlightExpressions(highlighter.highlight(input.substring(start, end)));
+            if (Config.getConfig().HighlightMiniMessage) highlighted = highlighter.highlight(input.substring(start,end));
+            else highlighted = Component.text(input.substring(start,end));
+
+            if (Config.getConfig().HighlightExpressions) highlighted = highlightExpressions(highlighted);
         } else {
-            highlighted = highlightExpressions(input.substring(start,end));
+            if (Config.getConfig().HighlightExpressions) highlighted = highlightExpressions(input.substring(start,end));
+            else highlighted = Component.text(input.substring(start,end));
         }
 
         Component combined = Component.text(input.substring(0, start)).color(NamedTextColor.GRAY).append(highlighted);

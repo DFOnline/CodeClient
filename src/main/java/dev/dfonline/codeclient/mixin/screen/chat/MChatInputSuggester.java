@@ -16,6 +16,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Objects;
+
 @Mixin(ChatInputSuggestor.class)
 public class MChatInputSuggester {
 
@@ -27,6 +29,7 @@ public class MChatInputSuggester {
 
     @Inject(method = "provideRenderText", at = @At("RETURN"), cancellable = true)
     private void provideRenderText(String partial, int position, CallbackInfoReturnable<OrderedText> cir) {
+        if (Objects.equals(partial, "")) return;
         CodeClient.getFeature(ExpressionHighlighter.class).ifPresent((action) -> {
             if (!action.enabled()) return;
 
