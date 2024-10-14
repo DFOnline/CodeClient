@@ -30,8 +30,6 @@ public class MChatInputSuggester {
         CodeClient.getFeature(ExpressionHighlighter.class).ifPresent((action) -> {
             if (!action.enabled()) return;
 
-            System.out.println(partial + " | "+ textField.getText());
-
             var range = IntegerRange.of(position, position + partial.length());
             ExpressionHighlighter.HighlightedExpression expression = action.format(textField.getText(), partial, range);
 

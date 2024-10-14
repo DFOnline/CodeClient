@@ -100,8 +100,8 @@ public class ExpressionHighlighter extends Feature {
             Component text;
 
             switch (varItem.getId()) {
-                case "num", "var", "txt" -> text = highlighter.highlight(input, false);
-                case "comp" -> text = highlighter.highlight(input, true);
+                case "num", "var", "txt" -> text = highlighter.highlight(input);
+                case "comp" -> text = highlighter.highlight(input);
                 default -> {
                     return null;
                 }
@@ -143,8 +143,7 @@ public class ExpressionHighlighter extends Feature {
 
         // edit box
         Component highlighted = highlighter.highlight(
-                input.substring(start, end),
-                command.parseMinimessage
+                input.substring(start, end)
         );
 
         Component combined = Component.text(input.substring(0, start)).color(NamedTextColor.GRAY).append(highlighted);

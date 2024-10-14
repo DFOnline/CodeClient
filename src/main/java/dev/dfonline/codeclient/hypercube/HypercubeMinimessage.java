@@ -9,16 +9,19 @@ import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 public class HypercubeMinimessage {
     public static final MiniMessage FORMATTER = MiniMessage.builder().tags(Tags.ALL).build();
 
+    public static final TagResolver SPACE_TAG = Tags.SPACE;
+    public static final TagResolver NEWLINE_TAG = Tags.NEWLINE;
+
     private static class Tags {
         private static final int MAX_REPETITION_COUNT = 32;
 
         // todo: remove when adventure is >5.15.0 (minecraft 1.21)
-        private static final TagResolver standard = StandardTags.defaults();
+        private static final TagResolver STANDARD = StandardTags.defaults();
 
-        private static final TagResolver space = repetitionTagResolver("space", " ");
-        private static final TagResolver newline = repetitionTagResolver("newline", "\n");
+        static final TagResolver SPACE = repetitionTagResolver("space", " ");
+        static final TagResolver NEWLINE = repetitionTagResolver("newline", "\n");
 
-        static final TagResolver ALL = TagResolver.resolver(standard, space, newline);
+        static final TagResolver ALL = TagResolver.resolver(STANDARD, SPACE, NEWLINE);
 
         private static TagResolver repetitionTagResolver(String name, String literal) {
             return TagResolver.resolver(name, (arguments, context) -> {
