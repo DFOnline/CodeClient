@@ -80,11 +80,10 @@ public class Config {
     public boolean CPUDisplay = true;
     public CPUDisplayCorner CPUDisplayCornerOption = CPUDisplayCorner.TOP_LEFT;
     public boolean HideScopeChangeMessages = true;
-
-    public boolean HighlighterEnabled = true; // whether expression highlighting is enabled.
-    public boolean HighlightExpressions = true; // if the highlighter marks up df expressions
-    public boolean HighlightMiniMessage = true; // if the highlighter marks up minimessage.
-    public int MiniMessageTagColor = 0x808080; // the color of minimessage tags in the edit box.
+    public boolean HighlighterEnabled = true;
+    public boolean HighlightExpressions = true;
+    public boolean HighlightMiniMessage = true;
+    public int MiniMessageTagColor = 0x808080;
 
     public Config() {
     }
