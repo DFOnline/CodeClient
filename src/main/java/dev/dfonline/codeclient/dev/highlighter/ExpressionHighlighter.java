@@ -10,6 +10,7 @@ import dev.dfonline.codeclient.location.Dev;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tree.Node;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -18,6 +19,7 @@ import net.minecraft.text.CharacterVisitor;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.IntegerRange;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,19 +50,24 @@ public class ExpressionHighlighter extends Feature {
             "entry"
     );
 
+    // palette copied from recode, maybe there's a better combination?
     private final List<TextColor> COLORS = List.of(
-            TextColor.fromRgb(0xffd600)
+            TextColor.fromRgb(0xffd42a),
+            TextColor.fromRgb(0x33ff00),
+            TextColor.fromRgb(0x00ffe0),
+            TextColor.fromRgb(0x5e77f7),
+            TextColor.fromRgb(0xca64fa),
+            TextColor.fromRgb(0xff4242)
     );
 
+    private final TextColor ERROR_COLOR = TextColor.fromFormatting(Formatting.RED);
 
     @Override
     public boolean enabled() {
         return CodeClient.location instanceof Dev; // todo: config
     }
 
-    public record HighlightedExpression(OrderedText text, @Nullable OrderedText preview) {
-
-    }
+    public record HighlightedExpression(OrderedText text, @Nullable OrderedText preview) {}
 
     private String cachedInput = "";
     private int cachedPosition = 0;
@@ -100,8 +107,8 @@ public class ExpressionHighlighter extends Feature {
             Component text;
 
             switch (varItem.getId()) {
-                case "num", "var", "txt" -> text = highlighter.highlight(input);
-                case "comp" -> text = highlighter.highlight(input);
+                case "num", "var", "txt" -> text = highlightExpressions(input);
+                case "comp" -> text = highlightExpressions(highlighter.highlight(input));
                 default -> {
                     return null;
                 }
@@ -142,9 +149,12 @@ public class ExpressionHighlighter extends Feature {
         }
 
         // edit box
-        Component highlighted = highlighter.highlight(
-                input.substring(start, end)
-        );
+        Component highlighted;
+        if (command.parseMinimessage) {
+            highlighted = highlightExpressions(highlighter.highlight(input.substring(start, end)));
+        } else {
+            highlighted = highlightExpressions(input.substring(start,end));
+        }
 
         Component combined = Component.text(input.substring(0, start)).color(NamedTextColor.GRAY).append(highlighted);
 
@@ -153,64 +163,93 @@ public class ExpressionHighlighter extends Feature {
         }
 
         // preview text
-        Component formatted = formatter.deserialize(input.substring(start, end));
+        Component formatted = Component.empty();
+        if (command.parseMinimessage) {
+            formatted = formatter.deserialize(input.substring(start, end));
+        }
 
 //        return new HighlightedExpression(splitComponent(combined, cursor), convert(formatted));
         return new HighlightedExpression(subSequence(convert(combined), range), convert(formatted));
     }
 
-    private OrderedText splitComponent(Component component, int cursor) {
-        String raw = PlainTextComponentSerializer.plainText().serialize(component);
+    private Component highlightExpressions(Component component) {
+        String raw = formatter.serialize(component);
 
-        Pattern half = Pattern.compile("^.{"+(cursor-1)+"}");
-        Matcher matcher = half.matcher(raw);
-
-        if (!matcher.matches()) return OrderedText.concat(convert(component));
-
-        Pattern first = Pattern.compile("^"+matcher.group());
-        Pattern last = Pattern.compile(matcher.replaceAll("")+"$");
-
-        Component firstComponent = component.replaceText(builder -> {
-            builder.replacement("");
-            builder.match(last);
-        });
-        Component secondComponent = component.replaceText(builder -> {
-            builder.replacement("");
-            builder.match(first);
-        });
-
-        return OrderedText.concat(convert(firstComponent), convert(secondComponent));
+        return highlightExpressions(raw);
     }
 
-    /** takes a given substring of a component.
-     * @param start inclusive
-     * @param end exclusive
-     * @return a component containing what's between the start index and end index.
-     */
-    private Component substr(Component component, int start, int end) {
-        String raw = PlainTextComponentSerializer.plainText().serialize(component);
-        String split = raw.substring(start, end);
+    private Component highlightExpressions(String raw) {
+        StringBuilder sb = new StringBuilder(raw.length());
 
-        // this variable reveals what needs to be replaced in the component.
-        var replace = raw.split(split);
+        Pattern pattern = Pattern.compile("(%[a-zA-Z]+\\(?)|\\)|$");
+        Matcher matcher = pattern.matcher(raw);
 
-        if (split.equals(raw)) return component;
+        int depth = 0;
+        int start = 0;
 
-        return component.replaceText(builder -> {
-            for (String section : replace) {
-                builder.matchLiteral(section);
+        while (matcher.find()) {
+            String value = matcher.group();
+            if (Objects.equals(value, ")")) {
+                if (start != matcher.start()) {
+                    String prev = raw.substring(start, matcher.start());
+                    sb.append(prev);
+                }
+
+                if (depth <= 0) {
+                    sb.append(value);
+                    start = matcher.end();
+                    continue;
+                }
+
+                var color = getColor(depth);
+                depth--;
+
+                String style = color.getHexCode();
+                sb.append(String.format("</color:%s>", style));
+                sb.append(value);
+
+                style = getColor(depth).getHexCode();
+                depth--;
+                sb.append(String.format("</color:%s>", style));
+            } else {
+                depth++;
+
+                var color = getColor(depth);
+                if (value.length() > 1 && !CODES.contains(value.replace("%", "").replace("(", ""))) {
+                    color = ERROR_COLOR;
+                }
+
+                if (start != matcher.start()) {
+                    String prev = raw.substring(start, matcher.start());
+                    sb.append(prev);
+                }
+
+                String style = color.getHexCode();
+                sb.append(String.format("<color:%s>", style));
+                sb.append(value);
+
+                if (value.endsWith("(")) {
+                    depth++;
+                    style = getColor(depth).getHexCode();
+                    sb.append(String.format("<color:%s>", style));
+                } else if (depth > 0){
+                    depth--;
+                    sb.append(String.format("</color:%s>", style));
+                }
             }
-            builder.replacement("");
-        });
+            start = matcher.end();
+        }
+
+        return formatter.deserialize(sb.toString());
     }
 
-    /** takes a given substring of a component.
-     * @param start inclusive
-     * @return a component containing what's after the start index
-     */
-    private Component substr(Component component, int start) {
-        String raw = PlainTextComponentSerializer.plainText().serialize(component);
-        return substr(component, start, raw.length()+1);
+    private TextColor getColor(int depth) {
+        if (depth < 1) return getColor(COLORS.size() - depth);
+        try {
+            return COLORS.get(depth - 1);
+        } catch (Exception e) {
+            return getColor(depth - COLORS.size());
+        }
     }
 
     private OrderedText subSequence(OrderedText original, int start, int end) {
