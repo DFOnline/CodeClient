@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.dev.highlighter;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.HypercubeCommands;
 import dev.dfonline.codeclient.hypercube.HypercubeMinimessage;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
@@ -64,7 +65,7 @@ public class ExpressionHighlighter extends Feature {
 
     @Override
     public boolean enabled() {
-        return CodeClient.location instanceof Dev; // todo: config
+        return CodeClient.location instanceof Dev && Config.getConfig().HighlighterEnabled;
     }
 
     public record HighlightedExpression(OrderedText text, @Nullable OrderedText preview) {}
@@ -107,8 +108,16 @@ public class ExpressionHighlighter extends Feature {
             Component text;
 
             switch (varItem.getId()) {
-                case "num", "var", "txt" -> text = highlightExpressions(input);
-                case "comp" -> text = highlightExpressions(highlighter.highlight(input));
+                case "num", "var", "txt" -> {
+                        if (Config.getConfig().HighlightExpressions) text = highlightExpressions(input);
+                        else text = Component.text(input);
+                }
+                case "comp" -> {
+                    if (Config.getConfig().HighlightMiniMessage) text = highlighter.highlight(input);
+                    else text = Component.text(input);
+
+                    if (Config.getConfig().HighlightExpressions) text = highlightExpressions(text);
+                }
                 default -> {
                     return null;
                 }

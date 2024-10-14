@@ -295,5 +295,18 @@
   "codeclient.command.uuid": "UUID of %s is %s!",
   "codeclient.command.name.not_found": "UUID %s was not found! Please check if you misspelled it and try again",
   "codeclient.command.name": "Name of %s is %s!",
-  "codeclient.command.name.own": "The UUID is yours! What a surprise!"
+  "codeclient.command.name.own": "The UUID is yours! What a surprise!",
+  "codeclient.config.chat_highlighter": "Chat Highlighter",
+  "codeclient.config.chat_highlighter.description": "Modifies the chat box to display MiniMessage highlighting and marks up DF expressions.",
+  "codeclient.config.chat_highlighter.description.extra": "Additionally provides a preview above the chat bar when editing styled text.",
+  "codeclient.config.chat_highlighter.enable": "Enable Chat Highlighter",
+  "codeclient.config.chat_highlighter.enable.description": "Enables the chat highlighter:",
+  "codeclient.config.chat_highlighter.with_expressions": "Highlight Expressions",
+  "codeclient.config.chat_highlighter.with_expressions.description": "When enabled DF expressions will be given special formatting in your chat box.",
+  "codeclient.config.chat_highlighter.with_expressions.description.example": "e.g. %uuid, %math(3-2), or %var(%uuid score)",
+  "codeclient.config.chat_highlighter.with_minimessage": "Highlight MiniMessage",
+  "codeclient.config.chat_highlighter.with_minimessage.description1": "When enabled, a preview will display above the chat bar when editing styled text.",
+  "codeclient.config.chat_highlighter.with_minimessage.description2": "It will additionally color the edit box to show formatting with the tags still being visible.",
+  "codeclient.config.chat_highlighter.minimessage_tag_color": "MiniMessage Tag Color",
+  "codeclient.config.chat_highlighter.minimessage_tag_color.description": "The color MiniMessage tags show up as in the chat box when modifying styled text."
 }

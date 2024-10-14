@@ -81,6 +81,11 @@ public class Config {
     public CPUDisplayCorner CPUDisplayCornerOption = CPUDisplayCorner.TOP_LEFT;
     public boolean HideScopeChangeMessages = true;
 
+    public boolean HighlighterEnabled = true; // whether expression highlighting is enabled.
+    public boolean HighlightExpressions = true; // if the highlighter marks up df expressions
+    public boolean HighlightMiniMessage = true; // if the highlighter marks up minimessage.
+    public int MiniMessageTagColor = 0x808080; // the color of minimessage tags in the edit box.
+
     public Config() {
     }
 
@@ -163,6 +168,12 @@ public class Config {
             object.addProperty("CPUDisplay", CPUDisplay);
             object.addProperty("CPUDisplayCorner", CPUDisplayCornerOption.name());
             object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
+
+            object.addProperty("HighlighterEnabled", HighlighterEnabled);
+            object.addProperty("HighlightExpressions", HighlightExpressions);
+            object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
+            object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
+
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -754,6 +765,73 @@ public class Config {
                                         .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500, 500))
                                         .build())
                                 .build())
+                        //</editor-fold>
+                        //<editor-fold desc="Chat Highlighter">
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.translatable("codeclient.config.chat_highlighter"))
+                                .description(OptionDescription.of(
+                                        Text.translatable("codeclient.config.chat_highlighter.description"),
+                                        Text.translatable("codeclient.config.chat_highlighter.description.extra")
+                                ))
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.translatable("codeclient.config.chat_highlighter.enable"))
+                                        .description(OptionDescription.of(
+                                                Text.translatable("codeclient.config.chat_highlighter.enable.description"),
+                                                Text.empty(),
+                                                Text.translatable("codeclient.config.chat_highlighter.description").setStyle(Style.EMPTY.withColor(Formatting.GRAY)),
+                                                Text.translatable("codeclient.config.chat_highlighter.description.extra").setStyle(Style.EMPTY.withColor(Formatting.GRAY))
+                                        ))
+                                        .binding(
+                                                true,
+                                                () -> HighlighterEnabled,
+                                                opt -> HighlighterEnabled = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.translatable("codeclient.config.chat_highlighter.with_expressions"))
+                                        .description(OptionDescription.of(
+                                                Text.translatable("codeclient.config.chat_highlighter.with_expressions.description"),
+                                                Text.translatable("codeclient.config.chat_highlighter.with_expressions.description.example")
+                                        ))
+                                        .binding(
+                                                true,
+                                                () -> HighlightExpressions,
+                                                opt -> HighlightExpressions = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.translatable("codeclient.config.chat_highlighter.with_minimessage"))
+                                        .description(OptionDescription.of(
+                                                Text.translatable("codeclient.config.chat_highlighter.with_minimessage.description1"),
+                                                Text.translatable("codeclient.config.chat_highlighter.with_minimessage.description2")
+                                        ))
+                                        .binding(
+                                                true,
+                                                () -> HighlightMiniMessage,
+                                                opt -> HighlightMiniMessage = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.translatable("codeclient.config.chat_highlighter.minimessage_tag_color"))
+                                        .description(OptionDescription.of(
+                                                Text.translatable("codeclient.config.chat_highlighter.minimessage_tag_color.description")
+                                        ))
+                                        .binding(
+                                                new Color((float) 128 / 255, (float) 128 / 255, (float) 128 / 255),
+                                                () -> new Color(MiniMessageTagColor),
+                                                opt -> MiniMessageTagColor = opt.getRGB()
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build()
+                                )
+                                .build()
+                        )
                         //</editor-fold>
                         //<editor-fold desc="Chest Highlight">
                         .group(OptionGroup.createBuilder()

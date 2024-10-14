@@ -1,7 +1,9 @@
 package dev.dfonline.codeclient.dev.highlighter;
 
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.HypercubeMinimessage;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -29,8 +31,10 @@ public class MiniMessageHighlighter {
             HypercubeMinimessage.SPACE_TAG
     )).build();
 
-    private final String TAG_STYLE = "c:#808080";
     private final String RESET_TAG = "<reset>";
+    private String getTagStyle() {
+        return TextColor.color(Config.getConfig().MiniMessageTagColor).asHexString();
+    }
 
     public Component highlight(String input) {
 
@@ -39,7 +43,7 @@ public class MiniMessageHighlighter {
         if (resets.length > 1 || input.toLowerCase().endsWith(RESET_TAG)) {
             Component value = Component.empty();
 
-            Component reset = HIGHLIGHTER.deserialize(String.format("<%s>", TAG_STYLE) + HIGHLIGHTER.escapeTags(RESET_TAG) + String.format("</%s>", TAG_STYLE));
+            Component reset = HIGHLIGHTER.deserialize(String.format("<%s>", getTagStyle()) + HIGHLIGHTER.escapeTags(RESET_TAG) + String.format("</%s>", getTagStyle()));
 
             for (String partial : resets) {
                 value = value.append(highlight(partial))
@@ -57,7 +61,7 @@ public class MiniMessageHighlighter {
 
     @SuppressWarnings("UnstableApiUsage")
     private void handle(Node node, String full, StringBuilder sb, AtomicInteger index) {
-        String style = TAG_STYLE;
+        String style = getTagStyle();
 
         if (node instanceof TagNode tagNode) {
             String tagString = getTokenString(tagNode.token(), full);
