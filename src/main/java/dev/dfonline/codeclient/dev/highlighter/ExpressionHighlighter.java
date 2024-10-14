@@ -65,7 +65,7 @@ public class ExpressionHighlighter extends Feature {
 
     @Override
     public boolean enabled() {
-        return CodeClient.location instanceof Dev && Config.getConfig().HighlighterEnabled;
+        return Config.getConfig().HighlighterEnabled;
     }
 
     public record HighlightedExpression(OrderedText text, @Nullable OrderedText preview) {}
