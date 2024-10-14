@@ -293,7 +293,7 @@ public class ExpressionHighlighter extends Feature {
     }
 
     // draws the preview above the chat bar
-    public void draw(DrawContext context, int mouseX, int mouseY, OrderedText input /* todo take out of mixin */) {
+    public void draw(DrawContext context, int mouseX, int mouseY, OrderedText input) {
         TextRenderer renderer = CodeClient.MC.textRenderer;
 
         var screen = CodeClient.MC.currentScreen;

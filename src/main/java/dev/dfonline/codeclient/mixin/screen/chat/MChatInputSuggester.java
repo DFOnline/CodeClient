@@ -39,7 +39,7 @@ public class MChatInputSuggester {
             if (expression == null) return;
 
             preview = expression.preview();
-            cir.setReturnValue(expression.text()); // todo: highlighting in the edit box
+            cir.setReturnValue(expression.text());
         });
     }
 
