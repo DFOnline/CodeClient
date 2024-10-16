@@ -14,12 +14,19 @@ repositories {
     // for more information about repositories.
     mavenCentral()
 
+
+    // Yet Another Config Lib
     maven {
         name 'Xander Maven'
         url 'https://maven.isxander.dev/releases'
     }
+    // ModMenu
     maven {
         url 'https://maven.terraformersmc.com/'
+    }
+    // Placeholder API (ModMenu dependency)
+    maven {
+        url "https://maven.nucleoid.xyz/"
     }
 }
 
@@ -29,11 +36,14 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
+    // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // Yet Another Config Lib
     modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:${project.yacl_version}"
+    // ModMenu
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
+    // WebSocket
     implementation include("org.java-websocket:Java-WebSocket:1.5.3")
 }
 
