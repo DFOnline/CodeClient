@@ -1,5 +1,7 @@
 package dev.dfonline.codeclient.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.location.Creator;
@@ -15,7 +17,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -53,13 +54,13 @@ public class MKeyboard {
     }
 
     // guys i gotta love mixing into lambda methods.
-    @Redirect(method = "method_1458", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Element;charTyped(CI)Z"))
-    private static boolean charTyped(Element instance, char chr, int modifiers) {
-        return CodeClient.onCharTyped(chr, modifiers) || instance.charTyped(chr, modifiers);
+    @WrapOperation(method = "method_1458", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Element;charTyped(CI)Z"))
+    private static boolean charTyped(Element instance, char chr, int modifiers, Operation<Boolean> original) {
+        return CodeClient.onCharTyped(chr, modifiers) || original.call(instance, chr, modifiers);
     }
 
-    @Redirect(method = "method_1454", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;keyReleased(III)Z"))
-    private static boolean keyReleased(Screen instance, int keyCode, int scanCode, int modifiers) {
-        return CodeClient.onKeyReleased(keyCode, scanCode, modifiers) || instance.keyReleased(keyCode, scanCode, modifiers);
+    @WrapOperation(method = "method_1454", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;keyReleased(III)Z"))
+    private static boolean keyReleased(Screen instance, int keyCode, int scanCode, int modifiers, Operation<Boolean> original) {
+        return CodeClient.onKeyReleased(keyCode, scanCode, modifiers) || original.call(instance, keyCode, scanCode, modifiers);
     }
 }

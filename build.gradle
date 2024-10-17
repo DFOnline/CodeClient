@@ -28,6 +28,8 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    // MixinExtras. Fabric Loader 0.15.0 and above should bundle it, but I don't have access to it for some reason.
+    implementation annotationProcessor(include("io.github.llamalad7:mixinextras-fabric:${project.mixin_extras_version}"))
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
