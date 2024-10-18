@@ -4,7 +4,8 @@
   "package": "dev.dfonline.codeclient.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "MChatScreen",
+    "screen.chat.MChatScreen",
+    "screen.chat.MChatInputSuggester",
     "MKeyboard",
     "MMouse",
     "entity.MEntity",
