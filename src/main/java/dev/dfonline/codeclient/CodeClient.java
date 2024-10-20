@@ -36,6 +36,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -81,6 +82,10 @@ public class CodeClient implements ClientModInitializer {
     public static Action confirmingAction = null;
     public static Location lastLocation = null;
     public static Location location = null;
+    /***
+     * Used to open a screen on the next tick.
+     */
+    public static Screen screenToOpen = null;
     public static boolean shouldReload = false;
     public static boolean isPreviewingItemTags = false;
 
@@ -97,6 +102,10 @@ public class CodeClient implements ClientModInitializer {
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (MC.player == null || MC.world == null) clean();
+            if (screenToOpen != null) {
+                MC.setScreen(screenToOpen);
+                screenToOpen = null;
+            }
         });
 
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
@@ -388,6 +397,7 @@ public class CodeClient implements ClientModInitializer {
         CodeClient.currentAction = new None();
         CodeClient.confirmingAction = null;
         CodeClient.location = null;
+        CodeClient.screenToOpen = null;
     }
 
     /**
