@@ -18,8 +18,8 @@ import net.kyori.adventure.text.minimessage.tree.Node;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 
 /**
  * Parses MiniMessage input, but leaves the tags in the message for formatting in the edit box.
@@ -55,12 +55,12 @@ public class MiniMessageHighlighter {
         Node.Root root = HIGHLIGHTER.deserializeToTree(input);
         StringBuilder newInput = new StringBuilder(input.length());
 
-        handle(root, root.input(), newInput, new AtomicInteger());
+        handle(root, root.input(), newInput, new AtomicInteger(), new ArrayList<>());
         return HIGHLIGHTER.deserialize(newInput.toString());
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private void handle(Node node, String full, StringBuilder sb, AtomicInteger index) {
+    private void handle(Node node, String full, StringBuilder sb, AtomicInteger index, ArrayList<String> decorations) {
         String style = getTagStyle();
 
         if (node instanceof TagNode tagNode) {
@@ -68,7 +68,13 @@ public class MiniMessageHighlighter {
 
             index.addAndGet(tagString.length());
 
-            appendEscapedTag(sb, tagString, style);
+            appendEscapedTag(sb, tagString, style, decorations);
+
+            String tagName = tagNode.name();
+            if (StandardTags.decorations().has(tagName)) {
+                decorations.add(tagName);
+            }
+
             sb.append(tagString);
         } else if (node instanceof ValueNode valueNode) {
             String value = valueNode.value();
@@ -79,20 +85,36 @@ public class MiniMessageHighlighter {
         }
 
         for (Node child : node.children()) {
-            handle(child, full, sb, index);
+            handle(child, full, sb, index, decorations);
         }
 
         if (node instanceof TagNode tagNode) {
-            String closing = String.format("</%s>", tagNode.name());
+            String tagName = tagNode.name();
+            String closing = String.format("</%s>", tagName);
+
             if (full.startsWith(closing, index.get())) {
+                if (StandardTags.decorations().has(tagName)) {
+                    decorations.remove(tagName);
+                }
+
                 index.addAndGet(closing.length());
                 sb.append(closing);
-                appendEscapedTag(sb, closing, style);
+                appendEscapedTag(sb, closing, style, decorations);
             }
         }
     }
 
-    private void appendEscapedTag(StringBuilder sb, String tag, String style) {
+    private void appendEscapedTag(StringBuilder sb, String tag, String style, ArrayList<String> decorations) {
+        /* idk if someone wants to figure this out, it doesn't actually seem to work with multiple decorations.
+        StringBuilder opening = new StringBuilder();
+
+        StringBuilder closing = new StringBuilder();
+        decorations.forEach(decoration -> {
+            interpolate(opening, "<", decoration, ">");
+            interpolate(closing, "</", decoration, ">");
+        });
+        */
+
         interpolate(sb, "<", style, ">", HIGHLIGHTER.escapeTags(tag), "</", style, ">");
     }
 
