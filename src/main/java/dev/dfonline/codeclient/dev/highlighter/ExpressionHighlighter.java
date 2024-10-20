@@ -24,6 +24,7 @@ import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.IntegerRange;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -200,6 +201,8 @@ public class ExpressionHighlighter extends Feature {
         int depth = 0;
         int start = 0;
 
+        boolean invalid = false;
+
         while (matcher.find()) {
             String value = matcher.group();
             if (Objects.equals(value, ")")) {
@@ -217,19 +220,26 @@ public class ExpressionHighlighter extends Feature {
                 var color = getColor(depth);
                 depth--;
 
-                String style = color.getHexCode();
-                sb.append(String.format("</color:%s>", style));
+                String style;
+                if (!invalid) {
+                    style = color.getHexCode();
+                    sb.append(String.format("</color:%s>", style));
+                    style = getColor(depth).getHexCode();
+                } else {
+                    style = ERROR_COLOR.getHexCode();
+                    sb.append(String.format("</color:%s>", style));
+                }
                 sb.append(value);
 
-                style = getColor(depth).getHexCode();
                 depth--;
                 sb.append(String.format("</color:%s>", style));
             } else {
                 depth++;
 
                 var color = getColor(depth);
-                if (value.length() > 1 && !CODES.contains(value.replace("%", "").replace("(", ""))) {
+                if ((value.length() > 1 && !CODES.contains(value.replace("%", "").replace("(", "")) && depth <= 1) || invalid) {
                     color = ERROR_COLOR;
+                    invalid = true;
                 }
 
                 if (start != matcher.start()) {
@@ -243,10 +253,13 @@ public class ExpressionHighlighter extends Feature {
 
                 if (value.endsWith("(")) {
                     depth++;
-                    style = getColor(depth).getHexCode();
+                    if (!invalid) {
+                        style = getColor(depth).getHexCode();
+                    }
                     sb.append(String.format("<color:%s>", style));
                 } else if (depth > 0){
                     depth--;
+
                     sb.append(String.format("</color:%s>", style));
                 }
             }
