@@ -19,9 +19,11 @@ public class CommandManager {
             new CommandGetActionDump(),
             new CommandGetSize(),
             new CommandGetSpawn(),
+            new CommandItemData(),
             new CommandJump(),
             new CommandJumpToFreeSpot(),
             new CommandLoad(),
+            new CommandName(),
             new CommandNode(),
             new CommandPing(),
             new CommandSave(),
@@ -30,10 +32,9 @@ public class CommandManager {
             new CommandSearch(),
             new CommandSwap(),
             new CommandTemplatePlacer(),
-            new CommandWidthDump(),
-            new CommandWorldPlot(),
             new CommandUuid(),
-            new CommandName()
+            new CommandWidthDump(),
+            new CommandWorldPlot()
     );
 
     public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {

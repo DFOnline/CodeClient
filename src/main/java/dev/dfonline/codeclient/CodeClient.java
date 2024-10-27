@@ -11,6 +11,7 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
+import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
 import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
 import dev.dfonline.codeclient.dev.menu.RecentValues;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
@@ -195,6 +196,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new ChatAutoEdit());
         feat(new CPUDisplay());
         feat(new MessageHiding());
+        feat(new ExpressionHighlighter());
     }
 
     /**
