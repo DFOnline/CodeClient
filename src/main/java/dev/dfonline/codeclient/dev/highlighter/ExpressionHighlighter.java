@@ -4,27 +4,21 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.HypercubeCommands;
-import dev.dfonline.codeclient.hypercube.HypercubeMinimessage;
+import dev.dfonline.codeclient.hypercube.HypercubeMiniMessage;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
-import dev.dfonline.codeclient.location.Dev;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tree.Node;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.CharacterVisitor;
 import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.IntegerRange;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -32,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static net.kyori.adventure.platform.fabric.FabricAudiences.nonWrappingSerializer;
+import static dev.dfonline.codeclient.Utility.componentToOrderedText;
 
 public class ExpressionHighlighter extends Feature {
     private final Set<String> CODES = Set.of(
@@ -75,7 +69,7 @@ public class ExpressionHighlighter extends Feature {
     private int cachedPosition = 0;
     private HighlightedExpression cachedHighlight = new HighlightedExpression(OrderedText.empty(), null);
 
-    private final MiniMessage formatter = HypercubeMinimessage.FORMATTER;
+    private final MiniMessage formatter = HypercubeMiniMessage.MM;
     private final MiniMessageHighlighter highlighter = new MiniMessageHighlighter();
 
     // creates an expression based on text input
@@ -126,7 +120,7 @@ public class ExpressionHighlighter extends Feature {
 
             Component preview = formatter.deserialize(input);
 
-            cachedHighlight = new HighlightedExpression(subSequence(convert(text), range), convert(preview));
+            cachedHighlight = new HighlightedExpression(subSequence(componentToOrderedText(text), range), componentToOrderedText(preview));
             return cachedHighlight;
         } catch (Exception ignored) {
             cachedHighlight = null;
@@ -183,7 +177,7 @@ public class ExpressionHighlighter extends Feature {
         }
 
 //        return new HighlightedExpression(splitComponent(combined, cursor), convert(formatted));
-        return new HighlightedExpression(subSequence(convert(combined), range), convert(formatted));
+        return new HighlightedExpression(subSequence(componentToOrderedText(combined), range), componentToOrderedText(formatted));
     }
 
     private Component highlightExpressions(Component component) {
@@ -300,7 +294,7 @@ public class ExpressionHighlighter extends Feature {
             final boolean shouldContinue = visitor.accept(index.getAndIncrement(), style, codePoint);
             if (Character.isHighSurrogate(Character.toString(codePoint).charAt(0))) {
                 index.getAndIncrement();
-            };
+            }
             return shouldContinue;
         });
     }
@@ -314,10 +308,6 @@ public class ExpressionHighlighter extends Feature {
 
         int y = screen.height - 25;
         context.drawTextWithShadow(renderer, input, 4, y,0xffffff);
-    }
-
-    private OrderedText convert(Component component) {
-        return nonWrappingSerializer().serialize(component).asOrderedText();
     }
 
     private enum CommandType {

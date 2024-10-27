@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.hypercube.template.Template;
+import net.kyori.adventure.text.Component;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -17,6 +18,7 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
@@ -30,6 +32,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
+
+import static net.kyori.adventure.platform.fabric.FabricAudiences.nonWrappingSerializer;
 
 public class Utility {
     /**
@@ -314,4 +318,25 @@ public class Utility {
 
         return builder.toString();
     }
+
+    /**
+     * Turns a {@link Component} to an {@link OrderedText}
+     *
+     * @param component The component to convert
+     * @return The converted component
+     */
+    public static OrderedText componentToOrderedText(Component component) {
+        return nonWrappingSerializer().serialize(component).asOrderedText();
+    }
+
+    /**
+     * Turns a {@link Component} to a {@link Text}
+     *
+     * @param component The component to convert
+     * @return The converted component
+     */
+    public static Text componentToText(Component component) {
+        return nonWrappingSerializer().serialize(component);
+    }
+
 }
