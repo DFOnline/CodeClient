@@ -26,6 +26,7 @@ public class CommandManager {
             new CommandName(),
             new CommandNode(),
             new CommandPing(),
+            new CommandPreview(),
             new CommandSave(),
             new CommandScanFor(),
             new CommandScanPlot(),

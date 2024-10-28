@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.dev.highlighter;
 
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.hypercube.HypercubeMinimessage;
+import dev.dfonline.codeclient.hypercube.HypercubeMiniMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -9,7 +9,8 @@ import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.ParsingException;
 import net.kyori.adventure.text.minimessage.internal.parser.Token;
-import net.kyori.adventure.text.minimessage.internal.parser.node.*;
+import net.kyori.adventure.text.minimessage.internal.parser.node.TagNode;
+import net.kyori.adventure.text.minimessage.internal.parser.node.ValueNode;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -27,8 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MiniMessageHighlighter {
     public MiniMessage HIGHLIGHTER = MiniMessage.builder().tags(TagResolver.resolver(
             new ShownTagResolver(),
-            HypercubeMinimessage.NEWLINE_TAG,
-            HypercubeMinimessage.SPACE_TAG
+            HypercubeMiniMessage.NEWLINE_TAG,
+            HypercubeMiniMessage.SPACE_TAG
     )).build();
 
     private final String RESET_TAG = "<reset>";
@@ -146,10 +147,7 @@ public class MiniMessageHighlighter {
         @Override
         public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
             Tag tag = standard.resolve(name, arguments, ctx);
-            if (tag != null) {
-                return tag;
-            }
-            return null;
+            return tag;
         }
 
         @Override
