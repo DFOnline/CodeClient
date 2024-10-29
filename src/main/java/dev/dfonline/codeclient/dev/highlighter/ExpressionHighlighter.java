@@ -114,6 +114,7 @@ public class ExpressionHighlighter extends Feature {
                     if (Config.getConfig().HighlightExpressions) text = highlightExpressions(text);
                 }
                 default -> {
+                    cachedHighlight = null;
                     return null;
                 }
             }
