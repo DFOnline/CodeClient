@@ -313,5 +313,7 @@
   "codeclient.command.itemdata.header": "Item Data for %s",
   "codeclient.command.itemdata.copy": "Click here to copy an %s or %s version.",
   "codeclient.command.itemdata.copy.unformatted": "Unformatted",
-  "codeclient.command.itemdata.copy.dfgive": "/dfgive"
+  "codeclient.command.itemdata.copy.dfgive": "/dfgive",
+  "codeclient.command.calc.success": "%s = %s",
+  "codeclient.command.calc.failure": "%s failed to parse"
 }
