@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.mixin.screen.chat;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
 import dev.dfonline.codeclient.location.Dev;
+import net.kyori.adventure.text.Component;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -39,7 +40,9 @@ public class MChatInputSuggester {
 
             if (expression == null) return;
 
-            preview = expression.preview();
+            if (preview != OrderedText.empty()) preview = expression.preview();
+            else preview = null;
+
             cir.setReturnValue(expression.text());
         });
     }
