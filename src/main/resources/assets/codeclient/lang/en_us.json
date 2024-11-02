@@ -19,6 +19,7 @@
   "codeclient.config": "CodeClient Config",
 
   "codeclient.config.requires_restart": "(requires restart)",
+  "codeclient.config.requires_noclip": "(requires NoClip)",
   "codeclient.config.default_recommended": "Default recommended.",
 
   "codeclient.config.tab.general": "General",
@@ -57,7 +58,7 @@
   "codeclient.config.tab.navigation.description": "How you move about in the codespace and the likes.",
 
   "codeclient.config.noclip": "NoClip",
-  "codeclient.config.noclip.description": "If you can NoClip in the dev space.",
+  "codeclient.config.noclip.description": "Whether you can walk through codeblocks, additionally enables codespace travel by looking up/down and jumping/sneaking.",
   "codeclient.config.airstrafe_modifier": "AirStrafe Modifier",
   "codeclient.config.airstrafe_modifier.description1": "How much faster you go when jumping in dev space.",
   "codeclient.config.airstrafe_modifier.description2": "Your jump speed will be based of walking speed.",
@@ -190,8 +191,8 @@
   "codeclient.config.command.query.fail": "There is no option with name %s.",
   "codeclient.config.command.enable": "Enabled option %s.",
   "codeclient.config.command.disable": "Disabled option %s.",
-  "codeclient.config.command.enum": "Set option %s to %s.",
-  "codeclient.config.command.enum.fail": "Couldn't set option %s to %s.",
+  "codeclient.config.command.set": "Set option %s to %s.",
+  "codeclient.config.command.set.fail": "Couldn't set option %s to %s.",
   "codeclient.config.command.fail": "You cannot set this config option.",
 
   "codeclient.config.destroy_item_reset.name": "Destroy Item Reset",

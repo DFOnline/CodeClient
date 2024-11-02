@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Config {
     private static Config instance;
-    public boolean NoClipEnabled = true;
+    public boolean NoClipEnabled = false;
     public boolean PlaceOnAir = false;
     public int AirSpeed = 10;
     public boolean CodeClientAPI = false;
@@ -37,7 +37,6 @@ public class Config {
     public float ReachDistance = 5;
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
-    public boolean AirControl = false;
     public boolean FocusSearch = false;
     public CharSetOption SaveCharSet = CharSetOption.UTF_8;
     public boolean RecentChestInsert = true;
@@ -78,7 +77,7 @@ public class Config {
     public boolean DevNodes = false;
     public boolean GiveUuidNameStrings = true;
     public boolean CPUDisplay = true;
-    public CPUDisplayCorner CPUDisplayCornerOption = CPUDisplayCorner.TOP_LEFT;
+    public CPUDisplayCornerOption CPUDisplayCorner = CPUDisplayCornerOption.TOP_LEFT;
     public boolean HideScopeChangeMessages = true;
     public boolean HighlighterEnabled = true;
     public boolean HighlightExpressions = true;
@@ -125,7 +124,6 @@ public class Config {
             object.addProperty("ReachDistance", ReachDistance);
             object.addProperty("AutoFly", AutoFly);
             object.addProperty("CodeLayerInteractionMode", CodeLayerInteractionMode.name());
-            object.addProperty("AirControl", AirControl);
             object.addProperty("FocusSearch", FocusSearch);
             object.addProperty("SaveCharSet", SaveCharSet.name());
             object.addProperty("RecentChestInsert", RecentChestInsert);
@@ -165,7 +163,7 @@ public class Config {
             object.addProperty("DevNodes", DevNodes);
             object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
             object.addProperty("CPUDisplay", CPUDisplay);
-            object.addProperty("CPUDisplayCorner", CPUDisplayCornerOption.name());
+            object.addProperty("CPUDisplayCorner", CPUDisplayCorner.name());
             object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
 
             object.addProperty("HighlighterEnabled", HighlighterEnabled);
@@ -337,7 +335,7 @@ public class Config {
                                         .text(Text.translatable("codeclient.config.noclip.description"))
                                         .build())
                                 .binding(
-                                        true,
+                                        false,
                                         () -> NoClipEnabled,
                                         opt -> NoClipEnabled = opt
                                 )
@@ -360,7 +358,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(float.class)
                                 .name(Text.translatable("codeclient.config.angle_up"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_up.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_up.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         50F,
                                         () -> UpAngle,
@@ -370,7 +368,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(float.class)
                                 .name(Text.translatable("codeclient.config.angle_down"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_down.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_down.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(50F,
                                         () -> DownAngle,
                                         opt -> DownAngle = opt
@@ -379,7 +377,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.tp_up"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_up.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_up.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         false,
                                         () -> TeleportUp,
@@ -389,7 +387,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.tp_down"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_down.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_down.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         false,
                                         () -> TeleportDown,
@@ -409,18 +407,6 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-//                                .option(Option.createBuilder(boolean.class)
-//                                        .name(Text.literal("Air Control"))
-//                                        .description(OptionDescription.createBuilder()
-//                                                .text(Text.literal("Gives you the same control in air as walking."))
-//                                                .build())
-//                                        .binding(
-//                                                false,
-//                                                () -> AirControl,
-//                                                opt -> AirControl = opt
-//                                        )
-//                                        .controller(TickBoxController::new)
-//                                        .build())
                         .build())
                 //</editor-fold>
                 //<editor-fold desc="Interaction">
@@ -672,15 +658,15 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-                        .option(Option.createBuilder(Config.CPUDisplayCorner.class)
+                        .option(Option.createBuilder(CPUDisplayCornerOption.class)
                                 .name(Text.translatable("codeclient.config.cpu_display_corner.name"))
                                 .description(OptionDescription.of(Text.translatable("codeclient.config.cpu_display_corner.description")))
                                 .binding(
-                                        CPUDisplayCorner.TOP_LEFT,
-                                        () -> CPUDisplayCornerOption,
-                                        opt -> CPUDisplayCornerOption = opt
+                                        CPUDisplayCornerOption.TOP_LEFT,
+                                        () -> CPUDisplayCorner,
+                                        opt -> CPUDisplayCorner = opt
                                 )
-                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.CPUDisplayCorner.class))
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, CPUDisplayCornerOption.class))
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.translatable("codeclient.config.hide_scope_change_messages"))
@@ -1017,7 +1003,7 @@ public class Config {
         }
     }
 
-    public enum CPUDisplayCorner {
+    public enum CPUDisplayCornerOption {
         TOP_LEFT,
         TOP_RIGHT,
         BOTTOM_LEFT,

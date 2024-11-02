@@ -32,6 +32,7 @@ public class Navigation extends Feature {
     public boolean onCrouch(boolean lastSneaking) {
         var player = CodeClient.MC.player;
         if (CodeClient.location instanceof Dev dev
+                && Config.getConfig().NoClipEnabled
                 && Config.getConfig().TeleportDown
                 && player != null
                 && dev.isInDevSpace()
@@ -53,6 +54,7 @@ public class Navigation extends Feature {
     public Float jumpHeight() {
         if (CodeClient.location instanceof Dev dev
                 && dev.isInDev(CodeClient.MC.player.getPos())
+                && Config.getConfig().NoClipEnabled
                 && CodeClient.MC.player.getPitch() <= Config.getConfig().UpAngle - 90)
             return 0.91f;
         return null;
