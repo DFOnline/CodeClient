@@ -23,6 +23,7 @@
     "render.hud.MInGameHud",
     "render.hud.MInGameOverlayRenderer",
     "render.hud.MTitleScreen",
+    "screen.MMultiplayerScreen",
     "screen.MHandledScreen",
     "screen.MHandledScreens",
     "screen.MCreativeInventoryScreen",

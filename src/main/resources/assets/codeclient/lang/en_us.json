@@ -13,6 +13,9 @@
   "key.codeclient.tp.backward": "Teleport Backwards",
   "key.codeclient.open_action": "Open Action",
 
+  "codeclient.toast.unofficial_address.title": "Unofficial Address Detected",
+  "codeclient.toast.unofficial_address": "The server address you used to connect to DiamondFire is unofficially hosted by a third party. For security reasons, we have replaced it with the official address.",
+
   "codeclient.config": "CodeClient Config",
 
   "codeclient.config.requires_restart": "(requires restart)",
