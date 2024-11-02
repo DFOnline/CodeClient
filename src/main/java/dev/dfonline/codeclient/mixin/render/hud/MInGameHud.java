@@ -53,7 +53,7 @@ public abstract class MInGameHud {
                 index++;
             }
         }
-        if (cpuUsage != null) {
+        if (cpuUsage != null && Config.getConfig().CPUDisplayCornerOption != Config.CPUDisplayCorner.TOP_LEFT) {
             int margin = 30;
             int x = switch (Config.getConfig().CPUDisplayCornerOption) {
                 case TOP_LEFT, BOTTOM_LEFT -> margin;
