@@ -11,6 +11,7 @@ public class CommandManager {
     private static final List<Command> COMMANDS = List.of(
             new CommandAbort(),
             new CommandAuth(),
+            new CommandCalc(),
             new CommandCCConfig(),
             new CommandConfirmCC(),
             new CommandDelete(),
