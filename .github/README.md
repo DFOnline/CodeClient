@@ -10,7 +10,7 @@
 
 A DiamondFire utility client for advanced coding.
 
-A Fabric 1.20 mod for coding more efficiently with utility features including but not limited to:
+A Fabric 1.21 mod for coding more efficiently with utility features including but not limited to:
 * Automatically placing templates in inventory
 * Moving faster in codespace
 * A palette with all the actions
@@ -19,13 +19,14 @@ A Fabric 1.20 mod for coding more efficiently with utility features including bu
 1. Download the latest release of the mod from **[here](https://github.com/DFOnline/CodeClient/releases/latest)**.
 2. Download all the other required mods, they are [Fabric API](https://modrinth.com/mod/fabric-api), [Yet Another Config Lib](https://modrinth.com/mod/yacl), and optionally [Mod Menu](https://modrinth.com/mod/modmenu)
 3. Move the downloaded mod files into the mods folder located at .minecraft/mods.
-4. Launch the game and try it out on [DiamondFire](mcdiamondfire.com).
+4. Launch the game and try it out on [DiamondFire](https://mcdiamondfire.com/).
 
 ## Useful Info
 There's a [discord](https://discord.gg/NqU6XnyVPA) for CodeClient, and a helpful [wiki](https://github.com/DFOnline/CodeClient/wiki)
 
 ## Versions
-* [1.20 (latest)](https://github.com/DFOnline/CodeClient/releases/latest)
+
+* [1.21 (latest)](https://github.com/DFOnline/CodeClient/releases/latest)
 
 ## Contributing
 
@@ -35,7 +36,7 @@ Feel free to help! [Open an issue](https://github.com/DFOnline/CodeClient/issues
 Thanks to all the people who contribute.
 
 <a href="https://github.com/DFOnline/CodeClient/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=DFOnline/CodeClient" />
+<img src="https://contrib.rocks/image?repo=DFOnline/CodeClient" alt="CodeClient Contributors" />
 </a>
 
 ## License
