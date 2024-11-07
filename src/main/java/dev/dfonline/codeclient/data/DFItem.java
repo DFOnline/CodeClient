@@ -60,7 +60,7 @@ public class DFItem {
     }
 
     /**
-     * Edits the item's data with a consumer if it exists.
+     * Edits the item's data with a consumer, creates the data if it doesn't exist.
      * <br>
      * Example:
      * <pre>{@code
@@ -72,9 +72,8 @@ public class DFItem {
      * @param consumer The consumer to edit the data with.
      */
     public void editData(Consumer<ItemData> consumer) {
-        var itemData = getItemData();
-        if (!itemData.hasCustomData()) return;
-        consumer.accept(itemData);
+        if (!data.hasCustomData()) data = ItemData.getEmpty();
+        consumer.accept(data);
     }
 
     /**

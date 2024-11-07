@@ -14,12 +14,20 @@ public class ItemData {
      * Creates a new ItemData from an ItemStack.
      *
      * @param item The item to create the ItemData from.
+     * @implNote Most operations won't work if the item doesn't have custom data.
      */
     public ItemData(ItemStack item) {
         var customDataComponent = item.get(DataComponentTypes.CUSTOM_DATA);
         if (customDataComponent != null) {
             customData = customDataComponent.copyNbt();
         }
+    }
+
+    /**
+     * Creates an ItemData with an existing empty NbtCompound.
+     */
+    private ItemData() {
+        this.customData = new NbtCompound();
     }
 
     /**
@@ -33,8 +41,16 @@ public class ItemData {
         if (customData == null) {
             customData = new NbtCompound();
         }
-        setPublicBukkitValues(publicBukkitValues);
+        if (publicBukkitValues != null)
+            customData.put(PublicBukkitValues.PUBLIC_BUKKIT_VALUES_KEY, publicBukkitValues.getNbt());
         return customData;
+    }
+
+    /**
+     * Creates an empty ItemData.
+     */
+    public static ItemData getEmpty() {
+        return new ItemData();
     }
 
     /**
@@ -69,6 +85,25 @@ public class ItemData {
     }
 
     /**
+     * Removes a key from the custom data.
+     *
+     * @param key The key to remove.
+     */
+    public void removeKey(String key) {
+        customData.remove(key);
+    }
+
+    /**
+     * Gets a String value of a key.
+     *
+     * @param key The key to get.
+     * @return The value of the key, or an empty string if it doesn't exist.
+     */
+    public String getStringValue(String key) {
+        return customData.getString(key);
+    }
+
+    /**
      * Gets a String value of a key.
      *
      * @param key   The key to get.
@@ -79,12 +114,13 @@ public class ItemData {
     }
 
     /**
-     * Removes a key from the custom data.
+     * Checks if the custom data has a key.
      *
-     * @param key The key to remove.
+     * @param key The key to check.
+     * @return Whether the custom data has the key.
      */
-    public void removeKey(String key) {
-        customData.remove(key);
+    public boolean hasKey(String key) {
+        return customData.contains(key);
     }
 
     /**
@@ -108,9 +144,7 @@ public class ItemData {
     public void setHypercubeStringValue(String key, String value) {
         var publicBukkitValues = getPublicBukkitValues();
         if (publicBukkitValues == null) {
-            setPublicBukkitValues(PublicBukkitValues.getEmpty());
-            // Should be non-null now.
-            publicBukkitValues = getPublicBukkitValues();
+            publicBukkitValues = PublicBukkitValues.getEmpty();
         }
         publicBukkitValues.setHypercubeStringValue(key, value);
     }
