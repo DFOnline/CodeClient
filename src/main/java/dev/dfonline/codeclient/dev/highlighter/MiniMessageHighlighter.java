@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.dev.highlighter;
 
+/* FIXME
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.HypercubeMiniMessage;
 import net.kyori.adventure.text.Component;
@@ -22,9 +23,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Parses MiniMessage input, but leaves the tags in the message for formatting in the edit box.
- */
+// /
+//  * Parses MiniMessage input, but leaves the tags in the message for formatting in the edit box.
+//  /
 public class MiniMessageHighlighter {
     public MiniMessage HIGHLIGHTER = MiniMessage.builder().tags(TagResolver.resolver(
             new ShownTagResolver(),
@@ -106,7 +107,7 @@ public class MiniMessageHighlighter {
     }
 
     private void appendEscapedTag(StringBuilder sb, String tag, String style, ArrayList<String> decorations) {
-        /* idk if someone wants to figure this out, it doesn't actually seem to work with multiple decorations.
+        // idk if someone wants to figure this out, it doesn't actually seem to work with multiple decorations.
         StringBuilder opening = new StringBuilder();
 
         StringBuilder closing = new StringBuilder();
@@ -114,7 +115,7 @@ public class MiniMessageHighlighter {
             interpolate(opening, "<", decoration, ">");
             interpolate(closing, "</", decoration, ">");
         });
-        */
+        //
 
         interpolate(sb, "<", style, ">", HIGHLIGHTER.escapeTags(tag), "</", style, ">");
     }
@@ -157,3 +158,4 @@ public class MiniMessageHighlighter {
     }
 
 }
+*/

@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.1-SNAPSHOT'
+    id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -28,17 +28,16 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    // MixinExtras. Fabric Loader 0.15.0 and above should bundle it, but I don't have access to it for some reason.
-    implementation annotationProcessor(include("io.github.llamalad7:mixinextras-fabric:${project.mixin_extras_version}"))
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:${project.yacl_version}"
+    modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     // adventure api for minimessage parsing (see ExpressionHighlighter)
 //    implementation "net.kyori:adventure-api:4.16.0"
-    modImplementation include("net.kyori:adventure-platform-fabric:5.12.0")
+    // FIXME: Adventure does NOT exist for 1.21.1.
+//    modImplementation include("net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}")
 
     implementation include("org.java-websocket:Java-WebSocket:1.5.3")
 }
@@ -52,7 +51,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
     // this fixes some edge cases with special characters not displaying correctly

@@ -52,7 +52,7 @@ public class MoveToLocation {
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
         }
         this.player.setPos(x, y, z);
-        this.player.teleport(x, y, z);
+        this.player.teleport(x, y, z, false);
         CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, false));
     }
 

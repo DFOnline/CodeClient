@@ -4,13 +4,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.data.PublicBukkitValues;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -21,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ScopeSwitcher extends GenericSwitcher {
-    private String option;
+    private final String option;
 
     public ScopeSwitcher(String option) {
         super(Text.translatable("codeclient.switcher.scope"), -1, GLFW.GLFW_KEY_SPACE);
@@ -56,25 +54,17 @@ public class ScopeSwitcher extends GenericSwitcher {
     private void run(String name) {
         ItemStack stack = CodeClient.MC.player.getStackInHand(Hand.MAIN_HAND);
 
-        NbtCompound nbt = stack.getNbt();
-        if (nbt == null) return;
-        NbtCompound display = nbt.getCompound("display");
-        if (display != null) {
-            NbtList lore = display.getList("Lore", NbtElement.STRING_TYPE);
-            lore.set(0, Utility.textToNBT(getSelected().text()));
-            display.put("Lore", lore);
-            nbt.put("display", display);
-        }
-        NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
-        if (pbv == null) return;
-        NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
-        if (varItem == null) return;
-        JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
+        DFItem item = DFItem.of(stack);
+        PublicBukkitValues pbv = item.getPublicBukkitValues();
+        String varItem = pbv.getHypercubeStringValue("varitem");
+        if (varItem.isEmpty()) return;
+        JsonObject var = JsonParser.parseString(varItem).getAsJsonObject();
         if (!var.get("id").getAsString().equals("var")) return;
         JsonObject data = var.get("data").getAsJsonObject();
         data.addProperty("scope", name);
-        pbv.put("hypercube:varitem", NbtString.of(var.toString()));
-        Utility.sendHandItem(stack);
+        pbv.setHypercubeStringValue("varitem", var.toString());
+        item.getItemData().setPublicBukkitValues(pbv);
+        Utility.sendHandItem(item.getItemStack());
         CodeClient.MC.gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
     }
 

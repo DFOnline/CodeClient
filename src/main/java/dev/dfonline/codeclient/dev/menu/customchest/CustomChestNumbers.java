@@ -6,7 +6,7 @@ import net.minecraft.util.Identifier;
 
 public class CustomChestNumbers {
     public static final CustomChestNumbers SMALL = new CustomChestNumbers(
-            new Identifier(CodeClient.MOD_ID, "textures/gui/container/custom_chest/background.png"),
+            CodeClient.getId("textures/gui/container/custom_chest/background.png"),
             176,
             216,
             202,
@@ -26,7 +26,7 @@ public class CustomChestNumbers {
             133,
             -1);
     public static final CustomChestNumbers LARGE = new CustomChestNumbers(
-            new Identifier(CodeClient.MOD_ID, "textures/gui/container/custom_chest/background_big.png"),
+            CodeClient.getId("textures/gui/container/custom_chest/background_big.png"),
             198,
             294,
             228,

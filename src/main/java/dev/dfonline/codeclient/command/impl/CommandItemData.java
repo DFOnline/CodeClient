@@ -10,7 +10,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.ClickEvent;
@@ -33,7 +33,9 @@ public class CommandItemData extends Command {
             ClientPlayerEntity player = CodeClient.MC.player;
             if (player == null) return -1;
             ItemStack item = player.getInventory().getMainHandStack();
-            NbtCompound nbt = item.getNbt();
+            if (CodeClient.MC.world == null) return -1;
+            NbtElement nbt = item.encode(CodeClient.MC.world.getRegistryManager());
+
             if (nbt == null) {
                 Utility.sendMessage(Text.translatable("codeclient.command.itemdata.no_nbt"), ChatType.FAIL);
                 return 0;

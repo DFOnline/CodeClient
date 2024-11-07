@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.TemplateActionCommand;
+import dev.dfonline.codeclient.data.DFItem;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.ItemStack;
@@ -39,8 +40,9 @@ public class CommandLoad extends TemplateActionCommand {
                 try {
                     byte[] data = Files.readAllBytes(path);
                     ItemStack template = Utility.makeTemplate(new String(Base64.getEncoder().encode(data)));
-                    template.setCustomName(Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(FileManager.templatesPath().relativize(path))));
-                    CodeClient.MC.player.giveItemStack(template);
+                    DFItem dfItem = new DFItem(template);
+                    dfItem.setName(Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(FileManager.templatesPath().relativize(path))));
+                    CodeClient.MC.player.giveItemStack(dfItem.getItemStack());
                     Utility.sendInventory();
                 } catch (Exception e) {
                     Utility.sendMessage(Text.translatable("codeclient.files.error.read_file", path), ChatType.FAIL);

@@ -7,9 +7,14 @@ import dev.dfonline.codeclient.action.impl.DevForBuild;
 import dev.dfonline.codeclient.command.CommandManager;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
+import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.data.ItemData;
+import dev.dfonline.codeclient.data.PublicBukkitValues;
+import dev.dfonline.codeclient.data.value.DataValue;
+import dev.dfonline.codeclient.data.value.NumberDataValue;
+import dev.dfonline.codeclient.data.value.StringDataValue;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
-import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
 import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
 import dev.dfonline.codeclient.dev.menu.RecentValues;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
@@ -42,10 +47,6 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -112,7 +113,7 @@ public class CodeClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
 
-        ClientLifecycleEvents.CLIENT_STOPPING.register(new Identifier(MOD_ID, "close"), client -> API.stop());
+        ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.of(MOD_ID, "close"), client -> API.stop());
 
         if (Config.getConfig().CodeClientAPI) {
             try {
@@ -129,29 +130,27 @@ public class CodeClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher, registryAccess));
 
-        ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
+        ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             if (isPreviewingItemTags) {
-                if (!stack.hasNbt()) return;
-                NbtCompound nbt = stack.getNbt();
-                if (nbt == null) return;
-                if (!nbt.contains("PublicBukkitValues")) return;
-                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-                for (var key : publicBukkit.getKeys()) {
-                    if (key.startsWith("hypercube:")) {
-                        NbtElement element = publicBukkit.get(key);
+                DFItem item = DFItem.of(stack);
+                ItemData itemData = item.getItemData();
+                if (itemData == null) return;
+                PublicBukkitValues publicBukkit = itemData.getPublicBukkitValues();
+                if (publicBukkit == null) return;
+                for (var key : publicBukkit.getHypercubeKeys()) {
+                    DataValue element = publicBukkit.getHypercubeValue(key);
 
-                        // Any type = yellow, number = red, string = aqua.
-                        MutableText value = Text.literal(publicBukkit.get(key).toString()).formatted(Formatting.GREEN);
-                        if (element instanceof NbtString) value.formatted(Formatting.AQUA);
-                        if (element instanceof AbstractNbtNumber) value.formatted(Formatting.RED);
+                    // Any type = yellow, number = red, string = aqua.
+                    MutableText value = Text.literal(publicBukkit.getHypercubeStringValue(key)).formatted(Formatting.GREEN);
+                    if (element instanceof StringDataValue) value.formatted(Formatting.AQUA);
+                    if (element instanceof NumberDataValue) value.formatted(Formatting.RED);
 
-                        lines.add(
-                                Text.literal(key.replace("hypercube:", ""))
-                                        .withColor(0xAAFF55)
-                                        .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
-                                        .append(value)
-                        );
-                    }
+                    lines.add(
+                            Text.literal(key)
+                                    .withColor(0xAAFF55)
+                                    .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
+                                    .append(value)
+                    );
                 }
             }
         });
@@ -188,7 +187,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new ChatAutoEdit());
         feat(new CPUDisplay());
         feat(new MessageHiding());
-        feat(new ExpressionHighlighter());
+        //FIXME: feat(new ExpressionHighlighter());
     }
 
     /**
@@ -203,6 +202,10 @@ public class CodeClient implements ClientModInitializer {
      */
     private static Stream<ChestFeature> chestFeatures() {
         return features().map(Feature::getChest).filter(Optional::isPresent).map(Optional::get);
+    }
+
+    public static Identifier getId(String path) {
+        return Identifier.of(MOD_ID, path);
     }
 
     public static void isCodeChest() {
@@ -455,7 +458,7 @@ public class CodeClient implements ClientModInitializer {
     private boolean registerResourcePack(String id, Text name, ResourcePackActivationType type) throws NullPointerException {
         var prefix = String.format("[%s] ", MOD_NAME);
         return ResourceManagerHelper.registerBuiltinResourcePack(
-                new Identifier(CodeClient.MOD_ID, id),
+                getId(id),
                 getModContainer(),
                 Text.literal(prefix).formatted(Formatting.GRAY).append(name),
                 type

@@ -5,6 +5,7 @@ import dev.dfonline.codeclient.Callback;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
 import dev.dfonline.codeclient.location.Dev;
@@ -12,7 +13,6 @@ import dev.dfonline.codeclient.mixin.entity.player.ClientPlayerInteractionManage
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -78,13 +78,9 @@ public class PlaceTemplates extends Action {
             var scan = dev.scanForSigns(Pattern.compile(".*"));
             ArrayList<ItemStack> leftOvers = new ArrayList<>(templates);
             for (ItemStack item : templates) {
-                if (!item.hasNbt()) continue;
-                NbtCompound nbt = item.getNbt();
-                if (nbt == null) continue;
-                if (!nbt.contains("PublicBukkitValues")) continue;
-                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-                if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
-                String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
+                DFItem dfItem = new DFItem(item);
+                String codeTemplateData = dfItem.getHypercubeStringValue("codetemplatedata");
+                if (codeTemplateData.isEmpty()) continue;
                 try {
                     Template template = Template.parse64(JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString());
                     if (template == null || template.blocks.isEmpty()) continue;

@@ -21,9 +21,9 @@ import java.util.List;
  * It can reasonably hold up to 4 options.
  */
 public abstract class GenericSwitcher extends Screen {
-    private static final Identifier TEXTURE = new Identifier("textures/gui/container/gamemode_switcher.png");
-    private static final Identifier SLOT_TEXTURE = new Identifier("gamemode_switcher/slot");
-    private static final Identifier SELECTED_TEXTURE = new Identifier("gamemode_switcher/selection");
+    private static final Identifier TEXTURE = Identifier.ofVanilla("textures/gui/container/gamemode_switcher.png");
+    private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("gamemode_switcher/slot");
+    private static final Identifier SELECTED_TEXTURE = Identifier.ofVanilla("gamemode_switcher/selection");
     /**
      * Key to hold down, generally F3.
      * The selected option will be run when this is released.

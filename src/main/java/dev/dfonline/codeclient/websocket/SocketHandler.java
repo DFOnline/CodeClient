@@ -545,7 +545,10 @@ public class SocketHandler {
                 return;
             }
             try {
-                CodeClient.MC.player.giveItemStack(ItemStack.fromNbt(StringNbtReader.parse(content)));
+                if (CodeClient.MC.world == null) return;
+                Optional<ItemStack> itemStack = ItemStack.fromNbt(CodeClient.MC.world.getRegistryManager(), StringNbtReader.parse(content));
+                if (itemStack.isEmpty()) return;
+                CodeClient.MC.player.giveItemStack(itemStack.get());
                 Utility.sendInventory();
             } catch (CommandSyntaxException e) {
                 responder.send("invalid nbt");

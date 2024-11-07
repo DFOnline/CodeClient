@@ -34,7 +34,6 @@ public class Config {
     public int AutoJoinPlotId = 0;
     public CharSetOption FileCharSet = CharSetOption.UTF_8;
     public boolean InvisibleBlocksInDev = false;
-    public float ReachDistance = 5;
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
     public boolean FocusSearch = false;
@@ -121,7 +120,6 @@ public class Config {
             object.addProperty("AutoJoinPlotId", AutoJoinPlotId);
             object.addProperty("FileCharSet", FileCharSet.name());
             object.addProperty("InvisibleBlocksInDev", InvisibleBlocksInDev);
-            object.addProperty("ReachDistance", ReachDistance);
             object.addProperty("AutoFly", AutoFly);
             object.addProperty("CodeLayerInteractionMode", CodeLayerInteractionMode.name());
             object.addProperty("FocusSearch", FocusSearch);

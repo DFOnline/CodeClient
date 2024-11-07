@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
@@ -136,7 +137,8 @@ public class Sound extends VarItem {
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
-        stack.setCustomName(Text.literal("Sound").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.SOUND.color)));
+        DFItem dfItem = DFItem.of(stack);
+        dfItem.setName(Text.literal("Sound").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.SOUND.color)));
         Text name;
         try {
             ActionDump db = ActionDump.getActionDump();
@@ -146,11 +148,11 @@ public class Sound extends VarItem {
         } catch (Exception e) {
             name = Text.literal(sound).setStyle(Style.EMPTY);
         }
-        Utility.addLore(stack,
+        Utility.addLore(dfItem.getItemStack(),
                 name,
                 Text.empty(),
                 Text.empty().append(Text.literal("Pitch: ").formatted(Formatting.GRAY)).append("%.2f".formatted(pitch)),
                 Text.empty().append(Text.literal("Volume: ").formatted(Formatting.GRAY)).append("%.2f".formatted(volume)));
-        return stack;
+        return dfItem.getItemStack();
     }
 }
