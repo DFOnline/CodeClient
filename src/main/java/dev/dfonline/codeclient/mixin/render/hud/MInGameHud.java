@@ -42,24 +42,28 @@ public abstract class MInGameHud {
 
         List<Text> overlay = new ArrayList<>(List.copyOf(OverlayManager.getOverlayText()));
         Text cpuUsage = OverlayManager.getCpuUsage();
-        if (!overlay.isEmpty()) {
-            if (cpuUsage != null && Config.getConfig().CPUDisplayCornerOption == Config.CPUDisplayCorner.TOP_LEFT) {
+        if (cpuUsage != null && Config.getConfig().CPUDisplayCorner == Config.CPUDisplayCornerOption.TOP_LEFT) {
+            if (overlay.isEmpty()) overlay.add(cpuUsage);
+            else {
                 overlay.add(0, cpuUsage);
                 overlay.add(1, Text.empty());
             }
+        }
+        if (!overlay.isEmpty()) {
             int index = 0;
             for (Text text : overlay) {
                 context.drawTextWithShadow(textRenderer, Objects.requireNonNullElseGet(text, () -> Text.literal("NULL")), 30, 30 + (index * 9), -1);
                 index++;
             }
         }
-        if (cpuUsage != null && Config.getConfig().CPUDisplayCornerOption != Config.CPUDisplayCorner.TOP_LEFT) {
+
+        if (cpuUsage != null && Config.getConfig().CPUDisplayCorner != Config.CPUDisplayCornerOption.TOP_LEFT) {
             int margin = 30;
-            int x = switch (Config.getConfig().CPUDisplayCornerOption) {
+            int x = switch (Config.getConfig().CPUDisplayCorner) {
                 case TOP_LEFT, BOTTOM_LEFT -> margin;
                 case TOP_RIGHT, BOTTOM_RIGHT -> scaledWidth - margin - textRenderer.getWidth(cpuUsage);
             };
-            int y = switch (Config.getConfig().CPUDisplayCornerOption) {
+            int y = switch (Config.getConfig().CPUDisplayCorner) {
                 case TOP_LEFT, TOP_RIGHT -> margin;
                 case BOTTOM_LEFT, BOTTOM_RIGHT -> scaledHeight - margin - 3;
             };
