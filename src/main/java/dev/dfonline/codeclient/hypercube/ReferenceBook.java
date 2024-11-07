@@ -4,6 +4,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.data.ItemData;
 import dev.dfonline.codeclient.data.PublicBukkitValues;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.WrittenBookItem;
 import net.minecraft.item.tooltip.TooltipType;
@@ -50,7 +51,7 @@ public class ReferenceBook {
     }
 
     public List<Text> getTooltip() {
-        return getTaglessItem().getTooltip(null, CodeClient.MC.player, TooltipType.BASIC);
+        return getTaglessItem().getTooltip(Item.TooltipContext.DEFAULT, CodeClient.MC.player, TooltipType.BASIC);
     }
 
     // todo: parse into action?
