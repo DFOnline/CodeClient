@@ -83,7 +83,7 @@ public class CodeClient implements ClientModInitializer {
     public static Action confirmingAction = null;
     public static Location lastLocation = null;
     public static Location location = null;
-    /***
+    /**
      * Used to open a screen on the next tick.
      */
     public static Screen screenToOpen = null;
@@ -204,6 +204,12 @@ public class CodeClient implements ClientModInitializer {
         return features().map(Feature::getChest).filter(Optional::isPresent).map(Optional::get);
     }
 
+    /**
+     * Get an identifier using the mod id as the namespace.
+     *
+     * @param path The path to the resource.
+     * @return Identifier under the mod id's namespace and the provided path as the path.
+     */
     public static Identifier getId(String path) {
         return Identifier.of(MOD_ID, path);
     }

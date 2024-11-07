@@ -1,10 +1,11 @@
 package dev.dfonline.codeclient.data.value;
 
-import dev.dfonline.codeclient.data.DataType;
-
+/**
+ * Represents a value of a key that is a string.
+ */
 public class StringDataValue extends DataValue {
     public StringDataValue(String value) {
-        super(DataType.STRING, value);
+        super(value);
     }
 
     public String getValue() {

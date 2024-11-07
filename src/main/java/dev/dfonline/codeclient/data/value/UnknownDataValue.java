@@ -1,9 +1,10 @@
 package dev.dfonline.codeclient.data.value;
 
-import dev.dfonline.codeclient.data.DataType;
-
+/**
+ * Represents a value of a key that can be of any type.
+ */
 public class UnknownDataValue extends DataValue {
     public UnknownDataValue(Object value) {
-        super(DataType.UNKNOWN, value);
+        super(value);
     }
 }

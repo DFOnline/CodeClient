@@ -1,10 +1,11 @@
 package dev.dfonline.codeclient.data.value;
 
-import dev.dfonline.codeclient.data.DataType;
-
+/**
+ * Represents a value of a key that is a number.
+ */
 public class NumberDataValue extends DataValue {
     public NumberDataValue(double value) {
-        super(DataType.NUMBER, value);
+        super(value);
     }
 
     public Double getValue() {
