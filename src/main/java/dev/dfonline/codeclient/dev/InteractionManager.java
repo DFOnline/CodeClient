@@ -25,6 +25,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
@@ -170,7 +171,7 @@ public class InteractionManager {
                         for (String option : options) {
                             MutableText text = Text.empty();
                             if (optionIndex == newSelection) {
-                                text.append(Text.literal("» ").formatted(Formatting.DARK_AQUA)).append(Text.literal(option).formatted(Formatting.AQUA));
+                                text.append(Text.literal("» ").setStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withItalic(false))).append(Text.literal(option).setStyle(Style.EMPTY.withColor(Formatting.AQUA).withItalic(false)));
                             } else
                                 text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
                             lore.set(tagStartIndex + optionIndex, text);

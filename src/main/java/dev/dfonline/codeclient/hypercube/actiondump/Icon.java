@@ -160,7 +160,7 @@ public class Icon {
             }
             else {
                 addToLore(lore,"");
-                lore.add(Text.literal(requiredRank.name + " Exclusive").withColor(requiredRank.color.getRgb()));
+                lore.add(Text.literal(requiredRank.name + " Exclusive").setStyle(Style.EMPTY.withColor(requiredRank.color.getRgb()).withItalic(false)));
             }
         }
 
