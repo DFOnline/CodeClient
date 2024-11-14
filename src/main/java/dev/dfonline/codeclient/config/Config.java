@@ -79,6 +79,7 @@ public class Config {
     public boolean CPUDisplay = true;
     public CPUDisplayCornerOption CPUDisplayCorner = CPUDisplayCornerOption.TOP_LEFT;
     public boolean HideScopeChangeMessages = true;
+    public AutoUpdate AutoUpdateOption = AutoUpdate.UPDATE;
     public boolean HighlighterEnabled = true;
     public boolean HighlightExpressions = true;
     public boolean HighlightMiniMessage = true;
@@ -165,12 +166,12 @@ public class Config {
             object.addProperty("CPUDisplay", CPUDisplay);
             object.addProperty("CPUDisplayCorner", CPUDisplayCorner.name());
             object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
-
+            object.addProperty("AutoUpdateOption", AutoUpdateOption.name());
             object.addProperty("HighlighterEnabled", HighlighterEnabled);
             object.addProperty("HighlightExpressions", HighlightExpressions);
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
             object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
-
+          
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -184,6 +185,20 @@ public class Config {
                 .category(ConfigCategory.createBuilder()
                         .name(Text.translatable("codeclient.config.tab.general"))
                         .tooltip(Text.translatable("codeclient.config.tab.general.tooltip"))
+                        .option(Option.createBuilder(AutoUpdate.class)
+                                .name(Text.translatable("codeclient.config.auto_update"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.translatable("codeclient.config.auto_update.description"))
+                                        .text(Text.translatable("codeclient.config.requires_restart"))
+                                        .build())
+                                .binding(
+                                        AutoUpdate.UPDATE,
+                                        () -> AutoUpdateOption,
+                                        opt -> AutoUpdateOption = opt
+                                )
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, AutoUpdate.class))
+                                .flag(OptionFlag.GAME_RESTART)
+                                .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.api"))
                                 .description(OptionDescription.createBuilder()
@@ -1008,5 +1023,11 @@ public class Config {
         TOP_RIGHT,
         BOTTOM_LEFT,
         BOTTOM_RIGHT
+    }
+
+    public enum AutoUpdate {
+        OFF,
+        NOTIFY,
+        UPDATE,
     }
 }

@@ -8,6 +8,7 @@
     "screen.chat.MChatInputSuggester",
     "MKeyboard",
     "MMouse",
+    "VersionChecker",
     "entity.MEntity",
     "entity.MLivingEntity",
     "entity.player.ClientPlayerInteractionManagerAccessor",
