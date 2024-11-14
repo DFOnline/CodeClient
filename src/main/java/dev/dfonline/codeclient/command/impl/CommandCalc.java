@@ -7,6 +7,9 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
 import java.math.BigDecimal;
@@ -33,7 +36,14 @@ public class CommandCalc extends Command {
                     if (CodeClient.MC.getNetworkHandler() == null) return -1;
 
                     try {
-                        Utility.sendMessage(Text.translatable("codeclient.command.calc.success", expr, calc(expr)), ChatType.SUCCESS);
+                        String result = String.valueOf(calc(expr));
+                        Text message = Text.translatable("codeclient.command.calc.success", expr, result)
+                                        .fillStyle(Style.EMPTY
+                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.hover.click_to_copy")))
+                                        .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, result)));
+
+                        Utility.sendMessage(message, ChatType.SUCCESS);
+                        
                     } catch (Exception e) {
                         Utility.sendMessage(Text.translatable("codeclient.command.calc.failure", expr), ChatType.FAIL);
                     }
