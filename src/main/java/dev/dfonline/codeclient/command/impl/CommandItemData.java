@@ -34,7 +34,7 @@ public class CommandItemData extends Command {
             if (player == null) return -1;
             ItemStack item = player.getInventory().getMainHandStack();
             if (CodeClient.MC.world == null) return -1;
-            NbtElement nbt = item.encode(CodeClient.MC.world.getRegistryManager());
+            NbtElement nbt = item.toNbt(CodeClient.MC.world.getRegistryManager());
 
             if (nbt == null) {
                 Utility.sendMessage(Text.translatable("codeclient.command.itemdata.no_nbt"), ChatType.FAIL);
@@ -46,7 +46,7 @@ public class CommandItemData extends Command {
                             .append(Text.literal(" ").setStyle(Style.EMPTY.withStrikethrough(false).withColor(Formatting.AQUA))
                                     .append(Text.translatable("codeclient.command.itemdata.header", Text.empty().formatted(Formatting.WHITE).append(item.getName())))
                                     .append(Text.literal(" ")))
-                            .append(" ".repeat(15))
+                            .append(" ".repeat(15)), false
             );
             player.sendMessage(Text.literal(nbt.toString()), false);
 

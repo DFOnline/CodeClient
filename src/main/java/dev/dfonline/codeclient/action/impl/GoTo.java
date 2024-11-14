@@ -54,7 +54,7 @@ public class GoTo extends Action {
         if (locationItem == null) return super.onReceivePacket(packet);
         if (packet instanceof PlayerPositionLookS2CPacket tp) {
             if (CodeClient.MC.getNetworkHandler() == null || CodeClient.MC.player == null) return false;
-            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(tp.getTeleportId()));
+            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(tp.teleportId()));
             CodeClient.MC.player.setPosition(target);
             active = false;
             callback();
@@ -134,7 +134,7 @@ public class GoTo extends Action {
             for (int i = 0; i < Math.min(lastTickPackets + 5, 50); i++) {
                 thisTickPackets++;
                 this.doNotSuppress = true;
-                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
+                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, true));
             }
         }
         thisTickPackets++;

@@ -7,6 +7,7 @@ import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Play;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Hand;
@@ -62,7 +63,7 @@ public class KeyBinds {
     }
 
     public static void tick() {
-        var player = CodeClient.MC.player;
+        ClientPlayerEntity player = CodeClient.MC.player;
         if (player != null) {
             checkTp(teleportLeft, new Vec3d(0, 0, -2));
             checkTp(teleportRight, new Vec3d(0, 0, 2));

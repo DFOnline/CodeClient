@@ -229,7 +229,7 @@ public class SocketHandler {
                             )
                             .setStyle(Style.EMPTY.withHoverEvent(
                                     new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
-                            ))
+                            )), false
             );
         }
         Utility.sendMessage(Text.translatable("codeclient.api.run_auth"));

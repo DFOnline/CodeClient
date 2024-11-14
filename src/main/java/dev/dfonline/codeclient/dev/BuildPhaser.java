@@ -13,7 +13,6 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -90,7 +89,7 @@ public class BuildPhaser extends Feature {
                         Math.min(Math.max(player.getZ(), plot.getZ()), plot.getZ() + plot.assumeSize().size + 1)
                 );
                 allowPacket = true;
-                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false));
+                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false, true));
                 CodeClient.MC.player.getAbilities().flying = true;
             }
         } else if (clipping || waitForTP) {
@@ -123,7 +122,7 @@ public class BuildPhaser extends Feature {
     public boolean onReceivePacket(Packet<?> packet) {
         if (!waitForTP) return false;
         if (packet instanceof PlayerPositionLookS2CPacket move) {
-            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.getTeleportId()));
+            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.teleportId()));
             return true;
         }
         if (packet instanceof EntityAnimationS2CPacket) return true;

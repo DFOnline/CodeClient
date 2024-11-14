@@ -49,7 +49,7 @@ public class GetPlotSize extends Action {
         if (CodeClient.location instanceof Dev plot) {
             if (step == Step.TP && packet instanceof PlayerPositionLookS2CPacket position) {
                 step = Step.DONE;
-                double size = position.getZ() - plot.getZ();
+                double size = position.change().position().z - plot.getZ();
                 if (size > 49) {
                     plot.setSize(Plot.Size.BASIC);
                 }

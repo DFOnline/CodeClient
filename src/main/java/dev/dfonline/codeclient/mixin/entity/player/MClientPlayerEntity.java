@@ -2,8 +2,6 @@ package dev.dfonline.codeclient.mixin.entity.player;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
-import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.Navigation;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
@@ -62,12 +60,12 @@ public abstract class MClientPlayerEntity {
                     if (position) {
                         NoClip.timesSinceMoved = 0;
                         if (rotation) {
-                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, yaw, pitch, false));
+                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, yaw, pitch, false, true));
                         } else {
-                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false));
+                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false, true));
                         }
                     } else {
-                        this.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false));
+                        this.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false, true));
                     }
                 }
                 NoClip.lastPos = pos;

@@ -23,7 +23,7 @@ public class Event {
             if (clear.shouldReset()) step = Sequence.WAIT_FOR_POS;
         }
         if (packet instanceof PlayerPositionLookS2CPacket pos) {
-            tp = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+            tp = new Vec3d(pos.change().position().x, pos.change().position().y, pos.change().position().z);
             if (step == Sequence.WAIT_FOR_POS) step = Sequence.WAIT_FOR_MESSAGE;
         }
         if (packet instanceof OverlayMessageS2CPacket overlay) {

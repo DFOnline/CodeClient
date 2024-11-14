@@ -14,19 +14,18 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryListener;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenTexts;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.ClickEvent;
@@ -46,7 +45,7 @@ import java.util.Objects;
 import static dev.dfonline.codeclient.dev.menu.devinventory.DevInventoryGroup.*;
 
 @Environment(EnvType.CLIENT)
-public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler> {
+public class DevInventoryScreen extends CreativeInventoryScreen {
     static final SimpleInventory Inventory = new SimpleInventory(45);
     private static final Identifier TEXTURE = CodeClient.getId("textures/gui/container/dev_inventory/tabs.png");
     private static final String TAB_TEXTURE_PREFIX = "textures/gui/container/creative_inventory/tab_";
@@ -64,8 +63,8 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
     private boolean ignoreNextKey = false;
     private boolean scrolling = false;
 
-    public DevInventoryScreen(PlayerEntity player) {
-        super(new CreativeInventoryScreen.CreativeScreenHandler(player), player.getInventory(), ScreenTexts.EMPTY);
+    public DevInventoryScreen(ClientPlayerEntity player) {
+        super(player, FeatureSet.empty(), CodeClient.MC.options.getOperatorItemsTab().getValue());
         player.currentScreenHandler = this.handler;
         this.backgroundHeight = 136;
         this.backgroundWidth = 195;
@@ -371,18 +370,15 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
 
         for (DevInventoryGroup group : DevInventoryGroup.GROUPS) {
-            RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, TEXTURE);
             this.renderTabIcon(context, group);
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         String texture = "item_search";
         if (!itemGroup.hasSearchBar()) texture = "items";
         if (itemGroup == INVENTORY) texture = "inventory";
-        context.drawTexture(Identifier.ofVanilla(TAB_TEXTURE_PREFIX + texture + ".png"), this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        context.drawGuiTexture(RenderLayer::getGuiTextured, Identifier.ofVanilla(TAB_TEXTURE_PREFIX + texture + ".png"), this.x, this.y, this.backgroundWidth, this.backgroundHeight);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE);
         this.renderTabIcon(context, itemGroup);
 
@@ -390,9 +386,10 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if (itemGroup != INVENTORY) {
             int scrollbarX = this.x + 175;
             int scrollbarY = this.y + 18;
-            if (scrollHeight == 0) context.drawTexture(TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15);
+            if (scrollHeight == 0)
+                context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, scrollbarX, scrollbarY, 244, 0, 256, 256, 12, 15);
             else
-                context.drawTexture(TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15);
+                context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 256, 256, 232, 0, 12, 15);
         } else {
             if (this.client != null && this.client.player != null)
                 InventoryScreen.drawEntity(context, this.x + 73, this.y + 6, this.x + 105, this.y + 49, 20, 0.0625F, (float) mouseX, (float) mouseY, this.client.player);
@@ -419,7 +416,7 @@ public class DevInventoryScreen extends AbstractInventoryScreen<net.minecraft.cl
         if (isSelected) mapY += 32;
         if (!isTopRow) mapY += 64;
 
-        context.drawTexture(TEXTURE, originX, originY, mapX, mapY, TAB_WIDTH, 32);
+        context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, originX, originY, mapX, mapY, 256, 256, TAB_WIDTH, 32);
 //        this.itemRenderer.zOffset = 100.0F;
         originX += 6;
         originY += 8 + (isTopRow ? 2 : -2);

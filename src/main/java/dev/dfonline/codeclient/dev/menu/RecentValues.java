@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.item.ItemStack;
@@ -84,7 +85,7 @@ public class RecentValues extends Feature {
         if (CodeClient.MC.world == null) throw new RuntimeException("World is null!");
 
         for (ItemStack item : list) {
-            out.add(item.encode(CodeClient.MC.world.getRegistryManager()).toString());
+            out.add(item.toNbt(CodeClient.MC.world.getRegistryManager()).toString());
         }
 
         return out;
@@ -129,7 +130,7 @@ public class RecentValues extends Feature {
             if(recent.isEmpty() && pinned.isEmpty()) return;
             int xEnd = 16*15;
 
-            context.drawGuiTexture(Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
+            context.drawGuiTexture(RenderLayer::getGuiTextured, Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
                     Math.min(Math.max(pinned.size(), recent.size()),16) * 15 + 10,
                     (((int) Math.ceil((double) pinned.size() / 16)) + ((int) Math.ceil((double) recent.size() / 16))) * 16 + 10
             );
@@ -141,7 +142,7 @@ public class RecentValues extends Feature {
                 int x = 10;
                 for (ItemStack item : group) {
                     context.drawItem(item, x - screenX, y - screenY);
-                    context.drawItemInSlot(CodeClient.MC.textRenderer, item, x - screenX, y - screenY);
+                    context.drawStackOverlay(CodeClient.MC.textRenderer, item, x - screenX, y - screenY);
                     if (mouseX > x && mouseY > y && mouseX < x + 15 && mouseY < y + 15) {
                         context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX - screenX, mouseY - screenY);
                         hoveredItem = item;

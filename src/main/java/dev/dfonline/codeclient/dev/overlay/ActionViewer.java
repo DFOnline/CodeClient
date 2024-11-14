@@ -18,6 +18,8 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
@@ -138,7 +140,7 @@ public class ActionViewer extends Feature {
             int tooltipHeight = components.size() == 1 ? -2 : 0;
 
             TooltipComponent tooltipComponent;
-            for (Iterator<TooltipComponent> iterator = components.iterator(); iterator.hasNext(); tooltipHeight += tooltipComponent.getHeight()) {
+            for (Iterator<TooltipComponent> iterator = components.iterator(); iterator.hasNext(); tooltipHeight += tooltipComponent.getHeight(textRenderer)) {
                 tooltipComponent = iterator.next();
                 int width = tooltipComponent.getWidth(textRenderer);
                 if (width > tooltipWidth) {
@@ -150,14 +152,16 @@ public class ActionViewer extends Feature {
 
             var finalWidth = tooltipWidth;
             var finalHeight = tooltipHeight;
-            context.draw(() -> TooltipBackgroundRenderer.render(context, vector.x(), vector.y(), finalWidth, finalHeight, z));
+            context.draw((vertexConsumer) -> TooltipBackgroundRenderer.render(context, vector.x(), vector.y(), finalWidth, finalHeight, z, null));
             context.getMatrices().translate(0.0F, 0.0F, (float) z);
 
             int textY = vector.y();
             for (int index = 0; index < components.size(); ++index) {
                 tooltipComponent = components.get(index);
-                tooltipComponent.drawText(textRenderer, vector.x(), textY, context.getMatrices().peek().getPositionMatrix(), context.getVertexConsumers());
-                textY += tooltipComponent.getHeight() + (index == 0 ? 2 : 0);
+                TooltipComponent finalTooltipComponent = tooltipComponent;
+                int finalTextY = textY;
+                context.draw(consumer -> finalTooltipComponent.drawText(textRenderer, vector.x(), finalTextY, context.getMatrices().peek().getPositionMatrix(), (VertexConsumerProvider.Immediate) consumer.getBuffer(RenderLayer.getGui())));
+                textY += tooltipComponent.getHeight(textRenderer) + (index == 0 ? 2 : 0);
             }
 
             context.getMatrices().pop();
@@ -218,9 +222,7 @@ public class ActionViewer extends Feature {
 
                 // check in range
                 if (x <= mouseX && mouseX <= x + width) {
-                    if (y <= mouseY && mouseY <= y + height) {
-                        return true;
-                    }
+                    return y <= mouseY && mouseY <= y + height;
                 }
                 return false;
             }

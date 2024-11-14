@@ -36,7 +36,7 @@ public class MoveToSpawn extends Action {
     public boolean onTeleport(PlayerPositionLookS2CPacket packet) {
         Dev plot = (Dev) CodeClient.location;
         if (currentStep == Step.WAIT_FOR_TELEPORT) {
-            plot.setDevSpawn(packet.getX(), packet.getZ());
+            plot.setDevSpawn(packet.change().position().x, packet.change().position().z);
             currentStep = Step.MOVE_TO_CORNER;
         }
         return false;

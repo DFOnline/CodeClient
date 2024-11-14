@@ -13,6 +13,7 @@ import dev.dfonline.codeclient.hypercube.item.*;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -185,7 +186,7 @@ public class InsertOverlayFeature extends Feature {
             public void render(DrawContext context, int mouseX, int mouseY) {
                 context.getMatrices().push();
                 context.getMatrices().translate(0.0F, 0.0F, 900.0F);
-                context.drawGuiTexture(Identifier.ofVanilla("recipe_book/overlay_recipe"), x, y, width, height);
+                context.drawGuiTexture(RenderLayer::getGuiTextured, Identifier.ofVanilla("recipe_book/overlay_recipe"), x, y, width, height);
                 if (field != null) {
                     field.render(context, mouseX, mouseY, 0);
                 } else {
