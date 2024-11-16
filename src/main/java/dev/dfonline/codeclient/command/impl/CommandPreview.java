@@ -1,6 +1,5 @@
 package dev.dfonline.codeclient.command.impl;
 
-/*FIXME
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -51,4 +50,3 @@ public class CommandPreview extends Command {
         return MM.deserialize(context.getArgument("text", String.class));
     }
 }
-*/

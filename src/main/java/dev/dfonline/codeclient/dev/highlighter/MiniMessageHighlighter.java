@@ -1,6 +1,5 @@
 package dev.dfonline.codeclient.dev.highlighter;
 
-/* FIXME
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.HypercubeMiniMessage;
 import net.kyori.adventure.text.Component;
@@ -158,4 +157,3 @@ public class MiniMessageHighlighter {
     }
 
 }
-*/

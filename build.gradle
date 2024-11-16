@@ -37,6 +37,7 @@ dependencies {
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     // Adventure for MiniMessage parsing.
+    implementation("net.kyori:adventure-api:${project.adventure_api_version}")
     modImplementation include("net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}")
 
     // WebSocket for CodeClient API.
