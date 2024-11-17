@@ -160,7 +160,7 @@ public class ActionViewer extends Feature {
                 tooltipComponent = components.get(index);
                 TooltipComponent finalTooltipComponent = tooltipComponent;
                 int finalTextY = textY;
-                context.draw(consumer -> finalTooltipComponent.drawText(textRenderer, vector.x(), finalTextY, context.getMatrices().peek().getPositionMatrix(), (VertexConsumerProvider.Immediate) consumer.getBuffer(RenderLayer.getGui())));
+                context.draw(consumer -> finalTooltipComponent.drawText(textRenderer, vector.x(), finalTextY, context.getMatrices().peek().getPositionMatrix(), (VertexConsumerProvider.Immediate) consumer));
                 textY += tooltipComponent.getHeight(textRenderer) + (index == 0 ? 2 : 0);
             }
 

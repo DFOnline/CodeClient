@@ -95,9 +95,14 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                                 && relY > y
                                 && relY < y + 18
                 ) {
-                    /* FIXME: render
-                    drawSlotHighlight(context, x, y, -10);*/
                     focusedSlot = slot;
+
+                    drawSlotHighlightBack(context);
+                    drawSlots(context);
+                    drawSlotHighlightFront(context);
+
+//                    drawSlotHighlight(context, x, y, -10);
+
                 }
             } else {
                 context.drawGuiTexture(RenderLayer::getGuiTextured, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);

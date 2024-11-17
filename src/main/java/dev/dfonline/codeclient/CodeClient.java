@@ -15,6 +15,7 @@ import dev.dfonline.codeclient.data.value.NumberDataValue;
 import dev.dfonline.codeclient.data.value.StringDataValue;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
+import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
 import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
 import dev.dfonline.codeclient.dev.menu.RecentValues;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
@@ -50,6 +51,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -187,7 +189,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new ChatAutoEdit());
         feat(new CPUDisplay());
         feat(new MessageHiding());
-        //FIXME: feat(new ExpressionHighlighter());
+        feat(new ExpressionHighlighter());
     }
 
     /**
@@ -225,6 +227,12 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+        if (packet instanceof BundleS2CPacket bundle) {
+            bundle.getPackets().forEach(CodeClient::handlePacket);
+            return false;
+        }
+
+
         if (currentAction.onReceivePacket(packet)) return true;
         for (var feature : features().toList()) {
             if (feature.onReceivePacket(packet)) return true;
@@ -271,6 +279,8 @@ public class CodeClient implements ClientModInitializer {
         currentAction.tick();
         features().forEach(Feature::tick);
         KeyBinds.tick();
+
+//        System.out.println(location.name());
 
         if (!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
             isCodeChest = false;
