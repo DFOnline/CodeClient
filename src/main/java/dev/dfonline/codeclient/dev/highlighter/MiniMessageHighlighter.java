@@ -27,6 +27,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 //  /
 public class MiniMessageHighlighter {
     public MiniMessage HIGHLIGHTER = MiniMessage.builder().tags(TagResolver.resolver(
+            new ShownTagResolver()
+    )).build();
+    public MiniMessage PARSER = MiniMessage.builder().tags(TagResolver.resolver(
             new ShownTagResolver(),
             HypercubeMiniMessage.NEWLINE_TAG,
             HypercubeMiniMessage.SPACE_TAG
@@ -44,7 +47,7 @@ public class MiniMessageHighlighter {
         if (resets.length > 1 || input.toLowerCase().endsWith(RESET_TAG)) {
             Component value = Component.empty();
 
-            Component reset = HIGHLIGHTER.deserialize(String.format("<%s>", getTagStyle()) + HIGHLIGHTER.escapeTags(RESET_TAG) + String.format("</%s>", getTagStyle()));
+            Component reset = PARSER.deserialize(String.format("<%s>", getTagStyle()) + HIGHLIGHTER.escapeTags(RESET_TAG) + String.format("</%s>", getTagStyle()));
 
             for (String partial : resets) {
                 value = value.append(highlight(partial))
@@ -53,7 +56,7 @@ public class MiniMessageHighlighter {
             return value;
         }
 
-        Node.Root root = HIGHLIGHTER.deserializeToTree(input);
+        Node.Root root = PARSER.deserializeToTree(input);
         StringBuilder newInput = new StringBuilder(input.length());
 
         handle(root, root.input(), newInput, new AtomicInteger(), new ArrayList<>());
@@ -76,13 +79,14 @@ public class MiniMessageHighlighter {
                 decorations.add(tagName);
             }
 
-            sb.append(tagString);
+            // prevent "space" and "newline" tags from being added extra as they dont get parsed in the chatbox.
+            if (!(tagString.contains("space") || tagString.contains("newline"))) sb.append(tagString);
         } else if (node instanceof ValueNode valueNode) {
             String value = valueNode.value();
 
             index.addAndGet(value.length());
 
-            sb.append(HIGHLIGHTER.escapeTags(value));
+            sb.append(PARSER.escapeTags(value));
         }
 
         for (Node child : node.children()) {
