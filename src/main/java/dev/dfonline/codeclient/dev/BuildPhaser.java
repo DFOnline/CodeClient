@@ -9,6 +9,7 @@ import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.hypercube.item.Location;
 import dev.dfonline.codeclient.location.Build;
 import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -30,6 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
+//FIXME: for some reason a movement packet is causing the player to be kicked upon exiting the clipping mode
 public class BuildPhaser extends Feature {
     private boolean clipping = false;
     private boolean wasFlying = true;
@@ -122,8 +124,8 @@ public class BuildPhaser extends Feature {
     public boolean onReceivePacket(Packet<?> packet) {
         if (!waitForTP) return false;
         if (packet instanceof PlayerPositionLookS2CPacket move) {
-            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.teleportId()));
-            return true;
+//            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.teleportId()));
+            return false;
         }
         if (packet instanceof EntityAnimationS2CPacket) return true;
         if (packet instanceof PlaySoundFromEntityS2CPacket) {
@@ -151,6 +153,17 @@ public class BuildPhaser extends Feature {
             abilities.flying = wasFlying;
             waitForTP = true;
 
+            var size = plot.assumeSize();
+
+            var x = Math.min(Math.max(player.getX(), plot.getX()), plot.getX() + size.size + 1);
+            var y = player.getY();
+            var z = Math.min(Math.max(player.getZ(), plot.getZ()), plot.getZ() + size.size + 1);
+            var pitch = player.getPitch();
+            var yaw = player.getYaw();
+
+            player.networkHandler.sendChatCommand(String.format("ptp %s %s %s %s %s", x, y, z, pitch, yaw));
+
+            /*
             Vec3d pos = plot.getPos().relativize(player.getPos());
             ItemStack location = new Location(pos.x, pos.y, pos.z, player.getPitch(), player.getYaw()).toStack();
 
@@ -167,13 +180,7 @@ public class BuildPhaser extends Feature {
                 net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 
             Utility.sendHandItem(lastItem);
-
-            final int MAX_SPEED = 2;
-
-            var velocity = CodeClient.MC.player.getVelocity();
-            if(velocity.length() > MAX_SPEED) {
-                CodeClient.MC.player.setVelocity(velocity.normalize().multiply(MAX_SPEED));
-            }
+            */
         }
     }
 
