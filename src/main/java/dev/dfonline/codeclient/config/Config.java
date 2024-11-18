@@ -555,7 +555,7 @@ public class Config {
                                 )
                                 .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(0, 100))
                                 .build())
-                        .option(Option.createBuilder(Config.DestroyItemReset.class)
+                        .option(Option.createBuilder(DestroyItemReset.class)
                                 .name(Text.translatable("codeclient.config.destroy_item_reset.name"))
                                 .description(OptionDescription.of(Text.translatable("codeclient.config.destroy_item_reset.description")))
                                 .binding(
@@ -563,7 +563,7 @@ public class Config {
                                         () -> DestroyItemResetMode,
                                         opt -> DestroyItemResetMode = opt
                                 )
-                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.DestroyItemReset.class))
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, DestroyItemReset.class))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.givestrings"))

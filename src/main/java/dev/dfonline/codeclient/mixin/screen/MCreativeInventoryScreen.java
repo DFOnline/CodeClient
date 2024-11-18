@@ -30,7 +30,7 @@ public abstract class MCreativeInventoryScreen {
 
             if (cmd != null) {
                 CodeClient.MC.setScreen(null);
-                CodeClient.MC.getNetworkHandler().sendCommand(cmd);
+                CodeClient.MC.getNetworkHandler().sendChatCommand(cmd);
                 ci.cancel();
             }
 
