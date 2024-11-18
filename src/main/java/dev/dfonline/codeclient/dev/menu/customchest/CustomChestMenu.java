@@ -22,6 +22,7 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -29,6 +30,10 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CustomChestMenu extends HandledScreen<CustomChestHandler> implements ScreenHandlerProvider<CustomChestHandler> {
+
+    // copy vanilla
+    private final Identifier SLOT_HIGHLIGHT_BACK_TEXTURE = Identifier.ofVanilla("container/slot_highlight_back");
+    private final Identifier SLOT_HIGHLIGHT_FRONT_TEXTURE = Identifier.ofVanilla("container/slot_highlight_front");
 
     private final CustomChestNumbers Size;
     private final HashMap<Integer, Widget> widgets = new HashMap<>();
@@ -86,7 +91,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
 
             if (i + scroll < 27) {
-                drawSlot(context, new Slot(slot.inventory, slot.id, x, y));
+
                 int relX = mouseX - this.x;
                 int relY = mouseY - this.y;
                 if (
@@ -97,15 +102,16 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 ) {
                     focusedSlot = slot;
 
-                    drawSlotHighlightBack(context);
-                    drawSlots(context);
-                    drawSlotHighlightFront(context);
+                    context.drawGuiTexture(RenderLayer::getGuiTextured, SLOT_HIGHLIGHT_BACK_TEXTURE, x-4, y-4, 24, 24); // draw back
+                    drawSlot(context, new Slot(slot.inventory, slot.id, x, y));
+                    context.drawGuiTexture(RenderLayer::getGuiTexturedOverlay, SLOT_HIGHLIGHT_FRONT_TEXTURE, x-4, y-4, 24, 24); // draw front
 
-//                    drawSlotHighlight(context, x, y, -10);
-
+                    //drawSlotHighlight(context, x, y, -10);
+                } else {
+                    drawSlot(context, new Slot(slot.inventory, slot.id, x, y));
                 }
             } else {
-                context.drawGuiTexture(RenderLayer::getGuiTextured, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+                context.drawTexture(RenderLayer::getGuiTextured, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
             }
         }
 
@@ -365,11 +371,11 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         RenderSystem.enableBlend();
         int centerX = this.width / 2 - (Size.MENU_WIDTH / 2);
         int centerY = this.height / 2 - (Size.MENU_HEIGHT / 2);
-        context.drawGuiTexture(RenderLayer::getGuiTextured, Size.TEXTURE, centerX, centerY, 0, 0, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+        context.drawTexture(RenderLayer::getGuiTextured, Size.TEXTURE, centerX, centerY, 0, 0, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
 
         boolean disabled = false;
         float scrollProgress = (float) scroll / (27 - Size.WIDGETS);
-        context.drawGuiTexture(RenderLayer::getGuiTextured, Size.TEXTURE,
+        context.drawTexture(RenderLayer::getGuiTextured, Size.TEXTURE,
                 centerX + Size.SCROLL_POS_X,
                 (int) (centerY + Size.SCROLL_POS_Y + scrollProgress * (Size.SCROLL_ROOM - Size.SCROLL_HEIGHT)),
                 (disabled ? Size.MENU_WIDTH + Size.SCROLL_WIDTH : Size.MENU_WIDTH),
@@ -379,6 +385,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 Size.TEXTURE_WIDTH,
                 Size.TEXTURE_HEIGHT
         );
+
         context.getMatrices().pop();
     }
 
