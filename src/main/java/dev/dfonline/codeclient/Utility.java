@@ -174,7 +174,6 @@ public class Utility {
      * @return Usable in lore and as a name in nbt.
      */
     public static NbtString textToNBT(Text text) {
-        assert CodeClient.MC.world != null; // ??? do we need this
         JsonElement json = TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, text).getOrThrow();
         if (json.isJsonObject()) {
             JsonObject obj = (JsonObject) json;

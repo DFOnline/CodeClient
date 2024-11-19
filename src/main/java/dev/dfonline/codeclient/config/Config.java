@@ -71,7 +71,7 @@ public class Config {
     public int RecentValues = 0;
     public Boolean ValueDetails = true;
     public Boolean PhaseToggle = false;
-    public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
+    public DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
     public boolean ShowVariableScopeBelowName = true;
     public boolean DevNodes = false;
     public boolean GiveUuidNameStrings = true;
@@ -156,7 +156,7 @@ public class Config {
             object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
-            object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
+            object.addProperty("DestroyItemResetMode", DestroyItemResetMode.name());
             object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
             object.addProperty("DevNodes", DevNodes);
             object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
