@@ -131,5 +131,4 @@ public class ItemSelector extends ClickableWidget {
     private record Search(ItemStack item, int x, int y) {
     }
 
-    ;
 }

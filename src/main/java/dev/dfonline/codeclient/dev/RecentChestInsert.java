@@ -36,7 +36,9 @@ public class RecentChestInsert extends Feature {
             VoxelShape shape = CodeClient.MC.world.getBlockState(lastChest).getOutlineShape(CodeClient.MC.world, lastChest).offset(lastChest.getX(), lastChest.getY(), lastChest.getZ());
             VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
             int color = Config.getConfig().ChestHighlightColor;
-            color = (int) (alpha * 255) << 24 | (color & 0x00FFFFFF);
+            float a = Math.min(alpha, 1f);
+
+            color = (int) (a * 255) << 24 | (color & 0x00FFFFFF);
             VertexRendering.drawOutline(matrices, vertexConsumer, shape, -cameraX, -cameraY, -cameraZ, color);
         }
     }

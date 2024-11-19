@@ -107,7 +107,7 @@ public class ScanPlot extends Action {
 
 
     private class PickUpBlock extends Action {
-        private BlockPos pos;
+        private final BlockPos pos;
         private Integer ticks = 0;
 
         public PickUpBlock(BlockPos pos, Callback callback) {

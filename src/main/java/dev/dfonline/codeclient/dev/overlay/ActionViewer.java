@@ -18,7 +18,6 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.tooltip.TooltipType;
@@ -160,7 +159,7 @@ public class ActionViewer extends Feature {
                 tooltipComponent = components.get(index);
                 TooltipComponent finalTooltipComponent = tooltipComponent;
                 int finalTextY = textY;
-                context.draw(consumer -> finalTooltipComponent.drawText(textRenderer, vector.x(), finalTextY, context.getMatrices().peek().getPositionMatrix(), (VertexConsumerProvider.Immediate) consumer.getBuffer(RenderLayer.getGui())));
+                context.draw(consumer -> finalTooltipComponent.drawText(textRenderer, vector.x(), finalTextY, context.getMatrices().peek().getPositionMatrix(), (VertexConsumerProvider.Immediate) consumer));
                 textY += tooltipComponent.getHeight(textRenderer) + (index == 0 ? 2 : 0);
             }
 

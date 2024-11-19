@@ -1,5 +1,5 @@
 package dev.dfonline.codeclient.hypercube;
-/* FIXME
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
@@ -39,4 +39,3 @@ public class HypercubeMiniMessage {
         }
     }
 }
-*/

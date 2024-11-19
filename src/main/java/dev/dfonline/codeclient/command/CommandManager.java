@@ -27,7 +27,7 @@ public class CommandManager {
             new CommandName(),
             new CommandNode(),
             new CommandPing(),
-            //FIXME: new CommandPreview(),
+            new CommandPreview(),
             new CommandSave(),
             new CommandScanFor(),
             new CommandScanPlot(),
@@ -36,7 +36,8 @@ public class CommandManager {
             new CommandTemplatePlacer(),
             new CommandUuid(),
             new CommandWidthDump(),
-            new CommandWorldPlot()
+            new CommandWorldPlot(),
+            new CommandClearQueue()
     );
 
     public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {

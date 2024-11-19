@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.template.Template;
+import net.kyori.adventure.platform.modcommon.impl.NonWrappingComponentSerializer;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -17,6 +18,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
+import net.kyori.adventure.text.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,8 +27,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
-
-//FIXME: import static net.kyori.adventure.platform.fabric.FabricAudiences.nonWrappingSerializer;
 
 public class Utility {
     /**
@@ -174,7 +174,6 @@ public class Utility {
      * @return Usable in lore and as a name in nbt.
      */
     public static NbtString textToNBT(Text text) {
-        assert CodeClient.MC.world != null;
         JsonElement json = TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, text).getOrThrow();
         if (json.isJsonObject()) {
             JsonObject obj = (JsonObject) json;
@@ -299,25 +298,24 @@ public class Utility {
         return builder.toString();
     }
 
-    /* FIXME: */
-//    /**
-//     * Turns a {@link Component} to an {@link OrderedText}
-//     *
-//     * @param component The component to convert
-//     * @return The converted component
-//     */
-//    public static OrderedText componentToOrderedText(Component component) {
-//        return nonWrappingSerializer().serialize(component).asOrderedText();
-//    }
-//
-//    /**
-//     * Turns a {@link Component} to a {@link Text}
-//     *
-//     * @param component The component to convert
-//     * @return The converted component
-//     */
-//    public static Text componentToText(Component component) {
-//        return nonWrappingSerializer().serialize(component);
-//    }
+    /**
+     * Turns a {@link net.kyori.adventure.text.Component} to an {@link OrderedText}
+     *
+     * @param component The component to convert
+     * @return The converted component
+     */
+    public static OrderedText componentToOrderedText(Component component) {
+        return NonWrappingComponentSerializer.INSTANCE.serialize(component).asOrderedText();
+    }
+
+    /**
+     * Turns a {@link net.kyori.adventure.text.Component} to a {@link Text}
+     *
+     * @param component The component to convert
+     * @return The converted component
+     */
+    public static Text componentToText(Component component) {
+        return NonWrappingComponentSerializer.INSTANCE.serialize(component);
+    }
 
 }
