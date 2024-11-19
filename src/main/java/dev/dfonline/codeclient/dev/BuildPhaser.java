@@ -1,14 +1,12 @@
 package dev.dfonline.codeclient.dev;
 
-import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
-import dev.dfonline.codeclient.location.Build;
-import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Creator;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.network.packet.Packet;
@@ -17,13 +15,9 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 
-//FIXME: for some reason a movement packet is causing the player to be kicked upon exiting the clipping mode
 public class BuildPhaser extends Feature {
     private boolean clipping = false;
     private boolean wasFlying = true;
@@ -53,7 +47,7 @@ public class BuildPhaser extends Feature {
     }
 
     public void tick() {
-        if (CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Creator plot) {
             if (plot.getX() == null) {
                 if (KeyBinds.clipBind.wasPressed())
                     Utility.sendMessage(Text.translatable("codeclient.phaser.plot_origin"));
@@ -90,19 +84,19 @@ public class BuildPhaser extends Feature {
             disableClipping();
         }
 
-        if (CodeClient.location instanceof Build) {
-            if (KeyBinds.clipBind.isPressed() && !dontSpamBuildWarn) {
-                dontSpamBuildWarn = true;
-                Utility.sendMessage(Text.translatable("codeclient.phaser.dev_mode1",
-                                Text.translatable("codeclient.phaser.dev_mode2")
-                                        .setStyle(Text.empty().getStyle()
-                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.link.open")))
-                                        ).formatted(Formatting.AQUA, Formatting.UNDERLINE)),
-                        ChatType.FAIL);
-            }
-            if (dontSpamBuildWarn && !KeyBinds.clipBind.isPressed()) dontSpamBuildWarn = false;
-        }
+//        if (CodeClient.location instanceof Build) {
+//            if (KeyBinds.clipBind.isPressed() && !dontSpamBuildWarn) {
+//                dontSpamBuildWarn = true;
+//                Utility.sendMessage(Text.translatable("codeclient.phaser.dev_mode1",
+//                                Text.translatable("codeclient.phaser.dev_mode2")
+//                                        .setStyle(Text.empty().getStyle()
+//                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
+//                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.link.open")))
+//                                        ).formatted(Formatting.AQUA, Formatting.UNDERLINE)),
+//                        ChatType.FAIL);
+//            }
+//            if (dontSpamBuildWarn && !KeyBinds.clipBind.isPressed()) dontSpamBuildWarn = false;
+//        }
     }
 
     public boolean onSendPacket(Packet<?> packet) {
@@ -138,7 +132,7 @@ public class BuildPhaser extends Feature {
 
     private void finishClipping() {
         disableClipping();
-        if (CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Creator plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
             PlayerAbilities abilities = player.getAbilities();
             abilities.allowFlying = true;
