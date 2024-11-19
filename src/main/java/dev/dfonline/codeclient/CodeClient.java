@@ -56,7 +56,6 @@ import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -146,15 +145,21 @@ public class CodeClient implements ClientModInitializer {
                     DataValue element = publicBukkit.getHypercubeValue(key);
 
                     // Any type = yellow, number = red, string = aqua.
-                    MutableText value = Text.literal(publicBukkit.getHypercubeStringValue(key)).formatted(Formatting.GREEN);
-                    if (element instanceof StringDataValue) value.formatted(Formatting.AQUA);
-                    if (element instanceof NumberDataValue) value.formatted(Formatting.RED);
+                    Formatting formatting = Formatting.GREEN;
+                    String stringElement = element.getValue() == null ? "?" : element.getValue().toString();
+                    if (element instanceof StringDataValue) {
+                        formatting = Formatting.AQUA;
+                    }
+                    if (element instanceof NumberDataValue numberDataValue) {
+                        formatting = Formatting.RED;
+                        stringElement = String.valueOf(numberDataValue.getValue());
+                    }
 
                     lines.add(
                             Text.literal(key)
                                     .withColor(0xAAFF55)
                                     .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
-                                    .append(value)
+                                    .append(Text.literal(stringElement).formatted(formatting))
                     );
                 }
             }
