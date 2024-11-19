@@ -13,9 +13,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Sound extends VarItem {
     private String sound;
@@ -97,6 +95,15 @@ public class Sound extends VarItem {
 
     public String getSound() {
         return sound;
+    }
+
+    public Optional<dev.dfonline.codeclient.hypercube.actiondump.Sound> getSoundId() {
+        try {
+            return Arrays.stream(ActionDump.getActionDump().sounds).filter(sound -> Objects.equals(sound.icon.getCleanName(), this.sound)).findFirst();
+        } catch (Exception ignored) {
+
+        }
+        return Optional.empty();
     }
 
     public void setSound(String sound) {

@@ -5,6 +5,7 @@
   "key.codeclient.preview_item_tags": "Preview Item Tags",
   "key.codeclient.playDev": "Toggle Mode Play <-> Dev",
   "key.codeclient.playBuild": "Toggle Mode Play <-> Build",
+  "key.codeclient.preview_sounds": "Preview Sounds In Code Chest",
 
   "category.codeclient.navigation": "Code Navigation",
   "key.codeclient.tp.left": "Teleport Left",

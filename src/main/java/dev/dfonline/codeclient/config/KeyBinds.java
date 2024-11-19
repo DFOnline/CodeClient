@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.config;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.menu.devinventory.DevInventoryScreen;
 import dev.dfonline.codeclient.location.Dev;
@@ -39,6 +40,11 @@ public class KeyBinds {
     public static KeyBinding previewItemTags;
 
     /**
+     * Plays all the sounds in a code chest.
+     */
+    public static KeyBinding previewSounds;
+
+    /**
      * Toggles between Play and Dev modes.
      */
     public static KeyBinding playDev;
@@ -58,6 +64,7 @@ public class KeyBinds {
         teleportBackward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.backward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
 
         previewItemTags = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_item_tags", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
+        previewSounds = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_sounds", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
         playDev = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.playDev", InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
         playBuild = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.playBuild", InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
     }
@@ -98,10 +105,10 @@ public class KeyBinds {
 
         if(CodeClient.MC.getNetworkHandler() == null) return;
         if (playDev.wasPressed())
-            CodeClient.MC.getNetworkHandler().sendCommand(CodeClient.location instanceof Play ? "dev" : "play");
+            CommandSender.queue(CodeClient.location instanceof Play ? "dev" : "play");
 
         if (playBuild.wasPressed())
-            CodeClient.MC.getNetworkHandler().sendCommand(CodeClient.location instanceof Play ? "build" : "play");
+            CommandSender.queue(CodeClient.location instanceof Play ? "build" : "play");
     }
 
     private static void checkTp(KeyBinding keyBinding, Vec3d offset) {

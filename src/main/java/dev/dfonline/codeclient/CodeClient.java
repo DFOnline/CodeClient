@@ -198,6 +198,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new CPUDisplay());
         feat(new MessageHiding());
         feat(new ExpressionHighlighter());
+        feat(new PreviewSoundChest());
     }
 
     /**

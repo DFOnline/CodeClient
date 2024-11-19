@@ -32,12 +32,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class ChestPeeker extends Feature {
-    private BlockPos currentBlock = null;
-    private ArrayList<ItemStack> items = null;
+
+    private static BlockPos currentBlock = null;
+    private static ArrayList<ItemStack> items = null;
     private boolean shouldClearChest = false;
     private int timeOut = 0;
+    private static Consumer<List<ItemStack>> currentCallback = null;
+
+    public static void pick(Consumer<List<ItemStack>> callback) {
+        currentCallback = callback;
+        currentBlock = null;
+        items = null;
+    }
 
     public void tick() {
         if (timeOut > 0) {
@@ -46,7 +55,7 @@ public class ChestPeeker extends Feature {
         }
         if (CodeClient.MC.currentScreen != null) return;
         if (CodeClient.MC.world == null) return;
-        if (!Config.getConfig().ChestPeeker) return;
+        if (!Config.getConfig().ChestPeeker && currentCallback == null) return;
         if (CodeClient.location instanceof Dev dev) {
             if (CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
                 BlockPos pos = block.getBlockPos();
@@ -85,7 +94,7 @@ public class ChestPeeker extends Feature {
     public boolean onReceivePacket(Packet<?> packet) {
         if (CodeClient.MC.currentScreen != null) return false;
         if (CodeClient.MC.getNetworkHandler() == null) return false;
-        if (!Config.getConfig().ChestPeeker) return false;
+        if (!Config.getConfig().ChestPeeker && currentCallback == null) return false;
         if (CodeClient.location instanceof Dev) {
             if (packet instanceof BlockEventS2CPacket block) {
                 if (!Objects.equals(currentBlock, block.getPos())) return false;
@@ -104,6 +113,12 @@ public class ChestPeeker extends Feature {
                 });
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
                 shouldClearChest = false;
+
+                // Invoke the callback if it exists
+                if (currentCallback != null) {
+                    currentCallback.accept(items);
+                    currentCallback = null;
+                }
                 return true;
             }
         }
@@ -210,6 +225,7 @@ public class ChestPeeker extends Feature {
         shouldClearChest = true;
         currentBlock = null;
         timeOut = 10;
+        currentCallback = null;
     }
 
     enum Type {
