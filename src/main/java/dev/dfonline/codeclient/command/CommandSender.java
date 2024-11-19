@@ -35,7 +35,7 @@ public class CommandSender {
     */
 
     public static void queue(String command) {
-        rateLimiter.increment();
+//        rateLimiter.increment();
         commandQueue.add(command);
     }
 
