@@ -18,7 +18,7 @@ jobs:
               uses: actions/setup-java@v3
               with:
                 java-version: 21
-                  distribution: "temurin"
+                distribution: "temurin"
             - name: Build with Gradle
               run: ./gradlew build '-Pversion=${{ github.run_number }}'
             - name: Upload Artifact
