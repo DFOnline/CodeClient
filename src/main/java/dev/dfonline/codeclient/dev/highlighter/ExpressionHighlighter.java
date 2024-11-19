@@ -86,6 +86,8 @@ public class ExpressionHighlighter extends Feature {
                 var matcher = command.regex.matcher(input);
                 if (!matcher.find(1)) {
                     continue;
+                } else if (matcher.start() > 1) {
+                    continue;
                 }
                 cachedHighlight = formatCommand(input, command, matcher.end(), range);
                 return cachedHighlight;
