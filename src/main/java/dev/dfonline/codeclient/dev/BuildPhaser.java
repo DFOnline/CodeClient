@@ -124,7 +124,6 @@ public class BuildPhaser extends Feature {
         if (!waitForTP) return false;
         if (packet instanceof PlayerPositionLookS2CPacket move) {
 //            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.teleportId()));
-            CodeClient.LOGGER.info(move.change().deltaMovement().toString());
 
             updateVelocity = true;
             return true;
