@@ -98,6 +98,8 @@ public class RecentValues extends Feature {
     }
 
     public void remember(ItemStack item) {
+        if (CodeClient.MC.world == null) return;
+
         DFItem dfItem = DFItem.of(item);
         if (!(CodeClient.location instanceof Dev) || dfItem.getHypercubeStringValue("varitem").isEmpty()) return;
         for (ItemStack it : pinned) {
@@ -105,7 +107,11 @@ public class RecentValues extends Feature {
         }
 
         ItemStack lambdaItem = item;
-        recent.removeIf(it -> lambdaItem.getItem() == it.getItem() && lambdaItem.equals(it));
+        if (item.getItem() == null) {
+            recent.remove(item);
+            return;
+        }
+        recent.removeIf(it -> lambdaItem.getItem() == it.getItem() && lambdaItem.toNbt(CodeClient.MC.world.getRegistryManager()).equals(it.toNbt(CodeClient.MC.world.getRegistryManager())));
         item = item.copyWithCount(1);
         recent.add(0, item);
 
@@ -128,10 +134,10 @@ public class RecentValues extends Feature {
         public void render(DrawContext context, int mouseX, int mouseY, int screenX, int screenY, float delta) {
             hoveredItem = null;
             if(recent.isEmpty() && pinned.isEmpty()) return;
-            int xEnd = 16*15;
+            int xEnd = 16 * 20;
 
             context.drawGuiTexture(RenderLayer::getGuiTextured, Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
-                    Math.min(Math.max(pinned.size(), recent.size()),16) * 15 + 10,
+                    Math.min(Math.max(pinned.size(), recent.size()), 16) * 20 + 10,
                     (((int) Math.ceil((double) pinned.size() / 16)) + ((int) Math.ceil((double) recent.size() / 16))) * 16 + 10
             );
 
@@ -139,7 +145,7 @@ public class RecentValues extends Feature {
             hoveredOrigin = null;
             int y = screenY;
             for (List<ItemStack> group : List.of(pinned,recent)) {
-                int x = 10;
+                int x = 13;
                 for (ItemStack item : group) {
                     context.drawItem(item, x - screenX, y - screenY);
                     context.drawStackOverlay(CodeClient.MC.textRenderer, item, x - screenX, y - screenY);
@@ -148,13 +154,13 @@ public class RecentValues extends Feature {
                         hoveredItem = item;
                         hoveredOrigin = group;
                     }
-                    x += 15;
+                    x += 20;
                     if (x > xEnd) {
-                        x = 10;
+                        x = 13;
                         y += 15;
                     }
                 }
-                if (x != 10) y += 15;
+                if (x != 13) y += 15;
             }
         }
 

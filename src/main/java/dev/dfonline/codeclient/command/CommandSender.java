@@ -14,28 +14,7 @@ public class CommandSender {
     private static final RateLimiter rateLimiter = new RateLimiter(20, 140);
     private static final ArrayDeque<String> commandQueue = new ArrayDeque<>();
 
-    /*
-    public static void queue(String command, int delay, Runnable callback) {
-        rateLimiter.increment();
-        for (int i = 0; i < delay; i++) {
-        }
-        commandQueue.add(command);
-        if (callback != null) {
-            callback.run();
-        }
-    }
-
-    public static void queue(String command, int delay) {
-        queue(command, delay, null);
-    }
-
     public static void queue(String command) {
-        queue(command, 0, null);
-    }
-    */
-
-    public static void queue(String command) {
-//        rateLimiter.increment();
         commandQueue.add(command);
     }
 

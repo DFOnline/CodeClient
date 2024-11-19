@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -30,7 +31,7 @@ public abstract class MCreativeInventoryScreen {
 
             if (cmd != null) {
                 CodeClient.MC.setScreen(null);
-                CodeClient.MC.getNetworkHandler().sendChatCommand(cmd);
+                CommandSender.queue(cmd);
                 ci.cancel();
             }
 
