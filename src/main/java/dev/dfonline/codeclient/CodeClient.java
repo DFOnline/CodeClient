@@ -5,6 +5,7 @@ import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
 import dev.dfonline.codeclient.command.CommandManager;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.data.DFItem;
@@ -116,6 +117,8 @@ public class CodeClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.of(MOD_ID, "close"), client -> API.stop());
+
+        ClientTickEvents.END_CLIENT_TICK.register(client -> CommandSender.tick());
 
         if (Config.getConfig().CodeClientAPI) {
             try {

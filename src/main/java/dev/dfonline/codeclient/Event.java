@@ -1,9 +1,11 @@
 package dev.dfonline.codeclient;
 
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.*;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.math.Vec3d;
@@ -52,9 +54,13 @@ public class Event {
 
     public static <T extends PacketListener> void onSendPacket(Packet<T> packet) {
         if (packet instanceof CommandExecutionC2SPacket command) {
+            CommandSender.registerCommandSend();
             if (List.of("play", "build", "code", "dev").contains(command.command().replaceFirst("mode ", ""))) {
                 switchingMode = true;
             }
+        }
+        if (packet instanceof ChatMessageC2SPacket) {
+            CommandSender.registerCommandSend();
         }
     }
 

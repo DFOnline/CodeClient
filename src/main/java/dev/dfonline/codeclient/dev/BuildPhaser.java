@@ -4,6 +4,7 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.location.Build;
@@ -152,7 +153,7 @@ public class BuildPhaser extends Feature {
             var pitch = player.getPitch();
             var yaw = player.getYaw();
 
-            player.networkHandler.sendChatCommand(String.format("ptp %s %s %s %s %s", x, y, z, pitch, yaw));
+            CommandSender.queue(String.format("ptp %s %s %s %s %s", x, y, z, pitch, yaw));
 
             /*
             Vec3d pos = plot.getPos().relativize(player.getPos());
