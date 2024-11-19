@@ -319,5 +319,7 @@
   "codeclient.command.itemdata.copy.unformatted": "Unformatted",
   "codeclient.command.itemdata.copy.dfgive": "/dfgive",
   "codeclient.command.calc.success": "%s = %s",
-  "codeclient.command.calc.failure": "%s failed to parse"
+  "codeclient.command.calc.failure": "%s failed to parse",
+  "codeclient.action.clearqueue.success": "Command queue cleared.",
+  "codeclient.action.clearqueue.empty": "Command queue was empty!"
 }

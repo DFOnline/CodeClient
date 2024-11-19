@@ -39,6 +39,14 @@ public class CommandSender {
         commandQueue.add(command);
     }
 
+    public static void clearQueue() {
+        commandQueue.clear();
+    }
+
+    public static int queueSize() {
+        return commandQueue.size();
+    }
+
 
     public static void tick() {
         rateLimiter.tick();
