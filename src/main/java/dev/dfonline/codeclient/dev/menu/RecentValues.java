@@ -111,7 +111,7 @@ public class RecentValues extends Feature {
             recent.remove(item);
             return;
         }
-        recent.removeIf(it -> lambdaItem.getItem() == it.getItem() && lambdaItem.toNbt(CodeClient.MC.world.getRegistryManager()).equals(it.toNbt(CodeClient.MC.world.getRegistryManager())));
+        recent.removeIf(it -> it != null && lambdaItem.getItem() == it.getItem() && lambdaItem.toNbt(CodeClient.MC.world.getRegistryManager()).equals(it.toNbt(CodeClient.MC.world.getRegistryManager())));
         item = item.copyWithCount(1);
         recent.add(0, item);
 
@@ -147,6 +147,7 @@ public class RecentValues extends Feature {
             for (List<ItemStack> group : List.of(pinned,recent)) {
                 int x = 13;
                 for (ItemStack item : group) {
+                    if (item == null) continue;
                     context.drawItem(item, x - screenX, y - screenY);
                     context.drawStackOverlay(CodeClient.MC.textRenderer, item, x - screenX, y - screenY);
                     if (mouseX > x && mouseY > y && mouseX < x + 15 && mouseY < y + 15) {
