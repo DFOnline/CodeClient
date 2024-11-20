@@ -42,13 +42,11 @@ public class ScopeSwitcher extends GenericSwitcher {
 
     @Override
     List<Option> getOptions() {
-        ArrayList list = new ArrayList<>();
-        list.add(new Option(Text.literal(Scope.unsaved.longName).setStyle(Style.EMPTY.withColor(Scope.unsaved.color)), Items.ENDER_CHEST.getDefaultStack(), () -> run("unsaved")));
-        list.add(new Option(Text.literal(Scope.saved.longName).setStyle(Style.EMPTY.withColor(Scope.saved.color)), Items.CHEST.getDefaultStack(), () -> run("saved")));
-        list.add(new Option(Text.literal(Scope.local.longName).setStyle(Style.EMPTY.withColor(Scope.local.color)), Items.EMERALD_BLOCK.getDefaultStack(), () -> run("local")));
-        list.add(new Option(Text.literal(Scope.line.longName).setStyle(Style.EMPTY.withColor(Scope.line.color)), Items.LAPIS_BLOCK.getDefaultStack(), () -> run("line")));
-//        list.remove(3);
-        return list;
+        return List.of(new Option(Text.literal(Scope.unsaved.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.unsaved.color)), Items.ENDER_CHEST.getDefaultStack(), () -> run("unsaved")),
+                new Option(Text.literal(Scope.saved.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.saved.color)), Items.CHEST.getDefaultStack(), () -> run("saved")),
+                new Option(Text.literal(Scope.local.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.local.color)), Items.EMERALD_BLOCK.getDefaultStack(), () -> run("local")),
+                new Option(Text.literal(Scope.line.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.line.color)), Items.LAPIS_BLOCK.getDefaultStack(), () -> run("line"))
+        );
     }
 
     private void run(String name) {
@@ -64,6 +62,9 @@ public class ScopeSwitcher extends GenericSwitcher {
         data.addProperty("scope", name);
         pbv.setHypercubeStringValue("varitem", var.toString());
         item.getItemData().setPublicBukkitValues(pbv);
+        ArrayList<Text> lore = new ArrayList<>(item.getLore());
+        lore.set(0, getSelected().text());
+        item.setLore(lore);
         Utility.sendHandItem(item.getItemStack());
         CodeClient.MC.gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
     }
