@@ -77,7 +77,7 @@ public abstract class GenericSwitcher extends Screen {
         RenderSystem.enableBlend();
         int centerX = this.width / 2 - 62;
         int centerY = this.height / 2 - 31 - 27;
-        context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, centerX, centerY, 0, 0, 125, 75, 128, 128);
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, centerX, centerY, 0, 0, 125, 75, 128, 128);
         context.getMatrices().pop();
         super.render(context, mouseX, mouseY, delta);
 
