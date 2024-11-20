@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import net.minecraft.item.Item;
@@ -76,13 +77,14 @@ public class GameValue extends VarItem {
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
+        DFItem dfItem = DFItem.of(stack);
         try {
             ActionDump db = ActionDump.getActionDump();
             var value = Arrays.stream(db.gameValues).filter(gv -> gv.icon.getCleanName().equals(type)).findFirst();
             if (value.isEmpty()) throw new Exception("");
-            stack.setCustomName(Text.literal(value.get().icon.name));
+            dfItem.setName(Text.literal(value.get().icon.name).setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
         } catch (Exception e) {
-            stack.setCustomName(Text.literal(type).setStyle(Style.EMPTY));
+            dfItem.setName(Text.literal(type).setStyle(Style.EMPTY));
         }
         Utility.addLore(stack, Text.literal("Target: ").formatted(Formatting.GRAY).append(Text.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color))));
         return stack;

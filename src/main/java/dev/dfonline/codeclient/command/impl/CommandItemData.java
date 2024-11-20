@@ -10,7 +10,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.ClickEvent;
@@ -33,7 +33,9 @@ public class CommandItemData extends Command {
             ClientPlayerEntity player = CodeClient.MC.player;
             if (player == null) return -1;
             ItemStack item = player.getInventory().getMainHandStack();
-            NbtCompound nbt = item.getNbt();
+            if (CodeClient.MC.world == null) return -1;
+            NbtElement nbt = item.toNbt(CodeClient.MC.world.getRegistryManager());
+
             if (nbt == null) {
                 Utility.sendMessage(Text.translatable("codeclient.command.itemdata.no_nbt"), ChatType.FAIL);
                 return 0;
@@ -44,7 +46,7 @@ public class CommandItemData extends Command {
                             .append(Text.literal(" ").setStyle(Style.EMPTY.withStrikethrough(false).withColor(Formatting.AQUA))
                                     .append(Text.translatable("codeclient.command.itemdata.header", Text.empty().formatted(Formatting.WHITE).append(item.getName())))
                                     .append(Text.literal(" ")))
-                            .append(" ".repeat(15))
+                            .append(" ".repeat(15)), false
             );
             player.sendMessage(Text.literal(nbt.toString()), false);
 

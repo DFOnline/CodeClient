@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -26,11 +27,11 @@ public abstract class MCreativeInventoryScreen {
                 && actionType == SlotActionType.QUICK_MOVE
                 && slot == this.deleteItemSlot) {
 
-            String cmd = Config.DestroyItemResetMode.command;
+            String cmd = Config.getConfig().DestroyItemResetMode.command;
 
             if (cmd != null) {
                 CodeClient.MC.setScreen(null);
-                CodeClient.MC.getNetworkHandler().sendCommand(cmd);
+                CommandSender.queue(cmd);
                 ci.cancel();
             }
 

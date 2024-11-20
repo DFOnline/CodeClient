@@ -2,8 +2,8 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
-import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -89,7 +89,8 @@ public class Potion extends VarItem {
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
-        stack.setCustomName(Text.literal("Potion Effect").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.POTION.color)));
+        DFItem dfItem = DFItem.of(stack);
+        dfItem.setName(Text.literal("Potion Effect").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
         Text name;
         try {
             ActionDump db = ActionDump.getActionDump();
@@ -99,12 +100,12 @@ public class Potion extends VarItem {
         } catch (Exception e) {
             name = Text.literal(potion).setStyle(Style.EMPTY);
         }
-        Utility.addLore(stack,
+        Utility.addLore(dfItem.getItemStack(),
                 name,
                 Text.empty(),
                 Text.empty().append(Text.literal("Amplifier: ").formatted(Formatting.GRAY)).append(Text.literal(String.valueOf(amplifier + 1))),
                 Text.empty().append(Text.literal("Duration: ").formatted(Formatting.GRAY)).append(Text.literal(duration())));
-        return stack;
+        return dfItem.getItemStack();
     }
 
     public String duration() {

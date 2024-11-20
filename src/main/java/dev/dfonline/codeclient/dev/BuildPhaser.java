@@ -1,34 +1,23 @@
 package dev.dfonline.codeclient.dev;
 
-import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
-import dev.dfonline.codeclient.hypercube.item.Location;
-import dev.dfonline.codeclient.location.Build;
-import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
+import dev.dfonline.codeclient.location.Creator;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.listener.PacketListener;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 public class BuildPhaser extends Feature {
@@ -37,8 +26,10 @@ public class BuildPhaser extends Feature {
     private Vec3d lastPos = new Vec3d(0, 0, 0);
     private boolean allowPacket = false;
     private boolean waitForTP = false;
+    private boolean updateVelocity = false;
     private boolean dontSpamBuildWarn = false;
     private boolean heldKeyCheck = false;
+    private Vec3d velocity = null;
 
     @Override
     public void reset() {
@@ -49,6 +40,7 @@ public class BuildPhaser extends Feature {
         waitForTP = false;
         dontSpamBuildWarn = false;
         heldKeyCheck = false;
+        velocity = null;
     }
 
     public boolean isClipping() {
@@ -60,7 +52,7 @@ public class BuildPhaser extends Feature {
     }
 
     public void tick() {
-        if (CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Creator plot) {
             if (plot.getX() == null) {
                 if (KeyBinds.clipBind.wasPressed())
                     Utility.sendMessage(Text.translatable("codeclient.phaser.plot_origin"));
@@ -90,31 +82,39 @@ public class BuildPhaser extends Feature {
                         Math.min(Math.max(player.getZ(), plot.getZ()), plot.getZ() + plot.assumeSize().size + 1)
                 );
                 allowPacket = true;
-                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false));
+                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false, true));
                 CodeClient.MC.player.getAbilities().flying = true;
             }
         } else if (clipping || waitForTP) {
             disableClipping();
         }
 
-        if (CodeClient.location instanceof Build) {
-            if (KeyBinds.clipBind.isPressed() && !dontSpamBuildWarn) {
-                dontSpamBuildWarn = true;
-                Utility.sendMessage(Text.translatable("codeclient.phaser.dev_mode1",
-                                Text.translatable("codeclient.phaser.dev_mode2")
-                                        .setStyle(Text.empty().getStyle()
-                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.link.open")))
-                                        ).formatted(Formatting.AQUA, Formatting.UNDERLINE)),
-                        ChatType.FAIL);
-            }
-            if (dontSpamBuildWarn && !KeyBinds.clipBind.isPressed()) dontSpamBuildWarn = false;
-        }
+//        if (CodeClient.location instanceof Build) {
+//            if (KeyBinds.clipBind.isPressed() && !dontSpamBuildWarn) {
+//                dontSpamBuildWarn = true;
+//                Utility.sendMessage(Text.translatable("codeclient.phaser.dev_mode1",
+//                                Text.translatable("codeclient.phaser.dev_mode2")
+//                                        .setStyle(Text.empty().getStyle()
+//                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
+//                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.link.open")))
+//                                        ).formatted(Formatting.AQUA, Formatting.UNDERLINE)),
+//                        ChatType.FAIL);
+//            }
+//            if (dontSpamBuildWarn && !KeyBinds.clipBind.isPressed()) dontSpamBuildWarn = false;
+//        }
     }
 
     public boolean onSendPacket(Packet<?> packet) {
         if (allowPacket) {
             allowPacket = false;
+            return false;
+        }
+        if (packet instanceof PlayerMoveC2SPacket.PositionAndOnGround && updateVelocity) {
+            var player = CodeClient.MC.player;
+            if (player != null && velocity != null) {
+                player.setVelocity(velocity);
+            }
+            updateVelocity = false;
             return false;
         }
         return clipping && (packet instanceof PlayerMoveC2SPacket || packet instanceof ClientCommandC2SPacket);
@@ -123,7 +123,9 @@ public class BuildPhaser extends Feature {
     public boolean onReceivePacket(Packet<?> packet) {
         if (!waitForTP) return false;
         if (packet instanceof PlayerPositionLookS2CPacket move) {
-            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.getTeleportId()));
+//            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.teleportId()));
+
+            updateVelocity = true;
             return true;
         }
         if (packet instanceof EntityAnimationS2CPacket) return true;
@@ -145,13 +147,26 @@ public class BuildPhaser extends Feature {
 
     private void finishClipping() {
         disableClipping();
-        if (CodeClient.location instanceof Dev plot) {
+        if (CodeClient.location instanceof Creator plot) {
             ClientPlayerEntity player = CodeClient.MC.player;
             PlayerAbilities abilities = player.getAbilities();
             abilities.allowFlying = true;
             abilities.flying = wasFlying;
             waitForTP = true;
 
+            var size = plot.assumeSize();
+
+            var x = Math.min(Math.max(player.getX(), plot.getX()), plot.getX() + size.size + 1);
+            var y = player.getY();
+            var z = Math.min(Math.max(player.getZ(), plot.getZ()), plot.getZ() + size.size + 1);
+            var pitch = player.getPitch();
+            var yaw = player.getYaw();
+
+            velocity = player.getVelocity();
+
+            CommandSender.queue(String.format("ptp %s %s %s %s %s", x, y, z, pitch, yaw));
+
+            /*
             Vec3d pos = plot.getPos().relativize(player.getPos());
             ItemStack location = new Location(pos.x, pos.y, pos.z, player.getPitch(), player.getYaw()).toStack();
 
@@ -168,13 +183,7 @@ public class BuildPhaser extends Feature {
                 net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
 
             Utility.sendHandItem(lastItem);
-
-            final int MAX_SPEED = 2;
-
-            var velocity = CodeClient.MC.player.getVelocity();
-            if(velocity.length() > MAX_SPEED) {
-                CodeClient.MC.player.setVelocity(velocity.normalize().multiply(MAX_SPEED));
-            }
+            */
         }
     }
 

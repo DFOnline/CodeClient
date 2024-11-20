@@ -3,7 +3,7 @@ package dev.dfonline.codeclient.hypercube.item;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
-import dev.dfonline.codeclient.hypercube.actiondump.Icon;
+import dev.dfonline.codeclient.data.DFItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -89,13 +89,14 @@ public class Vector extends VarItem {
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
-        stack.setCustomName(Text.literal("Vector").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.VECTOR.color)));
+        DFItem dfItem = DFItem.of(stack);
+        dfItem.setName(Text.literal("Vector").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
         Utility.addLore(
-                stack,
+                dfItem.getItemStack(),
                 Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x)),
                 Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y)),
                 Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z))
         );
-        return stack;
+        return dfItem.getItemStack();
     }
 }

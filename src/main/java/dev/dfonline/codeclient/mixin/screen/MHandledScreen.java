@@ -2,8 +2,6 @@ package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.InteractionManager;
-import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
-import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;

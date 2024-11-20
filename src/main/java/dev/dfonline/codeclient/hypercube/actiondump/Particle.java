@@ -2,16 +2,14 @@ package dev.dfonline.codeclient.hypercube.actiondump;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import dev.dfonline.codeclient.data.DFItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static dev.dfonline.codeclient.Utility.textToNBT;
 
 public class Particle extends VarItem implements Searchable {
     public String particle;
@@ -51,17 +49,18 @@ public class Particle extends VarItem implements Searchable {
 
         ItemStack item = super.getItem("part", data);
 
-        NbtCompound display = item.getSubNbt("display");
-        NbtList Lore = (NbtList) display.get("Lore");
-        Lore.add(textToNBT(Text.literal("")));
-        Lore.add(textToNBT(Text.literal("Additional Fields:").formatted(Formatting.GRAY)));
-        if (optionFields.size() == 0) Lore.add(textToNBT(Text.literal("None").formatted(Formatting.DARK_GRAY)));
+        DFItem dfItem = DFItem.of(item);
+        List<Text> lore = dfItem.getLore();
+        ArrayList<Text> newLore = new ArrayList<>(lore);
+
+        newLore.add(Text.empty());
+        newLore.add(Text.literal("Additional Fields:").formatted(Formatting.GRAY));
+        if (optionFields.isEmpty()) newLore.add(Text.literal("None").formatted(Formatting.DARK_GRAY));
         else for (ParticleField field : optionFields) {
-            if (field != null) Lore.add(textToNBT(Text.literal("• " + field.displayName).formatted(Formatting.WHITE)));
-            else Lore.add(textToNBT(Text.of("NULL?")));
+            if (field != null) newLore.add(Text.literal("• " + field.displayName).formatted(Formatting.WHITE));
+            else newLore.add(Text.of("NULL?"));
         }
-        display.put("Lore", Lore);
-        item.setSubNbt("display", display);
+        dfItem.setLore(newLore);
 
         return item;
     }

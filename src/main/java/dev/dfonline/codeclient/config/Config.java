@@ -34,7 +34,6 @@ public class Config {
     public int AutoJoinPlotId = 0;
     public CharSetOption FileCharSet = CharSetOption.UTF_8;
     public boolean InvisibleBlocksInDev = false;
-    public float ReachDistance = 5;
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
     public boolean FocusSearch = false;
@@ -72,7 +71,7 @@ public class Config {
     public int RecentValues = 0;
     public Boolean ValueDetails = true;
     public Boolean PhaseToggle = false;
-    public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
+    public DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
     public boolean ShowVariableScopeBelowName = true;
     public boolean DevNodes = false;
     public boolean GiveUuidNameStrings = true;
@@ -121,7 +120,6 @@ public class Config {
             object.addProperty("AutoJoinPlotId", AutoJoinPlotId);
             object.addProperty("FileCharSet", FileCharSet.name());
             object.addProperty("InvisibleBlocksInDev", InvisibleBlocksInDev);
-            object.addProperty("ReachDistance", ReachDistance);
             object.addProperty("AutoFly", AutoFly);
             object.addProperty("CodeLayerInteractionMode", CodeLayerInteractionMode.name());
             object.addProperty("FocusSearch", FocusSearch);
@@ -158,7 +156,7 @@ public class Config {
             object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
-            object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
+            object.addProperty("DestroyItemResetMode", DestroyItemResetMode.name());
             object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
             object.addProperty("DevNodes", DevNodes);
             object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
@@ -557,7 +555,7 @@ public class Config {
                                 )
                                 .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(0, 100))
                                 .build())
-                        .option(Option.createBuilder(Config.DestroyItemReset.class)
+                        .option(Option.createBuilder(DestroyItemReset.class)
                                 .name(Text.translatable("codeclient.config.destroy_item_reset.name"))
                                 .description(OptionDescription.of(Text.translatable("codeclient.config.destroy_item_reset.description")))
                                 .binding(
@@ -565,7 +563,7 @@ public class Config {
                                         () -> DestroyItemResetMode,
                                         opt -> DestroyItemResetMode = opt
                                 )
-                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.DestroyItemReset.class))
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, DestroyItemReset.class))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.givestrings"))

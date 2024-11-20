@@ -1,5 +1,4 @@
 package dev.dfonline.codeclient.dev.highlighter;
-
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
@@ -86,6 +85,8 @@ public class ExpressionHighlighter extends Feature {
             for (CommandType command : CommandType.values()) {
                 var matcher = command.regex.matcher(input);
                 if (!matcher.find(1)) {
+                    continue;
+                } else if (matcher.start() > 1) {
                     continue;
                 }
                 cachedHighlight = formatCommand(input, command, matcher.end(), range);
@@ -358,4 +359,4 @@ public class ExpressionHighlighter extends Feature {
             this.parseMinimessage = parseMinimessage;
         }
     }
-}
+    }

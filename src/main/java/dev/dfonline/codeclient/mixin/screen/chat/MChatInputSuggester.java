@@ -3,7 +3,6 @@ package dev.dfonline.codeclient.mixin.screen.chat;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
 import dev.dfonline.codeclient.location.Dev;
-import net.kyori.adventure.text.Component;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -28,7 +27,6 @@ public class MChatInputSuggester {
 
     @Unique
     private OrderedText preview = null;
-
     @Inject(method = "provideRenderText", at = @At("RETURN"), cancellable = true)
     private void provideRenderText(String partial, int position, CallbackInfoReturnable<OrderedText> cir) {
         if (Objects.equals(partial, "")) return;
@@ -56,5 +54,4 @@ public class MChatInputSuggester {
             preview = null; // prevents a preview from showing if the player deletes all text
         });
     }
-
 }

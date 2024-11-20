@@ -3,10 +3,11 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 import dev.dfonline.codeclient.CodeClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FakeSlot extends ClickableWidget {
-    public static final Identifier TEXTURE = new Identifier("minecraft", "textures/gui/sprites/container/slot.png");
+    public static final Identifier TEXTURE = Identifier.ofVanilla("textures/gui/sprites/container/slot.png");
     private final ScreenHandler handler;
     public boolean disabled = false;
     @NotNull
@@ -30,10 +31,14 @@ public class FakeSlot extends ClickableWidget {
 
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.drawTexture(TEXTURE, this.getX(), this.getY(), 0, 0, this.width, this.height, 18, 18);
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX(), this.getY(), 0, 0, this.width, this.height, 18, 18);
         context.drawItem(item, this.getX() + 1, this.getY() + 1);
         if (this.isMouseOver(mouseX, mouseY)) {
-            HandledScreen.drawSlotHighlight(context, this.getX() + 1, this.getY() + 1, -1000);
+            if (CodeClient.MC.currentScreen instanceof GenericContainerScreen sc) {
+                context.getMatrices().push();
+                context.getMatrices().translate(mouseX, mouseY, 0.0F);
+                // FIXMe: remnder
+            }
             context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX, mouseY);
         }
     }

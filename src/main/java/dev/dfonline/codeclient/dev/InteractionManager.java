@@ -4,8 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.switcher.ScopeSwitcher;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -15,24 +15,21 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.EntityAttachments;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
@@ -106,7 +103,7 @@ public class InteractionManager {
 
     private static void breakCodeBlock(BlockPos pos) {
         ClientWorld world = CodeClient.MC.world;
-        CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvent.of(new Identifier("minecraft:block.stone.break")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+        CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvents.BLOCK_STONE_BREAK, SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
         world.setBlockState(pos, Blocks.AIR.getDefaultState());
         world.setBlockState(pos.add(0, 1, 0), Blocks.AIR.getDefaultState());
         world.setBlockState(pos.add(-1, 0, 0), Blocks.AIR.getDefaultState());
@@ -118,16 +115,14 @@ public class InteractionManager {
             CodeClient.onClickSlot(slot,button,actionType,syncId,revision);
             if (!slot.hasStack()) return false;
             ItemStack item = slot.getStack();
-            if (!item.hasNbt()) return false;
-            NbtCompound nbt = item.getNbt();
-            if (nbt != null && !nbt.contains("PublicBukkitValues")) return false;
-            if (nbt != null && nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
-                if (!bukkitValues.contains("hypercube:varitem")) return false;
+            DFItem dfItem = DFItem.of(item);
+            if (dfItem.hasHypercubeKey("varitem")) {
                 try {
-                    if (bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
+                    String varItem = dfItem.getItemData().getHypercubeStringValue("varitem");
+                    if (!varItem.isEmpty()) {
                         if (!Config.getConfig().CustomTagInteraction) return false;
                         if (actionType == SlotActionType.PICKUP_ALL) return false;
-                        JsonElement varElement = JsonParser.parseString(varItem.asString());
+                        JsonElement varElement = JsonParser.parseString(varItem);
                         if (!varElement.isJsonObject()) return false;
                         JsonObject varObject = (JsonObject) varElement;
                         if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
@@ -138,9 +133,8 @@ public class InteractionManager {
                         CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
 
                         String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
-                        NbtCompound display = nbt.getCompound("display");
-                        NbtList lore = (NbtList) display.get("Lore");
-                        if (lore == null) return true;
+                        List<Text> currentLore = dfItem.getLore();
+                        ArrayList<Text> lore = new ArrayList<>(currentLore);
 
                         int i = 0;
                         Integer tagStartIndex = null;
@@ -148,8 +142,7 @@ public class InteractionManager {
                         List<String> options = new ArrayList<>();
 
                         // TODO: Utility.getBlockTagLines
-                        for (NbtElement element : lore) {
-                            Text text = Text.Serialization.fromJson(element.asString());
+                        for (Text text : lore) {
                             if (text == null) return false;
                             TextColor color = text.getStyle().getColor();
                             if (color == null) {
@@ -178,15 +171,15 @@ public class InteractionManager {
                         for (String option : options) {
                             MutableText text = Text.empty();
                             if (optionIndex == newSelection) {
-                                text.append(Text.literal("» ").formatted(Formatting.DARK_AQUA)).append(Text.literal(option).formatted(Formatting.AQUA));
+                                text.append(Text.literal("» ").setStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withItalic(false))).append(Text.literal(option).setStyle(Style.EMPTY.withColor(Formatting.AQUA).withItalic(false)));
                             } else
                                 text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
-                            lore.set(tagStartIndex + optionIndex, Utility.textToNBT(text));
+                            lore.set(tagStartIndex + optionIndex, text);
                             optionIndex++;
                         }
-                        display.put("Lore", lore);
-                        item.setSubNbt("display", display);
-                        slot.setStack(item);
+
+                        dfItem.setLore(lore);
+                        slot.setStack(dfItem.getItemStack());
                         return true;
                     }
                 } catch (Exception e) {
@@ -199,7 +192,7 @@ public class InteractionManager {
 
     public static boolean isInsideWall(Vec3d playerPos) {
         Vec3d middlePos = playerPos.add(0, 0.75, 0);
-        Box box = new EntityDimensions(0.6f, 1.8f, true).getBoxAt(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
+        Box box = new EntityDimensions(0.6f, 1.8f, 1.8f * 0.85f, EntityAttachments.of(0.6f, 1.8f), true).getBoxAt(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
         CodeClient.LOGGER.info(String.valueOf(box));
         return BlockPos.stream(box).anyMatch((pos) -> {
             BlockState blockState = CodeClient.MC.world.getBlockState(pos);
@@ -256,14 +249,11 @@ public class InteractionManager {
             if (player.isSneaking() || !Config.getConfig().ScopeSwitcher) return false;
 
             ItemStack stack = player.getStackInHand(hand);
+            DFItem dfItem = DFItem.of(stack);
 
-            NbtCompound nbt = stack.getNbt();
-            if (nbt == null) return false;
-            NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
-            if (pbv == null) return false;
-            NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
-            if (varItem == null) return false;
-            JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
+            if (!dfItem.hasHypercubeKey("varitem")) return false;
+            String varItem = dfItem.getHypercubeStringValue("varitem");
+            JsonObject var = JsonParser.parseString(varItem).getAsJsonObject();
             if (!var.get("id").getAsString().equals("var")) return false;
             JsonObject data = var.get("data").getAsJsonObject();
             String scopeName = data.get("scope").getAsString();

@@ -7,6 +7,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -21,9 +22,9 @@ import java.util.List;
  * It can reasonably hold up to 4 options.
  */
 public abstract class GenericSwitcher extends Screen {
-    private static final Identifier TEXTURE = new Identifier("textures/gui/container/gamemode_switcher.png");
-    private static final Identifier SLOT_TEXTURE = new Identifier("gamemode_switcher/slot");
-    private static final Identifier SELECTED_TEXTURE = new Identifier("gamemode_switcher/selection");
+    private static final Identifier TEXTURE = Identifier.ofVanilla("textures/gui/container/gamemode_switcher.png");
+    private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("gamemode_switcher/slot");
+    private static final Identifier SELECTED_TEXTURE = Identifier.ofVanilla("gamemode_switcher/selection");
     /**
      * Key to hold down, generally F3.
      * The selected option will be run when this is released.
@@ -76,7 +77,7 @@ public abstract class GenericSwitcher extends Screen {
         RenderSystem.enableBlend();
         int centerX = this.width / 2 - 62;
         int centerY = this.height / 2 - 31 - 27;
-        context.drawTexture(TEXTURE, centerX, centerY, 0.0F, 0.0F, 125, 75, 128, 128);
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, centerX, centerY, 0, 0, 125, 75, 128, 128);
         context.getMatrices().pop();
         super.render(context, mouseX, mouseY, delta);
 
@@ -102,8 +103,9 @@ public abstract class GenericSwitcher extends Screen {
                 if (button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
             }
             button.selected = this.selected == i;
-            context.drawGuiTexture(SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
-            if (button.selected) context.drawGuiTexture(SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
+            context.drawGuiTexture(RenderLayer::getGuiTextured, SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
+            if (button.selected)
+                context.drawGuiTexture(RenderLayer::getGuiTextured, SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
             button.render(context, mouseX, mouseY, delta);
             ++i;
         }
@@ -196,16 +198,16 @@ public abstract class GenericSwitcher extends Screen {
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             context.getMatrices().push();
             context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
-            context.drawTexture(TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
+            context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
             context.getMatrices().pop();
 
             context.drawItem(option.icon, this.getX() + 5, this.getY() + 5);
-            context.drawItemInSlot(textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
+            context.drawStackOverlay(textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
 
             if (selected) {
                 context.getMatrices().push();
                 context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
-                context.drawTexture(TEXTURE, 0, 0, 26.0F, 75.0F, 26, 26, 128, 128);
+                context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, 0, 0, 26, 75, 26, 26, 128, 128);
                 context.getMatrices().pop();
             }
         }

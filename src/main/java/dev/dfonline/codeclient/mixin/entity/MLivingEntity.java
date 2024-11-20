@@ -1,9 +1,7 @@
 package dev.dfonline.codeclient.mixin.entity;
 
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.Navigation;
-import dev.dfonline.codeclient.dev.NoClip;
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

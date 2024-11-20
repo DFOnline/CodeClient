@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.dfonline.codeclient.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "client": [
     "screen.chat.MChatScreen",
     "screen.chat.MChatInputSuggester",
@@ -35,7 +35,7 @@
     "world.block.MLightBlock",
     "world.block.MSignBlockEntity",
     "world.block.MStructureVoidBlock"
-  ],
+  ,"screen.MTextFieldWidget","screen.MElement"],
   "injectors": {
     "defaultRequire": 1
   }

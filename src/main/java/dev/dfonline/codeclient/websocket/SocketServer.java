@@ -11,7 +11,7 @@ import org.java_websocket.server.WebSocketServer;
 import java.net.InetSocketAddress;
 
 public class SocketServer extends WebSocketServer {
-    private SocketHandler handler;
+    private final SocketHandler handler;
 
     public SocketServer(InetSocketAddress address, SocketHandler socketHandler) {
         super(address);
