@@ -246,7 +246,8 @@ public class InteractionManager {
 
     public static boolean onItemInteract(PlayerEntity player, Hand hand) {
         if (CodeClient.location instanceof Dev) {
-            if (player.isSneaking() || !Config.getConfig().ScopeSwitcher) return false;
+            var feat = CodeClient.getFeature(ScopeSwitcher.ScopeSwitcherFeature.class);
+            if (player.isSneaking() || feat.isEmpty()) return false;
 
             ItemStack stack = player.getStackInHand(hand);
             DFItem dfItem = DFItem.of(stack);
@@ -258,7 +259,7 @@ public class InteractionManager {
             JsonObject data = var.get("data").getAsJsonObject();
             String scopeName = data.get("scope").getAsString();
 
-            CodeClient.MC.setScreen(new ScopeSwitcher(scopeName));
+            feat.get().open(scopeName);
             return true;
         }
         return false;

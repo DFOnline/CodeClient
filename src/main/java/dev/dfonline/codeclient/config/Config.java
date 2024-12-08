@@ -82,6 +82,8 @@ public class Config {
     public boolean HighlightExpressions = true;
     public boolean HighlightMiniMessage = true;
     public int MiniMessageTagColor = 0x808080;
+    public boolean StateSwitcher = true;
+    public boolean SpeedSwitcher = true;
 
     public Config() {
     }
@@ -163,7 +165,8 @@ public class Config {
             object.addProperty("CPUDisplay", CPUDisplay);
             object.addProperty("CPUDisplayCorner", CPUDisplayCorner.name());
             object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
-
+            object.addProperty("StateSwitcher",StateSwitcher);
+            object.addProperty("SpeedSwitcher",SpeedSwitcher);
             object.addProperty("HighlighterEnabled", HighlighterEnabled);
             object.addProperty("HighlightExpressions", HighlightExpressions);
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
@@ -574,6 +577,26 @@ public class Config {
                                         true,
                                         () -> GiveUuidNameStrings,
                                         opt -> GiveUuidNameStrings = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.state_switcher"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.state_switcher.description")))
+                                .binding(
+                                        true,
+                                        () -> StateSwitcher,
+                                        opt -> StateSwitcher = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.speed_switcher"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.speed_switcher.description")))
+                                .binding(
+                                        true,
+                                        () -> SpeedSwitcher,
+                                        opt -> SpeedSwitcher = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

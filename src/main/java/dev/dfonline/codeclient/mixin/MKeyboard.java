@@ -28,16 +28,16 @@ public class MKeyboard {
     @Inject(method = "processF3", at = @At("HEAD"), cancellable = true)
     private void handleF3(int key, CallbackInfoReturnable<Boolean> cir) {
         if (key == stateSwitcherKey) {
-            if (CodeClient.location instanceof Plot) {
-                CodeClient.MC.setScreen(new StateSwitcher());
-                cir.setReturnValue(true);
-            }
+            if (
+                    CodeClient.getFeature(StateSwitcher.StateSwitcherFeature.class)
+                            .map(StateSwitcher.StateSwitcherFeature::open)
+                            .orElse(false)) cir.setReturnValue(true);
         }
         if (key == speedSwitcherKey) {
-            if (CodeClient.location instanceof Creator || CodeClient.location instanceof Spawn) {
-                CodeClient.MC.setScreen(new SpeedSwitcher());
-                cir.setReturnValue(true);
-            }
+            if(
+                    CodeClient.getFeature(SpeedSwitcher.SpeedSwitcherFeature.class)
+                            .map(SpeedSwitcher.SpeedSwitcherFeature::open)
+                            .orElse(false)) cir.setReturnValue(false);
         }
     }
 

@@ -106,6 +106,10 @@
   "codeclient.config.pick_block_action.description3": "Click to open link.",
   "codeclient.config.recent_values": "Recent Values",
   "codeclient.config.recent_values.description": "Amount of recently used values to remember.",
+  "codeclient.config.state_switcher": "Mode Switcher",
+  "codeclient.config.state_switcher.description": "Using F3+F4 will cycle plot /modes instead of minecraft gamemodes.",
+  "codeclient.config.speed_switcher": "Speed Switcher",
+  "codeclient.config.speed_switcher.description": "Using F3+F5 will cycle different flyspeeds.",
 
   "codeclient.config.tab.visual": "Visual",
   "codeclient.config.tab.visual.description": "Purely visual elements of CodeClient, which can help in coding with information.",

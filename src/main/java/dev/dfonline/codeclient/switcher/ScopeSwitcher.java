@@ -3,7 +3,9 @@ package dev.dfonline.codeclient.switcher;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.data.PublicBukkitValues;
 import dev.dfonline.codeclient.hypercube.item.Scope;
@@ -24,6 +26,17 @@ public class ScopeSwitcher extends GenericSwitcher {
     public ScopeSwitcher(String option) {
         super(Text.translatable("codeclient.switcher.scope"), -1, GLFW.GLFW_KEY_SPACE);
         this.option = option;
+    }
+
+    public static class ScopeSwitcherFeature extends Feature {
+        @Override
+        public boolean enabled() {
+            return Config.getConfig().ScopeSwitcher;
+        }
+
+        public void open(String option) {
+            CodeClient.MC.setScreen(new ScopeSwitcher(option));
+        }
     }
 
     @Override

@@ -25,6 +25,8 @@ import dev.dfonline.codeclient.dev.overlay.CPUDisplay;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
+import dev.dfonline.codeclient.switcher.ScopeSwitcher;
+import dev.dfonline.codeclient.switcher.SpeedSwitcher;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ClientModInitializer;
@@ -199,6 +201,9 @@ public class CodeClient implements ClientModInitializer {
         feat(new MessageHiding());
         feat(new ExpressionHighlighter());
         feat(new PreviewSoundChest());
+        feat(new StateSwitcher.StateSwitcherFeature());
+        feat(new SpeedSwitcher.SpeedSwitcherFeature());
+        feat(new ScopeSwitcher.ScopeSwitcherFeature());
     }
 
     /**
