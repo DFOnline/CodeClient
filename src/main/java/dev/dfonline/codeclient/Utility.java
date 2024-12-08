@@ -76,6 +76,9 @@ public class Utility {
     public static String templateDataItem(ItemStack item) {
         DFItem dfItem = DFItem.of(item);
         String codeTemplateData = dfItem.getHypercubeStringValue("codetemplatedata");
+        if (codeTemplateData.isEmpty()) {
+            return null;
+        }
         return JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString();
     }
 
