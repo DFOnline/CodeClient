@@ -1,4 +1,8 @@
 {
+  "toast.codeclient.update.title":  "CodeClient was updated to %s",
+  "toast.codeclient.update":  "Restart to apply.",
+  "toast.codeclient.update_available.title": "CodeClient Update: %s",
+  "toast.codeclient.update_available": "New version available",
   "category.codeclient.dev": "CodeClient",
   "key.codeclient.codepalette": "Code Palette",
   "key.codeclient.phaser": "Phaser",
@@ -26,6 +30,8 @@
   "codeclient.config.tab.general": "General",
   "codeclient.config.tab.general.tooltip": "General always specific options for CodeClient.",
 
+  "codeclient.config.auto_update": "Auto Update",
+  "codeclient.config.auto_update.description": "Whether CodeClient should check for updates, and whether it should update or notify.",
   "codeclient.config.api": "CodeClient API",
   "codeclient.config.api.description": "Allows external apps to add code to your plot.",
   "codeclient.config.read_charset": "Read Charset",

@@ -14,10 +14,12 @@ repositories {
     // for more information about repositories.
     mavenCentral()
 
+    // Yet Another Config Lib
     maven {
         name 'Xander Maven'
         url 'https://maven.isxander.dev/releases'
     }
+    // ModMenu
     maven {
         url 'https://maven.terraformersmc.com/'
     }
