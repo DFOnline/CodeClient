@@ -171,8 +171,15 @@ public class PlaceTemplates extends Action {
             var targets = new ArrayList<Operation>();
             HashMap<BlockPos, SignText> scan = dev.scanForSigns(Pattern.compile(".*"));
             for (var entry: scan.entrySet()) {
-                if(names.contains(entry.getValue().getMessage(1,false).getString())) {
-                    targets.add(new DestroyOperation(entry.getKey()));
+                var sign = entry.getValue();
+                for (var name : names) {
+                    var type = name.split(" ")[0];
+                    var action = name.substring(type.length() + 1);
+                    if (type.equals("any") || sign.getMessage(0, false).getString().toLowerCase().contains(type.toLowerCase())) {
+                        if (action.equals(sign.getMessage(1, false).getString())) {
+                            targets.add(new DestroyOperation(entry.getKey()));
+                        }
+                    }
                 }
             }
             return new PlaceTemplates(targets,callback);
@@ -212,7 +219,7 @@ public class PlaceTemplates extends Action {
                         block.state = blockState;
                     }
                 });
-                if (operation instanceof TemplateToPlace) {
+                if (operation instanceof TemplateToPlace || operation instanceof DestroyOperation) {
                     if (!block.isTemplate) continue;
                     operation.setComplete();
                 }
@@ -255,6 +262,16 @@ public class PlaceTemplates extends Action {
                             BlockHitResult blockHitResult = new BlockHitResult(template.pos().add(0, 1, 0), Direction.UP, template.pos, false);
                             ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, blockHitResult, sequence));
                             template.setOpen(false);
+                        }
+                        if (operation instanceof DestroyOperation destroy) {
+                            var player = CodeClient.MC.player;
+                            boolean sneaky = !player.isSneaking();
+                            if (sneaky)
+                                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                            net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, destroy.pos, Direction.UP));
+                            net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, destroy.pos, Direction.UP));
+                            if (sneaky)
+                                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
                         }
                     }
                     return;
