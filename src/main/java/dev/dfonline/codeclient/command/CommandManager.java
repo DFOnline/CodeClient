@@ -11,6 +11,7 @@ public class CommandManager {
     private static final List<Command> COMMANDS = List.of(
             new CommandAbort(),
             new CommandAuth(),
+            new CommandCalc(),
             new CommandCCConfig(),
             new CommandConfirmCC(),
             new CommandDelete(),
@@ -26,6 +27,7 @@ public class CommandManager {
             new CommandName(),
             new CommandNode(),
             new CommandPing(),
+            new CommandPreview(),
             new CommandSave(),
             new CommandScanFor(),
             new CommandScanPlot(),
@@ -34,7 +36,8 @@ public class CommandManager {
             new CommandTemplatePlacer(),
             new CommandUuid(),
             new CommandWidthDump(),
-            new CommandWorldPlot()
+            new CommandWorldPlot(),
+            new CommandClearQueue()
     );
 
     public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {

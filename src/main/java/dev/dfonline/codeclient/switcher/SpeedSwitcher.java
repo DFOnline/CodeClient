@@ -1,6 +1,10 @@
 package dev.dfonline.codeclient.switcher;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
+import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.location.Plot;
+import dev.dfonline.codeclient.location.Spawn;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -13,6 +17,21 @@ public class SpeedSwitcher extends GenericSwitcher {
 
     public SpeedSwitcher() {
         super(Text.translatable("codeclient.switcher.speed"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F5);
+    }
+
+    public static class SpeedSwitcherFeature extends Feature {
+        @Override
+        public boolean enabled() {
+            return Config.getConfig().SpeedSwitcher;
+        }
+
+        public boolean open() {
+            if (CodeClient.location instanceof Plot || CodeClient.location instanceof Spawn) {
+                CodeClient.MC.setScreen(new SpeedSwitcher());
+                return true;
+            }
+            return false;
+        }
     }
 
     @Override

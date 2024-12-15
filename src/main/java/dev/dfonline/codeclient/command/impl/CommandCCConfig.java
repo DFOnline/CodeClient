@@ -81,12 +81,12 @@ public class CommandCCConfig extends Command {
                     for (Object member : field.getType().getEnumConstants()) {
                         if (((Enum<?>) member).name().equalsIgnoreCase(value)) {
                             field.set(Config.getConfig(), member);
-                            Utility.sendMessage(Text.translatable("codeclient.config.command.enum", Text.literal(option).formatted(Formatting.AQUA), Text.literal(value).formatted(Formatting.AQUA)), ChatType.SUCCESS);
+                            Utility.sendMessage(Text.translatable("codeclient.config.command.set", Text.literal(option).formatted(Formatting.AQUA), Text.literal(value).formatted(Formatting.AQUA)), ChatType.SUCCESS);
                             Config.getConfig().save();
                             return 0;
                         }
                     }
-                    Utility.sendMessage(Text.translatable("codeclient.config.command.enum.fail", Text.literal(option).formatted(Formatting.YELLOW), Text.literal(value).formatted(Formatting.YELLOW)), ChatType.FAIL);
+                    Utility.sendMessage(Text.translatable("codeclient.config.command.set.fail", Text.literal(option).formatted(Formatting.YELLOW), Text.literal(value).formatted(Formatting.YELLOW)), ChatType.FAIL);
                     return -1;
                 }
                 Utility.sendMessage(Text.translatable("codeclient.config.command.fail"), ChatType.FAIL);

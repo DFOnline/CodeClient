@@ -3,25 +3,22 @@ package dev.dfonline.codeclient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import dev.dfonline.codeclient.action.impl.GetActionDump;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.template.Template;
+import net.kyori.adventure.platform.modcommon.impl.NonWrappingComponentSerializer;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
+import net.kyori.adventure.text.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -87,24 +84,19 @@ public class Utility {
      * Gets the base64 template data from an item. Null if there is none.
      */
     public static String templateDataItem(ItemStack item) {
-        if (!item.hasNbt()) return null;
-        NbtCompound nbt = item.getNbt();
-        if (nbt == null) return null;
-        if (!nbt.contains("PublicBukkitValues")) return null;
-        NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-        if (!publicBukkit.contains("hypercube:codetemplatedata")) return null;
-        String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
+        DFItem dfItem = DFItem.of(item);
+        String codeTemplateData = dfItem.getHypercubeStringValue("codetemplatedata");
+        if (codeTemplateData.isEmpty()) {
+            return null;
+        }
         return JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString();
     }
 
-    public static ItemStack makeTemplate(String message) {
+    public static ItemStack makeTemplate(String code) {
         ItemStack template = new ItemStack(Items.ENDER_CHEST);
-        NbtCompound nbt = new NbtCompound();
-        NbtCompound PublicBukkitValues = new NbtCompound();
-        PublicBukkitValues.putString("hypercube:codetemplatedata", "{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + message + "\"}");
-        nbt.put("PublicBukkitValues", PublicBukkitValues);
-        template.setNbt(nbt);
-        return template;
+        DFItem dfItem = DFItem.of(template);
+        dfItem.editData(data -> data.setHypercubeStringValue("codetemplatedata", "{\"author\":\"CodeClient\",\"name\":\"Template to be placed\",\"version\":1,\"code\":\"" + code + "\"}"));
+        return dfItem.getItemStack();
     }
 
     /**
@@ -116,11 +108,11 @@ public class Utility {
     }
 
     public static void addLore(ItemStack stack, Text... lore) {
-        var display = Objects.requireNonNullElse(stack.getSubNbt("display"), new NbtCompound());
-        var loreList = new NbtList();
-        for (Text line : lore) loreList.add(Utility.textToNBT(Text.empty().append(line)));
-        display.put("Lore", loreList);
-        stack.setSubNbt("display", display);
+        DFItem item = DFItem.of(stack);
+        List<Text> currentLore = item.getLore();
+        ArrayList<Text> newLore = new ArrayList<>(currentLore);
+        newLore.addAll(List.of(lore));
+        item.setLore(newLore);
     }
 
     public static void sendHandItem(ItemStack item) {
@@ -137,12 +129,8 @@ public class Utility {
         ArrayList<ItemStack> templates = new ArrayList<>();
         for (int i = 0; i < (27 + 9); i++) {
             ItemStack item = inv.getStack(i);
-            if (!item.hasNbt()) continue;
-            NbtCompound nbt = item.getNbt();
-            if (nbt == null || !nbt.contains("PublicBukkitValues")) continue;
-            NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-            if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
-            templates.add(item);
+            DFItem dfItem = DFItem.of(item);
+            if (dfItem.hasHypercubeKey("codetemplatedata")) templates.add(item);
         }
         return templates;
     }
@@ -188,7 +176,7 @@ public class Utility {
                     .append(Text.literal(" "))
                     .append(message), false);
             if (type == ChatType.FAIL) {
-                player.playSound(SoundEvent.of(new Identifier("minecraft:block.note_block.didgeridoo")), SoundCategory.PLAYERS, 2, 0);
+                player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO.value(), 2, 0);
             }
         }
     }
@@ -199,7 +187,7 @@ public class Utility {
      * @return Usable in lore and as a name in nbt.
      */
     public static NbtString textToNBT(Text text) {
-        JsonElement json = Text.Serialization.toJsonTree(text);
+        JsonElement json = TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, text).getOrThrow();
         if (json.isJsonObject()) {
             JsonObject obj = (JsonObject) json;
 
@@ -219,7 +207,7 @@ public class Utility {
      */
     public static MutableText textFromString(String text) {
         MutableText output = Text.empty().setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0xFFFFFF)).withItalic(false));
-        MutableText component = Text.empty();
+        MutableText component = Text.empty().styled(s -> s.withItalic(false));
 
         Matcher m = Pattern.compile("§(([0-9a-kfmnolr])|x(§[0-9a-f]){6})|[^§]+").matcher(text);
         while (m.find()) {
@@ -240,17 +228,14 @@ public class Utility {
     }
 
     public static boolean isGlitchStick(ItemStack item) {
-        if (item == null) return false;
-        NbtCompound nbt = item.getNbt();
-        if (nbt == null) return false;
-        if (nbt.isEmpty()) return false;
-        if (Objects.equals(nbt.getCompound("PublicBukkitValues").getString("hypercube:item_instance"), ""))
-            return false;
-        return Objects.equals(nbt.getCompound("display").getString("Name"), "{\"italic\":false,\"color\":\"red\",\"text\":\"Glitch Stick\"}");
+        DFItem dfItem = DFItem.of(item);
+        if (!dfItem.hasHypercubeKey("item_instance")) return false;
+        return Objects.equals(dfItem.getName(), Text.literal("Glitch Stick").setStyle(Style.EMPTY.withColor(Formatting.RED).withItalic(false)));
     }
 
     public static HashMap<Integer, String> getBlockTagLines(ItemStack item) {
-        NbtCompound display = item.getSubNbt("display");
+        // Not migrated to 1.21 due to not being called anywhere.
+        /*NbtCompound display = item.getSubNbt("display");
         NbtList lore = (NbtList) display.get("Lore");
         if (lore == null) throw new NullPointerException("Can't get lore.");
 
@@ -266,7 +251,8 @@ public class Utility {
             options.put(index, data.replaceAll("» ", ""));
         }
 
-        return options;
+        return options;*/
+        return null;
     }
 
     public static void textToString(Text content, StringBuilder build, GetActionDump.ColorMode colorMode) {
@@ -324,4 +310,25 @@ public class Utility {
 
         return builder.toString();
     }
+
+    /**
+     * Turns a {@link net.kyori.adventure.text.Component} to an {@link OrderedText}
+     *
+     * @param component The component to convert
+     * @return The converted component
+     */
+    public static OrderedText componentToOrderedText(Component component) {
+        return NonWrappingComponentSerializer.INSTANCE.serialize(component).asOrderedText();
+    }
+
+    /**
+     * Turns a {@link net.kyori.adventure.text.Component} to a {@link Text}
+     *
+     * @param component The component to convert
+     * @return The converted component
+     */
+    public static Text componentToText(Component component) {
+        return NonWrappingComponentSerializer.INSTANCE.serialize(component);
+    }
+
 }

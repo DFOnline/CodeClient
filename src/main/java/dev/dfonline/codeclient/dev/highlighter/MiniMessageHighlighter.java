@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.dev.highlighter;
 
 import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.hypercube.HypercubeMinimessage;
+import dev.dfonline.codeclient.hypercube.HypercubeMiniMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -9,7 +9,8 @@ import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.ParsingException;
 import net.kyori.adventure.text.minimessage.internal.parser.Token;
-import net.kyori.adventure.text.minimessage.internal.parser.node.*;
+import net.kyori.adventure.text.minimessage.internal.parser.node.TagNode;
+import net.kyori.adventure.text.minimessage.internal.parser.node.ValueNode;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -21,14 +22,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Parses MiniMessage input, but leaves the tags in the message for formatting in the edit box.
- */
+// /
+//  * Parses MiniMessage input, but leaves the tags in the message for formatting in the edit box.
+//  /
 public class MiniMessageHighlighter {
     public MiniMessage HIGHLIGHTER = MiniMessage.builder().tags(TagResolver.resolver(
+            new ShownTagResolver()
+    )).build();
+    public MiniMessage PARSER = MiniMessage.builder().tags(TagResolver.resolver(
             new ShownTagResolver(),
-            HypercubeMinimessage.NEWLINE_TAG,
-            HypercubeMinimessage.SPACE_TAG
+            HypercubeMiniMessage.NEWLINE_TAG,
+            HypercubeMiniMessage.SPACE_TAG
     )).build();
 
     private final String RESET_TAG = "<reset>";
@@ -43,7 +47,7 @@ public class MiniMessageHighlighter {
         if (resets.length > 1 || input.toLowerCase().endsWith(RESET_TAG)) {
             Component value = Component.empty();
 
-            Component reset = HIGHLIGHTER.deserialize(String.format("<%s>", getTagStyle()) + HIGHLIGHTER.escapeTags(RESET_TAG) + String.format("</%s>", getTagStyle()));
+            Component reset = PARSER.deserialize(String.format("<%s>", getTagStyle()) + HIGHLIGHTER.escapeTags(RESET_TAG) + String.format("</%s>", getTagStyle()));
 
             for (String partial : resets) {
                 value = value.append(highlight(partial))
@@ -52,7 +56,7 @@ public class MiniMessageHighlighter {
             return value;
         }
 
-        Node.Root root = HIGHLIGHTER.deserializeToTree(input);
+        Node.Root root = PARSER.deserializeToTree(input);
         StringBuilder newInput = new StringBuilder(input.length());
 
         handle(root, root.input(), newInput, new AtomicInteger(), new ArrayList<>());
@@ -75,13 +79,14 @@ public class MiniMessageHighlighter {
                 decorations.add(tagName);
             }
 
-            sb.append(tagString);
+            // prevent "space" and "newline" tags from being added extra as they dont get parsed in the chatbox.
+            if (!(tagString.contains("space") || tagString.contains("newline"))) sb.append(tagString);
         } else if (node instanceof ValueNode valueNode) {
             String value = valueNode.value();
 
             index.addAndGet(value.length());
 
-            sb.append(HIGHLIGHTER.escapeTags(value));
+            sb.append(PARSER.escapeTags(value));
         }
 
         for (Node child : node.children()) {
@@ -105,7 +110,7 @@ public class MiniMessageHighlighter {
     }
 
     private void appendEscapedTag(StringBuilder sb, String tag, String style, ArrayList<String> decorations) {
-        /* idk if someone wants to figure this out, it doesn't actually seem to work with multiple decorations.
+        // idk if someone wants to figure this out, it doesn't actually seem to work with multiple decorations.
         StringBuilder opening = new StringBuilder();
 
         StringBuilder closing = new StringBuilder();
@@ -113,7 +118,7 @@ public class MiniMessageHighlighter {
             interpolate(opening, "<", decoration, ">");
             interpolate(closing, "</", decoration, ">");
         });
-        */
+        //
 
         interpolate(sb, "<", style, ">", HIGHLIGHTER.escapeTags(tag), "</", style, ">");
     }
@@ -146,10 +151,7 @@ public class MiniMessageHighlighter {
         @Override
         public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
             Tag tag = standard.resolve(name, arguments, ctx);
-            if (tag != null) {
-                return tag;
-            }
-            return null;
+            return tag;
         }
 
         @Override

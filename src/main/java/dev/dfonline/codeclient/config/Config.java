@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Config {
     private static Config instance;
-    public boolean NoClipEnabled = true;
+    public boolean NoClipEnabled = false;
     public boolean PlaceOnAir = false;
     public int AirSpeed = 10;
     public boolean CodeClientAPI = false;
@@ -34,10 +34,8 @@ public class Config {
     public int AutoJoinPlotId = 0;
     public CharSetOption FileCharSet = CharSetOption.UTF_8;
     public boolean InvisibleBlocksInDev = false;
-    public float ReachDistance = 5;
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
-    public boolean AirControl = false;
     public boolean FocusSearch = false;
     public CharSetOption SaveCharSet = CharSetOption.UTF_8;
     public boolean RecentChestInsert = true;
@@ -73,18 +71,20 @@ public class Config {
     public int RecentValues = 0;
     public Boolean ValueDetails = true;
     public Boolean PhaseToggle = false;
-    public static DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
+    public DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
     public boolean ShowVariableScopeBelowName = true;
     public boolean DevNodes = false;
     public boolean GiveUuidNameStrings = true;
     public boolean CPUDisplay = true;
-    public CPUDisplayCorner CPUDisplayCornerOption = CPUDisplayCorner.TOP_LEFT;
+    public CPUDisplayCornerOption CPUDisplayCorner = CPUDisplayCornerOption.TOP_LEFT;
     public boolean HideScopeChangeMessages = true;
     public AutoUpdate AutoUpdateOption = AutoUpdate.UPDATE;
     public boolean HighlighterEnabled = true;
     public boolean HighlightExpressions = true;
     public boolean HighlightMiniMessage = true;
     public int MiniMessageTagColor = 0x808080;
+    public boolean StateSwitcher = true;
+    public boolean SpeedSwitcher = true;
 
     public Config() {
     }
@@ -123,10 +123,8 @@ public class Config {
             object.addProperty("AutoJoinPlotId", AutoJoinPlotId);
             object.addProperty("FileCharSet", FileCharSet.name());
             object.addProperty("InvisibleBlocksInDev", InvisibleBlocksInDev);
-            object.addProperty("ReachDistance", ReachDistance);
             object.addProperty("AutoFly", AutoFly);
             object.addProperty("CodeLayerInteractionMode", CodeLayerInteractionMode.name());
-            object.addProperty("AirControl", AirControl);
             object.addProperty("FocusSearch", FocusSearch);
             object.addProperty("SaveCharSet", SaveCharSet.name());
             object.addProperty("RecentChestInsert", RecentChestInsert);
@@ -161,19 +159,21 @@ public class Config {
             object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
-            object.addProperty("DestroyItemReset", DestroyItemResetMode.name());
+            object.addProperty("DestroyItemResetMode", DestroyItemResetMode.name());
             object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
             object.addProperty("DevNodes", DevNodes);
             object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
             object.addProperty("CPUDisplay", CPUDisplay);
-            object.addProperty("CPUDisplayCorner", CPUDisplayCornerOption.name());
+            object.addProperty("CPUDisplayCorner", CPUDisplayCorner.name());
             object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
+            object.addProperty("StateSwitcher",StateSwitcher);
+            object.addProperty("SpeedSwitcher",SpeedSwitcher);
             object.addProperty("AutoUpdateOption", AutoUpdateOption.name());
             object.addProperty("HighlighterEnabled", HighlighterEnabled);
             object.addProperty("HighlightExpressions", HighlightExpressions);
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
             object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
-          
+
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -352,7 +352,7 @@ public class Config {
                                         .text(Text.translatable("codeclient.config.noclip.description"))
                                         .build())
                                 .binding(
-                                        true,
+                                        false,
                                         () -> NoClipEnabled,
                                         opt -> NoClipEnabled = opt
                                 )
@@ -375,7 +375,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(float.class)
                                 .name(Text.translatable("codeclient.config.angle_up"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_up.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_up.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         50F,
                                         () -> UpAngle,
@@ -385,7 +385,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(float.class)
                                 .name(Text.translatable("codeclient.config.angle_down"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_down.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_down.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(50F,
                                         () -> DownAngle,
                                         opt -> DownAngle = opt
@@ -394,7 +394,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.tp_up"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_up.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_up.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         false,
                                         () -> TeleportUp,
@@ -404,7 +404,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.tp_down"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_down.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_down.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         false,
                                         () -> TeleportDown,
@@ -424,18 +424,6 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-//                                .option(Option.createBuilder(boolean.class)
-//                                        .name(Text.literal("Air Control"))
-//                                        .description(OptionDescription.createBuilder()
-//                                                .text(Text.literal("Gives you the same control in air as walking."))
-//                                                .build())
-//                                        .binding(
-//                                                false,
-//                                                () -> AirControl,
-//                                                opt -> AirControl = opt
-//                                        )
-//                                        .controller(TickBoxController::new)
-//                                        .build())
                         .build())
                 //</editor-fold>
                 //<editor-fold desc="Interaction">
@@ -586,7 +574,7 @@ public class Config {
                                 )
                                 .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(0, 100))
                                 .build())
-                        .option(Option.createBuilder(Config.DestroyItemReset.class)
+                        .option(Option.createBuilder(DestroyItemReset.class)
                                 .name(Text.translatable("codeclient.config.destroy_item_reset.name"))
                                 .description(OptionDescription.of(Text.translatable("codeclient.config.destroy_item_reset.description")))
                                 .binding(
@@ -594,7 +582,7 @@ public class Config {
                                         () -> DestroyItemResetMode,
                                         opt -> DestroyItemResetMode = opt
                                 )
-                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.DestroyItemReset.class))
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, DestroyItemReset.class))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.givestrings"))
@@ -605,6 +593,26 @@ public class Config {
                                         true,
                                         () -> GiveUuidNameStrings,
                                         opt -> GiveUuidNameStrings = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.state_switcher"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.state_switcher.description")))
+                                .binding(
+                                        true,
+                                        () -> StateSwitcher,
+                                        opt -> StateSwitcher = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.speed_switcher"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.speed_switcher.description")))
+                                .binding(
+                                        true,
+                                        () -> SpeedSwitcher,
+                                        opt -> SpeedSwitcher = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
@@ -687,15 +695,15 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-                        .option(Option.createBuilder(Config.CPUDisplayCorner.class)
+                        .option(Option.createBuilder(CPUDisplayCornerOption.class)
                                 .name(Text.translatable("codeclient.config.cpu_display_corner.name"))
                                 .description(OptionDescription.of(Text.translatable("codeclient.config.cpu_display_corner.description")))
                                 .binding(
-                                        CPUDisplayCorner.TOP_LEFT,
-                                        () -> CPUDisplayCornerOption,
-                                        opt -> CPUDisplayCornerOption = opt
+                                        CPUDisplayCornerOption.TOP_LEFT,
+                                        () -> CPUDisplayCorner,
+                                        opt -> CPUDisplayCorner = opt
                                 )
-                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, Config.CPUDisplayCorner.class))
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, CPUDisplayCornerOption.class))
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.translatable("codeclient.config.hide_scope_change_messages"))
@@ -1032,7 +1040,7 @@ public class Config {
         }
     }
 
-    public enum CPUDisplayCorner {
+    public enum CPUDisplayCornerOption {
         TOP_LEFT,
         TOP_RIGHT,
         BOTTOM_LEFT,

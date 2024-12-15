@@ -6,8 +6,8 @@ import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 
-public class HypercubeMinimessage {
-    public static final MiniMessage FORMATTER = MiniMessage.builder().tags(Tags.ALL).build();
+public class HypercubeMiniMessage {
+    public static final MiniMessage MM = MiniMessage.builder().tags(Tags.ALL).build();
 
     public static final TagResolver SPACE_TAG = Tags.SPACE;
     public static final TagResolver NEWLINE_TAG = Tags.NEWLINE;

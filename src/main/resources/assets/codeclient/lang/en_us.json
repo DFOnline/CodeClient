@@ -9,6 +9,7 @@
   "key.codeclient.preview_item_tags": "Preview Item Tags",
   "key.codeclient.playDev": "Toggle Mode Play <-> Dev",
   "key.codeclient.playBuild": "Toggle Mode Play <-> Build",
+  "key.codeclient.preview_sounds": "Preview Sounds In Code Chest",
 
   "category.codeclient.navigation": "Code Navigation",
   "key.codeclient.tp.left": "Teleport Left",
@@ -17,9 +18,13 @@
   "key.codeclient.tp.backward": "Teleport Backwards",
   "key.codeclient.open_action": "Open Action",
 
+  "codeclient.toast.unofficial_address.title": "Unofficial Address Detected",
+  "codeclient.toast.unofficial_address": "The server address you used to connect to DiamondFire is unofficially hosted by a third party. For security reasons, we have replaced it with the official address.",
+
   "codeclient.config": "CodeClient Config",
 
   "codeclient.config.requires_restart": "(requires restart)",
+  "codeclient.config.requires_noclip": "(requires NoClip)",
   "codeclient.config.default_recommended": "Default recommended.",
 
   "codeclient.config.tab.general": "General",
@@ -60,7 +65,7 @@
   "codeclient.config.tab.navigation.description": "How you move about in the codespace and the likes.",
 
   "codeclient.config.noclip": "NoClip",
-  "codeclient.config.noclip.description": "If you can NoClip in the dev space.",
+  "codeclient.config.noclip.description": "Whether you can walk through codeblocks, additionally enables codespace travel by looking up/down and jumping/sneaking.",
   "codeclient.config.airstrafe_modifier": "AirStrafe Modifier",
   "codeclient.config.airstrafe_modifier.description1": "How much faster you go when jumping in dev space.",
   "codeclient.config.airstrafe_modifier.description2": "Your jump speed will be based of walking speed.",
@@ -107,6 +112,10 @@
   "codeclient.config.pick_block_action.description3": "Click to open link.",
   "codeclient.config.recent_values": "Recent Values",
   "codeclient.config.recent_values.description": "Amount of recently used values to remember.",
+  "codeclient.config.state_switcher": "Mode Switcher",
+  "codeclient.config.state_switcher.description": "Using F3+F4 will cycle plot /modes instead of minecraft gamemodes.",
+  "codeclient.config.speed_switcher": "Speed Switcher",
+  "codeclient.config.speed_switcher.description": "Using F3+F5 will cycle different flyspeeds.",
 
   "codeclient.config.tab.visual": "Visual",
   "codeclient.config.tab.visual.description": "Purely visual elements of CodeClient, which can help in coding with information.",
@@ -193,8 +202,8 @@
   "codeclient.config.command.query.fail": "There is no option with name %s.",
   "codeclient.config.command.enable": "Enabled option %s.",
   "codeclient.config.command.disable": "Disabled option %s.",
-  "codeclient.config.command.enum": "Set option %s to %s.",
-  "codeclient.config.command.enum.fail": "Couldn't set option %s to %s.",
+  "codeclient.config.command.set": "Set option %s to %s.",
+  "codeclient.config.command.set.fail": "Couldn't set option %s to %s.",
   "codeclient.config.command.fail": "You cannot set this config option.",
 
   "codeclient.config.destroy_item_reset.name": "Destroy Item Reset",
@@ -306,7 +315,7 @@
   "hypercube.codeblock.start_process": "Start Process",
 
   "codeclient.command.ping": "Your ping is %s ms.",
-  "codeclient.command.dfgive.count_above_max": "Maximum stack size of %s is %s",
+  "codeclient.command.dfgive.count_above_max": "Maximum stack size is %s",
   "codeclient.command.dfgive.count_below_min": "Minimum stack size is 1",
   "codeclient.command.dfgive.clipboard_unavailable": "Unable to access the clipboard",
   "codeclient.command.dfgive.clipboard_invalid": "Please copy a valid give command to your clipboard",
@@ -319,5 +328,9 @@
   "codeclient.command.itemdata.header": "Item Data for %s",
   "codeclient.command.itemdata.copy": "Click here to copy an %s or %s version.",
   "codeclient.command.itemdata.copy.unformatted": "Unformatted",
-  "codeclient.command.itemdata.copy.dfgive": "/dfgive"
+  "codeclient.command.itemdata.copy.dfgive": "/dfgive",
+  "codeclient.command.calc.success": "%s = %s",
+  "codeclient.command.calc.failure": "%s failed to parse",
+  "codeclient.action.clearqueue.success": "Command queue cleared.",
+  "codeclient.action.clearqueue.empty": "Command queue was empty!"
 }

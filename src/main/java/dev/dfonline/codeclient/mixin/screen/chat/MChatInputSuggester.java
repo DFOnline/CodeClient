@@ -27,7 +27,6 @@ public class MChatInputSuggester {
 
     @Unique
     private OrderedText preview = null;
-
     @Inject(method = "provideRenderText", at = @At("RETURN"), cancellable = true)
     private void provideRenderText(String partial, int position, CallbackInfoReturnable<OrderedText> cir) {
         if (Objects.equals(partial, "")) return;
@@ -39,7 +38,9 @@ public class MChatInputSuggester {
 
             if (expression == null) return;
 
-            preview = expression.preview();
+            if (preview != OrderedText.empty()) preview = expression.preview();
+            else preview = null;
+
             cir.setReturnValue(expression.text());
         });
     }
@@ -53,5 +54,4 @@ public class MChatInputSuggester {
             preview = null; // prevents a preview from showing if the player deletes all text
         });
     }
-
 }

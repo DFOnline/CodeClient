@@ -229,7 +229,7 @@ public class SocketHandler {
                             )
                             .setStyle(Style.EMPTY.withHoverEvent(
                                     new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
-                            ))
+                            )), false
             );
         }
         Utility.sendMessage(Text.translatable("codeclient.api.run_auth"));
@@ -545,7 +545,10 @@ public class SocketHandler {
                 return;
             }
             try {
-                CodeClient.MC.player.giveItemStack(ItemStack.fromNbt(StringNbtReader.parse(content)));
+                if (CodeClient.MC.world == null) return;
+                Optional<ItemStack> itemStack = ItemStack.fromNbt(CodeClient.MC.world.getRegistryManager(), StringNbtReader.parse(content));
+                if (itemStack.isEmpty()) return;
+                CodeClient.MC.player.giveItemStack(itemStack.get());
                 Utility.sendInventory();
             } catch (CommandSyntaxException e) {
                 responder.send("invalid nbt");

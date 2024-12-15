@@ -7,8 +7,15 @@ import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
 import dev.dfonline.codeclient.command.CommandManager;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
+import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.data.ItemData;
+import dev.dfonline.codeclient.data.PublicBukkitValues;
+import dev.dfonline.codeclient.data.value.DataValue;
+import dev.dfonline.codeclient.data.value.NumberDataValue;
+import dev.dfonline.codeclient.data.value.StringDataValue;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
 import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
@@ -20,6 +27,8 @@ import dev.dfonline.codeclient.dev.overlay.CPUDisplay;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
+import dev.dfonline.codeclient.switcher.ScopeSwitcher;
+import dev.dfonline.codeclient.switcher.SpeedSwitcher;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ClientModInitializer;
@@ -44,17 +53,13 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -90,7 +95,7 @@ public class CodeClient implements ClientModInitializer {
     public static Action confirmingAction = null;
     public static Location lastLocation = null;
     public static Location location = null;
-    /***
+    /**
      * Used to open a screen on the next tick.
      */
     public static Screen screenToOpen = null;
@@ -120,7 +125,9 @@ public class CodeClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
         BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
 
-        ClientLifecycleEvents.CLIENT_STOPPING.register(new Identifier(MOD_ID, "close"), client -> API.stop());
+        ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.of(MOD_ID, "close"), client -> API.stop());
+
+        ClientTickEvents.END_CLIENT_TICK.register(client -> CommandSender.tick());
 
         if (Config.getConfig().CodeClientAPI) {
             try {
@@ -137,29 +144,33 @@ public class CodeClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher, registryAccess));
 
-        ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
+        ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             if (isPreviewingItemTags) {
-                if (!stack.hasNbt()) return;
-                NbtCompound nbt = stack.getNbt();
-                if (nbt == null) return;
-                if (!nbt.contains("PublicBukkitValues")) return;
-                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-                for (var key : publicBukkit.getKeys()) {
-                    if (key.startsWith("hypercube:")) {
-                        NbtElement element = publicBukkit.get(key);
+                DFItem item = DFItem.of(stack);
+                ItemData itemData = item.getItemData();
+                if (itemData == null) return;
+                PublicBukkitValues publicBukkit = itemData.getPublicBukkitValues();
+                if (publicBukkit == null) return;
+                for (var key : publicBukkit.getHypercubeKeys()) {
+                    DataValue element = publicBukkit.getHypercubeValue(key);
 
-                        // Any type = yellow, number = red, string = aqua.
-                        MutableText value = Text.literal(publicBukkit.get(key).toString()).formatted(Formatting.GREEN);
-                        if (element instanceof NbtString) value.formatted(Formatting.AQUA);
-                        if (element instanceof AbstractNbtNumber) value.formatted(Formatting.RED);
-
-                        lines.add(
-                                Text.literal(key.replace("hypercube:", ""))
-                                        .withColor(0xAAFF55)
-                                        .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
-                                        .append(value)
-                        );
+                    // Any type = yellow, number = red, string = aqua.
+                    Formatting formatting = Formatting.GREEN;
+                    String stringElement = element.getValue() == null ? "?" : element.getValue().toString();
+                    if (element instanceof StringDataValue) {
+                        formatting = Formatting.AQUA;
                     }
+                    if (element instanceof NumberDataValue numberDataValue) {
+                        formatting = Formatting.RED;
+                        stringElement = String.valueOf(numberDataValue.getValue());
+                    }
+
+                    lines.add(
+                            Text.literal(key)
+                                    .withColor(0xAAFF55)
+                                    .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
+                                    .append(Text.literal(stringElement).formatted(formatting))
+                    );
                 }
             }
         });
@@ -197,6 +208,10 @@ public class CodeClient implements ClientModInitializer {
         feat(new CPUDisplay());
         feat(new MessageHiding());
         feat(new ExpressionHighlighter());
+        feat(new PreviewSoundChest());
+        feat(new StateSwitcher.StateSwitcherFeature());
+        feat(new SpeedSwitcher.SpeedSwitcherFeature());
+        feat(new ScopeSwitcher.ScopeSwitcherFeature());
     }
 
     /**
@@ -213,6 +228,16 @@ public class CodeClient implements ClientModInitializer {
         return features().map(Feature::getChest).filter(Optional::isPresent).map(Optional::get);
     }
 
+    /**
+     * Get an identifier using the mod id as the namespace.
+     *
+     * @param path The path to the resource.
+     * @return Identifier under the mod id's namespace and the provided path as the path.
+     */
+    public static Identifier getId(String path) {
+        return Identifier.of(MOD_ID, path);
+    }
+
     public static void isCodeChest() {
         isCodeChest = true;
     }
@@ -224,6 +249,12 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+        if (packet instanceof BundleS2CPacket bundle) {
+            bundle.getPackets().forEach(CodeClient::handlePacket);
+            return false;
+        }
+
+
         if (currentAction.onReceivePacket(packet)) return true;
         for (var feature : features().toList()) {
             if (feature.onReceivePacket(packet)) return true;
@@ -270,6 +301,8 @@ public class CodeClient implements ClientModInitializer {
         currentAction.tick();
         features().forEach(Feature::tick);
         KeyBinds.tick();
+
+//        System.out.println(location.name());
 
         if (!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
             isCodeChest = false;
@@ -463,7 +496,7 @@ public class CodeClient implements ClientModInitializer {
     private boolean registerResourcePack(String id, Text name, ResourcePackActivationType type) throws NullPointerException {
         var prefix = String.format("[%s] ", MOD_NAME);
         return ResourceManagerHelper.registerBuiltinResourcePack(
-                new Identifier(CodeClient.MOD_ID, id),
+                getId(id),
                 getModContainer(),
                 Text.literal(prefix).formatted(Formatting.GRAY).append(name),
                 type

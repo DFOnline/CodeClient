@@ -6,14 +6,15 @@ import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.dev.overlay.SignPeeker;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,38 +29,41 @@ import java.util.Objects;
 
 @Mixin(InGameHud.class)
 public abstract class MInGameHud {
-    @Shadow
-    private int scaledHeight;
-    @Shadow
-    private int scaledWidth;
 
     @Shadow
     public abstract TextRenderer getTextRenderer();
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void onRender(DrawContext context, float tickDelta, CallbackInfo ci) {
+    private void onRender(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        int scaledWidth = context.getScaledWindowWidth();
+        int scaledHeight = context.getScaledWindowHeight();
+
         TextRenderer textRenderer = getTextRenderer();
 
         List<Text> overlay = new ArrayList<>(List.copyOf(OverlayManager.getOverlayText()));
         Text cpuUsage = OverlayManager.getCpuUsage();
-        if (!overlay.isEmpty()) {
-            if (cpuUsage != null && Config.getConfig().CPUDisplayCornerOption == Config.CPUDisplayCorner.TOP_LEFT) {
+        if (cpuUsage != null && Config.getConfig().CPUDisplayCorner == Config.CPUDisplayCornerOption.TOP_LEFT) {
+            if (overlay.isEmpty()) overlay.add(cpuUsage);
+            else {
                 overlay.add(0, cpuUsage);
                 overlay.add(1, Text.empty());
             }
+        }
+        if (!overlay.isEmpty()) {
             int index = 0;
             for (Text text : overlay) {
                 context.drawTextWithShadow(textRenderer, Objects.requireNonNullElseGet(text, () -> Text.literal("NULL")), 30, 30 + (index * 9), -1);
                 index++;
             }
         }
-        if (cpuUsage != null && Config.getConfig().CPUDisplayCornerOption != Config.CPUDisplayCorner.TOP_LEFT) {
+
+        if (cpuUsage != null && Config.getConfig().CPUDisplayCorner != Config.CPUDisplayCornerOption.TOP_LEFT) {
             int margin = 30;
-            int x = switch (Config.getConfig().CPUDisplayCornerOption) {
+            int x = switch (Config.getConfig().CPUDisplayCorner) {
                 case TOP_LEFT, BOTTOM_LEFT -> margin;
                 case TOP_RIGHT, BOTTOM_RIGHT -> scaledWidth - margin - textRenderer.getWidth(cpuUsage);
             };
-            int y = switch (Config.getConfig().CPUDisplayCornerOption) {
+            int y = switch (Config.getConfig().CPUDisplayCorner) {
                 case TOP_LEFT, TOP_RIGHT -> margin;
                 case BOTTOM_LEFT, BOTTOM_RIGHT -> scaledHeight - margin - 3;
             };
@@ -88,13 +92,12 @@ public abstract class MInGameHud {
     public void renderHeldItemTooltip(DrawContext context, CallbackInfo ci) {
 
         if (!Config.getConfig().ShowVariableScopeBelowName) return;
-        if (!currentStack.hasNbt()) return;
-        NbtCompound nbt = currentStack.getNbt();
-        if (nbt == null) return;
-        if (!nbt.contains("PublicBukkitValues")) return;
-        NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-        if (!publicBukkit.contains("hypercube:varitem")) return;
-        String varItem = publicBukkit.getString("hypercube:varitem");
+        DFItem dfItem = DFItem.of(currentStack);
+        if (!dfItem.hasHypercubeKey("varitem")) return;
+        String varItem = dfItem.getHypercubeStringValue("varitem");
+
+        int scaledWidth = context.getScaledWindowWidth();
+        int scaledHeight = context.getScaledWindowHeight();
 
         try {
             JsonObject varItemJson = JsonParser.parseString(varItem).getAsJsonObject();
