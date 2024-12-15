@@ -5,20 +5,15 @@ import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.render.VertexRendering;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 public class RecentChestInsert extends Feature {
     private float alpha = 0;
@@ -41,7 +36,10 @@ public class RecentChestInsert extends Feature {
             VoxelShape shape = CodeClient.MC.world.getBlockState(lastChest).getOutlineShape(CodeClient.MC.world, lastChest).offset(lastChest.getX(), lastChest.getY(), lastChest.getZ());
             VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getLines());
             int color = Config.getConfig().ChestHighlightColor;
-            WorldRenderer.drawShapeOutline(matrices, vertexConsumer, shape, -cameraX, -cameraY, -cameraZ, (float) (color >> 16) / 255, (float) ((color & 0xFF00) >> 8) / 255, (float) (color & 0x0000FF) / 255, Math.min(alpha, 1), true);
+            float a = Math.min(alpha, 1f);
+
+            color = (int) (a * 255) << 24 | (color & 0x00FFFFFF);
+            VertexRendering.drawOutline(matrices, vertexConsumer, shape, -cameraX, -cameraY, -cameraZ, color);
         }
     }
 

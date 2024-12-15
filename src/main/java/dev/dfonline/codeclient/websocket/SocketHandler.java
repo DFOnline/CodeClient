@@ -21,19 +21,24 @@ import org.java_websocket.WebSocket;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class SocketHandler {
     public static final int PORT = 31375;
     private final ArrayList<Action> actionQueue = new ArrayList<>();
+    // Current connection
     @Nullable
     private WebSocket connection = null;
+    // Default scopes
     private static final List<AuthScope> defaultAuthScopes = List.of(AuthScope.DEFAULT);
+    // Unapproved scopes that the user needs to approve
     private List<AuthScope> unapprovedAuthScopes = List.of();
+    // Approved scopes the application has access to
     private List<AuthScope> authScopes = defaultAuthScopes;
+    // Map of tokens and their scopes
+    private final HashMap<String, List<AuthScope>> tokenMap = new HashMap<>();
+    // The active token, empty if none
+    private String activeToken = null;
     private SocketServer websocket;
 
     public void start() {
@@ -72,7 +77,17 @@ public class SocketHandler {
 
     public void setConnection(WebSocket socket) {
         if (socket != null) actionQueue.clear();
-        if (connection != null) connection.close(); // Close the old connection
+        if (connection != null) {
+            connection.close(); // Close the old connection
+            if (activeToken != null) {
+                // If we were using a token, save the scopes
+                tokenMap.put(activeToken, authScopes);
+            }
+            // Reset the active token and scopes
+            activeToken = null;
+            authScopes = defaultAuthScopes;
+            unapprovedAuthScopes = List.of();
+        }
         connection = socket;
     }
 
@@ -89,6 +104,7 @@ public class SocketHandler {
         }
         switch (arguments[0]) {
             case "scopes" -> handleScopeRequest(arguments);
+            case "token" -> handleTokenRequest(arguments);
             case "clear" -> assertScopeLevel(new Clear());
             case "spawn" -> assertScopeLevel(new Spawn());
             case "size" -> assertScopeLevel(new Size());
@@ -155,6 +171,29 @@ public class SocketHandler {
         promptUserAcceptScopes();
     }
 
+    private void handleTokenRequest(String[] arguments) {
+        assert connection != null;
+        List<String> args = Arrays.asList(arguments).subList(1, arguments.length);
+
+        if (args.isEmpty()) {
+            // Send the active token if one is active, otherwise regenerate it.
+            String token = activeToken == null ? Utility.genAuthToken() : activeToken;
+            connection.send("token " + token);
+            tokenMap.put(token, authScopes);
+            activeToken = token;
+        } else {
+            String token = args.get(0);
+            if (!tokenMap.containsKey(token)) {
+                connection.send("invalid token");
+                return;
+            }
+            // Restore the scopes
+            authScopes = tokenMap.get(token);
+            connection.send("auth");
+            activeToken = token;
+        }
+    }
+
     private void assertScopeLevel(SocketHandler.Action commandClass) {
         if (!authScopes.contains(commandClass.authScope)) {
             if(connection != null) connection.send("unauthed");
@@ -191,7 +230,7 @@ public class SocketHandler {
                             )
                             .setStyle(Style.EMPTY.withHoverEvent(
                                     new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
-                            ))
+                            )), false
             );
         }
         Utility.sendMessage(Text.translatable("codeclient.api.run_auth"));
@@ -541,7 +580,10 @@ public class SocketHandler {
                 return;
             }
             try {
-                CodeClient.MC.player.giveItemStack(ItemStack.fromNbt(StringNbtReader.parse(content)));
+                if (CodeClient.MC.world == null) return;
+                Optional<ItemStack> itemStack = ItemStack.fromNbt(CodeClient.MC.world.getRegistryManager(), StringNbtReader.parse(content));
+                if (itemStack.isEmpty()) return;
+                CodeClient.MC.player.giveItemStack(itemStack.get());
                 Utility.sendInventory();
             } catch (CommandSyntaxException e) {
                 responder.send("invalid nbt");

@@ -5,25 +5,25 @@ import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.Blocks;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ContainerComponent;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -32,12 +32,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class ChestPeeker extends Feature {
-    private BlockPos currentBlock = null;
-    private NbtList items = null;
+
+    private static BlockPos currentBlock = null;
+    private static ArrayList<ItemStack> items = null;
     private boolean shouldClearChest = false;
     private int timeOut = 0;
+    private static Consumer<List<ItemStack>> currentCallback = null;
+
+    public static void pick(Consumer<List<ItemStack>> callback) {
+        currentCallback = callback;
+        currentBlock = null;
+        items = null;
+    }
 
     public void tick() {
         if (timeOut > 0) {
@@ -46,7 +55,7 @@ public class ChestPeeker extends Feature {
         }
         if (CodeClient.MC.currentScreen != null) return;
         if (CodeClient.MC.world == null) return;
-        if (!Config.getConfig().ChestPeeker) return;
+        if (!Config.getConfig().ChestPeeker && currentCallback == null) return;
         if (CodeClient.location instanceof Dev dev) {
             if (CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
                 BlockPos pos = block.getBlockPos();
@@ -62,15 +71,16 @@ public class ChestPeeker extends Feature {
                     items = null;
                     shouldClearChest = true;
 
+                    // Uses non-abstracted item changes due to this very specific use case.
                     ItemStack item = Items.CHEST.getDefaultStack();
                     NbtCompound bet = new NbtCompound();
-                    bet.put("Items", new NbtList());
                     bet.putString("id", "minecraft:chest");
                     bet.putInt("x", pos.getX());
                     bet.putInt("y", pos.getY());
                     bet.putInt("z", pos.getZ());
-                    item.setSubNbt("BlockEntityTag", bet);
-                    item.setCustomName(Text.literal("CodeClient chest peeker internal"));
+                    item.set(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.of(bet));
+                    item.set(DataComponentTypes.CUSTOM_NAME, Text.literal("CodeClient chest peeker internal"));
+
                     CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1, ItemStack.EMPTY));
                     CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1, item));
                     return;
@@ -84,7 +94,7 @@ public class ChestPeeker extends Feature {
     public boolean onReceivePacket(Packet<?> packet) {
         if (CodeClient.MC.currentScreen != null) return false;
         if (CodeClient.MC.getNetworkHandler() == null) return false;
-        if (!Config.getConfig().ChestPeeker) return false;
+        if (!Config.getConfig().ChestPeeker && currentCallback == null) return false;
         if (CodeClient.location instanceof Dev) {
             if (packet instanceof BlockEventS2CPacket block) {
                 if (!Objects.equals(currentBlock, block.getPos())) return false;
@@ -93,18 +103,22 @@ public class ChestPeeker extends Feature {
                 reset();
             }
             if (packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
-                var nbt = slot.getStack().getNbt();
-                if (nbt == null) return false;
-                var display = nbt.getCompound("display");
-                if (display == null || !display.contains("Name", NbtElement.STRING_TYPE)) return false;
-                String name = display.getString("Name");
-                if (Objects.equals(name, ") {\"text\":\"CodeClient chest peeker internal\"}")) return false;
-                var bet = nbt.getCompound("BlockEntityTag");
-                if (bet == null) return false;
-                if (!Objects.equals(bet.getString("id"), "minecraft:chest")) return false;
-                if (currentBlock != null) items = bet.getList("Items", NbtElement.COMPOUND_TYPE);
+                DFItem item = DFItem.of(slot.getStack());
+                if (!Objects.equals(item.getName(), Text.literal("CodeClient chest peeker internal"))) return false;
+                ContainerComponent container = item.getContainer();
+                if (container == null) return false;
+                items = new ArrayList<>();
+                container.iterateNonEmpty().forEach((stack) -> {
+                    items.add(stack);
+                });
                 CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
                 shouldClearChest = false;
+
+                // Invoke the callback if it exists
+                if (currentCallback != null) {
+                    currentCallback.accept(items);
+                    currentCallback = null;
+                }
                 return true;
             }
         }
@@ -119,19 +133,17 @@ public class ChestPeeker extends Feature {
                 texts.add(Text.translatable("codeclient.peeker.empty").formatted(Formatting.GOLD));
             } else {
                 texts.add(Text.translatable("codeclient.peeker.contents").formatted(Formatting.GOLD));
-                for (NbtElement itemData : items) {
-                    if (itemData instanceof NbtCompound compound) {
-                        ItemStack item = Registries.ITEM.get(Identifier.tryParse(compound.getString("id"))).getDefaultStack();
-                        item.setCount(compound.getInt("Count"));
-                        NbtCompound tag = compound.getCompound("tag");
-                        item.setNbt(tag);
-                        NbtList lore = tag.getCompound("display").getList("Lore", NbtElement.STRING_TYPE);
+                for (ItemStack item : items) {
+                    DFItem dfItem = DFItem.of(item);
+                    List<Text> currentLore = dfItem.getLore();
+                    ArrayList<Text> lore = new ArrayList<>(currentLore);
 
-                        MutableText text = Text.empty();
+
+                    MutableText text = Text.empty();
                         text.append(Text.literal(" • ").formatted(Formatting.DARK_GRAY));
-                        String varItem = tag.getCompound("PublicBukkitValues").getString("hypercube:varitem");
+                    String varItem = dfItem.getHypercubeStringValue("varitem");
                         if (Objects.equals(varItem, "")) {
-                            text.append(compound.getInt("Count") + "x ");
+                            text.append(item.getCount() + "x ");
                             text.append(item.getName());
                         } else {
                             try {
@@ -164,7 +176,7 @@ public class ChestPeeker extends Feature {
                                     ).fillStyle(Style.EMPTY.withColor(Type.vec.color)));
                                 }
                                 if (type == Type.snd) {
-                                    text.append(Text.Serialization.fromJson(lore.getString(0)));
+                                    text.append(lore.getFirst());
                                     text.append(Text.literal(" P: ").formatted(Formatting.GRAY));
                                     text.append(Text.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
                                     text.append(Text.literal(" V: ").formatted(Formatting.GRAY));
@@ -172,10 +184,10 @@ public class ChestPeeker extends Feature {
                                 }
                                 if (type == Type.part) {
                                     text.append(Text.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
-                                    text.append(Text.Serialization.fromJson(lore.getString(0)));
+                                    text.append(lore.getFirst());
                                 }
                                 if (type == Type.pot) {
-                                    text.append(Text.Serialization.fromJson(lore.getString(0)));
+                                    text.append(lore.getFirst());
                                     text.append(Text.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
                                     int dur = data.get("dur").getAsInt();
                                     text.append(dur >= 1000000 ? "Infinite" : dur % 20 == 0 ? "%d:%02d".formatted((dur / 1200), (dur / 20) % 60) : (dur + "ticks"));
@@ -191,7 +203,6 @@ public class ChestPeeker extends Feature {
                             }
                         }
                         texts.add(text);
-                    }
                 }
             }
             return texts;
@@ -214,6 +225,7 @@ public class ChestPeeker extends Feature {
         shouldClearChest = true;
         currentBlock = null;
         timeOut = 10;
+        currentCallback = null;
     }
 
     enum Type {

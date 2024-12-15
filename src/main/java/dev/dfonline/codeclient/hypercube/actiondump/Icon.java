@@ -1,18 +1,16 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.Utility;
-import dev.dfonline.codeclient.hypercube.item.*;
+import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.data.ItemData;
 import dev.dfonline.codeclient.hypercube.item.Number;
 import dev.dfonline.codeclient.hypercube.item.Potion;
 import dev.dfonline.codeclient.hypercube.item.Sound;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
+import dev.dfonline.codeclient.hypercube.item.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtIntArray;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -20,13 +18,14 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Icon {
-    private static TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
+    private static final TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
     public String material;
     public String head;
     public String name;
@@ -57,11 +56,12 @@ public class Icon {
     }
 
     public ItemStack getItem() {
-        ItemStack item = Registries.ITEM.get(new Identifier(material.toLowerCase())).getDefaultStack();
+        ItemStack item = Registries.ITEM.get(Identifier.ofVanilla(material.toLowerCase())).getDefaultStack();
 
-        NbtCompound nbt = new NbtCompound();
-        NbtCompound display = new NbtCompound();
-        NbtList lore = new NbtList();
+        DFItem dfItem = DFItem.of(item);
+        ItemData data = dfItem.getItemData();
+
+        ArrayList<Text> lore = new ArrayList<>();
 
         for (String line : description) {
             addToLore(lore, "§7" + line);
@@ -83,8 +83,8 @@ public class Icon {
                 if (arg.description != null && description.length != 0) for (String line : arg.description) {
                     Type type = Type.valueOf(arg.type);
                     if (i == 0) {
-                        MutableText text = Text.empty().formatted(Formatting.GRAY);
-                        MutableText typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color));
+                        MutableText text = Text.empty().formatted(Formatting.GRAY).styled(s -> s.withItalic(false));
+                        MutableText typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color).withItalic(false));
                         if (arg.plural) typeText.append("(s)");
                         text.append(typeText);
                         if (arg.optional) {
@@ -93,8 +93,8 @@ public class Icon {
                         }
                         text.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
                         text.append(Utility.textFromString(line).formatted(Formatting.GRAY));
-                        lore.add(Utility.textToNBT(text));
-                    } else lore.add(Utility.textToNBT(Utility.textFromString(line).formatted(Formatting.GRAY)));
+                        lore.add(text);
+                    } else lore.add(Utility.textFromString(line).formatted(Formatting.GRAY));
                     i++;
                 }
                 if (arg.notes != null) for (String[] lines : arg.notes) {
@@ -107,11 +107,11 @@ public class Icon {
                 }
             }
             if (tags != null && tags != 0) {
-                lore.add(Utility.textToNBT(Text.literal("# ").formatted(Formatting.DARK_AQUA).append(Text.literal(tags + " Tag" + (tags != 1 ? "s" : "")).formatted(Formatting.GRAY))));
+                lore.add(Text.literal("# ").formatted(Formatting.DARK_AQUA).styled(s -> s.withItalic(false)).append(Text.literal(tags + " Tag" + (tags != 1 ? "s" : "")).formatted(Formatting.GRAY)));
             }
             if (hasOptional) {
-                lore.add(Utility.textToNBT(Text.literal("")));
-                lore.add(Utility.textToNBT(Text.literal("*Optional").formatted(Formatting.GRAY)));
+                lore.add(Text.empty());
+                lore.add(Text.literal("*Optional").formatted(Formatting.GRAY).styled(s -> s.withItalic(false)));
             }
         }
         if (returnValues != null && returnValues.length != 0) {
@@ -120,7 +120,7 @@ public class Icon {
             for (ReturnValue returnValue : returnValues) {
                 if (returnValue.text != null) addToLore(lore, returnValue.text);
                 else {
-                    lore.add(Utility.textToNBT(Text.empty().append(Text.literal(returnValue.type.display).setStyle(Style.EMPTY.withColor(returnValue.type.color))).append(Text.literal(" - ").formatted(Formatting.DARK_GRAY)).append(Text.literal(returnValue.description[0]).formatted(Formatting.GRAY))));
+                    lore.add(Text.empty().append(Text.literal(returnValue.type.display).setStyle(Style.EMPTY.withColor(returnValue.type.color).withItalic(false))).append(Text.literal(" - ").formatted(Formatting.DARK_GRAY)).append(Text.literal(returnValue.description[0]).formatted(Formatting.GRAY).styled(s -> s.withItalic(false))));
                     boolean first = true;
                     for (String description : returnValue.description) {
                         if (first) {
@@ -151,47 +151,35 @@ public class Icon {
         }
         if(requireTokens) {
             addToLore(lore,"");
-            lore.add(Utility.textToNBT(Text.literal("Unlock with Tokens").withColor(0xffd42a)));
+            lore.add(Text.literal("Unlock with Tokens").withColor(0xffd42a));
         }
         if(requiredRank != null) {
             if(requireTokens) {
-                lore.add(Utility.textToNBT(Text.literal("OR").withColor(0xff55aa)));
-                lore.add(Utility.textToNBT(Text.literal( "Unlock with " + requiredRank.name).withColor(requiredRank.color.getRgb())));
+                lore.add(Text.literal("OR").withColor(0xff55aa));
+                lore.add(Text.literal("Unlock with " + requiredRank.name).withColor(requiredRank.color.getRgb()));
             }
             else {
                 addToLore(lore,"");
-                lore.add(Utility.textToNBT(Text.literal(requiredRank.name + " Exclusive").withColor(requiredRank.color.getRgb())));
+                lore.add(Text.literal(requiredRank.name + " Exclusive").setStyle(Style.EMPTY.withColor(requiredRank.color.getRgb()).withItalic(false)));
             }
         }
-        display.put("Lore", lore);
 
-        display.put("Name", Utility.textToNBT(Utility.textFromString(name)));
+        dfItem.setName(Utility.textFromString(name));
+        dfItem.setLore(lore);
 
-        nbt.put("display", display);
-        nbt.put("HideFlags", NbtInt.of(127));
-        if (color != null) nbt.put("CustomPotionColor", NbtInt.of(color.getColor()));
+        dfItem.hideFlags();
 
-        if (head != null) {
-            NbtCompound SkullOwner = new NbtCompound();
-            NbtIntArray Id = new NbtIntArray(List.of(0, 0, 0, 0));
-            SkullOwner.put("Id", Id);
-            SkullOwner.putString("Name", "DF-HEAD");
-            NbtCompound Properties = new NbtCompound();
-            NbtList textures = new NbtList();
-            NbtCompound texture = new NbtCompound();
-            texture.putString("Value", head);
-            textures.add(texture);
-            Properties.put("textures", textures);
-            SkullOwner.put("Properties", Properties);
-            nbt.put("SkullOwner", SkullOwner);
-        }
+        if (color != null) dfItem.setDyeColor(color.getColor());
 
-        item.setNbt(nbt);
+        if (head != null) dfItem.setProfile(Util.NIL_UUID, head, null);
+
+        dfItem.setCustomModelData(5000);
+
         return item;
     }
 
-    private void addToLore(NbtList lore, String text) {
-        lore.add(Utility.textToNBT(Utility.textFromString(text)));
+    private void addToLore(ArrayList<Text> lore, String text) {
+        lore.add(Utility.textFromString(text));
     }
 
     public List<ArgumentGroup> getArgGroups() {
@@ -240,7 +228,6 @@ public class Icon {
             this.color = color;
             this.display = display;
             var item = icon.getDefaultStack();
-            item.setSubNbt("CustomModelData",NbtInt.of(5000));
             this.icon = item;
             getVarItem = null;
         }
@@ -252,9 +239,7 @@ public class Icon {
         Type(TextColor color, String display, Item icon, @Nullable Icon.Type.getVarItem getVarItem) {
             this.color = color;
             this.display = display;
-            var item = icon.getDefaultStack();
-            item.setSubNbt("CustomModelData",NbtInt.of(5000));
-            this.icon = item;
+            this.icon = icon.getDefaultStack();
             this.getVarItem = getVarItem;
         }
 

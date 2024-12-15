@@ -4,16 +4,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.template.Argument;
 import dev.dfonline.codeclient.hypercube.template.Bracket;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtString;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Action implements Searchable {
     public String name;
@@ -43,9 +44,6 @@ public class Action implements Searchable {
     @Override
     public ItemStack getItem() {
         ItemStack item = icon.getItem();
-        NbtCompound nbt = item.getNbt();
-        assert nbt != null;
-        NbtCompound PublicBukkitValues = new NbtCompound();
         JsonObject CodeTemplateData = new JsonObject();
         CodeTemplateData.addProperty("author", CodeClient.MC.getSession().getUsername());
         CodeTemplateData.addProperty("name", icon.name);
@@ -84,13 +82,12 @@ public class Action implements Searchable {
         } catch (Exception ignored) {
         }
 
-        PublicBukkitValues.put("hypercube:codetemplatedata", NbtString.of(String.valueOf(CodeTemplateData)));
-        nbt.put("PublicBukkitValues", PublicBukkitValues);
-        item.setNbt(nbt);
-        return item;
+        DFItem dfItem = DFItem.of(item);
+        dfItem.getItemData().setHypercubeStringValue("codetemplatedata", String.valueOf(CodeTemplateData));
+        return dfItem.getItemStack();
     }
 
     public boolean isInvalid() {
-        return this.icon.name.equals("");
+        return this.icon.name.isEmpty();
     }
 }

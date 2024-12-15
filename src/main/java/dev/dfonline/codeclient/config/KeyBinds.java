@@ -1,11 +1,14 @@
 package dev.dfonline.codeclient.config;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.menu.devinventory.DevInventoryScreen;
 import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Play;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Hand;
@@ -30,6 +33,26 @@ public class KeyBinds {
 
     public static KeyBinding openAction;
 
+    /**
+     * Shows tags set with /item tag when held in creative mode.
+     * Handled in the Keyboard mixin as keybinds don't get set when pressed while in a screen.
+     */
+    public static KeyBinding previewItemTags;
+
+    /**
+     * Plays all the sounds in a code chest.
+     */
+    public static KeyBinding previewSounds;
+
+    /**
+     * Toggles between Play and Dev modes.
+     */
+    public static KeyBinding playDev;
+    /**
+     * Toggles between Play and Build modes.
+     */
+    public static KeyBinding playBuild;
+
     public static void init() {
         editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.codepalette", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Y, "category.codeclient.dev"));
         clipBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.phaser", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "category.codeclient.dev"));
@@ -40,10 +63,14 @@ public class KeyBinds {
         teleportForward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.forward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
         teleportBackward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.backward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
 
+        previewItemTags = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_item_tags", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
+        previewSounds = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_sounds", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
+        playDev = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.playDev", InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
+        playBuild = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.playBuild", InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
     }
 
     public static void tick() {
-        var player = CodeClient.MC.player;
+        ClientPlayerEntity player = CodeClient.MC.player;
         if (player != null) {
             checkTp(teleportLeft, new Vec3d(0, 0, -2));
             checkTp(teleportRight, new Vec3d(0, 0, 2));
@@ -75,6 +102,13 @@ public class KeyBinds {
                 }
             }
         }
+
+        if(CodeClient.MC.getNetworkHandler() == null) return;
+        if (playDev.wasPressed())
+            CommandSender.queue(CodeClient.location instanceof Play ? "dev" : "play");
+
+        if (playBuild.wasPressed())
+            CommandSender.queue(CodeClient.location instanceof Play ? "build" : "play");
     }
 
     private static void checkTp(KeyBinding keyBinding, Vec3d offset) {

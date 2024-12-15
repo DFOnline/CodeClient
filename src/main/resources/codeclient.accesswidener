@@ -1,0 +1,8 @@
+accessWidener v2 named
+
+#accessible  method  net/minecraft/client/gui/screen/ingame/HandledScreen   drawSlotHighlightFront  (Lnet/minecraft/client/gui/DrawContext;)V
+#accessible  method  net/minecraft/client/gui/screen/ingame/HandledScreen   drawSlotHighlightBack   (Lnet/minecraft/client/gui/DrawContext;)V
+
+# <access>   class   <className>
+# <access>   method   <className>   <methodName>   <methodDesc>
+# <access>   field   <className>   <fieldName>   <fieldDesc>

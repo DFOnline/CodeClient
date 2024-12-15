@@ -9,7 +9,6 @@ import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
@@ -22,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Config {
     private static Config instance;
-    public boolean NoClipEnabled = true;
+    public boolean NoClipEnabled = false;
     public boolean PlaceOnAir = false;
     public int AirSpeed = 10;
     public boolean CodeClientAPI = false;
@@ -35,10 +34,8 @@ public class Config {
     public int AutoJoinPlotId = 0;
     public CharSetOption FileCharSet = CharSetOption.UTF_8;
     public boolean InvisibleBlocksInDev = false;
-    public float ReachDistance = 5;
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
-    public boolean AirControl = false;
     public boolean FocusSearch = false;
     public CharSetOption SaveCharSet = CharSetOption.UTF_8;
     public boolean RecentChestInsert = true;
@@ -74,6 +71,19 @@ public class Config {
     public int RecentValues = 0;
     public Boolean ValueDetails = true;
     public Boolean PhaseToggle = false;
+    public DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
+    public boolean ShowVariableScopeBelowName = true;
+    public boolean DevNodes = false;
+    public boolean GiveUuidNameStrings = true;
+    public boolean CPUDisplay = true;
+    public CPUDisplayCornerOption CPUDisplayCorner = CPUDisplayCornerOption.TOP_LEFT;
+    public boolean HideScopeChangeMessages = true;
+    public boolean HighlighterEnabled = true;
+    public boolean HighlightExpressions = true;
+    public boolean HighlightMiniMessage = true;
+    public int MiniMessageTagColor = 0x808080;
+    public boolean StateSwitcher = true;
+    public boolean SpeedSwitcher = true;
 
     public Config() {
     }
@@ -112,10 +122,8 @@ public class Config {
             object.addProperty("AutoJoinPlotId", AutoJoinPlotId);
             object.addProperty("FileCharSet", FileCharSet.name());
             object.addProperty("InvisibleBlocksInDev", InvisibleBlocksInDev);
-            object.addProperty("ReachDistance", ReachDistance);
             object.addProperty("AutoFly", AutoFly);
             object.addProperty("CodeLayerInteractionMode", CodeLayerInteractionMode.name());
-            object.addProperty("AirControl", AirControl);
             object.addProperty("FocusSearch", FocusSearch);
             object.addProperty("SaveCharSet", SaveCharSet.name());
             object.addProperty("RecentChestInsert", RecentChestInsert);
@@ -150,6 +158,20 @@ public class Config {
             object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
+            object.addProperty("DestroyItemResetMode", DestroyItemResetMode.name());
+            object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
+            object.addProperty("DevNodes", DevNodes);
+            object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
+            object.addProperty("CPUDisplay", CPUDisplay);
+            object.addProperty("CPUDisplayCorner", CPUDisplayCorner.name());
+            object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
+            object.addProperty("StateSwitcher",StateSwitcher);
+            object.addProperty("SpeedSwitcher",SpeedSwitcher);
+            object.addProperty("HighlighterEnabled", HighlighterEnabled);
+            object.addProperty("HighlightExpressions", HighlightExpressions);
+            object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
+            object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
+
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
             CodeClient.LOGGER.info("Couldn't save config: " + e);
@@ -314,7 +336,7 @@ public class Config {
                                         .text(Text.translatable("codeclient.config.noclip.description"))
                                         .build())
                                 .binding(
-                                        true,
+                                        false,
                                         () -> NoClipEnabled,
                                         opt -> NoClipEnabled = opt
                                 )
@@ -337,7 +359,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(float.class)
                                 .name(Text.translatable("codeclient.config.angle_up"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_up.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_up.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         50F,
                                         () -> UpAngle,
@@ -347,7 +369,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(float.class)
                                 .name(Text.translatable("codeclient.config.angle_down"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_down.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_down.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(50F,
                                         () -> DownAngle,
                                         opt -> DownAngle = opt
@@ -356,7 +378,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.tp_up"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_up.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_up.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         false,
                                         () -> TeleportUp,
@@ -366,7 +388,7 @@ public class Config {
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.tp_down"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_down.description")))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_down.description"), Text.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         false,
                                         () -> TeleportDown,
@@ -386,18 +408,6 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-//                                .option(Option.createBuilder(boolean.class)
-//                                        .name(Text.literal("Air Control"))
-//                                        .description(OptionDescription.createBuilder()
-//                                                .text(Text.literal("Gives you the same control in air as walking."))
-//                                                .build())
-//                                        .binding(
-//                                                false,
-//                                                () -> AirControl,
-//                                                opt -> AirControl = opt
-//                                        )
-//                                        .controller(TickBoxController::new)
-//                                        .build())
                         .build())
                 //</editor-fold>
                 //<editor-fold desc="Interaction">
@@ -548,6 +558,48 @@ public class Config {
                                 )
                                 .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(0, 100))
                                 .build())
+                        .option(Option.createBuilder(DestroyItemReset.class)
+                                .name(Text.translatable("codeclient.config.destroy_item_reset.name"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.destroy_item_reset.description")))
+                                .binding(
+                                        DestroyItemReset.OFF,
+                                        () -> DestroyItemResetMode,
+                                        opt -> DestroyItemResetMode = opt
+                                )
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, DestroyItemReset.class))
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.givestrings"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.translatable("codeclient.config.givestrings.description"))
+                                        .build())
+                                .binding(
+                                        true,
+                                        () -> GiveUuidNameStrings,
+                                        opt -> GiveUuidNameStrings = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.state_switcher"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.state_switcher.description")))
+                                .binding(
+                                        true,
+                                        () -> StateSwitcher,
+                                        opt -> StateSwitcher = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.speed_switcher"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.speed_switcher.description")))
+                                .binding(
+                                        true,
+                                        () -> SpeedSwitcher,
+                                        opt -> SpeedSwitcher = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
                         .build())
                 //</editor-fold>
                 //<editor-fold desc="Visual">
@@ -566,6 +618,16 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .available(true)
                                 .flag(OptionFlag.RELOAD_CHUNKS)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.show_variable_scope_below_name"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.show_variable_scope_below_name.description")))
+                                .binding(
+                                        true,
+                                        () -> ShowVariableScopeBelowName,
+                                        opt -> ShowVariableScopeBelowName = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.translatable("codeclient.config.show_i_on_line_scope"))
@@ -607,7 +669,36 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.cpu_display"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.cpu_display.description")))
+                                .binding(
+                                        true,
+                                        () -> CPUDisplay,
+                                        opt -> CPUDisplay = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(CPUDisplayCornerOption.class)
+                                .name(Text.translatable("codeclient.config.cpu_display_corner.name"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.cpu_display_corner.description")))
+                                .binding(
+                                        CPUDisplayCornerOption.TOP_LEFT,
+                                        () -> CPUDisplayCorner,
+                                        opt -> CPUDisplayCorner = opt
+                                )
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, CPUDisplayCornerOption.class))
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.hide_scope_change_messages"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.hide_scope_change_messages.description")))
+                                .binding(
+                                        true,
+                                        () -> HideScopeChangeMessages,
+                                        opt -> HideScopeChangeMessages = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
                         //</editor-fold>
                         //<editor-fold desc="Action Viewer">
                         .group(OptionGroup.createBuilder()
@@ -680,6 +771,73 @@ public class Config {
                                         .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500, 500))
                                         .build())
                                 .build())
+                        //</editor-fold>
+                        //<editor-fold desc="Chat Highlighter">
+                        .group(OptionGroup.createBuilder()
+                                .name(Text.translatable("codeclient.config.chat_highlighter"))
+                                .description(OptionDescription.of(
+                                        Text.translatable("codeclient.config.chat_highlighter.description"),
+                                        Text.translatable("codeclient.config.chat_highlighter.description.extra")
+                                ))
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.translatable("codeclient.config.chat_highlighter.enable"))
+                                        .description(OptionDescription.of(
+                                                Text.translatable("codeclient.config.chat_highlighter.enable.description"),
+                                                Text.empty(),
+                                                Text.translatable("codeclient.config.chat_highlighter.description").setStyle(Style.EMPTY.withColor(Formatting.GRAY)),
+                                                Text.translatable("codeclient.config.chat_highlighter.description.extra").setStyle(Style.EMPTY.withColor(Formatting.GRAY))
+                                        ))
+                                        .binding(
+                                                true,
+                                                () -> HighlighterEnabled,
+                                                opt -> HighlighterEnabled = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.translatable("codeclient.config.chat_highlighter.with_expressions"))
+                                        .description(OptionDescription.of(
+                                                Text.translatable("codeclient.config.chat_highlighter.with_expressions.description"),
+                                                Text.translatable("codeclient.config.chat_highlighter.with_expressions.description.example")
+                                        ))
+                                        .binding(
+                                                true,
+                                                () -> HighlightExpressions,
+                                                opt -> HighlightExpressions = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+                                .option(Option.createBuilder(Boolean.class)
+                                        .name(Text.translatable("codeclient.config.chat_highlighter.with_minimessage"))
+                                        .description(OptionDescription.of(
+                                                Text.translatable("codeclient.config.chat_highlighter.with_minimessage.description1"),
+                                                Text.translatable("codeclient.config.chat_highlighter.with_minimessage.description2")
+                                        ))
+                                        .binding(
+                                                true,
+                                                () -> HighlightMiniMessage,
+                                                opt -> HighlightMiniMessage = opt
+                                        )
+                                        .controller(TickBoxControllerBuilder::create)
+                                        .build()
+                                )
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.translatable("codeclient.config.chat_highlighter.minimessage_tag_color"))
+                                        .description(OptionDescription.of(
+                                                Text.translatable("codeclient.config.chat_highlighter.minimessage_tag_color.description")
+                                        ))
+                                        .binding(
+                                                new Color((float) 128 / 255, (float) 128 / 255, (float) 128 / 255),
+                                                () -> new Color(MiniMessageTagColor),
+                                                opt -> MiniMessageTagColor = opt.getRGB()
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build()
+                                )
+                                .build()
+                        )
                         //</editor-fold>
                         //<editor-fold desc="Chest Highlight">
                         .group(OptionGroup.createBuilder()
@@ -852,6 +1010,24 @@ public class Config {
 
     public enum ActionViewerAlignment {
         CENTER,
-        TOP;
+        TOP
+    }
+
+    public enum DestroyItemReset {
+        OFF(null),
+        STANDARD("rs"),
+        COMPACT("rc");
+
+        public String command;
+        DestroyItemReset(String command) {
+            this.command = command;
+        }
+    }
+
+    public enum CPUDisplayCornerOption {
+        TOP_LEFT,
+        TOP_RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM_RIGHT
     }
 }

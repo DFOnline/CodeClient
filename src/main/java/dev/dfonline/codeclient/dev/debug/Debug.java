@@ -41,7 +41,7 @@ public class Debug extends Feature {
         if (CodeClient.location instanceof Plot plot) {
             if (!Config.getConfig().CCDBUG) return false;
             if (packet instanceof OverlayMessageS2CPacket overlay) {
-                var txt = overlay.getMessage();
+                var txt = overlay.text();
                 if (Text.empty().equals(txt)) {
                     return false;
                 }

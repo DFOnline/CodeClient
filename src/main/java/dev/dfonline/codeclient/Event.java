@@ -1,9 +1,11 @@
 package dev.dfonline.codeclient;
 
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.*;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.math.Vec3d;
@@ -23,11 +25,11 @@ public class Event {
             if (clear.shouldReset()) step = Sequence.WAIT_FOR_POS;
         }
         if (packet instanceof PlayerPositionLookS2CPacket pos) {
-            tp = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+            tp = new Vec3d(pos.change().position().x, pos.change().position().y, pos.change().position().z);
             if (step == Sequence.WAIT_FOR_POS) step = Sequence.WAIT_FOR_MESSAGE;
         }
         if (packet instanceof OverlayMessageS2CPacket overlay) {
-            if (step == Sequence.WAIT_FOR_MESSAGE && overlay.getMessage().getString().startsWith("DiamondFire - ")) {
+            if (step == Sequence.WAIT_FOR_MESSAGE && overlay.text().getString().startsWith("DiamondFire - ")) {
                 updateLocation(new Spawn());
             }
         }
@@ -52,9 +54,13 @@ public class Event {
 
     public static <T extends PacketListener> void onSendPacket(Packet<T> packet) {
         if (packet instanceof CommandExecutionC2SPacket command) {
+            CommandSender.registerCommandSend();
             if (List.of("play", "build", "code", "dev").contains(command.command().replaceFirst("mode ", ""))) {
                 switchingMode = true;
             }
+        }
+        if (packet instanceof ChatMessageC2SPacket) {
+            CommandSender.registerCommandSend();
         }
     }
 

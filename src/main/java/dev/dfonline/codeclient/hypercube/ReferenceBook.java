@@ -1,8 +1,13 @@
 package dev.dfonline.codeclient.hypercube;
 
-import net.minecraft.client.item.TooltipContext;
+import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.data.ItemData;
+import dev.dfonline.codeclient.data.PublicBukkitValues;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.WrittenBookItem;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 
 import java.util.List;
@@ -17,8 +22,8 @@ public class ReferenceBook {
 
     private boolean validate(ItemStack item) {
         if (item.getItem() instanceof WrittenBookItem) {
-            var nbt = item.getSubNbt("PublicBukkitValues");
-            return nbt != null && !nbt.getString("hypercube:item_instance").isEmpty();
+            DFItem dfItem = DFItem.of(item);
+            return !dfItem.getHypercubeStringValue("item_instance").isEmpty();
         }
         return false;
     }
@@ -31,8 +36,22 @@ public class ReferenceBook {
         return book;
     }
 
+    /**
+     * This function exists to fix a compatibility issue with previewing items tags.
+     * (e.g. the {@link dev.dfonline.codeclient.dev.overlay.ActionViewer}'s fallback tooltip)
+     * @return the reference book without any tags applied to it.
+     */
+    public ItemStack getTaglessItem() {
+        DFItem tagless = DFItem.of(book.copy());
+        ItemData itemData = tagless.getItemData();
+        if (itemData == null) return book;
+        itemData.removeKey(PublicBukkitValues.PUBLIC_BUKKIT_VALUES_KEY);
+        tagless.setItemData(itemData);
+        return tagless.getItemStack();
+    }
+
     public List<Text> getTooltip() {
-        return book.getTooltip(null, TooltipContext.BASIC);
+        return getTaglessItem().getTooltip(Item.TooltipContext.DEFAULT, CodeClient.MC.player, TooltipType.BASIC);
     }
 
     // todo: parse into action?

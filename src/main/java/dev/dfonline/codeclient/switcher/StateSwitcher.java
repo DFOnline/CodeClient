@@ -1,6 +1,8 @@
 package dev.dfonline.codeclient.switcher;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.*;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
@@ -13,6 +15,21 @@ import java.util.List;
 public class StateSwitcher extends GenericSwitcher {
     public StateSwitcher() {
         super(Text.translatable("codeclient.switcher.state"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F4);
+    }
+
+    public static class StateSwitcherFeature extends Feature {
+        @Override
+        public boolean enabled() {
+            return Config.getConfig().StateSwitcher;
+        }
+
+        public boolean open() {
+            if (CodeClient.location instanceof Plot) {
+                CodeClient.MC.setScreen(new StateSwitcher());
+                return true;
+            }
+            return false;
+        }
     }
 
     @Override

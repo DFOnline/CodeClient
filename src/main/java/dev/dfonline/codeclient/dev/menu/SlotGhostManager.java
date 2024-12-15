@@ -112,7 +112,7 @@ public class SlotGhostManager extends Feature {
 //        itemStack.setCount(slot.id);
                 context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0x50__90_90_ff : 0x30__ff_00_00);
                 context.drawItem(itemStack, slot.x, slot.y);
-                context.drawItemInSlot(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
+                context.drawStackOverlay(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
 //        context.drawText(CodeClient.MC.textRenderer, Text.literal(arg.type),slot.x,slot.y,0xFFFFFF00,true);
                 context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40ffffff);
             } catch (Exception e) {

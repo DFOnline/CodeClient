@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.1-SNAPSHOT'
+    id 'fabric-loom' version '1.8-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -24,16 +24,23 @@ repositories {
 }
 
 dependencies {
-    // To change the versions see the gradle.properties file
+    // To change the versions see the gradle.properties file.
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
+    // Fabric API.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:${project.yacl_version}"
+    // YetAnotherConfigLib.
+    modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    // ModMenu.
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
+    // Adventure for MiniMessage parsing.
+    implementation("net.kyori:adventure-api:${project.adventure_api_version}")
+    modImplementation include("net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}")
+
+    // WebSocket for CodeClient API.
     implementation include("org.java-websocket:Java-WebSocket:1.5.3")
 }
 
@@ -46,7 +53,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
     // this fixes some edge cases with special characters not displaying correctly
@@ -68,6 +75,10 @@ java {
     // if it is present.
     // If you remove this line, sources will not be generated.
     // withSourcesJar()
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/codeclient.accesswidener")
 }
 
 jar {
