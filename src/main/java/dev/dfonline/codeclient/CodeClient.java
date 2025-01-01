@@ -1,6 +1,8 @@
 package dev.dfonline.codeclient;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
@@ -70,6 +72,11 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Objects;
@@ -84,6 +91,7 @@ public class CodeClient implements ClientModInitializer {
     public static MinecraftClient MC = MinecraftClient.getInstance();
 
     public static AutoJoin autoJoin = AutoJoin.NONE;
+    public static Utility.Toast startupToast;
 
     @NotNull
     public static Action currentAction = new None();
@@ -502,6 +510,40 @@ public class CodeClient implements ClientModInitializer {
                 getModContainer(),
                 Text.literal(prefix).formatted(Formatting.GRAY).append(name),
                 type
+        );
+    }
+
+    public static void parseVersionInfo(String response) {
+        JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+
+        var versionNumber = json.get("version_number").getAsString();
+
+        if (Config.getConfig().AutoUpdateOption != Config.AutoUpdate.UPDATE) {
+            startupToast = new Utility.Toast(Text.translatable("toast.codeclient.update_available.title", versionNumber), Text.translatable("toast.codeclient.update_available"));
+            return;
+        }
+        var files = json.getAsJsonArray("files");
+        files.forEach(file -> {
+                    var fileObject = file.getAsJsonObject();
+                    if (fileObject.get("primary").getAsBoolean()) {
+                        var url = fileObject.get("url").getAsString();
+                        LOGGER.info("Updated mod URL: {}", url);
+                        // Download the file.
+                        try (
+                                InputStream inputStream = new URI(url).toURL().openStream();
+                                ReadableByteChannel rbc = Channels.newChannel(inputStream);
+                                FileOutputStream fos = new FileOutputStream("mods/" + CodeClient.MOD_NAME + "-" + versionNumber + ".jar")
+                        ) {
+                            LOGGER.info("Starting download...");
+                            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                        } catch (Exception e) {
+                            LOGGER.error("Failed to download the file: {}", e.getMessage());
+                        } finally {
+                            LOGGER.info("Download complete.");
+                            startupToast = new Utility.Toast(Text.translatable("toast.codeclient.update.title", versionNumber), Text.translatable("toast.codeclient.update"));
+                        }
+                    }
+                }
         );
     }
 

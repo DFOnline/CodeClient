@@ -29,6 +29,16 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 public class Utility {
+
+    /***
+     * A toast message to be used when creating a SystemToast directly is not possible, such as before the game starts.
+     * @param title       The title of the toast.
+     * @param description The description of the toast.
+     */
+    public record Toast(Text title, Text description) {
+
+    }
+
     /**
      * Get the slot id to be used with a creative packet, from a local slot id.
      */
