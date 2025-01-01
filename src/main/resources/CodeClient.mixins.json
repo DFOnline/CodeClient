@@ -35,7 +35,7 @@
     "world.block.MLightBlock",
     "world.block.MSignBlockEntity",
     "world.block.MStructureVoidBlock"
-  ,"screen.MTextFieldWidget","screen.MElement"],
+  ],
   "injectors": {
     "defaultRequire": 1
   }
