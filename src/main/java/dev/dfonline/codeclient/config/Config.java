@@ -78,7 +78,7 @@ public class Config {
     public boolean CPUDisplay = true;
     public CPUDisplayCornerOption CPUDisplayCorner = CPUDisplayCornerOption.TOP_LEFT;
     public boolean HideScopeChangeMessages = true;
-    public AutoUpdate AutoUpdateOption = AutoUpdate.UPDATE;
+    public AutoUpdate AutoUpdateOption = AutoUpdate.OFF;
     public boolean HighlighterEnabled = true;
     public boolean HighlightExpressions = true;
     public boolean HighlightMiniMessage = true;
@@ -194,7 +194,7 @@ public class Config {
                                         .text(Text.translatable("codeclient.config.requires_restart"))
                                         .build())
                                 .binding(
-                                        AutoUpdate.UPDATE,
+                                        AutoUpdate.OFF,
                                         () -> AutoUpdateOption,
                                         opt -> AutoUpdateOption = opt
                                 )
