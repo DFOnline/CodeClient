@@ -114,9 +114,9 @@ public class KeyBinds {
     private static void checkTp(KeyBinding keyBinding, Vec3d offset) {
         var player = CodeClient.MC.player;
         if (player == null) return;
-        if (keyBinding.wasPressed() && CodeClient.location instanceof Dev dev && dev.isInDev(player.getPos())) {
+        if (keyBinding.wasPressed() && CodeClient.location instanceof Dev dev && dev.isInDevSpace()) {
             var target = player.getPos().add(offset);
-            if (dev.isInDev(target)) player.setPosition(target);
+            if (dev.isInDevSpace(target)) player.setPosition(target);
         }
     }
 }
