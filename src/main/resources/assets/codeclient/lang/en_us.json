@@ -215,6 +215,7 @@
   "codeclient.phaser.dev_mode1": "You cannot use phaser in build mode since %s to teleport.",
   "codeclient.phaser.dev_mode2": "it uses location items",
 
+  "codeclient.peeker.not_ready": "Didn't fetch items yet",
   "codeclient.peeker.empty": "Empty",
   "codeclient.peeker.contents": "Contents",
 
