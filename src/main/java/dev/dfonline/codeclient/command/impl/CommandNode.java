@@ -17,7 +17,8 @@ public class CommandNode extends Command {
 
     private static final Map<String, String> NODE_MAP = new HashMap<>();
 
-    static {
+    public void loadNodes() {
+        NODE_MAP.clear();
         NODE_MAP.put("1", "node1");
         NODE_MAP.put("2", "node2");
         NODE_MAP.put("3", "node3");
@@ -52,6 +53,7 @@ public class CommandNode extends Command {
     public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
         return cmd.then(argument("node", word())
                 .suggests((context, builder) -> {
+                    loadNodes(); // Refresh in case of config change.
                     NODE_MAP.keySet().forEach(builder::suggest);
                     return builder.buildFuture();
                 })
