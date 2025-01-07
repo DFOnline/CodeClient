@@ -7,9 +7,8 @@ import com.terraformersmc.modmenu.util.mod.ModrinthUpdateInfo;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
 import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,9 +20,8 @@ import java.net.http.HttpResponse;
 
 @Mixin(UpdateCheckerUtil.class)
 public class VersionChecker {
-    @Shadow
-    @Final
-    public static Logger LOGGER;
+    @Unique
+    private static final Logger LOGGER = UpdateCheckerUtil.LOGGER;
 
     @Inject(method = "checkForUpdates0", at = @At("TAIL"), remap = false)
     private static void checkVersion(CallbackInfo ci) {
@@ -45,15 +43,15 @@ public class VersionChecker {
             // Get the new version.
             final String versionUrl = "https://api.modrinth.com/v2/version/" + modrinthUpdateInfo.getVersionId();
 
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(versionUrl))
-                    .build();
-            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .thenApply(HttpResponse::body)
-                    .thenAccept(CodeClient::parseVersionInfo)
-                    .join();
-
+            try (HttpClient client = HttpClient.newHttpClient()) {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(versionUrl))
+                        .build();
+                client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                        .thenApply(HttpResponse::body)
+                        .thenAccept(CodeClient::parseVersionInfo)
+                        .join();
+            }
         }
     }
 }
