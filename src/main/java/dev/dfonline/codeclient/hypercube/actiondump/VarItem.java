@@ -12,8 +12,11 @@ public abstract class VarItem {
 
         DFItem dfItem = DFItem.of(item);
         dfItem.editData(itemData -> {
-            itemData.setHypercubeStringValue("id", id);
-            itemData.setHypercubeStringValue("data", data.toString());
+            JsonObject varItemData = new JsonObject();
+            varItemData.addProperty("id", id);
+            varItemData.add("data", data);
+
+            itemData.setHypercubeStringValue("varitem", varItemData.toString());
         });
         return dfItem.getItemStack();
     }
