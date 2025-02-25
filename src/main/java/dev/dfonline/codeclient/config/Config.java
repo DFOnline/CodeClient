@@ -59,6 +59,7 @@ public class Config {
     public boolean UseSelectionColor = true;
     public int Line4Color = 0xFF8800;
     public boolean SignPeeker = true;
+    public int SignHighlightColor = 0xFFFFFF;
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
     public boolean PickAction = true;
     public boolean DevForBuild = false;
@@ -148,6 +149,7 @@ public class Config {
             object.addProperty("UseSelectionColor", UseSelectionColor);
             object.addProperty("Line4Color", Line4Color);
             object.addProperty("SignPeeker", SignPeeker);
+            object.addProperty("SignHighlightColor", SignHighlightColor);
             object.addProperty("CustomCodeChest", CustomCodeChest.name());
             object.addProperty("PickAction", PickAction);
             object.addProperty("DevForBuild", DevForBuild);
@@ -958,6 +960,16 @@ public class Config {
                                                 new Color(0xFF8800),
                                                 () -> new Color(Line4Color),
                                                 opt -> Line4Color = opt.getRGB()
+                                        )
+                                        .controller(ColorControllerBuilder::create)
+                                        .build())
+                                .option(Option.createBuilder(Color.class)
+                                        .name(Text.translatable("codeclient.config.sign_highlight_color"))
+                                        .description(OptionDescription.of(Text.translatable("codeclient.config.sign_highlight_color.description1"), Text.translatable("codeclient.config.sign_highlight_color.description2")))
+                                        .binding(
+                                                new Color(0xFFFFFF),
+                                                () -> new Color(SignHighlightColor),
+                                                opt -> SignHighlightColor = opt.getRGB()
                                         )
                                         .controller(ColorControllerBuilder::create)
                                         .build())
