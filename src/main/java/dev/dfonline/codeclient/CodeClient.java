@@ -422,8 +422,8 @@ public class CodeClient implements ClientModInitializer {
         return chestFeatures().anyMatch(feature -> feature.charTyped(chr, modifiers));
     }
 
-    public static void onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-        chestFeatures().forEach(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
+    public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+        return chestFeatures().anyMatch(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
     }
 
     public static boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
