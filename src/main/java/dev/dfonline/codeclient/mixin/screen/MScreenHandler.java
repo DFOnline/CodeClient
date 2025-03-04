@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.dev.menu.AdvancedMiddleClickFeature;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -30,13 +31,13 @@ public abstract class MScreenHandler {
             cancellable = true
     )
     public void clickSlot(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
-        CodeClient.LOGGER.info(this.getClass().getName()+" "+actionType.name());
+        // creative inventories act differently, and dont keep track of the item in the cursor, blindly trusting the client when they place an item down.
         if (/*CodeClient.location instanceof Dev && */ actionType == SlotActionType.CLONE) {
-            if (player.isInCreativeMode() && getCursorStack().isEmpty() && slotIndex >= 0) {
+            if (player.isInCreativeMode()) {
                 var slot = (Slot) slots.get(slotIndex);
-                if (slot.hasStack()) {
-                    var item = slot.getStack().copyWithCount(1);
-                    setCursorStack(item);
+                var clone = AdvancedMiddleClickFeature.getCopy(slot, getCursorStack());
+                if (clone != null) {
+                    setCursorStack(clone);
                 }
                 ci.cancel();
             }
