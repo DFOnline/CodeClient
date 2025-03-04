@@ -1,15 +1,19 @@
 package dev.dfonline.codeclient.mixin.network;
 
+import dev.dfonline.codeclient.Utility;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.util.collection.DefaultedList;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
@@ -33,26 +37,30 @@ public class MClientPlayerInteractionManager {
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"),
-            cancellable = true,
+            cancellable = true
     )
     public void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
+        LOGGER.info(String.valueOf(slotId));
         if (actionType == SlotActionType.CLONE) {
             ScreenHandler handler = player.currentScreenHandler;
-            Slot slot = handler.getSlot(slotId);
-            ItemStack original = slot.getStack().copy();
-
-            LOGGER.info(handler.getCursorStack().toString());
 
             var manager = ((ClientPlayerInteractionManager)(Object)this);
-            manager.clickSlot(syncId, slotId, 0, SlotActionType.SWAP, player);
-            networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36, handler.getCursorStack()));
-            manager.clickSlot(syncId, slotId, 0, SlotActionType.SWAP, player);
-            manager.clickSlot(syncId, 54, 0, SlotActionType.QUICK_CRAFT, player);
-            manager.clickSlot(syncId, slotId, 0, SlotActionType.PICKUP, player);
 
-//            networkHandler.sendPacket(new ClickSlotC2SPacket(
-//                    syncId, screenHandler.getRevision(), slotId, button, actionType, screenHandler.getCursorStack().copy(), int2ObjectMap
-//            ));
+            var emptySlot = player.getInventory().getEmptySlot();
+            var stack = handler.getCursorStack().copy();
+
+            LOGGER.info(String.valueOf(emptySlot));
+            networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(
+                    Utility.getRemoteSlot(emptySlot), stack)
+            );
+            handler.setCursorStack(stack);
+
+            int convertedSlotId = Utility.getRemoteSlot(emptySlot)-9+(handler.slots.size()-36);
+            Slot slot = handler.getSlot(convertedSlotId);
+
+            manager.clickSlot(syncId, convertedSlotId, 0, SlotActionType.PICKUP, player);
+            slot.getStack().setCount(0);
+
             ci.cancel();
         }
     }
