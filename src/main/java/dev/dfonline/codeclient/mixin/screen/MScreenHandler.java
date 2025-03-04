@@ -31,8 +31,9 @@ public abstract class MScreenHandler {
             cancellable = true
     )
     public void clickSlot(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
-        // creative inventories act differently, and dont keep track of the item in the cursor, blindly trusting the client when they place an item down.
-        if (/*CodeClient.location instanceof Dev && */ actionType == SlotActionType.CLONE) {
+        // creative inventories act differently, and don't keep track of the item in the cursor, and will trust the client.
+        if (CodeClient.location instanceof Dev &&  actionType == SlotActionType.CLONE) {
+            if (!AdvancedMiddleClickFeature.activated()) return;
             if (player.isInCreativeMode()) {
                 var slot = (Slot) slots.get(slotIndex);
                 var clone = AdvancedMiddleClickFeature.getCopy(slot, getCursorStack());

@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.dev.menu;
 import dev.dfonline.codeclient.ChestFeature;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.config.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -15,13 +16,15 @@ import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.Optional;
 
-import static dev.dfonline.codeclient.CodeClient.LOGGER;
-
 public class AdvancedMiddleClickFeature extends Feature {
 
     @Override
     public boolean enabled() {
-        return true;
+        return activated();
+    }
+
+    public static boolean activated() {
+        return Config.getConfig().AdvancedMiddleClick;
     }
 
     public ChestFeature makeChestFeature(HandledScreen<?> screen) {

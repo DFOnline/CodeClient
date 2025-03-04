@@ -333,5 +333,8 @@
   "codeclient.command.calc.success": "%s = %s",
   "codeclient.command.calc.failure": "%s failed to parse",
   "codeclient.action.clearqueue.success": "Command queue cleared.",
-  "codeclient.action.clearqueue.empty": "Command queue was empty!"
+  "codeclient.action.clearqueue.empty": "Command queue was empty!",
+  "codeclient.config.advanced_middle_click": "Advanced Middle Click",
+  "codeclient.config.advanced_middle_click.description": "When enabled, middle clicking items in inventories will add 1 to your cursors stack instead of a stack.",
+  "codeclient.config.advanced_middle_click.description2": "Holding shift while copying an item will give you the full stack."
 }
