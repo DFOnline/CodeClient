@@ -60,8 +60,7 @@ public abstract class MHandledScreen {
     private void clickSlot(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
         if (slotId < 0) return;
 
-        if (InteractionManager.onClickSlot(slot,button,actionType,this.handler.syncId,this.handler.getRevision())) {
+        if (InteractionManager.onClickSlot(slot,button,actionType,this.handler.syncId,this.handler.getRevision()))
             ci.cancel();
-        }
     }
 }
