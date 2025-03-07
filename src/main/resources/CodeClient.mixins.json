@@ -20,6 +20,7 @@
     "network.MClientCommonPlayNetworkHandler",
     "network.MClientConnection",
     "render.MDebugRenderer",
+    "render.MSignRenderer",
     "render.hud.MDrawContext",
     "render.hud.MInGameHud",
     "render.hud.MInGameOverlayRenderer",

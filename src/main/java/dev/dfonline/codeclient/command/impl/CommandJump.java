@@ -52,13 +52,15 @@ public class CommandJump extends Command {
         }
     }
 
-    public static CompletableFuture<Suggestions> suggestJump(JumpType type, CommandContext<FabricClientCommandSource> ignored, SuggestionsBuilder builder) {
+    public static CompletableFuture<Suggestions> suggestJump(JumpType type, CommandContext<FabricClientCommandSource> ignored, SuggestionsBuilder builder, boolean lineStarters) {
         if (CodeClient.location instanceof Dev dev) {
             var possibilities = new ArrayList<String>();
 
-            for (var lineStarter : dev.getLineStartCache().values()) {
-                if (type.pattern.matcher(lineStarter.getMessage(0, false).getString()).matches())
-                    possibilities.add(lineStarter.getMessage(1, false).getString());
+
+
+            for (var signText : lineStarters ? dev.getLineStartCache().values() : dev.getActionCache().values()) {
+                if (type.pattern.matcher(signText.getMessage(0, false).getString()).matches())
+                    possibilities.add(signText.getMessage(1, false).getString());
             }
 
             for (String possibility : possibilities) {
@@ -81,22 +83,22 @@ public class CommandJump extends Command {
 
     @Override
     public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
-        return cmd.then(literal("player").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PLAYER_EVENT, context, builder)).executes(context -> {
+        return cmd.then(literal("player").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PLAYER_EVENT, context, builder, true)).executes(context -> {
                     var name = context.getArgument("name", String.class);
                     jump(JumpType.PLAYER_EVENT, name);
                     return 0;
                 })))
-                .then(literal("entity").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.ENTITY_EVENT, context, builder)).executes(context -> {
+                .then(literal("entity").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.ENTITY_EVENT, context, builder, true)).executes(context -> {
                     var name = context.getArgument("name", String.class);
                     jump(JumpType.ENTITY_EVENT, name);
                     return 0;
                 })))
-                .then(literal("func").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.FUNCTION, context, builder)).executes(context -> {
+                .then(literal("func").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.FUNCTION, context, builder, true)).executes(context -> {
                     var name = context.getArgument("name", String.class);
                     jump(JumpType.FUNCTION, name);
                     return 0;
                 })))
-                .then(literal("proc").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PROCESS, context, builder)).executes(context -> {
+                .then(literal("proc").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PROCESS, context, builder, true)).executes(context -> {
                     var name = context.getArgument("name", String.class);
                     jump(JumpType.PROCESS, name);
                     return 0;
@@ -108,7 +110,8 @@ public class CommandJump extends Command {
         ENTITY_EVENT("ENTITY EVENT"),
         FUNCTION("FUNCTION"),
         PROCESS("PROCESS"),
-        ANY("(((PLAYER)|(ENTITY)) EVENT)|(FUNCTION)|(PROCESS)");
+        ANY("(((PLAYER)|(ENTITY)) EVENT)|(FUNCTION)|(PROCESS)"),
+        ACTIONS("(PLAYER|ENTITY|GAME) ACTION|CALL FUNCTION|START PROCESS|CONTROL|REPEAT|SET VARIABLE|SELECT OBJECT|IF (GAME|ENTITY|PLAYER|VARIABLE)");
 
         public final Pattern pattern;
 
