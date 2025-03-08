@@ -41,6 +41,8 @@ public abstract class ChestFeature {
         return false;
     }
 
-    public void clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {}
+    public boolean clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+        return false;
+    }
 
 }

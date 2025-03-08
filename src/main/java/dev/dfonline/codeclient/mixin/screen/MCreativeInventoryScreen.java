@@ -22,11 +22,12 @@ public abstract class MCreativeInventoryScreen {
 
     @Inject(method = "onMouseClick", at = @At("HEAD"), cancellable = true)
     public void slotClicked(@Nullable Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
-        if (CodeClient.location instanceof Dev dev
+        if (
+                CodeClient.location instanceof Dev dev
                 && dev.isInDevSpace() // Clear the inventory regardless of mode if not in dev space
                 && actionType == SlotActionType.QUICK_MOVE
-                && slot == this.deleteItemSlot) {
-
+                && slot == this.deleteItemSlot
+        ) {
             String cmd = Config.getConfig().DestroyItemResetMode.command;
 
             if (cmd != null) {

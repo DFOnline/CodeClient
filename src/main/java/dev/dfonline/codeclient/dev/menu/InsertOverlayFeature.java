@@ -104,11 +104,12 @@ public class InsertOverlayFeature extends Feature {
         }
 
         @Override
-        public void clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-            if(CodeClient.MC.player != null && slot.inventory == CodeClient.MC.player.getInventory()) return;
+        public boolean clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+            if(CodeClient.MC.player != null && slot.inventory == CodeClient.MC.player.getInventory()) return false;
             if (actionType == SlotActionType.PICKUP && !slot.hasStack() && CodeClient.MC.player.currentScreenHandler.getCursorStack().isEmpty())
                 selectedSlot = new AddWidget(slot, () -> selectedSlot = null);
             else if (selectedSlot != null) selectedSlot.close();
+            return false;
         }
 
         private class AddWidget {

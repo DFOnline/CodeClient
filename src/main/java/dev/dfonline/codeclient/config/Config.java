@@ -61,6 +61,7 @@ public class Config {
     public boolean SignPeeker = true;
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
     public boolean PickAction = true;
+    public boolean AdvancedMiddleClick = false;
     public boolean DevForBuild = false;
     public boolean ChatEditsVars = true;
     public boolean InsertOverlay = true;
@@ -150,6 +151,7 @@ public class Config {
             object.addProperty("SignPeeker", SignPeeker);
             object.addProperty("CustomCodeChest", CustomCodeChest.name());
             object.addProperty("PickAction", PickAction);
+            object.addProperty("AdvancedMiddleClick", AdvancedMiddleClick);
             object.addProperty("DevForBuild", DevForBuild);
             object.addProperty("ChatEditsVars",ChatEditsVars);
             object.addProperty("InsertOverlay",InsertOverlay);
@@ -561,6 +563,16 @@ public class Config {
                                         true,
                                         () -> PickAction,
                                         opt -> PickAction = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.advanced_middle_click"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.advanced_middle_click.description"), Text.translatable("codeclient.config.advanced_middle_click.description2")))
+                                .binding(
+                                        false,
+                                        () -> AdvancedMiddleClick,
+                                        opt -> AdvancedMiddleClick = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
