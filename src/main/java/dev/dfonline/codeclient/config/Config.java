@@ -86,6 +86,11 @@ public class Config {
     public boolean StateSwitcher = true;
     public boolean SpeedSwitcher = true;
 
+    /* Polytope */
+    public boolean PickFunctionNames = true;
+    public boolean ShiftRCBackwarp = false;
+    public boolean JumpToSingleResults = true;
+
     public Config() {
     }
 
@@ -173,6 +178,11 @@ public class Config {
             object.addProperty("HighlightExpressions", HighlightExpressions);
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
             object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
+
+            /* Polytope */
+            object.addProperty("PickFunctionNames", PickFunctionNames);
+            object.addProperty("ShiftRCBackwarp", ShiftRCBackwarp);
+            object.addProperty("JumpToSingleResults", JumpToSingleResults);
 
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
@@ -413,6 +423,26 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.singleresultjump"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.singleresultjump.description1")))
+                                .binding(
+                                        true,
+                                        () -> JumpToSingleResults,
+                                        opt -> JumpToSingleResults = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.backwarp"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.backwarp.description1"),Text.translatable("codeclient.config.backwarp.description2"),Text.translatable("codeclient.config.backwarp.description3")))
+                                .binding(
+                                        false,
+                                        () -> ShiftRCBackwarp,
+                                        opt -> ShiftRCBackwarp = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.phase_toggle"))
                                 .description(OptionDescription.createBuilder()
                                         .text(Text.translatable("codeclient.config.phase_toggle.description"))
@@ -561,6 +591,18 @@ public class Config {
                                         true,
                                         () -> PickAction,
                                         opt -> PickAction = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.pick_function_names"))
+                                .description(OptionDescription.of(
+                                        Text.translatable("codeclient.config.pick_function_names.description1"), Text.translatable("codeclient.config.pick_function_names.description2"), Text.translatable("codeclient.config.pick_function_names.description3")
+                                ))
+                                .binding(
+                                        true,
+                                        () -> PickFunctionNames,
+                                        opt -> PickFunctionNames = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

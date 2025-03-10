@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
@@ -47,6 +48,23 @@ public class CommandSearch extends Command {
 
                 if (results == null || results.isEmpty()) {
                     Utility.sendMessage(Text.translatable("codeclient.search.no_results"), ChatType.INFO);
+                    return 0;
+                }
+
+                if (Config.getConfig().JumpToSingleResults && results.keySet().size() == 1) {
+                    results.forEach((pos, text) -> {
+                        var type = text.getMessage(0, false).getString();
+                        var name = text.getMessage(1, false).getString();
+
+                        String sub;
+                        if (CommandJump.JumpType.PLAYER_EVENT.pattern.matcher(type).matches()) sub = "player";
+                        else if (CommandJump.JumpType.ENTITY_EVENT.pattern.matcher(type).matches()) sub = "entity";
+                        else if (CommandJump.JumpType.FUNCTION.pattern.matcher(type).matches()) sub = "func";
+                        else if (CommandJump.JumpType.PROCESS.pattern.matcher(type).matches()) sub = "proc";
+                        else return;
+
+                        CodeClient.MC.getNetworkHandler().sendChatCommand(String.format("jump %s %s", sub, name));
+                    });
                     return 0;
                 }
 

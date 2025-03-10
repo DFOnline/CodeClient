@@ -1,13 +1,18 @@
 package dev.dfonline.codeclient.mixin.entity.player;
 
+import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.dev.Backwarp;
 import dev.dfonline.codeclient.dev.BlockBreakDeltaCalculator;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.data.PassthroughBlockHitResult;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -20,11 +25,13 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,6 +39,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static dev.dfonline.codeclient.CodeClient.MC;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class MClientPlayerInteractionManager {
@@ -69,8 +78,50 @@ public abstract class MClientPlayerInteractionManager {
         if (InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
     }
 
-    @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V"))
+    @Inject(method = "interactBlock", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V"))
     public void beforeSendPlace(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+
+        if (Config.getConfig().ShiftRCBackwarp) {
+            if (!(hitResult instanceof PassthroughBlockHitResult)) {
+                if (CodeClient.location instanceof Dev dev) {
+
+                    var pos = hitResult.getBlockPos();
+
+                    if (!(MC.world.getBlockEntity(pos) instanceof SignBlockEntity)) {
+                        pos = pos.subtract(new Vec3i(1, 0, 0));
+                    }
+
+                    if (MC.world.getBlockEntity(pos) instanceof SignBlockEntity signBlock) {
+                        if (MC.player.isSneaking() && MC.crosshairTarget instanceof BlockHitResult result) {
+
+                            SignText text = signBlock.getFrontText();
+                            String trimmedFirstLine = text.getMessage(0, false).getString().trim();
+                            boolean isFunction = trimmedFirstLine.equals("FUNCTION");
+                            boolean isProcess = trimmedFirstLine.equals("PROCESS");
+
+                            if (isFunction || isProcess) {
+
+                                Backwarp.BackwarpResult warpRes = Backwarp.to(dev, (isFunction) ? "CALL FUNCTION" : "START PROCESS", text.getMessage(1, false).getString());
+
+                                if (warpRes.message != null)
+                                    Utility.sendMessage(warpRes.message, warpRes.success ? ChatType.SUCCESS : ChatType.INFO);
+
+                                cir.setReturnValue(ActionResult.FAIL);
+                                cir.cancel();
+
+                                return;
+
+                            }
+
+                        }
+
+
+                    }
+                }
+            }
+
+        }
+
         ItemStack handItem = player.getStackInHand(hand);
         boolean isTemplate = DFItem.of(handItem).hasHypercubeKey("codetemplatedata");
         if (!isTemplate) return;
