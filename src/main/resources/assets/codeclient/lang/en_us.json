@@ -110,10 +110,6 @@
   "codeclient.config.pick_block_action.description1": "Replaces pick block with the action",
   "codeclient.config.pick_block_action.description2": "Requires actiondump.",
   "codeclient.config.pick_block_action.description3": "Click to open link.",
-  "codeclient.config.pick_function_names": "Pick Function/Process Names",
-  "codeclient.config.pick_function_names.description1": "Replaces sign pick block for function/process related blocks",
-  "codeclient.config.pick_function_names.description2": "Gives you a string with the relevant function/process name.",
-  "codeclient.config.pick_function_names.description3": "Compatible with Pick Block Action.",
   "codeclient.config.recent_values": "Recent Values",
   "codeclient.config.recent_values.description": "Amount of recently used values to remember.",
   "codeclient.config.state_switcher": "Mode Switcher",
@@ -202,15 +198,6 @@
   "codeclient.config.chat_highlighter.minimessage_tag_color": "MiniMessage Tag Color",
   "codeclient.config.chat_highlighter.minimessage_tag_color.description": "The color MiniMessage tags show up as in the chat box when modifying styled text.",
 
-  "codeclient.config.backwarp": "Function/Process Sneaking Interaction Backwarp",
-  "codeclient.config.backwarp.description1": "Replaces sneak+interact (shift RC) for functions and processes.",
-  "codeclient.config.backwarp.description2": "It will warp you to the code calling the function, or list teleportable options if multiple pieces call it.",
-  "codeclient.config.backwarp.description3": "Base sneak+interact functionality (copy) is moved to sneak+pick block.",
-
-  "codeclient.config.singleresultjump": "Jump To Single Search Result",
-  "codeclient.config.singleresultjump.description1": "If /search returns one result, you will be teleported straight to it.",
-
-
   "codeclient.config.command.query": "Option %s is set to %s.",
   "codeclient.config.command.query.fail": "There is no option with name %s.",
   "codeclient.config.command.enable": "Enabled option %s.",
@@ -270,9 +257,6 @@
   "codeclient.search.results": "Search Results:",
   "codeclient.search.no_results": "No results.",
   "codeclient.search.hover.teleport": "Click to teleport\nx: %s, y: %s, z: %s",
-
-  "codeclient.backwarp.results": "Called:",
-  "codeclient.backwarp.no_results": "No calls found. They may be too far.",
 
   "codeclient.files.template_fail": "Couldn't load templates.",
   "codeclient.files.hold_template": "You need to hold a template to save.",

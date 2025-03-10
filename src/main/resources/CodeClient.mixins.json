@@ -24,7 +24,6 @@
     "render.hud.MInGameHud",
     "render.hud.MInGameOverlayRenderer",
     "render.hud.MTitleScreen",
-    "render.MSignRenderer",
     "screen.MMultiplayerScreen",
     "screen.MHandledScreen",
     "screen.MHandledScreens",

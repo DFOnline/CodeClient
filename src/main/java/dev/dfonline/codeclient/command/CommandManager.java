@@ -2,7 +2,6 @@ package dev.dfonline.codeclient.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.dfonline.codeclient.command.impl.*;
-import dev.dfonline.codeclient.command.impl.polytope.*;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
 
@@ -38,22 +37,7 @@ public class CommandManager {
             new CommandUuid(),
             new CommandWidthDump(),
             new CommandWorldPlot(),
-            new CommandClearQueue(),
-
-            /* Polytope */
-            new CommandBubbles(),
-            new CommandCrashMeLater(),
-            new CommandCrashMeNow(),
-            new CommandCs(),
-            new CommandCsc(),
-            new CommandCsexclude(),
-            new CommandCsl(),
-            new CommandCst(),
-            new CommandGo(),
-            new CommandHome(),
-            new CommandRainbowify(),
-            new CommandSmcaps(),
-            new CommandBackwarp()
+            new CommandClearQueue()
     );
 
     public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
