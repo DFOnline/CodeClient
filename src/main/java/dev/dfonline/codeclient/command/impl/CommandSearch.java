@@ -8,7 +8,6 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -51,16 +50,10 @@ public class CommandSearch extends Command {
                 var message = Text.translatable("codeclient.search.results");
                 results.forEach((pos, text) -> {
                     var type = text.getMessage(0, false).getString();
-                    var name = text.getMessage(1, false).getString();
-
-                    var teleportAction = Text.empty().append(" [⏼]").setStyle(Style.EMPTY
-                            .withColor(Formatting.GREEN)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/ptp %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.teleport", pos.getX(), pos.getY(), pos.getZ())))
-                    );
+                    var name = text.getMessage(1, false).getString().trim();
 
                     var highlightAction = Text.empty().append(" [⏼]").setStyle(Style.EMPTY
-                            .withColor(Formatting.DARK_PURPLE)
+                            .withColor(0xFF7FAA)
                             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/highlight %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.highlight", pos.getX(), pos.getY(), pos.getZ())))
                     );
@@ -69,9 +62,13 @@ public class CommandSearch extends Command {
 
                     var entry = Text.empty().append("\n ⏹ ").setStyle(actionStyle
                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                            Text.empty().append(type).setStyle(actionStyle))))
-                            .append(Text.empty().append(name).formatted(Formatting.WHITE))
-                            .append(teleportAction)
+                                            Text.empty().append(type).setStyle(actionStyle))
+                                    )
+                            )
+                            .append(Text.empty().append(name).setStyle(Style.EMPTY
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/ptp %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.teleport", pos.getX(), pos.getY(), pos.getZ())))
+                            ))
                             .append(highlightAction);
                     message.append(entry);
                 });

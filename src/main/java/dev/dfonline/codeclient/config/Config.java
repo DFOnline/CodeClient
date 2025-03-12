@@ -5,8 +5,17 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestNumbers;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
-import dev.isxander.yacl3.api.*;
-import dev.isxander.yacl3.api.controller.*;
+import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.OptionFlag;
+import dev.isxander.yacl3.api.OptionGroup;
+import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
+import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
+import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
+import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
+import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
 import net.minecraft.text.ClickEvent;
@@ -15,7 +24,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.awt.*;
+import java.awt.Color;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -59,7 +68,7 @@ public class Config {
     public boolean UseSelectionColor = true;
     public int Line4Color = 0xFF8800;
     public boolean SignPeeker = true;
-    public int SignHighlightColor = 0xFFFFFF;
+    public int SignHighlightColor = 0xFF7FAA;
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
     public boolean PickAction = true;
     public boolean DevForBuild = false;
@@ -149,16 +158,15 @@ public class Config {
             object.addProperty("UseSelectionColor", UseSelectionColor);
             object.addProperty("Line4Color", Line4Color);
             object.addProperty("SignPeeker", SignPeeker);
-            object.addProperty("SignHighlightColor", SignHighlightColor);
             object.addProperty("CustomCodeChest", CustomCodeChest.name());
             object.addProperty("PickAction", PickAction);
             object.addProperty("DevForBuild", DevForBuild);
-            object.addProperty("ChatEditsVars",ChatEditsVars);
-            object.addProperty("InsertOverlay",InsertOverlay);
-            object.addProperty("ParameterGhosts",ParameterGhosts);
-            object.addProperty("ActionViewer",ActionViewer);
-            object.addProperty("InvertActionViewerScroll",InvertActionViewerScroll);
-            object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
+            object.addProperty("ChatEditsVars", ChatEditsVars);
+            object.addProperty("InsertOverlay", InsertOverlay);
+            object.addProperty("ParameterGhosts", ParameterGhosts);
+            object.addProperty("ActionViewer", ActionViewer);
+            object.addProperty("InvertActionViewerScroll", InvertActionViewerScroll);
+            object.addProperty("ActionViewerLocation", ActionViewerLocation.name());
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
             object.addProperty("DestroyItemResetMode", DestroyItemResetMode.name());
@@ -168,8 +176,8 @@ public class Config {
             object.addProperty("CPUDisplay", CPUDisplay);
             object.addProperty("CPUDisplayCorner", CPUDisplayCorner.name());
             object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
-            object.addProperty("StateSwitcher",StateSwitcher);
-            object.addProperty("SpeedSwitcher",SpeedSwitcher);
+            object.addProperty("StateSwitcher", StateSwitcher);
+            object.addProperty("SpeedSwitcher", SpeedSwitcher);
             object.addProperty("AutoUpdateOption", AutoUpdateOption.name());
             object.addProperty("HighlighterEnabled", HighlighterEnabled);
             object.addProperty("HighlightExpressions", HighlightExpressions);
@@ -963,16 +971,6 @@ public class Config {
                                         )
                                         .controller(ColorControllerBuilder::create)
                                         .build())
-                                .option(Option.createBuilder(Color.class)
-                                        .name(Text.translatable("codeclient.config.sign_highlight_color"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.sign_highlight_color.description1"), Text.translatable("codeclient.config.sign_highlight_color.description2")))
-                                        .binding(
-                                                new Color(0xFFFFFF),
-                                                () -> new Color(SignHighlightColor),
-                                                opt -> SignHighlightColor = opt.getRGB()
-                                        )
-                                        .controller(ColorControllerBuilder::create)
-                                        .build())
                                 .build())
                         //</editor-fold>
                         .build())
@@ -1047,6 +1045,7 @@ public class Config {
         COMPACT("rc");
 
         public String command;
+
         DestroyItemReset(String command) {
             this.command = command;
         }
