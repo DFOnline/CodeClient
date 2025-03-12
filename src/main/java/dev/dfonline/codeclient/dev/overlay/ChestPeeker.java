@@ -108,7 +108,7 @@ public class ChestPeeker extends Feature {
             }
             if (packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
                 DFItem item = DFItem.of(slot.getStack());
-                if (!Objects.equals(item.getName(), Text.literal("CodeClient chest peeker internal"))) return false;
+                if (!item.getName().getString().equals("CodeClient chest peeker internal")) return false;
                 ContainerComponent container = item.getContainer();
                 if (container == null) return false;
                 items.clear();
