@@ -103,8 +103,9 @@ public class Potion extends VarItem {
         Utility.addLore(dfItem.getItemStack(),
                 name,
                 Text.empty(),
-                Text.empty().append(Text.literal("Amplifier: ").formatted(Formatting.GRAY)).append(Text.literal(String.valueOf(amplifier + 1))),
-                Text.empty().append(Text.literal("Duration: ").formatted(Formatting.GRAY)).append(Text.literal(duration())));
+                Text.empty().append(Text.literal("Amplifier: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal(String.valueOf(amplifier + 1)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
+                Text.empty().append(Text.literal("Duration: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal(duration()).setStyle(Style.EMPTY.withColor(Formatting.WHITE))))
+        );
         return dfItem.getItemStack();
     }
 

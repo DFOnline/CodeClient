@@ -158,8 +158,9 @@ public class Sound extends VarItem {
         Utility.addLore(dfItem.getItemStack(),
                 name,
                 Text.empty(),
-                Text.empty().append(Text.literal("Pitch: ").formatted(Formatting.GRAY)).append("%.2f".formatted(pitch)),
-                Text.empty().append(Text.literal("Volume: ").formatted(Formatting.GRAY)).append("%.2f".formatted(volume)));
+                Text.empty().append(Text.literal("Pitch: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.pitch)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
+                Text.empty().append(Text.literal("Volume: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.volume)).setStyle(Style.EMPTY.withColor(Formatting.WHITE))))
+        );
         return dfItem.getItemStack();
     }
 }

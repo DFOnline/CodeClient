@@ -162,11 +162,11 @@ public class Location extends VarItem {
         dfItem.setName(Text.literal("Location").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.LOCATION.color)));
         Utility.addLore(
                 dfItem.getItemStack(),
-                Text.empty().append(Text.literal("X: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.x)),
-                Text.empty().append(Text.literal("Y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.y)),
-                Text.empty().append(Text.literal("Z: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.z)),
-                Text.empty().append(Text.literal("p: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.pitch)),
-                Text.empty().append(Text.literal("y: ").formatted(Formatting.GRAY)).append("%.2f".formatted(this.yaw))
+                Text.empty().append(Text.literal("X: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.x)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
+                Text.empty().append(Text.literal("Y: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.y)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
+                Text.empty().append(Text.literal("Z: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.z)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
+                Text.empty().append(Text.literal("p: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.pitch)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
+                Text.empty().append(Text.literal("y: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.yaw)).setStyle(Style.EMPTY.withColor(Formatting.WHITE))))
         );
         return dfItem.getItemStack();
     }
