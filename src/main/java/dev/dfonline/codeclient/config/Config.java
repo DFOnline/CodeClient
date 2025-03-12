@@ -68,7 +68,7 @@ public class Config {
     public boolean UseSelectionColor = true;
     public int Line4Color = 0xFF8800;
     public boolean SignPeeker = true;
-    public int SignHighlightColor = 0xFFFF7FAA;
+    public int SignHighlightColor = 0xFF7FFF;
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
     public boolean PickAction = true;
     public boolean AdvancedMiddleClick = false;
