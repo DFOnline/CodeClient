@@ -184,6 +184,9 @@
   "codeclient.config.sign_color.line4": "Line 4",
   "codeclient.config.sign_color.line4.description1": "The bottom line on a sign.",
   "codeclient.config.sign_color.line4.description2": "Only tells you if it is inverted: NOT",
+  "codeclient.config.sign_highlight_color": "Sign Highlight Color",
+  "codeclient.config.sign_highlight_color.description1": "The color of the outline of",
+  "codeclient.config.sign_highlight_color.description2": "a highlighted sign",
   "codeclient.config.chat_highlighter": "Chat Highlighter",
   "codeclient.config.chat_highlighter.description": "Modifies the chat box to display MiniMessage highlighting and marks up DF expressions.",
   "codeclient.config.chat_highlighter.description.extra": "Additionally provides a preview above the chat bar when editing styled text.",
@@ -256,6 +259,7 @@
   "codeclient.search.results": "Search Results:",
   "codeclient.search.no_results": "No results.",
   "codeclient.search.hover.teleport": "Click to teleport\nx: %s, y: %s, z: %s",
+  "codeclient.search.hover.highlight": "Click to highlight\nx: %s, y: %s, z: %s",
 
   "codeclient.files.template_fail": "Couldn't load templates.",
   "codeclient.files.hold_template": "You need to hold a template to save.",
