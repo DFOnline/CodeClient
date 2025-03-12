@@ -75,9 +75,7 @@ public class ScopeSwitcher extends GenericSwitcher {
         data.addProperty("scope", name);
         pbv.setHypercubeStringValue("varitem", var.toString());
         item.getItemData().setPublicBukkitValues(pbv);
-        ArrayList<Text> lore = new ArrayList<>(item.getLore());
-        lore.set(0, getSelected().text());
-        item.setLore(lore);
+        item.setLore(List.of(getSelected().text()));
         Utility.sendHandItem(item.getItemStack());
         CodeClient.MC.gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
     }
