@@ -103,7 +103,6 @@ public class AdvancedMiddleClickFeature extends Feature {
 
                 if (external != -1) {
                     manager.clickSlot(syncId, external, 0, SlotActionType.SWAP, player);
-//                    manager.clickSlot(syncId, 54, 0, SlotActionType.QUICK_CRAFT, player);
                 } else {
                     emptySlot.getStack().setCount(0); // hides the temporary item in the empty slot.
                 }
