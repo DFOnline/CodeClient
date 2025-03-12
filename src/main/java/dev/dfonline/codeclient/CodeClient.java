@@ -19,6 +19,7 @@ import dev.dfonline.codeclient.data.value.StringDataValue;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
 import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
+import dev.dfonline.codeclient.dev.menu.AdvancedMiddleClickFeature;
 import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
 import dev.dfonline.codeclient.dev.menu.RecentValues;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
@@ -219,6 +220,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new MessageHiding());
         feat(new ExpressionHighlighter());
         feat(new PreviewSoundChest());
+        feat(new AdvancedMiddleClickFeature());
         feat(new StateSwitcher.StateSwitcherFeature());
         feat(new SpeedSwitcher.SpeedSwitcherFeature());
         feat(new ScopeSwitcher.ScopeSwitcherFeature());
@@ -422,8 +424,8 @@ public class CodeClient implements ClientModInitializer {
         return chestFeatures().anyMatch(feature -> feature.charTyped(chr, modifiers));
     }
 
-    public static void onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-        chestFeatures().forEach(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
+    public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+        return chestFeatures().anyMatch(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
     }
 
     public static boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {

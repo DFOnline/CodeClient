@@ -63,5 +63,4 @@ public abstract class MHandledScreen {
         if (InteractionManager.onClickSlot(slot,button,actionType,this.handler.syncId,this.handler.getRevision()))
             ci.cancel();
     }
-
 }

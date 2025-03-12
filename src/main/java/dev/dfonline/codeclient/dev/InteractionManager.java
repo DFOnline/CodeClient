@@ -112,7 +112,7 @@ public class InteractionManager {
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
-            CodeClient.onClickSlot(slot,button,actionType,syncId,revision);
+            if (CodeClient.onClickSlot(slot,button,actionType,syncId,revision)) return true;
             if (!slot.hasStack()) return false;
             ItemStack item = slot.getStack();
             DFItem dfItem = DFItem.of(item);

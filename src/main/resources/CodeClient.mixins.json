@@ -4,8 +4,6 @@
   "package": "dev.dfonline.codeclient.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "screen.chat.MChatScreen",
-    "screen.chat.MChatInputSuggester",
     "MKeyboard",
     "MMouse",
     "VersionChecker",
@@ -24,10 +22,12 @@
     "render.hud.MInGameHud",
     "render.hud.MInGameOverlayRenderer",
     "render.hud.MTitleScreen",
-    "screen.MMultiplayerScreen",
+    "screen.MCreativeInventoryScreen",
     "screen.MHandledScreen",
     "screen.MHandledScreens",
-    "screen.MCreativeInventoryScreen",
+    "screen.MMultiplayerScreen",
+    "screen.chat.MChatInputSuggester",
+    "screen.chat.MChatScreen",
     "world.MWorldRenderer",
     "world.block.MAbstractBlockState",
     "world.block.MBarrierBlock",
@@ -39,5 +39,8 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "screen.MScreenHandler"
+  ]
 }
