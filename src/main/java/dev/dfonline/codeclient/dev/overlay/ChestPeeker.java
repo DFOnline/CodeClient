@@ -132,7 +132,7 @@ public class ChestPeeker extends Feature {
         if (CodeClient.location instanceof Dev && currentBlock != null) {
             ArrayList<Text> texts = new ArrayList<>();
             if (!itemsFetched) {
-                texts.add(Text.translatable("codeclient.peeker.not_ready").formatted(Formatting.DARK_GRAY));
+                return null;
             } else if (items.isEmpty()) {
                 texts.add(Text.translatable("codeclient.peeker.empty").formatted(Formatting.GOLD));
             } else {
