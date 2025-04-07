@@ -13,12 +13,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Sound extends VarItem {
     private String sound;
     private double pitch;
     private double volume;
+    private String variant;
 
     public static final Map<String, Double> Notes;
     public static final Map<Double, String> Pitches;
@@ -83,6 +85,9 @@ public class Sound extends VarItem {
         this.sound = data.get("sound").getAsString();
         this.pitch = data.get("pitch").getAsDouble();
         this.volume = data.get("vol").getAsDouble();
+        if (data.has("variant")) {
+            this.variant = data.get("variant").getAsString();
+        }
     }
 
     public Sound() {
@@ -100,10 +105,9 @@ public class Sound extends VarItem {
     public Optional<dev.dfonline.codeclient.hypercube.actiondump.Sound> getSoundId() {
         try {
             return Arrays.stream(ActionDump.getActionDump().sounds).filter(sound -> Objects.equals(sound.icon.getCleanName(), this.sound)).findFirst();
-        } catch (Exception ignored) {
-
+        } catch (IOException ignored) {
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     public void setSound(String sound) {
@@ -139,6 +143,10 @@ public class Sound extends VarItem {
     public void setVolume(double volume) {
         this.volume = volume;
         this.data.addProperty("vol", volume);
+    }
+
+    public String getVariant() {
+        return variant;
     }
 
     @Override
