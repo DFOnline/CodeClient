@@ -9,6 +9,8 @@ import net.minecraft.command.CommandRegistryAccess;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
@@ -16,6 +18,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.arg
 public class CommandNode extends Command {
 
     private static final Map<String, String> NODE_MAP = new HashMap<>();
+    private static final Pattern PRIVATE_NODE_PATTERN = Pattern.compile("^p(\\d+)$");
 
     public void loadNodes() {
         NODE_MAP.clear();
@@ -61,7 +64,18 @@ public class CommandNode extends Command {
                     String key = context.getArgument("node", String.class);
                     if (CodeClient.MC.getNetworkHandler() == null) return -1;
 
-                    CodeClient.MC.getNetworkHandler().sendCommand("server " + NODE_MAP.getOrDefault(key, key));
+                    String serverId = NODE_MAP.getOrDefault(key, key);
+
+                    // If the server ID is not found, as a last resort,
+                    // try to process "pX" syntax as a private node shorthand.
+                    if (serverId.equals(key)) {
+                        Matcher privateNodeMatcher = PRIVATE_NODE_PATTERN.matcher(key.trim());
+                        if (privateNodeMatcher.find()) {
+                            serverId = "private" + privateNodeMatcher.group(1);
+                        }
+                    }
+
+                    CodeClient.MC.getNetworkHandler().sendCommand("server " + serverId);
                     return 0;
                 }));
     }
