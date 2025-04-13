@@ -7,10 +7,8 @@ import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.location.Creator;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -77,9 +75,9 @@ public class BuildPhaser extends Feature {
                 var player = CodeClient.MC.player;
                 var size = plot.assumeSize();
                 player.setPos(
-                        Math.min(Math.max(player.getX(), plot.getX()), plot.getX() + plot.assumeSize().size + 1),
+                        Math.min(Math.max(player.getX(), plot.getX() - plot.assumeSize().codeWidth), plot.getX() + plot.assumeSize().size + 1),
                         player.getY(),
-                        Math.min(Math.max(player.getZ(), plot.getZ()), plot.getZ() + plot.assumeSize().size + 1)
+                        Math.min(Math.max(player.getZ(), plot.getZ() - plot.assumeSize().codeLength), plot.getZ() + plot.assumeSize().size + 1)
                 );
                 allowPacket = true;
                 CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false, true));
@@ -156,9 +154,9 @@ public class BuildPhaser extends Feature {
 
             var size = plot.assumeSize();
 
-            var x = Math.min(Math.max(player.getX(), plot.getX()), plot.getX() + size.size + 1);
+            var x = Math.min(Math.max(player.getX(), plot.getX() - plot.assumeSize().codeLength), plot.getX() + size.size + 1);
             var y = player.getY();
-            var z = Math.min(Math.max(player.getZ(), plot.getZ()), plot.getZ() + size.size + 1);
+            var z = Math.min(Math.max(player.getZ(), plot.getZ() - plot.assumeSize().codeWidth), plot.getZ() + size.size + 1);
             var pitch = player.getPitch();
             var yaw = player.getYaw();
 
