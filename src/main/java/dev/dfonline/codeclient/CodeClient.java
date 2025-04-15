@@ -47,6 +47,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -57,10 +58,13 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
+import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -276,18 +280,32 @@ public class CodeClient implements ClientModInitializer {
 
         //noinspection unused
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.", "");
-//        if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
+//        if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket", "DebugSampleS2CPacket").contains(name)) LOGGER.info(name);
 
         if (CodeClient.location instanceof Dev dev) {
             try {
                 if (packet instanceof BlockEntityUpdateS2CPacket beu && dev.isInDev(beu.getPos()) && beu.getBlockEntityType() == BlockEntityType.SIGN) {
-                    dev.clearLineStarterCache();
+                    NbtCompound compound = beu.getNbt();
+                    if(compound.contains("front_text")) {
+                        SignText text = SignText.CODEC.decode(NbtOps.INSTANCE, beu.getNbt().get("front_text")).getOrThrow().getFirst();
+                        if (Plot.lineStarterPattern.matcher(text.getMessage(0, false).getString()).matches()) {
+                            dev.getLineStartCache().put(beu.getPos(), text);
+                        }
+                    } else {
+                        dev.clearLineStarterCache();
+                    }
                 }
             } catch (ConcurrentModificationException exception) {
                 // Not sure how this comes to happen. My guess it's the getBlockEntity call.
                 // Unfortunately, I don't know what state the game has to be in to make it fail, maybe an unloaded chunk?
                 // It's hard to check for that, apparently.
                 dev.clearLineStarterCache();
+            } catch (IllegalStateException exception) {
+                dev.clearLineStarterCache();
+            }
+
+            if (packet instanceof ChunkDeltaUpdateS2CPacket update) {
+                update.visitUpdates((blockPos, blockState) -> dev.getLineStartCache().remove(blockPos));
             }
         }
         return (MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen || MC.currentScreen instanceof StateSwitcher) && packet instanceof CloseScreenS2CPacket;
@@ -465,6 +483,9 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static void onModeChange(Location location) {
+        if (location instanceof Dev dev) {
+            dev.clearLineStarterCache();
+        }
         if (Config.getConfig().DevForBuild && (currentAction instanceof None || currentAction instanceof DevForBuild) && location instanceof Build) {
             currentAction = new DevForBuild(() -> currentAction = new None());
             currentAction.init();

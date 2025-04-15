@@ -15,6 +15,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class Plot extends Location {
+
+    public static Pattern lineStarterPattern = Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS");
+
     /**
      * The position the player was at before they were teleported, in any scenario but plot borders.
      */
@@ -168,7 +171,7 @@ public abstract class Plot extends Location {
      * Returns null if the plot origin is unknown.
      */
     public HashMap<BlockPos, SignText> scanForSigns(Pattern scan) {
-        return scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"), scan);
+        return scanForSigns(lineStarterPattern, scan);
     }
 
     /**
