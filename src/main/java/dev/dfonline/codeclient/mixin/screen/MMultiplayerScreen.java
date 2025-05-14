@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 @Mixin(MultiplayerScreen.class)
 public abstract class MMultiplayerScreen {
     @Unique
-    private static final String[] unofficialDFAddresses = {"mcdiamondfire.net", "luke.cash", "reason.codes", "boobs.im"};
+    private static final String[] unofficialDFAddresses = {"mcdiamondfire.net", "reason.codes", "boobs.im"};
 
     @Shadow
     private ServerList serverList;
