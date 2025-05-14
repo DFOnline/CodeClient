@@ -17,8 +17,12 @@ public class MTitleScreen {
     @Inject(method = "init", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
         if (CodeClient.startupToast != null) {
-            // UNSECURE_SERVER_WARNING so the toast stays longer, there is no visual difference.
-            CodeClient.MC.getToastManager().add(new SystemToast(SystemToast.Type.UNSECURE_SERVER_WARNING, CodeClient.startupToast.title(), CodeClient.startupToast.description()));
+            CodeClient.MC.getToastManager().add(SystemToast.create(
+                    CodeClient.MC,
+                    SystemToast.Type.PACK_LOAD_FAILURE,
+                    CodeClient.startupToast.title(),
+                    CodeClient.startupToast.description())
+            );
             CodeClient.startupToast = null;
         }
 
