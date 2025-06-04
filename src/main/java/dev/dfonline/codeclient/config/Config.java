@@ -96,6 +96,7 @@ public class Config {
     public int MiniMessageTagColor = 0x808080;
     public boolean StateSwitcher = true;
     public boolean SpeedSwitcher = true;
+    public boolean PickFunctionNames = true;
 
     public Config() {
     }
@@ -185,6 +186,7 @@ public class Config {
             object.addProperty("HighlightExpressions", HighlightExpressions);
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
             object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
+            object.addProperty("PickFunctionNames", PickFunctionNames);
 
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
@@ -573,6 +575,18 @@ public class Config {
                                         true,
                                         () -> PickAction,
                                         opt -> PickAction = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.pick_function_names"))
+                                .description(OptionDescription.of(
+                                        Text.translatable("codeclient.config.pick_function_names.description1"), Text.translatable("codeclient.config.pick_function_names.description2")
+                                ))
+                                .binding(
+                                        true,
+                                        () -> PickFunctionNames,
+                                        opt -> PickFunctionNames = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
