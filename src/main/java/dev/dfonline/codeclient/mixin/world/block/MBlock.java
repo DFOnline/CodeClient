@@ -1,7 +1,5 @@
 package dev.dfonline.codeclient.mixin.world.block;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
@@ -13,7 +11,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldView;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,7 +25,6 @@ import net.minecraft.text.Text;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 @Mixin(Block.class)
 public class MBlock {
@@ -86,7 +82,6 @@ public class MBlock {
         if (CodeClient.MC.world.getBlockEntity(pos) instanceof SignBlockEntity signBlock) {
             try {
                 SignText text = signBlock.getFrontText();
-
                 String firstLine = text.getMessage(0, false).getString();
 
                 if (!CALLABLE_BLOCK_NAMES.contains(firstLine))
@@ -95,22 +90,14 @@ public class MBlock {
                 DFItem string = new DFItem(new ItemStack(Items.STRING, 1));
 
                 String funcName = text.getMessage(1, false).getString();
+                // stop item name from being italicized like anvil renaming
+                string.setName(Text.literal(funcName).setStyle(Style.EMPTY.withItalic(false)));
 
-                string.setName(
-                        // stop it from being italicized like anvil renaming
-                        Text.literal(funcName).setStyle(Style.EMPTY.withItalic(false))
-                    );
-
-                String varItemJSON = CodeClient.gson.toJson(
-                        Map.of(
-                                "id", "txt",
-                                "data", Map.of("name", funcName)
-                        )
-                );
-
-                string.getItemData().setHypercubeStringValue(
-                        "varitem", varItemJSON
-                    );
+                String varItemJSON = CodeClient.gson.toJson(Map.of(
+                            "id", "txt",
+                            "data", Map.of("name", funcName)
+                        ));
+                string.getItemData().setHypercubeStringValue("varitem", varItemJSON);
 
                 return string.getItemStack();
             } catch (Exception ignored) {
