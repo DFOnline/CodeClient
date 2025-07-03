@@ -1,15 +1,19 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
+import com.ibm.icu.text.CaseMap;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Argument {
@@ -30,9 +34,10 @@ public class Argument {
     }
 
     public ItemStack getItem() {
-        Icon.Type icon = getType();
-        if(icon == null) return ItemStack.EMPTY;
-        var item = icon.getIcon();
+        Icon.Type type = getType();
+        ItemStack item = type == null
+                ? Items.GRAY_DYE.getDefaultStack()
+                : type.getIcon();
 
         DFItem dfItem = DFItem.of(item);
         // First line is item name, others are lore
@@ -50,10 +55,22 @@ public class Argument {
         int i = 0;
         if (this.text != null) addToLore(lore, this.text);
         if (this.description != null) for (String line : this.description) {
-            Icon.Type type = Icon.Type.valueOf(this.type);
+            MutableText text = Text.empty().formatted(Formatting.GRAY).styled(s -> s.withItalic(false));
+            MutableText typeText;
+
+            try {
+                Icon.Type type = Icon.Type.valueOf(this.type);
+                typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color).withItalic(false));
+            } catch (IllegalArgumentException e) {
+                // Show a grayed out version of the name.
+                String properCase = CaseMap.Title.toTitle().apply(Locale.ENGLISH, null, this.type.replaceAll("_", " "));
+                typeText = Text.literal(properCase).setStyle(Text.empty().getStyle()
+                        .withColor(TextColor.fromRgb(0x808080))
+                        .withItalic(false));
+            }
+
             if (i == 0) {
-                MutableText text = Text.empty().formatted(Formatting.GRAY).styled(s -> s.withItalic(false));
-                MutableText typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color).withItalic(false));
+
                 if (this.plural) typeText.append("(s)");
                 text.append(typeText);
                 if (this.optional) {
@@ -80,10 +97,12 @@ public class Argument {
     public boolean isOr() {
         return text != null && text.endsWith("OR");
     }
+
     public boolean isSplitter() {
-        return Objects.equals(text,"");
+        return Objects.equals(text, "");
     }
 
     private void addToLore(ArrayList<Text> lore, String text) {
         lore.add(Utility.textFromString(text));
-    }}
+    }
+}

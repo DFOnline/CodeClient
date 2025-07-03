@@ -150,11 +150,10 @@ public class ChestPeeker extends Feature {
                         text.append(item.getCount() + "x ");
                         text.append(item.getName());
                     } else {
+                        JsonObject object = JsonParser.parseString(varItem).getAsJsonObject();
                         try {
-                            JsonObject object = JsonParser.parseString(varItem).getAsJsonObject();
                             Type type = Type.valueOf(object.get("id").getAsString());
                             JsonObject data = object.get("data").getAsJsonObject();
-                            //                            JsonArray lore = data.get("display").getAsJsonObject().get("Lore").getAsJsonArray();
                             text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
                             if (type == Type.var) {
                                 Scope scope = Scope.valueOf(data.get("scope").getAsString());
@@ -202,8 +201,11 @@ public class ChestPeeker extends Feature {
                                 text.append(Text.literal(data.get("option").getAsString()).formatted(Formatting.AQUA));
                             }
                             if (type == Type.hint) continue;
-                        } catch (Exception ignored) {
-                            continue;
+                        } catch (IllegalArgumentException ignored) {
+                            text.append(Text.literal(object.get("id").getAsString().toUpperCase())
+                                    .styled(style -> style.withColor(TextColor.fromRgb(0x808080)))
+                                    .append(" "));
+                            text.append(item.getName());
                         }
                     }
                     texts.add(text);
