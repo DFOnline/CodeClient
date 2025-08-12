@@ -153,7 +153,7 @@ public class CodeClient implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher, registryAccess));
 
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
-            if (isPreviewingItemTags) {
+            if (isPreviewingItemTags && location instanceof Creator) {
                 DFItem item = DFItem.of(stack);
                 ItemData itemData = item.getItemData();
                 if (itemData == null) return;
