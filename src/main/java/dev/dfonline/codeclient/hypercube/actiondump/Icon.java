@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
+import com.ibm.icu.text.CaseMap;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.data.ItemData;
@@ -19,10 +20,12 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Icon {
     private static final TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
@@ -78,33 +81,7 @@ public class Icon {
             addToLore(lore, "Chest Parameters:");
             boolean hasOptional = false;
             for (Argument arg : arguments) {
-                int i = 0;
-                if (arg.text != null) addToLore(lore, arg.text);
-                if (arg.description != null && description.length != 0) for (String line : arg.description) {
-                    Type type = Type.valueOf(arg.type);
-                    if (i == 0) {
-                        MutableText text = Text.empty().formatted(Formatting.GRAY).styled(s -> s.withItalic(false));
-                        MutableText typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color).withItalic(false));
-                        if (arg.plural) typeText.append("(s)");
-                        text.append(typeText);
-                        if (arg.optional) {
-                            text.append(Text.literal("*").formatted(Formatting.WHITE));
-                            hasOptional = true;
-                        }
-                        text.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
-                        text.append(Utility.textFromString(line).formatted(Formatting.GRAY));
-                        lore.add(text);
-                    } else lore.add(Utility.textFromString(line).formatted(Formatting.GRAY));
-                    i++;
-                }
-                if (arg.notes != null) for (String[] lines : arg.notes) {
-                    i = 0;
-                    if (lines != null) for (String line : lines) {
-                        if (i == 0) addToLore(lore, "§9⏵ §7" + line);
-                        else addToLore(lore, "§7" + line);
-                        i++;
-                    }
-                }
+                lore.addAll(arg.getLore());
             }
             if (tags != null && tags != 0) {
                 lore.add(Text.literal("# ").formatted(Formatting.DARK_AQUA).styled(s -> s.withItalic(false)).append(Text.literal(tags + " Tag" + (tags != 1 ? "s" : "")).formatted(Formatting.GRAY)));
@@ -149,17 +126,16 @@ public class Icon {
             if (cancelledAutomatically) addToLore(lore, "§4∅ §cCancelled automatically");
             else addToLore(lore, "§4∅ §cCancellable");
         }
-        if(requireTokens) {
-            addToLore(lore,"");
+        if (requireTokens) {
+            addToLore(lore, "");
             lore.add(Text.literal("Unlock with Tokens").withColor(0xffd42a));
         }
-        if(requiredRank != null) {
-            if(requireTokens) {
+        if (requiredRank != null) {
+            if (requireTokens) {
                 lore.add(Text.literal("OR").withColor(0xff55aa));
                 lore.add(Text.literal("Unlock with " + requiredRank.name).withColor(requiredRank.color.getRgb()));
-            }
-            else {
-                addToLore(lore,"");
+            } else {
+                addToLore(lore, "");
                 lore.add(Text.literal(requiredRank.name + " Exclusive").setStyle(Style.EMPTY.withColor(requiredRank.color.getRgb()).withItalic(false)));
             }
         }
@@ -185,8 +161,8 @@ public class Icon {
     public List<ArgumentGroup> getArgGroups() {
         var groups = new ArrayList<ArgumentGroup>();
         var group = new ArrayList<Argument>();
-        for(var arg: arguments) {
-            if(!arg.isSplitter()) group.add(arg);
+        for (var arg : arguments) {
+            if (!arg.isSplitter()) group.add(arg);
             else {
                 groups.add(new ArgumentGroup(group));
                 group = new ArrayList<>();
@@ -200,6 +176,7 @@ public class Icon {
         TEXT(TextColor.fromFormatting(Formatting.AQUA), "String", Items.STRING, dev.dfonline.codeclient.hypercube.item.Text::new),
         COMPONENT(TextColor.fromRgb(0x7fd42a), "Styled Text", Items.BOOK, Component::new),
         NUMBER(TextColor.fromFormatting(Formatting.RED), "Number", Items.SLIME_BALL, Number::new),
+        BYTE(TextColor.fromFormatting(Formatting.RED), "Byte", Items.SLIME_BALL, Number::new),
         LOCATION(TextColor.fromFormatting(Formatting.GREEN), "Location", Items.PAPER, Location::new),
         VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD, Vector::new),
         SOUND(TextColor.fromFormatting(Formatting.BLUE), "Sound", Items.NAUTILUS_SHELL, Sound::new),
@@ -216,18 +193,19 @@ public class Icon {
         BLOCK_TAG(TextColor.fromFormatting(Formatting.AQUA), "Block Tag", Items.CHAIN_COMMAND_BLOCK, dev.dfonline.codeclient.hypercube.item.Text::new),
         LIST(TextColor.fromFormatting(Formatting.DARK_GREEN), "List", Items.SKULL_BANNER_PATTERN), // Ender chest or empty banner pattern
         DICT(TextColor.fromRgb(0x55AAFF), "Dictionary", Items.KNOWLEDGE_BOOK), // Knowledge book or chest minecart
-        NONE(TextColor.fromRgb(0x808080), "None", Items.AIR),
+        NONE(TextColor.fromRgb(0x808080), "None", Items.AIR)
         ;
 
         public final TextColor color;
         public final String display;
         private final ItemStack icon;
-        @Nullable public final Icon.Type.getVarItem getVarItem;
+        @Nullable
+        public final Icon.Type.getVarItem getVarItem;
 
         Type(TextColor color, String display, Item icon) {
             this.color = color;
             this.display = display;
-            var item = icon.getDefaultStack();
+            ItemStack item = icon.getDefaultStack();
             this.icon = item;
             getVarItem = null;
         }
@@ -249,14 +227,15 @@ public class Icon {
     }
 
     public enum RequiredRank {
-        Noble("Noble",TextColor.fromRgb(0x7fff7f)),
-        Emperor("Emperor",TextColor.fromRgb(0x55aaff)),
-        Mythic("Mythic",TextColor.fromRgb(0xd42ad4)),
-        Overlord("Overlord",TextColor.fromFormatting(Formatting.RED)),
-        Dev("",TextColor.fromRgb(0));
+        Noble("Noble", TextColor.fromRgb(0x7fff7f)),
+        Emperor("Emperor", TextColor.fromRgb(0x55aaff)),
+        Mythic("Mythic", TextColor.fromRgb(0xd42ad4)),
+        Overlord("Overlord", TextColor.fromFormatting(Formatting.RED)),
+        Dev("", TextColor.fromRgb(0));
 
         public final String name;
         public final TextColor color;
+
         RequiredRank(String name, TextColor color) {
             this.name = name;
             this.color = color;
@@ -267,8 +246,8 @@ public class Icon {
         public List<ArgumentPossibilities> getPossibilities() {
             var groups = new ArrayList<ArgumentPossibilities>();
             var group = new ArrayList<Argument>();
-            for(var arg: arguments) {
-                if(!arg.isOr()) group.add(arg);
+            for (var arg : arguments) {
+                if (!arg.isOr()) group.add(arg);
                 else {
                     groups.add(new ArgumentPossibilities(group));
                     group = new ArrayList<>();

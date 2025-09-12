@@ -29,7 +29,7 @@ public class Event {
             if (step == Sequence.WAIT_FOR_POS) step = Sequence.WAIT_FOR_MESSAGE;
         }
         if (packet instanceof OverlayMessageS2CPacket overlay) {
-            if (step == Sequence.WAIT_FOR_MESSAGE && overlay.text().getString().startsWith("DiamondFire - ")) {
+            if (step == Sequence.WAIT_FOR_MESSAGE && overlay.text().getString().matches("(⏵+ - )?⧈ -?\\d+ Tokens {2}ᛥ -?\\d+ Tickets {2}⚡ -?\\d+ Sparks")) {
                 updateLocation(new Spawn());
             }
         }

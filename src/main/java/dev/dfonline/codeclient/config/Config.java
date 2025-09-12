@@ -5,8 +5,17 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestNumbers;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
-import dev.isxander.yacl3.api.*;
-import dev.isxander.yacl3.api.controller.*;
+import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.OptionFlag;
+import dev.isxander.yacl3.api.OptionGroup;
+import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
+import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
+import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
+import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
+import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
 import net.minecraft.text.ClickEvent;
@@ -15,7 +24,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.awt.*;
+import java.awt.Color;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -59,8 +68,10 @@ public class Config {
     public boolean UseSelectionColor = true;
     public int Line4Color = 0xFF8800;
     public boolean SignPeeker = true;
+    public int SignHighlightColor = 0xFF7FFF;
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
     public boolean PickAction = true;
+    public boolean AdvancedMiddleClick = false;
     public boolean DevForBuild = false;
     public boolean ChatEditsVars = true;
     public boolean InsertOverlay = true;
@@ -78,6 +89,7 @@ public class Config {
     public boolean CPUDisplay = true;
     public CPUDisplayCornerOption CPUDisplayCorner = CPUDisplayCornerOption.TOP_LEFT;
     public boolean HideScopeChangeMessages = true;
+    public AutoUpdate AutoUpdateOption = AutoUpdate.OFF;
     public boolean HighlighterEnabled = true;
     public boolean HighlightExpressions = true;
     public boolean HighlightMiniMessage = true;
@@ -149,13 +161,14 @@ public class Config {
             object.addProperty("SignPeeker", SignPeeker);
             object.addProperty("CustomCodeChest", CustomCodeChest.name());
             object.addProperty("PickAction", PickAction);
+            object.addProperty("AdvancedMiddleClick", AdvancedMiddleClick);
             object.addProperty("DevForBuild", DevForBuild);
-            object.addProperty("ChatEditsVars",ChatEditsVars);
-            object.addProperty("InsertOverlay",InsertOverlay);
-            object.addProperty("ParameterGhosts",ParameterGhosts);
-            object.addProperty("ActionViewer",ActionViewer);
-            object.addProperty("InvertActionViewerScroll",InvertActionViewerScroll);
-            object.addProperty("ActionViewerLocation",ActionViewerLocation.name());
+            object.addProperty("ChatEditsVars", ChatEditsVars);
+            object.addProperty("InsertOverlay", InsertOverlay);
+            object.addProperty("ParameterGhosts", ParameterGhosts);
+            object.addProperty("ActionViewer", ActionViewer);
+            object.addProperty("InvertActionViewerScroll", InvertActionViewerScroll);
+            object.addProperty("ActionViewerLocation", ActionViewerLocation.name());
             object.addProperty("RecentValues", RecentValues);
             object.addProperty("PhaseToggle", PhaseToggle);
             object.addProperty("DestroyItemResetMode", DestroyItemResetMode.name());
@@ -165,8 +178,9 @@ public class Config {
             object.addProperty("CPUDisplay", CPUDisplay);
             object.addProperty("CPUDisplayCorner", CPUDisplayCorner.name());
             object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
-            object.addProperty("StateSwitcher",StateSwitcher);
-            object.addProperty("SpeedSwitcher",SpeedSwitcher);
+            object.addProperty("StateSwitcher", StateSwitcher);
+            object.addProperty("SpeedSwitcher", SpeedSwitcher);
+            object.addProperty("AutoUpdateOption", AutoUpdateOption.name());
             object.addProperty("HighlighterEnabled", HighlighterEnabled);
             object.addProperty("HighlightExpressions", HighlightExpressions);
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
@@ -185,6 +199,20 @@ public class Config {
                 .category(ConfigCategory.createBuilder()
                         .name(Text.translatable("codeclient.config.tab.general"))
                         .tooltip(Text.translatable("codeclient.config.tab.general.tooltip"))
+                        .option(Option.createBuilder(AutoUpdate.class)
+                                .name(Text.translatable("codeclient.config.auto_update"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.translatable("codeclient.config.auto_update.description"))
+                                        .text(Text.translatable("codeclient.config.requires_restart"))
+                                        .build())
+                                .binding(
+                                        AutoUpdate.OFF,
+                                        () -> AutoUpdateOption,
+                                        opt -> AutoUpdateOption = opt
+                                )
+                                .controller(nodeOption -> () -> new EnumController<>(nodeOption, AutoUpdate.class))
+                                .flag(OptionFlag.GAME_RESTART)
+                                .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.api"))
                                 .description(OptionDescription.createBuilder()
@@ -545,6 +573,16 @@ public class Config {
                                         true,
                                         () -> PickAction,
                                         opt -> PickAction = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(Boolean.class)
+                                .name(Text.translatable("codeclient.config.advanced_middle_click"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.advanced_middle_click.description"), Text.translatable("codeclient.config.advanced_middle_click.description2")))
+                                .binding(
+                                        false,
+                                        () -> AdvancedMiddleClick,
+                                        opt -> AdvancedMiddleClick = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
@@ -1019,6 +1057,7 @@ public class Config {
         COMPACT("rc");
 
         public String command;
+
         DestroyItemReset(String command) {
             this.command = command;
         }
@@ -1029,5 +1068,11 @@ public class Config {
         TOP_RIGHT,
         BOTTOM_LEFT,
         BOTTOM_RIGHT
+    }
+
+    public enum AutoUpdate {
+        OFF,
+        NOTIFY,
+        UPDATE,
     }
 }

@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.location;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.command.impl.CommandJump;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.block.entity.SignText;
@@ -14,6 +15,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class Plot extends Location {
+
+    public static Pattern lineStarterPattern = Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS");
+
     /**
      * The position the player was at before they were teleported, in any scenario but plot borders.
      */
@@ -29,6 +33,7 @@ public abstract class Plot extends Location {
     protected Boolean hasDev;
     protected Size size;
     protected HashMap<BlockPos, SignText> lineStarterCache = new HashMap<>();
+    protected HashMap<BlockPos, SignText> actionCache = new HashMap<>();
 
     public void setOrigin(int x, int z) {
         this.originX = x;
@@ -166,7 +171,15 @@ public abstract class Plot extends Location {
      * Returns null if the plot origin is unknown.
      */
     public HashMap<BlockPos, SignText> scanForSigns(Pattern scan) {
-        return scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"), scan);
+        return scanForSigns(lineStarterPattern, scan);
+    }
+
+    /**
+     * Searches for all actions which match the name argument.
+     * Returns null if the plot origin is unknown.
+     */
+    public HashMap<BlockPos, SignText> scanForActionSigns(Pattern scan) {
+        return scanForSigns(CommandJump.JumpType.ACTIONS.pattern, scan);
     }
 
     public void clearLineStarterCache() {
@@ -181,6 +194,20 @@ public abstract class Plot extends Location {
     public Map<BlockPos, SignText> getLineStartCache() {
         if (lineStarterCache.isEmpty()) fillLineStarterCache();
         return lineStarterCache;
+    }
+
+    public void clearActionCache() {
+        actionCache.clear();
+    }
+
+    private void fillActionCache() {
+        clearActionCache();
+        actionCache = scanForActionSigns(Pattern.compile(".*"));
+    }
+
+    public Map<BlockPos, SignText> getActionCache() {
+        if (actionCache.isEmpty()) fillActionCache();
+        return actionCache;
     }
 
      /**

@@ -1,6 +1,8 @@
 package dev.dfonline.codeclient;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
@@ -17,6 +19,7 @@ import dev.dfonline.codeclient.data.value.StringDataValue;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
 import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
+import dev.dfonline.codeclient.dev.menu.AdvancedMiddleClickFeature;
 import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
 import dev.dfonline.codeclient.dev.menu.RecentValues;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
@@ -35,12 +38,16 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -51,10 +58,13 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
+import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -67,6 +77,11 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Objects;
@@ -81,6 +96,7 @@ public class CodeClient implements ClientModInitializer {
     public static MinecraftClient MC = MinecraftClient.getInstance();
 
     public static AutoJoin autoJoin = AutoJoin.NONE;
+    public static Utility.Toast startupToast;
 
     @NotNull
     public static Action currentAction = new None();
@@ -137,7 +153,7 @@ public class CodeClient implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher, registryAccess));
 
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
-            if (isPreviewingItemTags) {
+            if (isPreviewingItemTags && location instanceof Creator) {
                 DFItem item = DFItem.of(stack);
                 ItemData itemData = item.getItemData();
                 if (itemData == null) return;
@@ -165,6 +181,13 @@ public class CodeClient implements ClientModInitializer {
                     );
                 }
             }
+        });
+
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key, scancode, modifiers) -> !CodeClient.onKeyPressed(key, scancode, modifiers));
+            ScreenKeyboardEvents.allowKeyRelease(screen).register((screen1, key, scancode, modifiers) -> !CodeClient.onKeyReleased(key, scancode,  modifiers));
+            ScreenMouseEvents.allowMouseClick(screen).register((screen1, mouseX, mouseY, button) -> !CodeClient.onMouseClicked(mouseX, mouseY, button));
+            ScreenMouseEvents.allowMouseScroll(screen).register((screen1, mouseX, mouseY, horizontalAmount, verticalAmount) -> !CodeClient.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
         });
 
         try {
@@ -201,6 +224,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new MessageHiding());
         feat(new ExpressionHighlighter());
         feat(new PreviewSoundChest());
+        feat(new AdvancedMiddleClickFeature());
         feat(new StateSwitcher.StateSwitcherFeature());
         feat(new SpeedSwitcher.SpeedSwitcherFeature());
         feat(new ScopeSwitcher.ScopeSwitcherFeature());
@@ -256,18 +280,32 @@ public class CodeClient implements ClientModInitializer {
 
         //noinspection unused
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.", "");
-//        if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
+//        if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket", "DebugSampleS2CPacket").contains(name)) LOGGER.info(name);
 
         if (CodeClient.location instanceof Dev dev) {
             try {
                 if (packet instanceof BlockEntityUpdateS2CPacket beu && dev.isInDev(beu.getPos()) && beu.getBlockEntityType() == BlockEntityType.SIGN) {
-                    dev.clearLineStarterCache();
+                    NbtCompound compound = beu.getNbt();
+                    if(compound.contains("front_text")) {
+                        SignText text = SignText.CODEC.decode(NbtOps.INSTANCE, beu.getNbt().get("front_text")).getOrThrow().getFirst();
+                        if (Plot.lineStarterPattern.matcher(text.getMessage(0, false).getString()).matches()) {
+                            dev.getLineStartCache().put(beu.getPos(), text);
+                        }
+                    } else {
+                        dev.clearLineStarterCache();
+                    }
                 }
             } catch (ConcurrentModificationException exception) {
                 // Not sure how this comes to happen. My guess it's the getBlockEntity call.
                 // Unfortunately, I don't know what state the game has to be in to make it fail, maybe an unloaded chunk?
                 // It's hard to check for that, apparently.
                 dev.clearLineStarterCache();
+            } catch (IllegalStateException exception) {
+                dev.clearLineStarterCache();
+            }
+
+            if (packet instanceof ChunkDeltaUpdateS2CPacket update) {
+                update.visitUpdates((blockPos, blockState) -> dev.getLineStartCache().remove(blockPos));
             }
         }
         return (MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen || MC.currentScreen instanceof StateSwitcher) && packet instanceof CloseScreenS2CPacket;
@@ -404,8 +442,8 @@ public class CodeClient implements ClientModInitializer {
         return chestFeatures().anyMatch(feature -> feature.charTyped(chr, modifiers));
     }
 
-    public static void onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-        chestFeatures().forEach(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
+    public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+        return chestFeatures().anyMatch(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
     }
 
     public static boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
@@ -445,6 +483,9 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static void onModeChange(Location location) {
+        if (location instanceof Dev dev) {
+            dev.clearLineStarterCache();
+        }
         if (Config.getConfig().DevForBuild && (currentAction instanceof None || currentAction instanceof DevForBuild) && location instanceof Build) {
             currentAction = new DevForBuild(() -> currentAction = new None());
             currentAction.init();
@@ -492,6 +533,40 @@ public class CodeClient implements ClientModInitializer {
                 getModContainer(),
                 Text.literal(prefix).formatted(Formatting.GRAY).append(name),
                 type
+        );
+    }
+
+    public static void parseVersionInfo(String response) {
+        JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+
+        var versionNumber = json.get("version_number").getAsString();
+
+        if (Config.getConfig().AutoUpdateOption != Config.AutoUpdate.UPDATE) {
+            startupToast = new Utility.Toast(Text.translatable("toast.codeclient.update_available.title", versionNumber), Text.translatable("toast.codeclient.update_available"));
+            return;
+        }
+        var files = json.getAsJsonArray("files");
+        files.forEach(file -> {
+                    var fileObject = file.getAsJsonObject();
+                    if (fileObject.get("primary").getAsBoolean()) {
+                        var url = fileObject.get("url").getAsString();
+                        LOGGER.info("Updated mod URL: {}", url);
+                        // Download the file.
+                        try (
+                                InputStream inputStream = new URI(url).toURL().openStream();
+                                ReadableByteChannel rbc = Channels.newChannel(inputStream);
+                                FileOutputStream fos = new FileOutputStream("mods/" + CodeClient.MOD_NAME + "-" + versionNumber + ".jar")
+                        ) {
+                            LOGGER.info("Starting download...");
+                            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                        } catch (Exception e) {
+                            LOGGER.error("Failed to download the file: {}", e.getMessage());
+                        } finally {
+                            LOGGER.info("Download complete.");
+                            startupToast = new Utility.Toast(Text.translatable("toast.codeclient.update.title", versionNumber), Text.translatable("toast.codeclient.update"));
+                        }
+                    }
+                }
         );
     }
 

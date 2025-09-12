@@ -87,14 +87,11 @@ public class InteractionManager {
 
     public static boolean onBreakBlock(BlockPos pos) {
         if (CodeClient.location instanceof Dev dev) {
-            dev.clearLineStarterCache();
             if (!dev.isInDev(pos)) return false;
             BlockPos breakPos = isBlockBreakable(pos);
             CodeClient.onBreakBlock(dev,pos,breakPos);
-            if (Config.getConfig().CustomBlockInteractions) {
-                if (breakPos != null) {
-                    breakCodeBlock(breakPos);
-                }
+            if (breakPos != null) {
+                breakCodeBlock(breakPos);
             }
             return true;
         }
@@ -102,17 +99,23 @@ public class InteractionManager {
     }
 
     private static void breakCodeBlock(BlockPos pos) {
-        ClientWorld world = CodeClient.MC.world;
-        CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvents.BLOCK_STONE_BREAK, SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
-        world.setBlockState(pos, Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(0, 1, 0), Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(-1, 0, 0), Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(0, 0, 1), Blocks.AIR.getDefaultState());
+        if (CodeClient.location instanceof Dev dev) {
+            dev.getLineStartCache().remove(pos.west());
+        }
+
+        if (Config.getConfig().CustomBlockInteractions) {
+            ClientWorld world = CodeClient.MC.world;
+            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvents.BLOCK_STONE_BREAK, SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+            world.setBlockState(pos, Blocks.AIR.getDefaultState());
+            world.setBlockState(pos.add(0, 1, 0), Blocks.AIR.getDefaultState());
+            world.setBlockState(pos.add(-1, 0, 0), Blocks.AIR.getDefaultState());
+            world.setBlockState(pos.add(0, 0, 1), Blocks.AIR.getDefaultState());
+        }
     }
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
-            CodeClient.onClickSlot(slot,button,actionType,syncId,revision);
+            if (CodeClient.onClickSlot(slot,button,actionType,syncId,revision)) return true;
             if (!slot.hasStack()) return false;
             ItemStack item = slot.getStack();
             DFItem dfItem = DFItem.of(item);

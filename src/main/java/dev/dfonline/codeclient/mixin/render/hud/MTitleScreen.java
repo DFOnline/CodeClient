@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.toast.SystemToast;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,6 +16,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MTitleScreen {
     @Inject(method = "init", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
+        if (CodeClient.startupToast != null) {
+            CodeClient.MC.getToastManager().add(SystemToast.create(
+                    CodeClient.MC,
+                    SystemToast.Type.PACK_LOAD_FAILURE,
+                    CodeClient.startupToast.title(),
+                    CodeClient.startupToast.description())
+            );
+            CodeClient.startupToast = null;
+        }
+
         if (CodeClient.autoJoin == CodeClient.AutoJoin.GAME) {
             ServerInfo info = new ServerInfo("DiamondFire", Config.getConfig().AutoNode.prepend + "mcdiamondfire.com", ServerInfo.ServerType.OTHER);
             ConnectScreen.connect((TitleScreen) (Object) this, CodeClient.MC, ServerAddress.parse(info.address), info, true, null);

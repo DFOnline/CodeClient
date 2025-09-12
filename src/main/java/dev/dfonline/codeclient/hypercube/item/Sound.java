@@ -13,12 +13,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Sound extends VarItem {
     private String sound;
     private double pitch;
     private double volume;
+    private String variant;
 
     public static final Map<String, Double> Notes;
     public static final Map<Double, String> Pitches;
@@ -83,6 +85,9 @@ public class Sound extends VarItem {
         this.sound = data.get("sound").getAsString();
         this.pitch = data.get("pitch").getAsDouble();
         this.volume = data.get("vol").getAsDouble();
+        if (data.has("variant")) {
+            this.variant = data.get("variant").getAsString();
+        }
     }
 
     public Sound() {
@@ -100,10 +105,9 @@ public class Sound extends VarItem {
     public Optional<dev.dfonline.codeclient.hypercube.actiondump.Sound> getSoundId() {
         try {
             return Arrays.stream(ActionDump.getActionDump().sounds).filter(sound -> Objects.equals(sound.icon.getCleanName(), this.sound)).findFirst();
-        } catch (Exception ignored) {
-
+        } catch (IOException ignored) {
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     public void setSound(String sound) {
@@ -141,6 +145,10 @@ public class Sound extends VarItem {
         this.data.addProperty("vol", volume);
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
@@ -158,8 +166,9 @@ public class Sound extends VarItem {
         Utility.addLore(dfItem.getItemStack(),
                 name,
                 Text.empty(),
-                Text.empty().append(Text.literal("Pitch: ").formatted(Formatting.GRAY)).append("%.2f".formatted(pitch)),
-                Text.empty().append(Text.literal("Volume: ").formatted(Formatting.GRAY)).append("%.2f".formatted(volume)));
+                Text.empty().append(Text.literal("Pitch: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.pitch)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
+                Text.empty().append(Text.literal("Volume: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.volume)).setStyle(Style.EMPTY.withColor(Formatting.WHITE))))
+        );
         return dfItem.getItemStack();
     }
 }

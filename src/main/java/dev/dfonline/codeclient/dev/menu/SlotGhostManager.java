@@ -20,12 +20,13 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SlotGhostManager extends Feature {
     private Action action;
@@ -84,10 +85,10 @@ public class SlotGhostManager extends Feature {
 
         @Nullable
         public Argument getArgument(Slot slot) {
-            var args = new ArrayList<Argument>();
+            List<Argument> args = new ArrayList<>();
 
-            for (var group : action.icon.getArgGroups()) {
-                var pos = group.getPossibilities();
+            for (Icon.ArgumentGroup group : action.icon.getArgGroups()) {
+                List<Icon.ArgumentGroup.ArgumentPossibilities> pos = group.getPossibilities();
                 args.addAll(pos.get((int) (time / 30F) % pos.size()).arguments());
             }
 
@@ -97,27 +98,21 @@ public class SlotGhostManager extends Feature {
         }
 
         public void drawSlot(DrawContext context, Slot slot) {
-            try {
-                if (!(CodeClient.MC.currentScreen instanceof GenericContainerScreen || CodeClient.MC.currentScreen instanceof CustomChestMenu)) {
-                    action = null;
-                }
-                if (badAction() || slot.inventory instanceof PlayerInventory)
-                    return;
-                if (slot.hasStack()) return;
-                var arg = getArgument(slot);
-                if (arg == null) return;
-                Icon.Type type = Icon.Type.valueOf(arg.type);
-                ItemStack itemStack = type.getIcon();
-                if (itemStack.isEmpty()) return;
-//        itemStack.setCount(slot.id);
-                context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0x50__90_90_ff : 0x30__ff_00_00);
-                context.drawItem(itemStack, slot.x, slot.y);
-                context.drawStackOverlay(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
-//        context.drawText(CodeClient.MC.textRenderer, Text.literal(arg.type),slot.x,slot.y,0xFFFFFF00,true);
-                context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40ffffff);
-            } catch (Exception e) {
-                context.drawText(CodeClient.MC.textRenderer, Text.literal("Error."), slot.x, slot.y, 0xFF0000, true);
+            if (!(CodeClient.MC.currentScreen instanceof GenericContainerScreen || CodeClient.MC.currentScreen instanceof CustomChestMenu)) {
+                action = null;
             }
+            if (badAction() || slot.inventory instanceof PlayerInventory)
+                return;
+            if (slot.hasStack()) return;
+            Argument arg = getArgument(slot);
+            if (arg == null) return;
+            ItemStack itemStack = arg.getItem();
+
+            if (itemStack.isEmpty()) return;
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0x50__90_90_ff : 0x30__ff_00_00);
+            context.drawItem(itemStack, slot.x, slot.y);
+            context.drawStackOverlay(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
+            context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40ffffff);
         }
 
         @Override @Nullable
@@ -125,7 +120,7 @@ public class SlotGhostManager extends Feature {
             if (badAction() || slot.inventory instanceof PlayerInventory)
                 return null;
             if (slot.hasStack()) return null;
-            var arg = getArgument(slot);
+            Argument arg = getArgument(slot);
             if (arg == null) return null;
             return arg.getItem();
         }

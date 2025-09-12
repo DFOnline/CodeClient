@@ -74,7 +74,7 @@ public abstract class MInGameHud {
         try {
             List<Text> peeker = CodeClient.getFeature(ChestPeeker.class)
                     .map(ChestPeeker::getOverlayText).orElse(null);
-            if (peeker == null) peeker = SignPeeker.getOverlayText();
+            if (peeker == null || peeker.isEmpty()) peeker = SignPeeker.getOverlayText();
             if (peeker != null && !peeker.isEmpty()) {
                 context.drawTooltip(textRenderer, peeker, x, yOrig);
 

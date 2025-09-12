@@ -47,7 +47,7 @@ public class Variable extends NamedItem {
         var stack = super.toStack();
         DFItem dfItem = DFItem.of(stack);
         dfItem.setName(Text.literal(getName()).setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
-        Utility.addLore(dfItem.getItemStack(), Text.literal(scope.longName).setStyle(Style.EMPTY.withColor(scope.color)));
+        Utility.addLore(dfItem.getItemStack(), Text.literal(scope.longName).setStyle(Style.EMPTY.withColor(scope.color).withItalic(false)));
         return dfItem.getItemStack();
     }
 }

@@ -53,7 +53,7 @@ public class Navigation extends Feature {
     @Nullable
     public Float jumpHeight() {
         if (CodeClient.location instanceof Dev dev
-                && dev.isInDev(CodeClient.MC.player.getPos())
+                && dev.isInDevSpace()
                 && Config.getConfig().NoClipEnabled
                 && CodeClient.MC.player.getPitch() <= Config.getConfig().UpAngle - 90)
             return 0.91f;

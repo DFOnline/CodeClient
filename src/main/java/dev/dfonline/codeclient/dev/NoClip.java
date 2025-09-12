@@ -14,6 +14,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class NoClip extends Feature {
     public static final double PLAYER_FREEDOM = 0.621;
     /**
@@ -32,7 +34,8 @@ public class NoClip extends Feature {
     }
 
     public boolean isIgnoringWalls() {
-        return CodeClient.location instanceof Dev dev && CodeClient.noClipOn() && dev.isInDevSpace();
+        Optional<BuildPhaser> buildPhaser = CodeClient.getFeature(BuildPhaser.class);
+        return CodeClient.location instanceof Dev dev && CodeClient.noClipOn() && dev.isInDevSpace() && !buildPhaser.get().isClipping();
     }
 
     public Vec3d handleClientPosition(Vec3d movement) {
