@@ -487,7 +487,7 @@ public class SocketHandler {
 
         @Override
         public void message(WebSocket responder, String message) {
-            if(message.isEmpty() && !targets.isEmpty()) {
+            if(message.equals("go") && !targets.isEmpty()) {
                 ready = true;
                 if (Objects.equals(actionQueue.getFirst(), this)) {
                     this.start(responder);
