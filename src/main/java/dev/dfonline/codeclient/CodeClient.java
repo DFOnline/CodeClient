@@ -46,6 +46,7 @@ import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.CaveVines;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
@@ -153,7 +154,7 @@ public class CodeClient implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher, registryAccess));
 
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
-            if (isPreviewingItemTags && location instanceof Creator) {
+            if (isPreviewingItemTags && ((location instanceof Plot plot && plot.getHasDev()) || location instanceof Creator)) {
                 DFItem item = DFItem.of(stack);
                 ItemData itemData = item.getItemData();
                 if (itemData == null) return;

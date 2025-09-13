@@ -237,6 +237,10 @@ public abstract class Plot extends Location {
         return null;
     }
 
+    public Boolean getHasDev() {
+        return hasDev;
+    }
+
     public enum Size {
         BASIC(50),
         LARGE(100),
