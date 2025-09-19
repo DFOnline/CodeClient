@@ -33,11 +33,11 @@ import dev.dfonline.codeclient.switcher.SpeedSwitcher;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
@@ -54,6 +54,7 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
@@ -129,9 +130,10 @@ public class CodeClient implements ClientModInitializer {
             }
         });
 
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
+
+        BlockRenderLayerMap.putBlock(Blocks.BARRIER, BlockRenderLayer.TRANSLUCENT);
+        BlockRenderLayerMap.putBlock(Blocks.STRUCTURE_VOID, BlockRenderLayer.TRANSLUCENT);
+        BlockRenderLayerMap.putBlock(Blocks.LIGHT, BlockRenderLayer.TRANSLUCENT);
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.of(MOD_ID, "close"), client -> API.stop());
 
