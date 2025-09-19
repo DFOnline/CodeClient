@@ -237,7 +237,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             VarItem item = field.item;
             if (item instanceof BlockTag) {
                 Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
-                CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.nextRevision(), slot.getIndex(), 0, SlotActionType.PICKUP, item.toStack(), int2ObjectMap));
+//                CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.nextRevision(), slot.getIndex(), 0, SlotActionType.PICKUP, item.toStack(), int2ObjectMap));
             } else {
                 doNotUpdate = true;
                 super.onMouseClick(slot, slot.id, 0, SlotActionType.SWAP);

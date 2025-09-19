@@ -133,7 +133,7 @@ public class InteractionManager {
                             return false;
 
                         Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
-                        CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
+//                        CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
 
                         String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
                         List<Text> currentLore = dfItem.getLore();
