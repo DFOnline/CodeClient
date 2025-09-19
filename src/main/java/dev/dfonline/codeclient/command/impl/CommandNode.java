@@ -75,7 +75,7 @@ public class CommandNode extends Command {
                         }
                     }
 
-                    CodeClient.MC.getNetworkHandler().sendCommand("server " + serverId);
+                    CodeClient.MC.getNetworkHandler().sendChatCommand("server " + serverId);
                     return 0;
                 }));
     }

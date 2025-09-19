@@ -70,7 +70,7 @@ public class CommandName extends Command {
                                     Utility.sendMessage(message, ChatType.SUCCESS);
 
                                     if (CodeClient.location instanceof Dev && Config.getConfig().GiveUuidNameStrings)
-                                        mc.getNetworkHandler().sendCommand("str " + fullName);
+                                        mc.getNetworkHandler().sendChatCommand("str " + fullName);
                                     
                                     return 0;
                                 }

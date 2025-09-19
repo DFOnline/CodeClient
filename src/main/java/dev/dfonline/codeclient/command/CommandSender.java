@@ -31,7 +31,7 @@ public class CommandSender {
         rateLimiter.tick();
         if (CodeClient.MC.getNetworkHandler() == null) return;
         if (!rateLimiter.isRateLimited() && !commandQueue.isEmpty()) {
-            CodeClient.MC.getNetworkHandler().sendCommand(commandQueue.pop());
+            CodeClient.MC.getNetworkHandler().sendChatCommand(commandQueue.pop());
             // No need to increment here, since our packet listener will do that for us. (Event#onSendPacket)
         }
     }

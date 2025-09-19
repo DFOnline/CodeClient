@@ -380,10 +380,10 @@ public class CodeClient implements ClientModInitializer {
         }
         if (CodeClient.location instanceof Spawn spawn && MC.getNetworkHandler() != null && spawn.consumeHasJustJoined()) {
             if (autoJoin == AutoJoin.PLOT) {
-                MC.getNetworkHandler().sendCommand("join " + Config.getConfig().AutoJoinPlotId);
+                MC.getNetworkHandler().sendChatCommand("join " + Config.getConfig().AutoJoinPlotId);
                 autoJoin = AutoJoin.NONE;
             } else if (Config.getConfig().AutoFly) {
-                MC.getNetworkHandler().sendCommand("fly");
+                MC.getNetworkHandler().sendChatCommand("fly");
             }
         }
     }

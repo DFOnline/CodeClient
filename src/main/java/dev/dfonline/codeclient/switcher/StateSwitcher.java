@@ -58,6 +58,6 @@ public class StateSwitcher extends GenericSwitcher {
     }
 
     private void joinMode(String mode) {
-        CodeClient.MC.getNetworkHandler().sendCommand(mode);
+        CodeClient.MC.getNetworkHandler().sendChatCommand(mode);
     }
 }

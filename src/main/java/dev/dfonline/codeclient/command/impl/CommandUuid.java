@@ -68,7 +68,7 @@ public class CommandUuid extends Command {
             Utility.sendMessage(message, ChatType.SUCCESS);
 
             if (CodeClient.location instanceof Dev && Config.getConfig().GiveUuidNameStrings)
-                mc.getNetworkHandler().sendCommand("str " + fullUUID);
+                mc.getNetworkHandler().sendChatCommand("str " + fullUUID);
 
         } catch (IOException e) {
             Utility.sendMessage(Text.translatable("codeclient.command.uuid.not_found", username), ChatType.FAIL);

@@ -579,7 +579,7 @@ public class SocketHandler {
         @Override
         public void start(WebSocket responder) {
             if (CodeClient.location instanceof Plot && !command.isEmpty() && CodeClient.MC.getNetworkHandler() != null) {
-                CodeClient.MC.getNetworkHandler().sendCommand(command);
+                CodeClient.MC.getNetworkHandler().sendChatCommand(command);
             } else {
                 responder.send(CodeClient.location.name());
             }

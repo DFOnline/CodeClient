@@ -59,7 +59,7 @@ public class CommandDFGive extends Command {
                                 return -1;
                             }
 
-                            CodeClient.MC.getNetworkHandler().sendCommand("dfgive " + clipboard);
+                            CodeClient.MC.getNetworkHandler().sendChatCommand("dfgive " + clipboard);
                             return 1;
                         })
                 );
