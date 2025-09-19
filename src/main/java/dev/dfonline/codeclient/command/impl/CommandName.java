@@ -64,8 +64,8 @@ public class CommandName extends Command {
 
                                     Text message = Text.translatable("codeclient.command.name", uuid, nameDisplay)
                                             .fillStyle(Style.EMPTY
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.hover.click_to_copy")))
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, fullName)));
+                                                    .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.hover.click_to_copy")))
+                                                    .withClickEvent(new ClickEvent.CopyToClipboard(fullName)));
 
                                     Utility.sendMessage(message, ChatType.SUCCESS);
 

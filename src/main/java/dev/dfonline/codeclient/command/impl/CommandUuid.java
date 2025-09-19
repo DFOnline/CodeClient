@@ -62,8 +62,8 @@ public class CommandUuid extends Command {
 
             Text message = Text.translatable("codeclient.command.uuid", username, uuidDisplay)
                     .fillStyle(Style.EMPTY
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.hover.click_to_copy")))
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, fullUUID)));
+                            .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.hover.click_to_copy")))
+                            .withClickEvent(new ClickEvent.CopyToClipboard(fullUUID)));
 
             Utility.sendMessage(message, ChatType.SUCCESS);
 
