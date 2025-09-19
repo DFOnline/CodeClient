@@ -46,7 +46,6 @@ import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.CaveVines;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
