@@ -93,8 +93,8 @@ public class BuildPhaser extends Feature {
 //                Utility.sendMessage(Text.translatable("codeclient.phaser.dev_mode1",
 //                                Text.translatable("codeclient.phaser.dev_mode2")
 //                                        .setStyle(Text.empty().getStyle()
-//                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
-//                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.link.open")))
+//                                                .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/DFOnline/CodeClient/wiki/phaser#internal"))
+//                                                .withHoverEvent(new HoverEvent.ShowText(Text.translatable("chat.link.open")))
 //                                        ).formatted(Formatting.AQUA, Formatting.UNDERLINE)),
 //                        ChatType.FAIL);
 //            }

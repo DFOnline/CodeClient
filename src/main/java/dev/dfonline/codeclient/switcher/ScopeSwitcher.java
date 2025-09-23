@@ -19,6 +19,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ScopeSwitcher extends GenericSwitcher {
     private final String option;
@@ -67,9 +68,9 @@ public class ScopeSwitcher extends GenericSwitcher {
 
         DFItem item = DFItem.of(stack);
         PublicBukkitValues pbv = item.getPublicBukkitValues();
-        String varItem = pbv.getHypercubeStringValue("varitem");
+        Optional<String> varItem = pbv.getHypercubeStringValue("varitem");
         if (varItem.isEmpty()) return;
-        JsonObject var = JsonParser.parseString(varItem).getAsJsonObject();
+        JsonObject var = JsonParser.parseString(varItem.get()).getAsJsonObject();
         if (!var.get("id").getAsString().equals("var")) return;
         JsonObject data = var.get("data").getAsJsonObject();
         data.addProperty("scope", name);

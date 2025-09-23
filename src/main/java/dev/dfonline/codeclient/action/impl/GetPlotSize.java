@@ -35,12 +35,12 @@ public class GetPlotSize extends Action {
     @Override
     public void tick() {
         if (step == Step.WAIT) {
-            step = Step.TP;
+            step = Step.TP;/*TODO(1.21.8)
             CodeClient.MC.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(CodeClient.MC.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             CodeClient.MC.interactionManager.attackBlock(CodeClient.MC.player.getBlockPos(), Direction.UP);
             CodeClient.MC.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             CodeClient.MC.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(CodeClient.MC.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-            if (recoverMainHand != null) Utility.makeHolding(recoverMainHand);
+            if (recoverMainHand != null) Utility.makeHolding(recoverMainHand);*/
         }
     }
 

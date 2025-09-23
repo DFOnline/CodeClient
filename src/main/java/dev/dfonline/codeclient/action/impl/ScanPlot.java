@@ -121,11 +121,12 @@ public class ScanPlot extends Action {
             Utility.makeHolding(ItemStack.EMPTY);
             var player = CodeClient.MC.player;
             var inter = CodeClient.MC.interactionManager;
-            boolean sneaky = !player.isSneaking();
+            boolean sneaky = !player.isSneaking();/*TODO(1.21.8)
             if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             inter.interactBlock(player, Hand.MAIN_HAND, new BlockHitResult(this.pos.toCenterPos(), Direction.UP, this.pos, false));
             if (sneaky)
                 net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+             */
         }
 
         @Override

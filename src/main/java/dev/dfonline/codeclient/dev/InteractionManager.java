@@ -42,6 +42,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class InteractionManager {
 
@@ -121,11 +122,11 @@ public class InteractionManager {
             DFItem dfItem = DFItem.of(item);
             if (dfItem.hasHypercubeKey("varitem")) {
                 try {
-                    String varItem = dfItem.getItemData().getHypercubeStringValue("varitem");
-                    if (!varItem.isEmpty()) {
+                    Optional<String> varItem = dfItem.getItemData().getHypercubeStringValue("varitem");
+                    if (varItem.isPresent()) {
                         if (!Config.getConfig().CustomTagInteraction) return false;
                         if (actionType == SlotActionType.PICKUP_ALL) return false;
-                        JsonElement varElement = JsonParser.parseString(varItem);
+                        JsonElement varElement = JsonParser.parseString(varItem.get());
                         if (!varElement.isJsonObject()) return false;
                         JsonObject varObject = (JsonObject) varElement;
                         if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
@@ -256,8 +257,9 @@ public class InteractionManager {
             DFItem dfItem = DFItem.of(stack);
 
             if (!dfItem.hasHypercubeKey("varitem")) return false;
-            String varItem = dfItem.getHypercubeStringValue("varitem");
-            JsonObject var = JsonParser.parseString(varItem).getAsJsonObject();
+            Optional<String> varItem = dfItem.getHypercubeStringValue("varitem");
+            if (varItem.isEmpty()) return false;
+            JsonObject var = JsonParser.parseString(varItem.get()).getAsJsonObject();
             if (!var.get("id").getAsString().equals("var")) return false;
             JsonObject data = var.get("data").getAsJsonObject();
             String scopeName = data.get("scope").getAsString();

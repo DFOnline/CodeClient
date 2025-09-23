@@ -39,8 +39,8 @@ public class CommandCalc extends Command {
                         String result = String.valueOf(calc(expr));
                         Text message = Text.translatable("codeclient.command.calc.success", expr, result)
                                         .fillStyle(Style.EMPTY
-                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.hover.click_to_copy")))
-                                        .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, result)));
+                                        .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.hover.click_to_copy")))
+                                        .withClickEvent(new ClickEvent.CopyToClipboard(result)));
 
                         Utility.sendMessage(message, ChatType.SUCCESS);
                         

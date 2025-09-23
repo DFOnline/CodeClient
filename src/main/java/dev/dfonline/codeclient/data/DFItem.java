@@ -2,6 +2,8 @@ package dev.dfonline.codeclient.data;
 
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.item.ItemStack;
@@ -11,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.SequencedSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -20,6 +24,27 @@ import java.util.function.Consumer;
 public class DFItem {
     ItemStack item;
     ItemData data;
+
+    private static final SequencedSet<ComponentType<?>> HIDDEN_COMPONENTS_PREVIOUSLY = ReferenceLinkedOpenHashSet.of(
+            DataComponentTypes.BANNER_PATTERNS,
+            DataComponentTypes.BEES,
+            DataComponentTypes.BLOCK_ENTITY_DATA,
+            DataComponentTypes.BLOCK_STATE,
+            DataComponentTypes.BUNDLE_CONTENTS,
+            DataComponentTypes.CHARGED_PROJECTILES,
+            DataComponentTypes.CONTAINER,
+            DataComponentTypes.CONTAINER_LOOT,
+            DataComponentTypes.FIREWORK_EXPLOSION,
+            DataComponentTypes.FIREWORKS,
+            DataComponentTypes.INSTRUMENT,
+            DataComponentTypes.JUKEBOX_PLAYABLE,
+            DataComponentTypes.MAP_ID,
+            DataComponentTypes.PAINTING_VARIANT,
+            DataComponentTypes.POT_DECORATIONS,
+            DataComponentTypes.POTION_CONTENTS,
+            DataComponentTypes.TROPICAL_FISH_PATTERN,
+            DataComponentTypes.WRITTEN_BOOK_CONTENT
+    );
 
     /**
      * Creates a new DFItem from an ItemStack.
@@ -82,9 +107,9 @@ public class DFItem {
      * @param key The key to get, without the hypercube: prefix.
      * @return The value of the key, or an empty string if it doesn't exist.
      */
-    public String getHypercubeStringValue(String key) {
+    public Optional<String> getHypercubeStringValue(String key) {
         var itemData = getItemData();
-        if (itemData == null) return "";
+        if (itemData == null) return Optional.empty();
         return itemData.getHypercubeStringValue(key);
     }
 
@@ -161,10 +186,7 @@ public class DFItem {
      * Hides additional information about the item, such as additional tooltip, jukebox playable, fireworks, and attribute modifiers.
      */
     public void hideFlags() {
-        item.set(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE);
-        item.remove(DataComponentTypes.JUKEBOX_PLAYABLE);
-        item.remove(DataComponentTypes.FIREWORKS);
-        item.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+        item.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(false, HIDDEN_COMPONENTS_PREVIOUSLY));
     }
 
     /**
@@ -173,7 +195,7 @@ public class DFItem {
      * @param color The new dye color to set.
      */
     public void setDyeColor(int color) {
-        item.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(color, false));
+        item.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(color));
     }
 
     /**
@@ -182,7 +204,7 @@ public class DFItem {
      * @param modelData The new custom model data to set.
      */
     public void setCustomModelData(int modelData) {
-        item.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(modelData));
+        item.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(List.of((float) modelData), List.of(), List.of(), List.of()));
     }
 
     /**

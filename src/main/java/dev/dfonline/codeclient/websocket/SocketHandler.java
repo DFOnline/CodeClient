@@ -228,7 +228,7 @@ public class SocketHandler {
                                             )
                             )
                             .setStyle(Style.EMPTY.withHoverEvent(
-                                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
+                                    new HoverEvent.ShowText(Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
                             )), false
             );
         }
@@ -474,11 +474,11 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            if (CodeClient.MC.player == null) return;
+            /*TODO(1.21.8) if (CodeClient.MC.player == null) return;
             NbtCompound nbt = new NbtCompound();
             CodeClient.MC.player.writeNbt(nbt);
             responder.send(String.valueOf(nbt.get("Inventory")));
-            next();
+            next();*/
         }
 
         @Override
@@ -500,6 +500,7 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
+            /*TODO(1.21.8)
             if (CodeClient.MC.player == null) return;
             if (!CodeClient.MC.player.isCreative()) {
                 responder.send("not creative mode");
@@ -516,7 +517,7 @@ public class SocketHandler {
                 responder.send("invalid nbt");
             } finally {
                 next();
-            }
+            }*/
         }
 
         @Override
@@ -538,6 +539,7 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
+            /*TODO(1.21.8)
             if (CodeClient.MC.player == null) return;
             if (!CodeClient.MC.player.isCreative()) {
                 responder.send("not creative mode");
@@ -554,7 +556,7 @@ public class SocketHandler {
                 responder.send("invalid nbt");
             } finally {
                 next();
-            }
+            }*/
         }
 
         @Override

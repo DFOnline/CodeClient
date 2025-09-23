@@ -38,11 +38,11 @@ public abstract class MHandledScreen {
     public void removed(CallbackInfo ci) {
         CodeClient.onScreenClosed();
     }
-
+/*TODO(1.21.8)
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;pop()V"))
     private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         CodeClient.onRender(context,mouseX,mouseY,this.x,this.y,delta);
-    }
+    }*/
 
     @Redirect(method = "drawMouseoverTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;hasStack()Z"))
     private boolean hasStack(Slot instance) {

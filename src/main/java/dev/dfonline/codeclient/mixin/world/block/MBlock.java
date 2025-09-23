@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 @Mixin(Block.class)
 public class MBlock {
+    /*TODO(1.21.8)
     @Inject(method = "getPickStack", at = @At("HEAD"), cancellable = true)
     private void getPickStack(WorldView world, BlockPos pos, BlockState state, CallbackInfoReturnable<ItemStack> cir) {
         if (!Config.getConfig().PickAction) return;
@@ -41,5 +42,5 @@ public class MBlock {
                 } catch (Exception ignored) {
                 }
         }
-    }
+    }*/
 }

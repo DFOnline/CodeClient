@@ -73,7 +73,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {/*TODO(1.21.8)
         super.render(context, mouseX, mouseY, delta);
         context.getMatrices().push();
         context.getMatrices().translate(this.x, this.y, 0);
@@ -119,7 +119,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             if (focusedSlot.hasStack())
                 context.drawItemTooltip(textRenderer, focusedSlot.getStack(), mouseX - this.x, mouseY - this.y);
         }
-        context.getMatrices().pop();
+        context.getMatrices().pop();*/
     }
 
     public void update() {
@@ -366,7 +366,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {/*TODO(1.21.8)
         context.getMatrices().push();
         RenderSystem.enableBlend();
         int centerX = this.width / 2 - (Size.MENU_WIDTH / 2);
@@ -386,7 +386,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 Size.TEXTURE_HEIGHT
         );
 
-        context.getMatrices().pop();
+        context.getMatrices().pop();*/
     }
 
     @Override

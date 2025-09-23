@@ -72,6 +72,7 @@ public abstract class GenericSwitcher extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        /*TODO(1.21.8)
         if (checkFinished()) return;
         context.getMatrices().push();
         RenderSystem.enableBlend();
@@ -108,7 +109,7 @@ public abstract class GenericSwitcher extends Screen {
                 context.drawGuiTexture(RenderLayer::getGuiTextured, SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
             button.render(context, mouseX, mouseY, delta);
             ++i;
-        }
+        }*/
     }
 
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -196,6 +197,7 @@ public abstract class GenericSwitcher extends Screen {
 
         @Override
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+            /*TODO(1.21.8)
             context.getMatrices().push();
             context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
             context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
@@ -209,7 +211,7 @@ public abstract class GenericSwitcher extends Screen {
                 context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
                 context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, 0, 0, 26, 75, 26, 26, 128, 128);
                 context.getMatrices().pop();
-            }
+            }*/
         }
 
         @Override

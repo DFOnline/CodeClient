@@ -32,7 +32,7 @@ public class CommandWidthDump extends Command {
             String dataFinal = data.toString();
             try {
                 Path path = FileManager.writeFile("widthdump.txt", dataFinal);
-                Utility.sendMessage(Text.translatable("codeclient.files.saved", path).setStyle(Text.empty().getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toString()))));
+                Utility.sendMessage(Text.translatable("codeclient.files.saved", path).setStyle(Text.empty().getStyle().withClickEvent(new ClickEvent.OpenFile(path.toString()))));
             } catch (Exception ignored) {
                 Utility.sendMessage(Text.translatable("codeclient.files.error.cant_save"), ChatType.FAIL);
                 CodeClient.LOGGER.info(dataFinal);

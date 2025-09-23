@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DrawContext.class)
 public abstract class MDrawContext {
+    /*TODO(1.21.8)
     @Shadow
     @Final
     private MatrixStack matrices;
@@ -27,5 +28,5 @@ public abstract class MDrawContext {
     private void additionalItemRendering(TextRenderer textRenderer, ItemStack stack, int x, int y, String stackCountText, CallbackInfo ci) {
         CodeClient.getFeature(ValueDetails.class).ifPresent(valueDetails ->
                 valueDetails.draw(this::drawText, textRenderer, stack, x, y, matrices));
-    }
+    }*/
 }

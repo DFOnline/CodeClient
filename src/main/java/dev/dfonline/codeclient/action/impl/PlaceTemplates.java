@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class PlaceTemplates extends Action {
@@ -79,10 +80,10 @@ public class PlaceTemplates extends Action {
             ArrayList<ItemStack> leftOvers = new ArrayList<>(templates);
             for (ItemStack item : templates) {
                 DFItem dfItem = new DFItem(item);
-                String codeTemplateData = dfItem.getHypercubeStringValue("codetemplatedata");
+                Optional<String> codeTemplateData = dfItem.getHypercubeStringValue("codetemplatedata");
                 if (codeTemplateData.isEmpty()) continue;
                 try {
-                    Template template = Template.parse64(JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString());
+                    Template template = Template.parse64(JsonParser.parseString(codeTemplateData.get()).getAsJsonObject().get("code").getAsString());
                     if (template == null || template.blocks.isEmpty()) continue;
                     TemplateBlock block = template.blocks.get(0);
                     if (block.block == null) continue;
@@ -203,7 +204,7 @@ public class PlaceTemplates extends Action {
     }
 
     @Override
-    public void tick() {
+    public void tick() {/*TODO(1.21.8)
         var net = CodeClient.MC.getNetworkHandler();
         if (CodeClient.MC.interactionManager == null || CodeClient.MC.player == null || net == null) return;
         if (CodeClient.location instanceof Dev) {
@@ -253,7 +254,7 @@ public class PlaceTemplates extends Action {
                 goTo.init();
                 cooldown = 2;
             }
-        }
+        }*/
     }
 
     private static abstract class Operation {

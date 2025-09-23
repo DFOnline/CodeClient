@@ -54,20 +54,20 @@ public class CommandSearch extends Command {
 
                     var highlightAction = Text.empty().append(" [⏼]").setStyle(Style.EMPTY
                             .withColor(0xFF7FAA)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/highlight %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.highlight", pos.getX(), pos.getY(), pos.getZ())))
+                            .withClickEvent(new ClickEvent.RunCommand(String.format("/highlight %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
+                            .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.search.hover.highlight", pos.getX(), pos.getY(), pos.getZ())))
                     );
 
                     Style actionStyle = getActionColor(type);
 
                     var entry = Text.empty().append("\n ⏹ ").setStyle(actionStyle
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                    .withHoverEvent(new HoverEvent.ShowText(
                                             Text.empty().append(type).setStyle(actionStyle))
                                     )
                             )
                             .append(Text.empty().append(name).setStyle(Style.EMPTY
-                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/ptp %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.search.hover.teleport", pos.getX(), pos.getY(), pos.getZ())))
+                                    .withClickEvent(new ClickEvent.RunCommand(String.format("/ptp %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
+                                    .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.search.hover.teleport", pos.getX(), pos.getY(), pos.getZ())))
                             ))
                             .append(highlightAction);
                     message.append(entry);

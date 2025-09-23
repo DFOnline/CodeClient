@@ -73,10 +73,10 @@ public abstract class MClientPlayerEntity {
                 NoClip.lastPitch = pitch;
             }
             boolean sneaking = player.isSneaking();
-            if (sneaking != this.lastSneaking) {
+            if (sneaking != this.lastSneaking) {/*TODO(1.21.8)
                 ClientCommandC2SPacket.Mode mode = sneaking ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY : ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
                 this.networkHandler.sendPacket(new ClientCommandC2SPacket(player, mode));
-                this.lastSneaking = sneaking;
+                this.lastSneaking = sneaking;*/
             }
         }
     }

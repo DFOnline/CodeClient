@@ -121,7 +121,7 @@ public class ActionViewer extends Feature {
         }
 
         // this implementation of draw tooltip allows a change in the z-index of the rendered tooltip.
-        private void drawTooltip(DrawContext context, HandledScreen<?> handledScreen, List<TooltipComponent> components, int x, int y, int z) {
+        private void drawTooltip(DrawContext context, HandledScreen<?> handledScreen, List<TooltipComponent> components, int x, int y, int z) {/*TODO(1.21.8)
             var textRenderer = CodeClient.MC.textRenderer;
 
             if (handledScreen instanceof CustomChestMenu menu) {
@@ -163,7 +163,7 @@ public class ActionViewer extends Feature {
                 textY += tooltipComponent.getHeight(textRenderer) + (index == 0 ? 2 : 0);
             }
 
-            context.getMatrices().pop();
+            context.getMatrices().pop();*/
         }
 
         private class ActionTooltipPositioner implements TooltipPositioner {

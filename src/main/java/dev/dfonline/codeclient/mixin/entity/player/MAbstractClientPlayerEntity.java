@@ -10,9 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractClientPlayerEntity.class)
 public class MAbstractClientPlayerEntity {
+    /*TODO(1.21.8)
     @Inject(method = "isSpectator", at = @At("HEAD"), cancellable = true)
     public void isSpectator(CallbackInfoReturnable<Boolean> cir) {
         var feat = CodeClient.getFeature(BuildPhaser.class);
         if (feat.isPresent() && feat.get().isClipping()) cir.setReturnValue(true);
-    }
+    }*/
 }

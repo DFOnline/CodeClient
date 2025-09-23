@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class ChestPeeker extends Feature {
@@ -145,12 +146,12 @@ public class ChestPeeker extends Feature {
 
                     MutableText text = Text.empty();
                     text.append(Text.literal(" • ").formatted(Formatting.DARK_GRAY));
-                    String varItem = dfItem.getHypercubeStringValue("varitem");
-                    if (Objects.equals(varItem, "")) {
+                    Optional<String> varItem = dfItem.getHypercubeStringValue("varitem");
+                    if (varItem.isEmpty()) {
                         text.append(item.getCount() + "x ");
                         text.append(item.getName());
                     } else {
-                        JsonObject object = JsonParser.parseString(varItem).getAsJsonObject();
+                        JsonObject object = JsonParser.parseString(varItem.get()).getAsJsonObject();
                         try {
                             Type type = Type.valueOf(object.get("id").getAsString());
                             JsonObject data = object.get("data").getAsJsonObject();

@@ -38,10 +38,10 @@ public class VersionChecker {
             return;
         }
         if (updateInfo instanceof ModrinthUpdateInfo modrinthUpdateInfo) {
-            CodeClient.LOGGER.warn("Update available! Branch: {}, Version: {}", modrinthUpdateInfo.getUpdateChannel(), modrinthUpdateInfo.getVersionId());
+            CodeClient.LOGGER.warn("Update available! Branch: {}, Version: {}", modrinthUpdateInfo.getUpdateChannel(), modrinthUpdateInfo.versionId());
 
             // Get the new version.
-            final String versionUrl = "https://api.modrinth.com/v2/version/" + modrinthUpdateInfo.getVersionId();
+            final String versionUrl = "https://api.modrinth.com/v2/version/" + modrinthUpdateInfo.versionId();
 
             try (HttpClient client = HttpClient.newHttpClient()) {
                 HttpRequest request = HttpRequest.newBuilder()

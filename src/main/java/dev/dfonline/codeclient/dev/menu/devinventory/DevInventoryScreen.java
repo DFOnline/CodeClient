@@ -41,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
@@ -121,7 +122,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
             CodeClient.LOGGER.error(e.getMessage());
             Utility.sendMessage(
                     Text.translatable("codeclient.parse_db", Text.literal("https://github.com/DFOnline/CodeClient/wiki/actiondump").formatted(Formatting.AQUA, Formatting.UNDERLINE))
-                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/DFOnline/CodeClient/wiki/actiondump"))),
+                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/DFOnline/CodeClient/wiki/actiondump")))),
                     ChatType.FAIL);
         }
 
@@ -170,12 +171,12 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
 //    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
 //    }
 
-    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {/*TODO(1.21.8)
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
         if (itemGroup != DevInventoryGroup.INVENTORY) {
             RenderSystem.disableBlend();
             context.drawText(textRenderer, itemGroup.getName(), 8, 6, 0x404040, false);
-        }
+        }*/
     }
 
     //
@@ -288,7 +289,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         }
     }
 
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {/*TODO(1.21.8)
         this.renderBackground(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
 
@@ -303,7 +304,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         }
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.drawMouseoverTooltip(context, mouseX, mouseY);
+        this.drawMouseoverTooltip(context, mouseX, mouseY);*/
     }
 
     public boolean charTyped(char chr, int modifiers) {
@@ -370,7 +371,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {/*TODO(1.21.8)
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
 
@@ -399,7 +400,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
             if (this.client != null && this.client.player != null)
                 InventoryScreen.drawEntity(context, this.x + 73, this.y + 6, this.x + 105, this.y + 49, 20, 0.0625F, (float) mouseX, (float) mouseY, this.client.player);
         }
-
+*/
     }
 
     protected boolean isClickInTab(DevInventoryGroup group, double mouseX, double mouseY) {
@@ -411,6 +412,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
     }
 
     protected void renderTabIcon(DrawContext context, DevInventoryGroup group) {
+        /*TODO(1.21.8)
         boolean isSelected = group.getIndex() == selectedTab;
         boolean isTopRow = group.isTopHalf();
         int column = group.getColumn();
@@ -428,6 +430,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         ItemStack itemStack = group.getIcon();
         context.drawItem(itemStack, originX, originY);
 //        this.itemRenderer.zOffset = 0.0F;
+*/
     }
 
     @Override

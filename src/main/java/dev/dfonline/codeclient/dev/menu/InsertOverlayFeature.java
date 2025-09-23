@@ -184,7 +184,7 @@ public class InsertOverlayFeature extends Feature {
                 this.close.run();
             }
 
-            public void render(DrawContext context, int mouseX, int mouseY) {
+            public void render(DrawContext context, int mouseX, int mouseY) {/*TODO(1.21.8)
                 context.getMatrices().push();
                 context.getMatrices().translate(0.0F, 0.0F, 900.0F);
                 context.drawGuiTexture(RenderLayer::getGuiTextured, Identifier.ofVanilla("recipe_book/overlay_recipe"), x, y, width, height);
@@ -198,7 +198,7 @@ public class InsertOverlayFeature extends Feature {
                 context.getMatrices().pop();
 //                new Identifier("recipe_book/crafting_overlay_highlighted")
 //                new Identifier("recipe_book/crafting_overlay")
-//                RecipeAlternativesWidget.CRAFTING_OVERLAY_HIGHLIGHTED_TEXTURE : RecipeAlternativesWidget.CRAFTING_OVERLAY_TEXTURE
+//                RecipeAlternativesWidget.CRAFTING_OVERLAY_HIGHLIGHTED_TEXTURE : RecipeAlternativesWidget.CRAFTING_OVERLAY_TEXTURE*/
             }
 
             public boolean mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen) {

@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Mixin(InGameHud.class)
 public abstract class MInGameHud {
@@ -94,13 +95,14 @@ public abstract class MInGameHud {
         if (!Config.getConfig().ShowVariableScopeBelowName) return;
         DFItem dfItem = DFItem.of(currentStack);
         if (!dfItem.hasHypercubeKey("varitem")) return;
-        String varItem = dfItem.getHypercubeStringValue("varitem");
+        Optional<String> varItem = dfItem.getHypercubeStringValue("varitem");
+        if (varItem.isEmpty()) return;
 
         int scaledWidth = context.getScaledWindowWidth();
         int scaledHeight = context.getScaledWindowHeight();
 
         try {
-            JsonObject varItemJson = JsonParser.parseString(varItem).getAsJsonObject();
+            JsonObject varItemJson = JsonParser.parseString(varItem.get()).getAsJsonObject();
             String type = varItemJson.get("id").getAsString();
 
             JsonElement varName = varItemJson.getAsJsonObject("data").get("name");

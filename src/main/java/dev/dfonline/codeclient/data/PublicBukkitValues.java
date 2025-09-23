@@ -4,6 +4,7 @@ import dev.dfonline.codeclient.data.value.DataValue;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,8 +37,7 @@ public class PublicBukkitValues {
         var customData = data.getNbt();
         if (customData == null) return null;
         var publicBukkitValues = customData.getCompound(PUBLIC_BUKKIT_VALUES_KEY);
-        if (publicBukkitValues == null) return null;
-        return new PublicBukkitValues(publicBukkitValues);
+        return publicBukkitValues.map(PublicBukkitValues::new).orElse(null);
     }
 
     /**
@@ -67,7 +67,7 @@ public class PublicBukkitValues {
      * @param key The key to get, without the hypercube: prefix.
      * @return The value of the key.
      */
-    public String getHypercubeStringValue(String key) {
+    public Optional<String> getHypercubeStringValue(String key) {
         return publicBukkitValues.getString(HYPERCUBE_KEY_PREFIX + key);
     }
 
@@ -77,7 +77,7 @@ public class PublicBukkitValues {
      * @param key The key to get.
      * @return The value of the key.
      */
-    public String getStringValue(String key) {
+    public Optional<String> getStringValue(String key) {
         return publicBukkitValues.getString(key);
     }
 

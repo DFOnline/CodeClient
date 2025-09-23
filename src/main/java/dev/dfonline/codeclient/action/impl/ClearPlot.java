@@ -44,7 +44,7 @@ public class ClearPlot extends Action {
             }
             if (currentStep == Step.WAIT_FOR_CLEAR) {
                 int i = 11;
-                ItemStack itemStack = inventoryS2CPacket.getContents().get(i);
+                ItemStack itemStack = inventoryS2CPacket.contents().get(i);
                 if (itemStack.getItem().equals(Items.GREEN_CONCRETE)) {
                     Int2ObjectMap<ItemStack> modified = Int2ObjectMaps.singleton(i, new ItemStack(Items.AIR));
 //                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.syncId(), inventoryS2CPacket.revision(), i, 0, SlotActionType.PICKUP, itemStack, modified));

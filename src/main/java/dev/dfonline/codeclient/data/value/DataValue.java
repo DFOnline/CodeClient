@@ -5,6 +5,8 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 /**
  * Represents a value of a key that can be of a specific type,
  * where recognized types can return the value as their respective data type.
@@ -29,7 +31,11 @@ public class DataValue {
      */
     public static DataValue fromNbt(NbtElement nbt) {
         if (nbt instanceof NbtString) {
-            return new StringDataValue(nbt.asString());
+            Optional<String> value = nbt.asString();
+            if (value.isEmpty()) {
+                return new UnknownDataValue(nbt);
+            }
+            return new StringDataValue(value.get());
         }
         if (nbt instanceof AbstractNbtNumber) {
             return new NumberDataValue(((AbstractNbtNumber) nbt).doubleValue());

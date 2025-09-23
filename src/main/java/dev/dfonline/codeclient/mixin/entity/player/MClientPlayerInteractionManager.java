@@ -77,6 +77,7 @@ public abstract class MClientPlayerInteractionManager {
         BlockPos place = InteractionManager.getPlacePos(hitResult);
         if (place != null && CodeClient.MC.world.getBlockState(place).isSolidBlock(CodeClient.MC.world, place)) {
             ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
+            /*TODO(1.21.8)
             if (!player.isSneaking())
                 net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
             this.sendSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult, sequence));
@@ -84,7 +85,7 @@ public abstract class MClientPlayerInteractionManager {
                 net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             if (!player.isSneaking()) {
                 this.sendSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(place.toCenterPos(), Direction.UP, place, hitResult.isInsideBlock()), sequence));
-            }
+            }*/
         }
         ItemStack template = Items.ENDER_CHEST.getDefaultStack();
         DFItem dfTemplate = DFItem.of(template);

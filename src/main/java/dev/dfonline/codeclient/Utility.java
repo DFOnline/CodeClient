@@ -67,7 +67,7 @@ public class Utility {
         if(CodeClient.MC.player == null) return;
         PlayerInventory inv = CodeClient.MC.player.getInventory();
         Utility.sendHandItem(item);
-        inv.selectedSlot = 0;
+        inv.setSelectedSlot(0);
         inv.setStack(0, item);
     }
 
@@ -85,11 +85,8 @@ public class Utility {
      */
     public static String templateDataItem(ItemStack item) {
         DFItem dfItem = DFItem.of(item);
-        String codeTemplateData = dfItem.getHypercubeStringValue("codetemplatedata");
-        if (codeTemplateData.isEmpty()) {
-            return null;
-        }
-        return JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString();
+        Optional<String> codeTemplateData = dfItem.getHypercubeStringValue("codetemplatedata");
+        return codeTemplateData.map(s -> JsonParser.parseString(s).getAsJsonObject().get("code").getAsString()).orElse(null);
     }
 
     public static ItemStack makeTemplate(String code) {
@@ -117,7 +114,7 @@ public class Utility {
 
     public static void sendHandItem(ItemStack item) {
         if(CodeClient.MC.getNetworkHandler() == null || CodeClient.MC.player == null) return;
-        CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + CodeClient.MC.player.getInventory().selectedSlot, item));
+        CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + CodeClient.MC.player.getInventory().getSelectedSlot(), item));
     }
 
     /**

@@ -8,6 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class VarItem {
     protected JsonObject data;
@@ -33,9 +34,9 @@ public abstract class VarItem {
     public static JsonObject prefetch(ItemStack item) throws Exception {
         DFItem dfItem = DFItem.of(item);
         PublicBukkitValues pbv = dfItem.getPublicBukkitValues();
-        String varitem = pbv.getHypercubeStringValue("varitem");
+        Optional<String> varitem = pbv.getHypercubeStringValue("varitem");
         if (varitem.isEmpty()) throw new Exception("Item does not have a varitem");
-        return JsonParser.parseString(varitem).getAsJsonObject();
+        return JsonParser.parseString(varitem.get()).getAsJsonObject();
 
     }
 

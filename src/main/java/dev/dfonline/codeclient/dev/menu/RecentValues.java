@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.datafixers.util.Pair;
 import dev.dfonline.codeclient.ChestFeature;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
@@ -19,6 +20,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -65,7 +67,7 @@ public class RecentValues extends Feature {
                 try {
                     if (!Files.exists(file.getParent())) Files.createDirectories(file.getParent());
                     JsonObject data = new JsonObject();
-                    data.addProperty("version", SharedConstants.getGameVersion().getSaveVersion().getId());
+                    data.addProperty("version", SharedConstants.getGameVersion().dataVersion().id());
                     data.add("pinned", saveItems(pinned));
                     data.add("recent", saveItems(recent));
                     Files.writeString(file, data.toString());
@@ -85,7 +87,7 @@ public class RecentValues extends Feature {
         if (CodeClient.MC.world == null) throw new RuntimeException("World is null!");
 
         for (ItemStack item : list) {
-            out.add(item.toNbt(CodeClient.MC.world.getRegistryManager()).toString());
+            out.add(ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), item).getOrThrow().toString());
         }
 
         return out;
@@ -93,8 +95,8 @@ public class RecentValues extends Feature {
 
     private ItemStack readItem(int version, JsonElement item) throws Exception {
         if (CodeClient.MC.world == null) return null;
-        var fromNbt = ItemStack.fromNbt(CodeClient.MC.world.getRegistryManager(), DataFixTypes.HOTBAR.update(CodeClient.MC.getDataFixer(), StringNbtReader.parse(item.getAsString()), version));
-        return fromNbt.orElse(null);
+        var fromNbt = ItemStack.CODEC.decode(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), DataFixTypes.HOTBAR.update(CodeClient.MC.getDataFixer(), StringNbtReader.readCompound(item.getAsString()), version));
+        return fromNbt.result().map(Pair::getFirst).orElse(null);
     }
 
     public void remember(ItemStack item) {
@@ -111,7 +113,7 @@ public class RecentValues extends Feature {
             recent.remove(item);
             return;
         }
-        recent.removeIf(it -> it != null && lambdaItem.getItem() == it.getItem() && lambdaItem.toNbt(CodeClient.MC.world.getRegistryManager()).equals(it.toNbt(CodeClient.MC.world.getRegistryManager())));
+        recent.removeIf(it -> it != null && lambdaItem.getItem() == it.getItem() && ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), lambdaItem).getOrThrow().equals(ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), it).getOrThrow()));
         item = item.copyWithCount(1);
         recent.add(0, item);
 
@@ -136,10 +138,10 @@ public class RecentValues extends Feature {
             if(recent.isEmpty() && pinned.isEmpty()) return;
             int xEnd = 16 * 20;
 
-            context.drawGuiTexture(RenderLayer::getGuiTextured, Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
+            /*TODO(1.21.8) context.drawGuiTexture(RenderLayer::getGuiTextured, Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
                     Math.min(Math.max(pinned.size(), recent.size()), 16) * 20 + 10,
                     (((int) Math.ceil((double) pinned.size() / 16)) + ((int) Math.ceil((double) recent.size() / 16))) * 16 + 10
-            );
+            );*/
 
             hoveredItem = null;
             hoveredOrigin = null;

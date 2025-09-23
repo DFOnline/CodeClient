@@ -13,11 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SignBlockEntityRenderer.class)
 public class MSignRenderer {
 
+    /*TODO(1.21.8)
     @Inject(method = "render(Lnet/minecraft/block/entity/SignBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At("RETURN"))
     private void render(SignBlockEntity sign, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo ci) {
         if (vertexConsumers instanceof VertexConsumerProvider.Immediate immediate) {
             SignOutlineRenderer.render(sign, matrices, immediate);
         }
-    }
+    }*/
 
 }

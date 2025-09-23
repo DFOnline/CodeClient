@@ -112,7 +112,7 @@ public class SlotGhostManager extends Feature {
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0x50__90_90_ff : 0x30__ff_00_00);
             context.drawItem(itemStack, slot.x, slot.y);
             context.drawStackOverlay(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
-            context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40ffffff);
+            /*TODO(1.21.8) context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40ffffff);*/
         }
 
         @Override @Nullable

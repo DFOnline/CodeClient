@@ -30,7 +30,7 @@ public class FakeSlot extends ClickableWidget {
     }
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {/*TODO(1.21.8)
         context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX(), this.getY(), 0, 0, this.width, this.height, 18, 18);
         context.drawItem(item, this.getX() + 1, this.getY() + 1);
         if (this.isMouseOver(mouseX, mouseY)) {
@@ -40,7 +40,7 @@ public class FakeSlot extends ClickableWidget {
                 // FIXMe: remnder
             }
             context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX, mouseY);
-        }
+        }*/
     }
 
     @Override
@@ -57,7 +57,7 @@ public class FakeSlot extends ClickableWidget {
     }
 
     @Nullable
-    @Override
+//    @Override TODO(1.21.8)
     public Tooltip getTooltip() {
         var data = Screen.getTooltipFromItem(CodeClient.MC, item);
         var text = Text.empty();

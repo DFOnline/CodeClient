@@ -6,6 +6,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class ItemData {
     private NbtCompound customData;
     private PublicBukkitValues publicBukkitValues;
@@ -99,7 +101,7 @@ public class ItemData {
      * @param key The key to get.
      * @return The value of the key, or an empty string if it doesn't exist.
      */
-    public String getStringValue(String key) {
+    public Optional<String> getStringValue(String key) {
         return customData.getString(key);
     }
 
@@ -129,9 +131,9 @@ public class ItemData {
      * @param key The key to get, without the hypercube: prefix.
      * @return The value of the key, or an empty string if it doesn't exist.
      */
-    public String getHypercubeStringValue(String key) {
+    public Optional<String> getHypercubeStringValue(String key) {
         var publicBukkitValues = getPublicBukkitValues();
-        if (publicBukkitValues == null) return "";
+        if (publicBukkitValues == null) return Optional.empty();
         return publicBukkitValues.getHypercubeStringValue(key);
     }
 

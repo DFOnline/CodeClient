@@ -41,12 +41,13 @@ public class GoTo extends Action {
 
     @Override
     public void init() {
+        /*TODO(1.21.8) (locationItemTeleport)
         active = true;
         if (CodeClient.MC.player == null) return;
         if (CodeClient.location instanceof Dev dev && dev.isInArea(target)) {
             locationItem = new Location(dev.getPos().relativize(target)).setRotation(CodeClient.MC.player.getPitch(), CodeClient.MC.player.getYaw()).toStack();
             locationItemTeleport();
-        }
+        }*/
     }
 
     @Override
@@ -93,6 +94,7 @@ public class GoTo extends Action {
     }
 
     private void locationItemTeleport() {
+        /*TODO(1.21.8)
         ClientPlayerEntity player = CodeClient.MC.player;
         ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
         if (player == null || net == null) return;
@@ -103,7 +105,7 @@ public class GoTo extends Action {
         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
         if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-        Utility.sendHandItem(handItem);
+        Utility.sendHandItem(handItem);*/
     }
 
     /**
