@@ -328,7 +328,7 @@ public class CodeClient implements ClientModInitializer {
         Event.onSendPacket(packet);
         //noinspection unused
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.", "");
-//        LOGGER.info(name);
+//        if (!name.equals("ClientTickEndC2SPacket")) LOGGER.info(name);
         return false;
     }
 

@@ -14,12 +14,9 @@
         "screen.MMultiplayerScreen", "screen.chat.MChatInputSuggester", "screen.chat.MChatScreen",
         "world.MWorldRenderer", "world.block.MAbstractBlockState", "world.block.MBarrierBlock", "world.block.MBlock",
         "world.block.MBlockItem", "world.block.MLightBlock", "world.block.MSignBlockEntity",
-        "world.block.MStructureVoidBlock"
+        "world.block.MStructureVoidBlock", "screen.MScreenHandler"
     ],
     "injectors": {
         "defaultRequire": 1
-    },
-    "mixins": [
-        "screen.MScreenHandler"
-    ]
+    }
 }

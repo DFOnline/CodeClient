@@ -19,9 +19,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -77,15 +79,15 @@ public abstract class MClientPlayerInteractionManager {
         BlockPos place = InteractionManager.getPlacePos(hitResult);
         if (place != null && CodeClient.MC.world.getBlockState(place).isSolidBlock(CodeClient.MC.world, place)) {
             ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
-            /*TODO(1.21.8)
+
             if (!player.isSneaking())
-                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
             this.sendSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult, sequence));
             if (!player.isSneaking())
-                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+                net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
             if (!player.isSneaking()) {
                 this.sendSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(place.toCenterPos(), Direction.UP, place, hitResult.isInsideBlock()), sequence));
-            }*/
+            }
         }
         ItemStack template = Items.ENDER_CHEST.getDefaultStack();
         DFItem dfTemplate = DFItem.of(template);
