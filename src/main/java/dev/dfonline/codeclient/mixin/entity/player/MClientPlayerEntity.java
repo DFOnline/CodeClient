@@ -9,8 +9,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.math.Vec3d;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -73,10 +74,10 @@ public abstract class MClientPlayerEntity {
                 NoClip.lastPitch = pitch;
             }
             boolean sneaking = player.isSneaking();
-            if (sneaking != this.lastSneaking) {/*TODO(1.21.8)
-                ClientCommandC2SPacket.Mode mode = sneaking ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY : ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
-                this.networkHandler.sendPacket(new ClientCommandC2SPacket(player, mode));
-                this.lastSneaking = sneaking;*/
+            if (sneaking != this.lastSneaking) {
+                PlayerInput mode = sneaking ? new PlayerInput(false, false, false, false, false, true, false) : MC.player.getLastPlayerInput();
+                this.networkHandler.sendPacket(new PlayerInputC2SPacket(mode));
+                this.lastSneaking = sneaking;
             }
         }
     }
