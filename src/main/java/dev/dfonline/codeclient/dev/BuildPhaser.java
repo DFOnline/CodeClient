@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
@@ -75,9 +76,9 @@ public class BuildPhaser extends Feature {
                 var player = CodeClient.MC.player;
                 var size = plot.assumeSize();
                 player.setPos(
-                        Math.min(Math.max(player.getX(), plot.getX() - plot.assumeSize().codeWidth), plot.getX() + plot.assumeSize().size + 1),
+                        Math.min(Math.max(player.getX(), plot.getX() - size.codeWidth), plot.getX() + size.size + 1),
                         player.getY(),
-                        Math.min(Math.max(player.getZ(), plot.getZ() - plot.assumeSize().codeLength), plot.getZ() + plot.assumeSize().size + 1)
+                        Math.min(Math.max(player.getZ(), plot.getZ() - size.codeLength), plot.getZ() + size.size + 1)
                 );
                 allowPacket = true;
                 CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(lastPos.x, lastPos.y, lastPos.z, false, true));
@@ -121,7 +122,13 @@ public class BuildPhaser extends Feature {
     public boolean onReceivePacket(Packet<?> packet) {
         if (!waitForTP) return false;
         if (packet instanceof PlayerPositionLookS2CPacket move) {
-//            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(move.teleportId()));
+            var net = CodeClient.MC.getNetworkHandler();
+
+            net.sendPacket(new TeleportConfirmC2SPacket(move.teleportId()));
+            var change = move.change();
+            net.sendPacket(
+                            new PlayerMoveC2SPacket.Full(lastPos.add(change.deltaMovement()), change.yaw(), change.pitch(), false, false)
+                    );
 
             updateVelocity = true;
             return true;
