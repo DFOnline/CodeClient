@@ -10,16 +10,14 @@ import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PickItemFromBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -43,12 +41,16 @@ public class ChestPeeker extends Feature {
     private static boolean itemsFetched = false;
     private int timeOut = 0;
     private static Consumer<List<ItemStack>> currentCallback = null;
+    private static int putIntoSlot = 0;
+    private static ItemStack replacedItem = null;
 
     public static void pick(Consumer<List<ItemStack>> callback) {
         currentCallback = callback;
         currentBlock = null;
         items = new ArrayList<>();
         itemsFetched = false;
+        putIntoSlot = 0;
+        replacedItem = null;
     }
 
     public void tick() {
@@ -74,19 +76,22 @@ public class ChestPeeker extends Feature {
                     items = new ArrayList<>();
                     itemsFetched = false;
 
-                    ItemStack item = Items.CHEST.getDefaultStack();
-                    NbtCompound bet = new NbtCompound();
-                    bet.putString("id", "minecraft:chest");
-                    bet.putInt("x", pos.getX());
-                    bet.putInt("y", pos.getY());
-                    bet.putInt("z", pos.getZ());
-                    item.set(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.of(bet));
-                    item.set(DataComponentTypes.CUSTOM_NAME, Text.literal("CodeClient chest peeker internal"));
-
+//                    ItemStack item = Items.CHEST.getDefaultStack();
+//                    NbtCompound bet = new NbtCompound();
+//                    bet.putString("id", "minecraft:chest");
+//                    bet.putInt("x", pos.getX());
+//                    bet.putInt("y", pos.getY());
+//                    bet.putInt("z", pos.getZ());
+//                    item.set(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.of(bet));
+//                    item.set(DataComponentTypes.CUSTOM_NAME, Text.literal("CodeClient chest peeker internal"));
+//
                     ClientPlayNetworkHandler network = CodeClient.MC.getNetworkHandler();
                     if (network == null) return;
-                    network.sendPacket(new CreativeInventoryActionC2SPacket(1, ItemStack.EMPTY));
-                    network.sendPacket(new CreativeInventoryActionC2SPacket(1, item));
+//
+//                    network.sendPacket(new CreativeInventoryActionC2SPacket(1, ItemStack.EMPTY));
+//                    network.sendPacket(new CreativeInventoryActionC2SPacket(1, item));
+
+                    network.sendPacket(new PickItemFromBlockC2SPacket(currentBlock, true));
                     return;
                 }
             }
@@ -101,15 +106,19 @@ public class ChestPeeker extends Feature {
         if (CodeClient.MC.getNetworkHandler() == null) return false;
         if (!Config.getConfig().ChestPeeker && currentCallback == null) return false;
         if (CodeClient.location instanceof Dev) {
-            if (packet instanceof BlockEventS2CPacket block) {
-                if (!Objects.equals(currentBlock, block.getPos())) return false;
-                if (block.getType() != 1) return false;
-                if (block.getData() != 0) return false;
-                reset();
+//            if (packet instanceof BlockEventS2CPacket block) {
+//                if (!Objects.equals(currentBlock, block.getPos())) return false;
+//                if (block.getType() != 1) return false;
+//                if (block.getData() != 0) return false;
+//                reset();
+//            }
+            if (packet instanceof UpdateSelectedSlotS2CPacket slot) {
+                putIntoSlot = slot.slot();
+                replacedItem = CodeClient.MC.player.getInventory().getStack(slot.slot());
+                return true;
             }
             if (packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
                 DFItem item = DFItem.of(slot.getStack());
-                if (!item.getName().getString().equals("CodeClient chest peeker internal")) return false;
                 ContainerComponent container = item.getContainer();
                 if (container == null) return false;
                 items.clear();
