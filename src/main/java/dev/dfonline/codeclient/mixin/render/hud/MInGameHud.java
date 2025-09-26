@@ -78,6 +78,7 @@ public abstract class MInGameHud {
             if (peeker == null || peeker.isEmpty()) peeker = SignPeeker.getOverlayText();
             if (peeker != null && !peeker.isEmpty()) {
                 context.drawTooltip(textRenderer, peeker, x, yOrig);
+                context.renderTooltip();
 
             }
         } catch (Exception ignored) {
