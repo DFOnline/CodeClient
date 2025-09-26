@@ -145,7 +145,9 @@ public class MiniMessageHighlighter {
                 StandardTags.decorations(TextDecoration.STRIKETHROUGH),
                 StandardTags.reset(),
                 StandardTags.gradient(),
-                StandardTags.rainbow()
+                StandardTags.rainbow(),
+                StandardTags.pride(),
+                StandardTags.shadowColor()
         );
 
         @Override
