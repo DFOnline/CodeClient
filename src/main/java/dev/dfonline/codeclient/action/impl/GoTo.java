@@ -10,11 +10,9 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
@@ -41,13 +39,12 @@ public class GoTo extends Action {
 
     @Override
     public void init() {
-        /*TODO(1.21.8) (locationItemTeleport)
         active = true;
         if (CodeClient.MC.player == null) return;
         if (CodeClient.location instanceof Dev dev && dev.isInArea(target)) {
             locationItem = new Location(dev.getPos().relativize(target)).setRotation(CodeClient.MC.player.getPitch(), CodeClient.MC.player.getYaw()).toStack();
             locationItemTeleport();
-        }*/
+        }
     }
 
     @Override
@@ -94,18 +91,17 @@ public class GoTo extends Action {
     }
 
     private void locationItemTeleport() {
-        /*TODO(1.21.8)
         ClientPlayerEntity player = CodeClient.MC.player;
         ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
         if (player == null || net == null) return;
         ItemStack handItem = player.getMainHandStack();
         Utility.sendHandItem(locationItem);
         boolean sneaky = !player.isSneaking();
-        if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        if (sneaky) net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
-        if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-        Utility.sendHandItem(handItem);*/
+        if (sneaky) net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
+        Utility.sendHandItem(handItem);
     }
 
     /**
