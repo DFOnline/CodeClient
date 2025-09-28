@@ -75,22 +75,8 @@ public class ChestPeeker extends Feature {
                     currentBlock = pos;
                     items = new ArrayList<>();
                     itemsFetched = false;
-
-//                    ItemStack item = Items.CHEST.getDefaultStack();
-//                    NbtCompound bet = new NbtCompound();
-//                    bet.putString("id", "minecraft:chest");
-//                    bet.putInt("x", pos.getX());
-//                    bet.putInt("y", pos.getY());
-//                    bet.putInt("z", pos.getZ());
-//                    item.set(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.of(bet));
-//                    item.set(DataComponentTypes.CUSTOM_NAME, Text.literal("CodeClient chest peeker internal"));
-//
                     ClientPlayNetworkHandler network = CodeClient.MC.getNetworkHandler();
                     if (network == null) return;
-//
-//                    network.sendPacket(new CreativeInventoryActionC2SPacket(1, ItemStack.EMPTY));
-//                    network.sendPacket(new CreativeInventoryActionC2SPacket(1, item));
-
                     network.sendPacket(new PickItemFromBlockC2SPacket(currentBlock, true));
                     return;
                 }
@@ -106,32 +92,34 @@ public class ChestPeeker extends Feature {
         if (CodeClient.MC.getNetworkHandler() == null) return false;
         if (!Config.getConfig().ChestPeeker && currentCallback == null) return false;
         if (CodeClient.location instanceof Dev) {
-//            if (packet instanceof BlockEventS2CPacket block) {
-//                if (!Objects.equals(currentBlock, block.getPos())) return false;
-//                if (block.getType() != 1) return false;
-//                if (block.getData() != 0) return false;
-//                reset();
-//            }
-            if (packet instanceof UpdateSelectedSlotS2CPacket slot) {
-                putIntoSlot = slot.slot();
-                replacedItem = CodeClient.MC.player.getInventory().getStack(slot.slot());
-                return true;
+            if (packet instanceof BlockEventS2CPacket block) {
+                if (!Objects.equals(currentBlock, block.getPos())) return false;
+                if (block.getType() != 1) return false;
+                if (block.getData() != 0) return false;
+                reset();
             }
-            if (packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
-                DFItem item = DFItem.of(slot.getStack());
-                ContainerComponent container = item.getContainer();
-                if (container == null) return false;
-                items.clear();
-                container.iterateNonEmpty().forEach(stack -> items.add(stack));
-
-                itemsFetched = true;
-                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
-
-                if (currentCallback != null) {
-                    currentCallback.accept(items);
-                    currentCallback = null;
+            if (currentBlock != null) {
+                if (packet instanceof UpdateSelectedSlotS2CPacket slot) { // FIXME: the server will attempt to move an item into your inventory if your hotbar is full
+                    putIntoSlot = slot.slot();
+                    replacedItem = CodeClient.MC.player.getInventory().getStack(slot.slot());
+                    return true;
                 }
-                return true;
+                if (packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
+                    DFItem item = DFItem.of(slot.getStack());
+                    ContainerComponent container = item.getContainer();
+                    if (container == null) return false;
+                    items.clear();
+                    container.iterateNonEmpty().forEach(stack -> items.add(stack));
+
+                    itemsFetched = true;
+                    CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
+
+                    if (currentCallback != null) {
+                        currentCallback.accept(items);
+                        currentCallback = null;
+                    }
+                    return true;
+                }
             }
         }
         return false;
