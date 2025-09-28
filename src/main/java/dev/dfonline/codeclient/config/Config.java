@@ -71,7 +71,6 @@ public class Config {
     public boolean SignPeeker = true;
     public int SignHighlightColor = 0xFF7FFF;
     public CustomChestMenuType CustomCodeChest = CustomChestMenuType.OFF;
-    public boolean PickAction = true;
     public boolean AdvancedMiddleClick = false;
     public boolean DevForBuild = false;
     public boolean ChatEditsVars = true;
@@ -161,7 +160,6 @@ public class Config {
             object.addProperty("Line4Color", Line4Color);
             object.addProperty("SignPeeker", SignPeeker);
             object.addProperty("CustomCodeChest", CustomCodeChest.name());
-            object.addProperty("PickAction", PickAction);
             object.addProperty("AdvancedMiddleClick", AdvancedMiddleClick);
             object.addProperty("DevForBuild", DevForBuild);
             object.addProperty("ChatEditsVars", ChatEditsVars);
@@ -566,16 +564,6 @@ public class Config {
                                         opt -> CodeLayerInteractionMode = opt
                                 )
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, LayerInteractionMode.class))
-                                .build())
-                        .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.pick_block_action"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.pick_block_action.description1"), Text.translatable("codeclient.config.pick_block_action.description2").setStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/DFOnline/CodeClient/wiki/actiondump"))).withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.config.pick_block_action.description3"))).withUnderline(true).withColor(Formatting.AQUA))))
-                                .binding(
-                                        true,
-                                        () -> PickAction,
-                                        opt -> PickAction = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Text.translatable("codeclient.config.advanced_middle_click"))
