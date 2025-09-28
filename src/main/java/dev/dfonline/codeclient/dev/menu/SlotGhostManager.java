@@ -17,10 +17,8 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.hit.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -109,10 +107,10 @@ public class SlotGhostManager extends Feature {
             ItemStack itemStack = arg.getItem();
 
             if (itemStack.isEmpty()) return;
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0x50__90_90_ff : 0x30__ff_00_00);
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0xA0__90_90_FF : 0x60__FF_00_00);
             context.drawItem(itemStack, slot.x, slot.y);
             context.drawStackOverlay(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
-            /*TODO(1.21.8) context.fill(RenderLayer.getGuiGhostRecipeOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40ffffff);*/
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40_FFFFFF);
         }
 
         @Override @Nullable
