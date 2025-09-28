@@ -80,7 +80,7 @@ public class ItemSelector extends ClickableWidget {
                             mouseY - this.getY() - screenY > item.y &&
                             mouseY - this.getY() - screenY < item.y + itemSize
             ) {
-                context.drawItemTooltip(textRenderer, item.item, mouseX - screenX, mouseY - screenY);
+                context.drawItemTooltip(textRenderer, item.item, mouseX, mouseY);
             }
             i++;
         }
@@ -102,6 +102,7 @@ public class ItemSelector extends ClickableWidget {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        // TODO: make enter and/or number keys select a given item
         if (search.keyPressed(keyCode, scanCode, modifiers)) {
             search();
             return true;

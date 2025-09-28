@@ -146,7 +146,7 @@ public class ItemData {
     public void setHypercubeStringValue(String key, String value) {
         var publicBukkitValues = getPublicBukkitValues();
         if (publicBukkitValues == null) {
-            publicBukkitValues = PublicBukkitValues.getEmpty();
+            this.publicBukkitValues = publicBukkitValues = PublicBukkitValues.getEmpty();
         }
         publicBukkitValues.setHypercubeStringValue(key, value);
     }
