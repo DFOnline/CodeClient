@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -237,8 +238,8 @@ public abstract class Plot extends Location {
         return null;
     }
 
-    public Boolean getHasDev() {
-        return hasDev;
+    public Optional<Boolean> getHasDev() {
+        return Optional.ofNullable(hasDev);
     }
 
     public enum Size {
