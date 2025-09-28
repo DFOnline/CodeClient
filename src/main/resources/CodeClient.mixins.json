@@ -5,7 +5,7 @@
     "compatibilityLevel": "JAVA_21",
     "client": [
         "MKeyboard", "MMouse", "VersionChecker", "entity.MEntity", "entity.MLivingEntity",
-        "entity.player.ClientPlayerInteractionManagerAccessor", "entity.player.MAbstractClientPlayerEntity",
+        "entity.player.ClientPlayerInteractionManagerAccessor",
         "entity.player.MClientPlayerEntity", "entity.player.MClientPlayerInteractionManager",
         "entity.player.MPlayerEntity", "entity.player.MPlayerInventory", "network.MClientCommonPlayNetworkHandler",
         "network.MClientConnection", "render.MDebugRenderer", "render.MSignRenderer", "render.MWorldRenderer",

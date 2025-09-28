@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.mixin.entity.player;
 
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.dev.BuildPhaser;
 import dev.dfonline.codeclient.dev.Navigation;
 import dev.dfonline.codeclient.dev.NoClip;
 import net.minecraft.entity.EntityPose;
@@ -39,5 +40,11 @@ public abstract class MPlayerEntity extends LivingEntity {
     @Inject(method = "canChangeIntoPose", at = @At("HEAD"), cancellable = true)
     private void canChangeIntoPose(EntityPose pose, CallbackInfoReturnable<Boolean> cir) {
         if (CodeClient.getFeature(NoClip.class).map(NoClip::isIgnoringWalls).orElse(false)) cir.setReturnValue(true);
+    }
+
+    @Inject(method = "isSpectator", at = @At("HEAD"), cancellable = true)
+    public void isSpectator(CallbackInfoReturnable<Boolean> cir) {
+        var feat = CodeClient.getFeature(BuildPhaser.class);
+        if (this.getUuid() == CodeClient.MC.player.getUuid() && feat.isPresent() && feat.get().isClipping()) cir.setReturnValue(true);
     }
 }
