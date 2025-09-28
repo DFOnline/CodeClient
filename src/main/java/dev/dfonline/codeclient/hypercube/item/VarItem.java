@@ -49,10 +49,13 @@ public abstract class VarItem {
 
     public ItemStack toStack() {
         DFItem dfItem = DFItem.of(getIcon());
-        var varItem = new JsonObject();
-        varItem.addProperty("id", getId());
-        varItem.add("data", data);
-        dfItem.getPublicBukkitValues().setHypercubeStringValue("varitem", varItem.toString());
+        dfItem.editData(itemData -> {
+            var varItem = new JsonObject();
+            varItem.addProperty("id", getId());
+            varItem.add("data", data);
+
+            itemData.setHypercubeStringValue("varitem", varItem.toString());
+        });
         return dfItem.getItemStack();
     }
 
