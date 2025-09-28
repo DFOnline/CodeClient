@@ -17,6 +17,8 @@ import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
+import net.minecraft.util.math.ColorHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -90,6 +92,8 @@ public abstract class MInGameHud {
     @Shadow
     private ItemStack currentStack;
 
+    @Shadow private int heldItemTooltipFade;
+
     @Inject(method = "renderHeldItemTooltip", at = @At(value = "HEAD"), cancellable = true)
     public void renderHeldItemTooltip(DrawContext context, CallbackInfo ci) {
 
@@ -119,6 +123,7 @@ public abstract class MInGameHud {
                 int x1 = (scaledWidth - getTextRenderer().getWidth(nameText)) / 2;
                 int y1 = scaledHeight - 45;
                 context.drawTextWithShadow(getTextRenderer(), nameText, x1, y1, 0xffffff);
+                context.drawTextWithBackground(this.getTextRenderer(), nameText, x1, y1, 0xffffff, ColorHelper.withAlpha(255, Colors.WHITE));
 
                 // Render variable scope, if this throws an exception it can only
                 // mean Scope.valueOf() failed, as such the scope is invalid.
@@ -127,6 +132,13 @@ public abstract class MInGameHud {
                     int x2 = (scaledWidth - getTextRenderer().getWidth(scope.longName)) / 2;
                     int y2 = scaledHeight - 35;
                     context.drawTextWithShadow(getTextRenderer(), Text.literal(scope.longName).fillStyle(Style.EMPTY.withColor(scope.color)), x2, y2, 0xffffff);
+                    context.drawTextWithBackground(this.getTextRenderer(),
+                            Text.literal(scope.longName).fillStyle(Style.EMPTY.withColor(scope.color)),
+                            x2,
+                            y2,
+                            0xffffff,
+                            ColorHelper.withAlpha(255, Colors.WHITE));
+
                 } catch (Exception ignored2) {
                     // 'data' or 'scope' are invalid, do nothing. (same behavior as scope on variable item)
                 }
