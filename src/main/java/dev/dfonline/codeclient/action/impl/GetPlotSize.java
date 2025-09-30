@@ -4,6 +4,7 @@ import dev.dfonline.codeclient.Callback;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.item.ItemStack;
@@ -27,7 +28,7 @@ public class GetPlotSize extends Action {
     public void tick() {
         if (step == Step.WAIT) {
             step = Step.TP;
-            CodeClient.MC.getNetworkHandler().sendChatCommand("/ptp 0 256 1000");
+            CommandSender.queue("/ptp 0 256 1000");
         }
     }
 
