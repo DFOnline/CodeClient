@@ -121,7 +121,8 @@ public class ActionViewer extends Feature {
         }
 
         // this implementation of draw tooltip allows a change in the z-index of the rendered tooltip.
-        private void drawTooltip(DrawContext context, HandledScreen<?> handledScreen, List<TooltipComponent> components, int x, int y, int z) {/*TODO(1.21.8)
+        // z appears to be completely useless with the changes I had to make for 1.21.8
+        private void drawTooltip(DrawContext context, HandledScreen<?> handledScreen, List<TooltipComponent> components, int x, int y, int z) {
             var textRenderer = CodeClient.MC.textRenderer;
 
             if (handledScreen instanceof CustomChestMenu menu) {
@@ -147,23 +148,24 @@ public class ActionViewer extends Feature {
                 }
             }
             Vector2ic vector = positioner.getPosition(context.getScaledWindowWidth(), context.getScaledWindowHeight(), x, y, tooltipWidth, tooltipHeight);
-            context.getMatrices().push();
+//            context.getMatrices().push();
 
             var finalWidth = tooltipWidth;
             var finalHeight = tooltipHeight;
-            context.draw((vertexConsumer) -> TooltipBackgroundRenderer.render(context, vector.x(), vector.y(), finalWidth, finalHeight, z, null));
-            context.getMatrices().translate(0.0F, 0.0F, (float) z);
+//            context.draw((vertexConsumer) -> );
+            TooltipBackgroundRenderer.render(context, vector.x(), vector.y(), finalWidth, finalHeight, null);
+//            context.getMatrices().translate(0.0F, 0.0F, (float) z);
 
             int textY = vector.y();
             for (int index = 0; index < components.size(); ++index) {
                 tooltipComponent = components.get(index);
                 TooltipComponent finalTooltipComponent = tooltipComponent;
-                int finalTextY = textY;
-                context.draw(consumer -> finalTooltipComponent.drawText(textRenderer, vector.x(), finalTextY, context.getMatrices().peek().getPositionMatrix(), (VertexConsumerProvider.Immediate) consumer));
+//                context.draw(consumer -> );
+                finalTooltipComponent.drawText(context, textRenderer, vector.x(), textY);
                 textY += tooltipComponent.getHeight(textRenderer) + (index == 0 ? 2 : 0);
             }
 
-            context.getMatrices().pop();*/
+//            context.getMatrices().pop();
         }
 
         private class ActionTooltipPositioner implements TooltipPositioner {
