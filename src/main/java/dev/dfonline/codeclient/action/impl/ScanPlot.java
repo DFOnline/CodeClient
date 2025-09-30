@@ -125,8 +125,7 @@ public class ScanPlot extends Action {
             boolean sneaky = !player.isSneaking();
             if (sneaky) net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
             inter.interactBlock(player, Hand.MAIN_HAND, new BlockHitResult(this.pos.toCenterPos(), Direction.UP, this.pos, false));
-            if (sneaky)
-                net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
+            if (sneaky) net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
         }
 
         @Override

@@ -16,10 +16,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -204,7 +206,7 @@ public class PlaceTemplates extends Action {
     }
 
     @Override
-    public void tick() {/*TODO(1.21.8)
+    public void tick() {
         var net = CodeClient.MC.getNetworkHandler();
         if (CodeClient.MC.interactionManager == null || CodeClient.MC.player == null || net == null) return;
         if (CodeClient.location instanceof Dev) {
@@ -226,12 +228,11 @@ public class PlaceTemplates extends Action {
                             if (shouldBeSwapping) {
                                 var player = CodeClient.MC.player;
                                 boolean sneaky = !player.isSneaking();
-                                if (sneaky)
-                                    net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                                // TODO I have never actually tested if these input packets actually replicate sneaking.
+                                if (sneaky) net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
                                 net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, template.pos, Direction.UP));
                                 net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, template.pos, Direction.UP));
-                                if (sneaky)
-                                    net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+                                if (sneaky) net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
                             }
                             Utility.makeHolding(template.template);
                             BlockHitResult blockHitResult = new BlockHitResult(template.pos().add(0, 1, 0), Direction.UP, template.pos, false);
@@ -254,7 +255,7 @@ public class PlaceTemplates extends Action {
                 goTo.init();
                 cooldown = 2;
             }
-        }*/
+        }
     }
 
     private static abstract class Operation {
