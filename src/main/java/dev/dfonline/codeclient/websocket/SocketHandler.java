@@ -9,10 +9,13 @@ import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.scope.AuthScope;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -474,11 +477,10 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            /*TODO(1.21.8) if (CodeClient.MC.player == null) return;
-            NbtCompound nbt = new NbtCompound();
-            CodeClient.MC.player.writeNbt(nbt);
-            responder.send(String.valueOf(nbt.get("Inventory")));
-            next();*/
+            var view = NbtWriteView.create(null, CodeClient.MC.player.getRegistryManager());
+            CodeClient.MC.player.getInventory().writeData(view.getListAppender("Inventory", StackWithSlot.CODEC));
+            responder.send(String.valueOf(view.getNbt().get("Inventory")));
+            next();
         }
 
         @Override
@@ -500,7 +502,6 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            /*TODO(1.21.8)
             if (CodeClient.MC.player == null) return;
             if (!CodeClient.MC.player.isCreative()) {
                 responder.send("not creative mode");
@@ -508,16 +509,15 @@ public class SocketHandler {
                 return;
             }
             try {
-                NbtCompound nbt = new NbtCompound();
-                CodeClient.MC.player.writeNbt(nbt);
-                nbt.put("Inventory", StringNbtReader.parse("{Inventory:" + content + "}").getList("Inventory", NbtElement.COMPOUND_TYPE));
-                CodeClient.MC.player.readNbt(nbt);
+                CodeClient.MC.player.getInventory().readData(
+                        NbtReadView.create(null, CodeClient.MC.player.getRegistryManager(), StringNbtReader.readCompound("{Inventory:" + content + "}")).getTypedListView("Inventory", StackWithSlot.CODEC)
+                );
                 Utility.sendInventory();
             } catch (CommandSyntaxException e) {
                 responder.send("invalid nbt");
             } finally {
                 next();
-            }*/
+            }
         }
 
         @Override
@@ -539,7 +539,6 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            /*TODO(1.21.8)
             if (CodeClient.MC.player == null) return;
             if (!CodeClient.MC.player.isCreative()) {
                 responder.send("not creative mode");
@@ -548,7 +547,7 @@ public class SocketHandler {
             }
             try {
                 if (CodeClient.MC.world == null) return;
-                Optional<ItemStack> itemStack = ItemStack.fromNbt(CodeClient.MC.world.getRegistryManager(), StringNbtReader.parse(content));
+                Optional<ItemStack> itemStack = ItemStack.CODEC.parse(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), StringNbtReader.readCompound(content)).result();
                 if (itemStack.isEmpty()) return;
                 CodeClient.MC.player.giveItemStack(itemStack.get());
                 Utility.sendInventory();
@@ -556,7 +555,7 @@ public class SocketHandler {
                 responder.send("invalid nbt");
             } finally {
                 next();
-            }*/
+            }
         }
 
         @Override
