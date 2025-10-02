@@ -8,12 +8,16 @@ import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Play;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
@@ -34,6 +38,7 @@ public class KeyBinds {
 
     public static KeyBinding openAction;
     public static KeyBinding editAction;
+    public static KeyBinding actionUsages;
 
     /**
      * Shows tags set with /item tag when held in creative mode.
@@ -60,6 +65,7 @@ public class KeyBinds {
         clipBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.phaser", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "category.codeclient.dev"));
         openAction = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.open_action", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
         editAction = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.edit_action", InputUtil.Type.KEYSYM, InputUtil.GLFW_KEY_PERIOD, "category.codeclient.dev"));
+        actionUsages = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.action_usages", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
 
         teleportLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.left", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
         teleportRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.right", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
@@ -107,6 +113,28 @@ public class KeyBinds {
 
             if(editAction.wasPressed()) {
                 mc.setScreen(new ChatScreen("/action "));
+            }
+
+            if(actionUsages.wasPressed()) {
+                    if (CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
+                        BlockPos pos = InteractionManager.isBlockBreakable(block.getBlockPos());
+                        if (pos == null || (!dev.isInDev(pos)) || CodeClient.MC.world == null) return;
+                        if (CodeClient.MC.world.getBlockEntity(pos.west()) instanceof SignBlockEntity sign) {
+                            SignText text = sign.getFrontText();
+
+                            //Checks if 2nd line is empty. There probably is a better way to check this, right...?
+                            if(text.getMessages(false)[1].getSiblings().contains(Text.empty())) return;
+
+                            String command = String.format("usages %s %s",
+                                    text.getMessage(0, false).withoutStyle().getFirst().getString()
+                                            .toLowerCase()
+                                            .replace(" ", "_")
+                                            .replace("call_function", "function")
+                                            .replace("start_process", "process"),
+                                    text.getMessage(1, false).withoutStyle().getFirst().getString());
+                            mc.getNetworkHandler().sendChatCommand(command);
+                        }
+                    }
             }
         }
 
