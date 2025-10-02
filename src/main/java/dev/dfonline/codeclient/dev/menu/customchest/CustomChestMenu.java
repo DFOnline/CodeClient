@@ -1,12 +1,12 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -14,10 +14,8 @@ import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -73,10 +71,10 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {/*TODO(1.21.8)
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        context.getMatrices().push();
-        context.getMatrices().translate(this.x, this.y, 0);
+        context.getMatrices().pushMatrix();
+        context.getMatrices().translate(this.x, this.y);
         for (Widget widget : widgets.values()) {
             if (widget instanceof Drawable drawable) {
                 drawable.render(context, mouseX - this.x, mouseY - this.y, delta);
@@ -102,24 +100,24 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 ) {
                     focusedSlot = slot;
 
-                    context.drawGuiTexture(RenderLayer::getGuiTextured, SLOT_HIGHLIGHT_BACK_TEXTURE, x-4, y-4, 24, 24); // draw back
+                    context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_TEXTURE, x-4, y-4, 24, 24); // draw back
                     drawSlot(context, new Slot(slot.inventory, slot.id, x, y));
-                    context.drawGuiTexture(RenderLayer::getGuiTexturedOverlay, SLOT_HIGHLIGHT_FRONT_TEXTURE, x-4, y-4, 24, 24); // draw front
+                    context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_TEXTURE, x-4, y-4, 24, 24); // draw front
 
                     //drawSlotHighlight(context, x, y, -10);
                 } else {
                     drawSlot(context, new Slot(slot.inventory, slot.id, x, y));
                 }
             } else {
-                context.drawTexture(RenderLayer::getGuiTextured, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
             }
         }
 
         if (focusedSlot != null) {
             if (focusedSlot.hasStack())
-                context.drawItemTooltip(textRenderer, focusedSlot.getStack(), mouseX - this.x, mouseY - this.y);
+                context.drawItemTooltip(textRenderer, focusedSlot.getStack(), mouseX, mouseY);
         }
-        context.getMatrices().pop();*/
+        context.getMatrices().popMatrix();
     }
 
     public void update() {
@@ -366,16 +364,16 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {/*TODO(1.21.8)
-        context.getMatrices().push();
-        RenderSystem.enableBlend();
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+//        context.getMatrices().push();
+//        RenderSystem.enableBlend();
         int centerX = this.width / 2 - (Size.MENU_WIDTH / 2);
         int centerY = this.height / 2 - (Size.MENU_HEIGHT / 2);
-        context.drawTexture(RenderLayer::getGuiTextured, Size.TEXTURE, centerX, centerY, 0, 0, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, centerX, centerY, 0, 0, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
 
         boolean disabled = false;
         float scrollProgress = (float) scroll / (27 - Size.WIDGETS);
-        context.drawTexture(RenderLayer::getGuiTextured, Size.TEXTURE,
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, Size.TEXTURE,
                 centerX + Size.SCROLL_POS_X,
                 (int) (centerY + Size.SCROLL_POS_Y + scrollProgress * (Size.SCROLL_ROOM - Size.SCROLL_HEIGHT)),
                 (disabled ? Size.MENU_WIDTH + Size.SCROLL_WIDTH : Size.MENU_WIDTH),
@@ -386,7 +384,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 Size.TEXTURE_HEIGHT
         );
 
-        context.getMatrices().pop();*/
+//        context.getMatrices().pop();
     }
 
     @Override
