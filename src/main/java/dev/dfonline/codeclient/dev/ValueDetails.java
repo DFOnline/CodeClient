@@ -7,10 +7,10 @@ import dev.dfonline.codeclient.hypercube.item.Sound;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import dev.dfonline.codeclient.hypercube.item.Variable;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.joml.Matrix3x2fStack;
 
 public class ValueDetails extends Feature {
     @Override
@@ -18,7 +18,7 @@ public class ValueDetails extends Feature {
         return Config.getConfig().ValueDetails;
     }
 
-    public void draw(DrawText drawText, TextRenderer textRenderer, ItemStack stack, int x, int y, MatrixStack matrices) {
+    public void draw(DrawText drawText, TextRenderer textRenderer, ItemStack stack, int x, int y, Matrix3x2fStack matrices) {
         var varItem = VarItems.parse(stack);
 
         if (varItem == null) return;
@@ -42,12 +42,12 @@ public class ValueDetails extends Feature {
 
         if (text == null) return;
 
-        matrices.translate(0.0F, 0.0F, 200.0F);
-        drawText.run(textRenderer, text, x, y, 0xFFFFFF, true);
-        matrices.translate(0.0F, 0.0F, -200.0F);
+        matrices.translate(0.0F, 0.0F);
+        drawText.run(textRenderer, text, x, y, 0xFF_FFFFFF, true);
+        matrices.translate(0.0F, 0.0F);
     }
 
     public interface DrawText {
-        int run(TextRenderer textRenderer, Text text, int x, int y, int color, boolean shadow);
+        void run(TextRenderer textRenderer, Text text, int x, int y, int color, boolean shadow);
     }
 }
