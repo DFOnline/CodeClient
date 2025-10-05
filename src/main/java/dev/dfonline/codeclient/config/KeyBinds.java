@@ -117,7 +117,7 @@ public class KeyBinds {
 
             if(actionUsages.wasPressed()) {
                     if (CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
-                        BlockPos pos = InteractionManager.isBlockBreakable(block.getBlockPos());
+                        BlockPos pos = InteractionManager.targetedBlockPos(block.getBlockPos());
                         if (pos == null || (!dev.isInDev(pos)) || CodeClient.MC.world == null) return;
                         if (CodeClient.MC.world.getBlockEntity(pos.west()) instanceof SignBlockEntity sign) {
                             SignText text = sign.getFrontText();
