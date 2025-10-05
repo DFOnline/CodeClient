@@ -103,14 +103,14 @@ public class ChestPeeker extends Feature {
 
         if (CodeClient.location instanceof Dev) {
             if (currentBlock != null/* && CodeClient.MC.currentScreen == null*/) {
-//            if (packet instanceof BlockEventS2CPacket block) {
-//                if (!Objects.equals(currentBlock, block.getPos())) return false;
-//                if (block.getType() != 1) return false;
-//                if (block.getData() != 0) return false;
-//                reset();
-//            }
+                if (packet instanceof BlockEventS2CPacket block) {
+                    if (!Objects.equals(currentBlock, block.getPos())) return false;
+                    if (block.getType() != 1) return false;
+                    if (block.getData() != 0) return false;
+                    clear();
+                }
                 if (expectingItems && packet instanceof UpdateSelectedSlotS2CPacket) {
-                   net.sendPacket(new UpdateSelectedSlotC2SPacket(inv.getSelectedSlot()));
+                    net.sendPacket(new UpdateSelectedSlotC2SPacket(inv.getSelectedSlot()));
                     return true;
                 }
             }
@@ -123,7 +123,8 @@ public class ChestPeeker extends Feature {
 
                 DFItem item = DFItem.of(slot.getStack());
                 ContainerComponent container = item.getContainer();
-                if (container == null) return ItemStack.areItemsEqual(CodeClient.MC.player.getMainHandStack(), slot.getStack());
+                if (container == null)
+                    return ItemStack.areItemsEqual(CodeClient.MC.player.getMainHandStack(), slot.getStack());
                 items.clear();
                 container.iterateNonEmpty().forEach(stack -> items.add(stack));
 
@@ -231,20 +232,25 @@ public class ChestPeeker extends Feature {
 
     @Override
     public void onBreakBlock(@NotNull Dev dev, @NotNull BlockPos pos, @Nullable BlockPos breakPos) {
-        reset();
+        clear();
     }
 
     @Override
     public void onClickChest(BlockHitResult hitResult) {
-//        reset();
+//        clear();
     }
 
-    public void reset() {
+    private void clear() {
         items.clear();
         itemsFetched = false;
         currentBlock = null;
         timeOut = 10;
         currentCallback = null;
+    }
+
+    public void reset() {
+        clear();
+        expectingItems = false;
     }
 
     enum Type {
