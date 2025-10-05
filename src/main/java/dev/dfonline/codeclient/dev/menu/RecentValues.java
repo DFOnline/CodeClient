@@ -14,9 +14,11 @@ import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.item.ItemStack;
@@ -105,7 +107,7 @@ public class RecentValues extends Feature {
         DFItem dfItem = DFItem.of(item);
         if (!(CodeClient.location instanceof Dev) || dfItem.getHypercubeStringValue("varitem").isEmpty()) return;
         for (ItemStack it : pinned) {
-            if (item.getItem() == it.getItem() && item.equals(it)) return;
+            if (it != null && item.getItem() == it.getItem() && item.equals(it)) return;
         }
 
         ItemStack lambdaItem = item;
@@ -138,10 +140,10 @@ public class RecentValues extends Feature {
             if(recent.isEmpty() && pinned.isEmpty()) return;
             int xEnd = 16 * 20;
 
-            /*TODO(1.21.8) context.drawGuiTexture(RenderLayer::getGuiTextured, Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
+            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
                     Math.min(Math.max(pinned.size(), recent.size()), 16) * 20 + 10,
                     (((int) Math.ceil((double) pinned.size() / 16)) + ((int) Math.ceil((double) recent.size() / 16))) * 16 + 10
-            );*/
+            );
 
             hoveredItem = null;
             hoveredOrigin = null;
@@ -153,7 +155,7 @@ public class RecentValues extends Feature {
                     context.drawItem(item, x - screenX, y - screenY);
                     context.drawStackOverlay(CodeClient.MC.textRenderer, item, x - screenX, y - screenY);
                     if (mouseX > x && mouseY > y && mouseX < x + 15 && mouseY < y + 15) {
-                        context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX - screenX, mouseY - screenY);
+                        context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX, mouseY);
                         hoveredItem = item;
                         hoveredOrigin = group;
                     }
