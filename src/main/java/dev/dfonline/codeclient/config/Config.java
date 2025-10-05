@@ -464,18 +464,18 @@ public class Config {
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.custom_tag_interaction"))
-                                .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.custom_tag_interaction.description"))
-                                        .build())
-                                .binding(
-                                        false,
-                                        () -> CustomTagInteraction,
-                                        opt -> CustomTagInteraction = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
+//                        .option(Option.createBuilder(boolean.class)
+//                                .name(Text.translatable("codeclient.config.custom_tag_interaction"))
+//                                .description(OptionDescription.createBuilder()
+//                                        .text(Text.translatable("codeclient.config.custom_tag_interaction.description"))
+//                                        .build())
+//                                .binding(
+//                                        false,
+//                                        () -> CustomTagInteraction,
+//                                        opt -> CustomTagInteraction = opt
+//                                )
+//                                .controller(TickBoxControllerBuilder::create)
+//                                .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.insert_overlay"))
                                 .description(OptionDescription.of(

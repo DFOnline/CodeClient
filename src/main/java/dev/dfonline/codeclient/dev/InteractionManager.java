@@ -117,79 +117,78 @@ public class InteractionManager {
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
             if (CodeClient.onClickSlot(slot,button,actionType,syncId,revision)) return true;
-            if (!slot.hasStack()) return false;
-            ItemStack item = slot.getStack();
-            DFItem dfItem = DFItem.of(item);
-            if (dfItem.hasHypercubeKey("varitem")) {
-                try {
-                    Optional<String> varItem = dfItem.getItemData().getHypercubeStringValue("varitem");
-                    if (varItem.isPresent()) {
-                        if (!Config.getConfig().CustomTagInteraction) return false;
-                        if (actionType == SlotActionType.PICKUP_ALL) return false;
-                        JsonElement varElement = JsonParser.parseString(varItem.get());
-                        if (!varElement.isJsonObject()) return false;
-                        JsonObject varObject = (JsonObject) varElement;
-                        if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
-                        if (actionType == SlotActionType.QUICK_MOVE && varObject.get("data").getAsJsonObject().has("variable"))
-                            return false;
-
-                        Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
+//            if (!slot.hasStack()) return false;
+//            ItemStack item = slot.getStack();
+//            DFItem dfItem = DFItem.of(item);
+//            if (dfItem.hasHypercubeKey("varitem")) {
+//                try {
+//                    Optional<String> varItem = dfItem.getItemData().getHypercubeStringValue("varitem");
+//                    if (varItem.isPresent()) {
+//                        if (!Config.getConfig().CustomTagInteraction) return false;
+//                        if (actionType == SlotActionType.PICKUP_ALL) return false;
+//                        JsonElement varElement = JsonParser.parseString(varItem.get());
+//                        if (!varElement.isJsonObject()) return false;
+//                        JsonObject varObject = (JsonObject) varElement;
+//                        if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
+//                        if (actionType == SlotActionType.QUICK_MOVE && varObject.get("data").getAsJsonObject().has("variable"))
+//                            return false;
+//
+//                        Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
 //                        CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
-
-                        String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
-                        List<Text> currentLore = dfItem.getLore();
-                        ArrayList<Text> lore = new ArrayList<>(currentLore);
-
-                        int i = 0;
-                        Integer tagStartIndex = null;
-                        Integer selectedIndex = null;
-                        List<String> options = new ArrayList<>();
-
-                        // TODO: Utility.getBlockTagLines
-                        for (Text text : lore) {
-                            if (text == null) return false;
-                            TextColor color = text.getStyle().getColor();
-                            if (color == null) {
-                                List<Text> siblings = text.getSiblings();
-                                if (siblings.size() == 2)
-                                    if (text.getSiblings().get(0).getStyle().getColor().equals(TextColor.fromFormatting(Formatting.DARK_AQUA))) {
-                                        if (tagStartIndex == null) tagStartIndex = i;
-                                        options.add(text.getSiblings().get(1).getString());
-                                        selectedIndex = i;
-                                    }
-                            } else if (color.equals(TextColor.fromRgb(0x808080))) {
-                                if (tagStartIndex == null) tagStartIndex = i;
-                                options.add(text.getString());
-                            }
-                            i++;
-                        }
-
-                        if (selectedIndex == null) return true;
-
-                        int shift = button == 0 ? 1 : -1;
-                        int selectionIndex = selectedIndex - tagStartIndex;
-                        int newSelection = (selectionIndex + shift) % (options.size());
-                        if (newSelection < 0) newSelection = options.size() + newSelection;
-
-                        int optionIndex = 0;
-                        for (String option : options) {
-                            MutableText text = Text.empty();
-                            if (optionIndex == newSelection) {
-                                text.append(Text.literal("» ").setStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withItalic(false))).append(Text.literal(option).setStyle(Style.EMPTY.withColor(Formatting.AQUA).withItalic(false)));
-                            } else
-                                text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
-                            lore.set(tagStartIndex + optionIndex, text);
-                            optionIndex++;
-                        }
-
-                        dfItem.setLore(lore);
-                        slot.setStack(dfItem.getItemStack());
-                        return true;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+//
+//                        String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
+//                        List<Text> currentLore = dfItem.getLore();
+//                        ArrayList<Text> lore = new ArrayList<>(currentLore);
+//
+//                        int i = 0;
+//                        Integer tagStartIndex = null;
+//                        Integer selectedIndex = null;
+//                        List<String> options = new ArrayList<>();
+//
+//                        for (Text text : lore) {
+//                            if (text == null) return false;
+//                            TextColor color = text.getStyle().getColor();
+//                            if (color == null) {
+//                                List<Text> siblings = text.getSiblings();
+//                                if (siblings.size() == 2)
+//                                    if (text.getSiblings().get(0).getStyle().getColor().equals(TextColor.fromFormatting(Formatting.DARK_AQUA))) {
+//                                        if (tagStartIndex == null) tagStartIndex = i;
+//                                        options.add(text.getSiblings().get(1).getString());
+//                                        selectedIndex = i;
+//                                    }
+//                            } else if (color.equals(TextColor.fromRgb(0x808080))) {
+//                                if (tagStartIndex == null) tagStartIndex = i;
+//                                options.add(text.getString());
+//                            }
+//                            i++;
+//                        }
+//
+//                        if (selectedIndex == null) return true;
+//
+//                        int shift = button == 0 ? 1 : -1;
+//                        int selectionIndex = selectedIndex - tagStartIndex;
+//                        int newSelection = (selectionIndex + shift) % (options.size());
+//                        if (newSelection < 0) newSelection = options.size() + newSelection;
+//
+//                        int optionIndex = 0;
+//                        for (String option : options) {
+//                            MutableText text = Text.empty();
+//                            if (optionIndex == newSelection) {
+//                                text.append(Text.literal("» ").setStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withItalic(false))).append(Text.literal(option).setStyle(Style.EMPTY.withColor(Formatting.AQUA).withItalic(false)));
+//                            } else
+//                                text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
+//                            lore.set(tagStartIndex + optionIndex, text);
+//                            optionIndex++;
+//                        }
+//
+//                        dfItem.setLore(lore);
+//                        slot.setStack(dfItem.getItemStack());
+//                        return true;
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
         return false;
     }
