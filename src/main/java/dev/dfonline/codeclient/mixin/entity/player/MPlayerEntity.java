@@ -38,6 +38,7 @@ public abstract class MPlayerEntity extends LivingEntity {
     @Inject(method = "isSpectator", at = @At("HEAD"), cancellable = true)
     public void isSpectator(CallbackInfoReturnable<Boolean> cir) {
         var feat = CodeClient.getFeature(BuildPhaser.class);
-        if (this.getUuid() == CodeClient.MC.player.getUuid() && feat.isPresent() && feat.get().isClipping()) cir.setReturnValue(true);
+        if (CodeClient.MC.player != null && this.getUuid() == CodeClient.MC.player.getUuid() && feat.isPresent() && feat.get().isClipping())
+            cir.setReturnValue(true);
     }
 }
