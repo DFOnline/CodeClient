@@ -95,6 +95,7 @@ public class Config {
     public int MiniMessageTagColor = 0x808080;
     public boolean StateSwitcher = true;
     public boolean SpeedSwitcher = true;
+    public boolean HasSelectedPreset = false;
 
     public Config() {
     }
@@ -182,6 +183,7 @@ public class Config {
             object.addProperty("HighlightExpressions", HighlightExpressions);
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
             object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
+            object.addProperty("HasSelectedPreset", HasSelectedPreset);
 
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
