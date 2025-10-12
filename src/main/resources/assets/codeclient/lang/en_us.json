@@ -331,5 +331,18 @@
   "codeclient.action.clearqueue.empty": "Command queue was empty!",
   "codeclient.config.advanced_middle_click": "Advanced Middle Click",
   "codeclient.config.advanced_middle_click.description": "When enabled, cloning items in inventories will add 1 to your cursor's stack instead of a full stack.",
-  "codeclient.config.advanced_middle_click.description2": "Holding shift while cloning an item will instead give you a full stack."
+  "codeclient.config.advanced_middle_click.description2": "Holding shift while cloning an item will instead give you a full stack.",
+
+  "screen.codeclient.config_preset.title": "Config Preset",
+  "screen.codeclient.config_preset.subtitle": "Select a config preset to apply it",
+  "screen.codeclient.config_preset.warning": "Warning: Selecting a preset is irreversible",
+  "screen.codeclient.config_preset.welcome.title": "Welcome to CodeClient!",
+  "screen.codeclient.config_preset.welcome.subtitle": "For you to have the best experience, select the config preset that matches your needs!",
+  "screen.codeclient.config_preset.minimal": "Minimal",
+  "screen.codeclient.config_preset.basic": "Basic",
+  "screen.codeclient.config_preset.full": "Full",
+  "screen.codeclient.config_preset.minimal.tooltip": "A lightweight setup with essentials only. Keeps things close to vanilla.",
+  "screen.codeclient.config_preset.basic.tooltip": "Balanced defaults recommended for most players.",
+  "screen.codeclient.config_preset.full.tooltip": "All features enabled for power users. Most opinionated experience.",
+  "screen.codeclient.config_preset.hover_hint": "(hover on buttons for explanation)"
 }

@@ -26,6 +26,7 @@ import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
 import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import dev.dfonline.codeclient.dev.overlay.CPUDisplay;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
+import dev.dfonline.codeclient.config.preset.ConfigPresetScreen;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
 import dev.dfonline.codeclient.switcher.ScopeSwitcher;
@@ -53,6 +54,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.client.render.RenderLayer;
@@ -193,6 +195,10 @@ public class CodeClient implements ClientModInitializer {
             ScreenKeyboardEvents.allowKeyRelease(screen).register((screen1, key, scancode, modifiers) -> !CodeClient.onKeyReleased(key, scancode,  modifiers));
             ScreenMouseEvents.allowMouseClick(screen).register((screen1, mouseX, mouseY, button) -> !CodeClient.onMouseClicked(mouseX, mouseY, button));
             ScreenMouseEvents.allowMouseScroll(screen).register((screen1, mouseX, mouseY, horizontalAmount, verticalAmount) -> !CodeClient.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
+
+            if (!Config.getConfig().HasSelectedPreset && screen instanceof TitleScreen) {
+                client.setScreen(new ConfigPresetScreen(screen));
+            }
         });
 
         try {

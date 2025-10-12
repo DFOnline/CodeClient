@@ -18,14 +18,11 @@ import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.awt.Color;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -95,6 +92,7 @@ public class Config {
     public int MiniMessageTagColor = 0x808080;
     public boolean StateSwitcher = true;
     public boolean SpeedSwitcher = true;
+    public boolean HasSelectedPreset = false;
 
     public Config() {
     }
@@ -103,6 +101,8 @@ public class Config {
         if (instance == null) {
             try {
                 instance = CodeClient.gson.fromJson(FileManager.readConfig(), Config.class);
+                instance.HasSelectedPreset = true; // Config was already present.
+                instance.save();
             } catch (Exception exception) {
                 CodeClient.LOGGER.info("Config didn't load: " + exception);
                 CodeClient.LOGGER.info("Making a new one.");
@@ -182,6 +182,7 @@ public class Config {
             object.addProperty("HighlightExpressions", HighlightExpressions);
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
             object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
+            object.addProperty("HasSelectedPreset", HasSelectedPreset);
 
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
