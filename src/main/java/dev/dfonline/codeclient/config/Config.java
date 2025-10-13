@@ -82,6 +82,7 @@ public class Config {
     public DestroyItemReset DestroyItemResetMode = DestroyItemReset.OFF;
     public boolean ShowVariableScopeBelowName = true;
     public boolean DevNodes = false;
+    public boolean GiveUuidNameStrings = true;
     public boolean CPUDisplay = true;
     public CPUDisplayCornerOption CPUDisplayCorner = CPUDisplayCornerOption.TOP_LEFT;
     public boolean HideScopeChangeMessages = true;
@@ -172,6 +173,7 @@ public class Config {
             object.addProperty("DestroyItemResetMode", DestroyItemResetMode.name());
             object.addProperty("ShowVariableScopeBelowName", ShowVariableScopeBelowName);
             object.addProperty("DevNodes", DevNodes);
+            object.addProperty("GiveUuidNameStrings", GiveUuidNameStrings);
             object.addProperty("CPUDisplay", CPUDisplay);
             object.addProperty("CPUDisplayCorner", CPUDisplayCorner.name());
             object.addProperty("HideScopeChangeMessages", HideScopeChangeMessages);
@@ -593,6 +595,18 @@ public class Config {
                                         opt -> DestroyItemResetMode = opt
                                 )
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, DestroyItemReset.class))
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.givestrings"))
+                                .description(OptionDescription.createBuilder()
+                                        .text(Text.translatable("codeclient.config.givestrings.description"))
+                                        .build())
+                                .binding(
+                                        true,
+                                        () -> GiveUuidNameStrings,
+                                        opt -> GiveUuidNameStrings = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("codeclient.config.state_switcher"))

@@ -49,6 +49,7 @@
   "codeclient.config.chat_edits_vars.description": "Opening chat whilst holding a value will automatically put the contents in chat.",
   "codeclient.config.ccdbug": "CCDBUG",
   "codeclient.config.ccdbug.description": "Toggle CCDBUG, which is a variable and entity watcher for debugging.",
+  "codeclient.config.givestrings": "Give result",
   "codeclient.config.givestrings.description": "If CodeClient should automatically give you result of /uuid and /name commands when in dev mode.",
   "codeclient.config.autojoin": "AutoJoin",
   "codeclient.config.autojoin.description": "If and where to auto join.",
