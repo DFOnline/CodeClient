@@ -14,6 +14,7 @@ import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.screen.sync.ItemStackHash;
 
 import java.util.List;
 
@@ -33,21 +34,30 @@ public class ClearPlot extends Action {
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
         if (packet instanceof InventoryS2CPacket inventoryS2CPacket) {
-            if (currentStep == Step.WAIT_FOR_OPTIONS) {
-                for (int i : List.of(9, 14, 15, 44)) {
-                    ItemStack itemStack = inventoryS2CPacket.contents().get(i);
-                    Int2ObjectMap<ItemStack> modified = Int2ObjectMaps.singleton(i, new ItemStack(Items.AIR));
-//                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.syncId(), inventoryS2CPacket.revision(), i, 0, SlotActionType.PICKUP, itemStack, modified));
-                }
-                currentStep = Step.WAIT_FOR_CLEAR;
+
+            if (CodeClient.MC.getNetworkHandler() == null) {
+                currentStep = Step.DONE;
+                this.callback();
                 return true;
             }
-            if (currentStep == Step.WAIT_FOR_CLEAR) {
-                int i = 11;
-                ItemStack itemStack = inventoryS2CPacket.contents().get(i);
+            var hasher = CodeClient.MC.getNetworkHandler().getComponentHasher();
+
+            if (currentStep == Step.WAIT_FOR_OPTIONS) {
+                for (int slot : List.of(9, 14, 15, 44)) {
+                    ItemStackHash stack = ItemStackHash.fromItemStack(inventoryS2CPacket.contents().get(slot),hasher);
+                    Int2ObjectMap<ItemStackHash> modified = Int2ObjectMaps.singleton(slot, ItemStackHash.fromItemStack(Items.AIR.getDefaultStack(), hasher));
+                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.syncId(),inventoryS2CPacket.revision(),(short)slot,(byte)0,SlotActionType.PICKUP,modified,stack));
+                }
+                currentStep = Step.WAIT_FOR_CONFIRM;
+                return true;
+            }
+            if (currentStep == Step.WAIT_FOR_CONFIRM) {
+                short slot = 11;
+                ItemStack itemStack = inventoryS2CPacket.contents().get(slot);
                 if (itemStack.getItem().equals(Items.GREEN_CONCRETE)) {
-                    Int2ObjectMap<ItemStack> modified = Int2ObjectMaps.singleton(i, new ItemStack(Items.AIR));
-//                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.syncId(), inventoryS2CPacket.revision(), i, 0, SlotActionType.PICKUP, itemStack, modified));
+                    var air = ItemStackHash.fromItemStack(Items.AIR.getDefaultStack(), hasher);
+                    Int2ObjectMap<ItemStackHash> modified = Int2ObjectMaps.singleton(slot, air);
+                    CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(inventoryS2CPacket.syncId(),inventoryS2CPacket.revision(),slot,(byte)0,SlotActionType.PICKUP,modified,air));
                     currentStep = Step.DONE;
                     this.callback();
                     return true;
@@ -70,7 +80,7 @@ public class ClearPlot extends Action {
 
     enum Step {
         WAIT_FOR_OPTIONS,
-        WAIT_FOR_CLEAR,
+        WAIT_FOR_CONFIRM,
         DONE
     }
 }
