@@ -15,6 +15,8 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.debug.gizmo.GizmoDrawing;
+import net.minecraft.world.debug.gizmo.TextGizmo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -125,6 +127,6 @@ public class Debug extends Feature {
 
     public void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         if (active) for (var entry : locations.entrySet())
-            DebugRenderer.drawString(matrices, vertexConsumers, entry.getValue().getString(), entry.getKey().x, entry.getKey().y, entry.getKey().z, 0xFFFFFF, 0.02F, true, 0, true);
+            GizmoDrawing.text(entry.getValue().getString(), entry.getKey(), TextGizmo.Style.centered(0xFFFFFF));
     }
 }

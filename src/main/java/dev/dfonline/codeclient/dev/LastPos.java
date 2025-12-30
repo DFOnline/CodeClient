@@ -13,10 +13,10 @@ public class LastPos {
     public static void handlePacket(Packet<?> packet) {
         if (CodeClient.MC.player == null) return;
         if (CodeClient.location instanceof Creator plot) {
-            if (plot.getSize() != null && !plot.isInPlot(BlockPos.ofFloored(CodeClient.MC.player.getPos())))
+            if (plot.getSize() != null && !plot.isInPlot(BlockPos.ofFloored(CodeClient.MC.player.getEntityPos())))
                 return; // todo: make a player version for this
             if (!(packet instanceof PlayerPositionLookS2CPacket)) return;
-            plot.devPos = CodeClient.MC.player.getPos();
+            plot.devPos = CodeClient.MC.player.getEntityPos();
         }
     }
 

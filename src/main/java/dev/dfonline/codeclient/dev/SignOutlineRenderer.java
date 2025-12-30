@@ -18,6 +18,7 @@ public class SignOutlineRenderer extends Feature {
 
     public static BlockPos highlightedSign = null;
 
+    // FIXME: :sob:
 //    private static final RenderLayer.MultiPhase SIGN_OUTLINE = RenderLayer.of(
 //            "codeclient:sign_outline",
 //            VertexFormats.POSITION_COLOR,
@@ -33,39 +34,39 @@ public class SignOutlineRenderer extends Feature {
 //                    .cull(RenderLayer.DISABLE_CULLING)
 //                    .build(true)
 //    );
-
-    private static final RenderLayer.MultiPhase SIGN_OUTLINE = RenderLayer.of(
-            "codeclient:sign_outline",
-            1536,
-            false,
-            true,
-            RenderPipelines.ENTITY_OUTLINE_BLIT, // FIXME
-            RenderLayer.MultiPhaseParameters.builder().build(RenderLayer.OutlineMode.IS_OUTLINE)
-    );
-
-    public static void render(SignBlockEntity sign, MatrixStack matrices, VertexConsumerProvider.Immediate immediate) {
-        if (CodeClient.location instanceof Dev) {
-            if (highlightedSign == null || !highlightedSign.equals(sign.getPos())) return;
-            matrices.push();
-
-            VoxelShape signShape = CodeClient.MC.world.getBlockState(sign.getPos()).getOutlineShape(CodeClient.MC.world, sign.getPos());
-            VertexRendering.drawFilledBox(
-                    matrices,
-                    immediate.getBuffer(SIGN_OUTLINE),
-                    signShape.getMin(Direction.Axis.X),
-                    signShape.getMin(Direction.Axis.Y),
-                    signShape.getMin(Direction.Axis.Z),
-                    signShape.getMax(Direction.Axis.X),
-                    signShape.getMax(Direction.Axis.Y),
-                    signShape.getMax(Direction.Axis.Z),
-                    ((Config.getConfig().SignHighlightColor >> 16) & 0xFF) / 255f,
-                    ((Config.getConfig().SignHighlightColor >> 8) & 0xFF) / 255f,
-                    (Config.getConfig().SignHighlightColor & 0xFF) / 255f,
-                    1.0f
-            );
-
-
-            matrices.pop();
-        }
-    }
+//
+//    private static final RenderLayer.MultiPhase SIGN_OUTLINE = RenderLayer.of(
+//            "codeclient:sign_outline",
+//            1536,
+//            false,
+//            true,
+//            RenderPipelines.ENTITY_OUTLINE_BLIT,
+//            RenderLayer.MultiPhaseParameters.builder().build(RenderLayer.OutlineMode.IS_OUTLINE)
+//    );
+//
+//    public static void render(SignBlockEntity sign, MatrixStack matrices, VertexConsumerProvider.Immediate immediate) {
+//        if (CodeClient.location instanceof Dev) {
+//            if (highlightedSign == null || !highlightedSign.equals(sign.getPos())) return;
+//            matrices.push();
+//
+//            VoxelShape signShape = CodeClient.MC.world.getBlockState(sign.getPos()).getOutlineShape(CodeClient.MC.world, sign.getPos());
+//            VertexRendering.drawFilledBox(
+//                    matrices,
+//                    immediate.getBuffer(SIGN_OUTLINE),
+//                    signShape.getMin(Direction.Axis.X),
+//                    signShape.getMin(Direction.Axis.Y),
+//                    signShape.getMin(Direction.Axis.Z),
+//                    signShape.getMax(Direction.Axis.X),
+//                    signShape.getMax(Direction.Axis.Y),
+//                    signShape.getMax(Direction.Axis.Z),
+//                    ((Config.getConfig().SignHighlightColor >> 16) & 0xFF) / 255f,
+//                    ((Config.getConfig().SignHighlightColor >> 8) & 0xFF) / 255f,
+//                    (Config.getConfig().SignHighlightColor & 0xFF) / 255f,
+//                    1.0f
+//            );
+//
+//
+//            matrices.pop();
+//        }
+//    }
 }

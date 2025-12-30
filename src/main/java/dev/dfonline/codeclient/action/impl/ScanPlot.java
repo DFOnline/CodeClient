@@ -66,7 +66,7 @@ public class ScanPlot extends Action {
 
     @Nullable
     private BlockPos findNextBlock() {
-        var player = CodeClient.MC.player.getPos();
+        var player = CodeClient.MC.player.getEntityPos();
         BlockPos nearest = null;
         for (BlockPos pos : blocks) {
             if (nearest == null || pos.isWithinDistance(player, nearest.toCenterPos().distanceTo(player))) {

@@ -29,7 +29,7 @@ public class MoveToLocation {
     }
 
     public static void shove(ClientPlayerEntity player, Vec3d location) {
-        new MoveToLocation(player).teleportTowards(player.getPos(), location);
+        new MoveToLocation(player).teleportTowards(player.getEntityPos(), location);
     }
 
     public void setPos(Vec3d pos) {
@@ -38,7 +38,7 @@ public class MoveToLocation {
 
     public void setPos(double x, double y, double z) {
         if (CodeClient.MC.getNetworkHandler() == null) return;
-        if (new Vec3d(x, y, x).distanceTo(player.getPos()) > 10) {
+        if (new Vec3d(x, y, x).distanceTo(player.getEntityPos()) > 10) {
             // I've always done it like this, problems?
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, true));
             CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, true));

@@ -16,6 +16,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -61,21 +62,24 @@ public class KeyBinds {
     public static KeyBinding playBuild;
 
     public static void init() {
-        editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.codepalette", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Y, "category.codeclient.dev"));
-        clipBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.phaser", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "category.codeclient.dev"));
-        openAction = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.open_action", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
-        editAction = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.edit_action", InputUtil.Type.KEYSYM, InputUtil.GLFW_KEY_PERIOD, "category.codeclient.dev"));
-        actionUsages = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.action_usages", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
+        KeyBinding.Category dev = KeyBinding.Category.create(Identifier.of("codeclient:dev"));
+        KeyBinding.Category navi = KeyBinding.Category.create(Identifier.of("codeclient:navigation"));
 
-        teleportLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.left", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
-        teleportRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.right", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
-        teleportForward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.forward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
-        teleportBackward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.backward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.navigation"));
+        editBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.codepalette", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Y, dev));
+        clipBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.phaser", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, dev));
+        openAction = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.open_action", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), dev));
+        editAction = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.edit_action", InputUtil.Type.KEYSYM, InputUtil.GLFW_KEY_PERIOD, dev));
+        actionUsages = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.action_usages", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), dev));
 
-        previewItemTags = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_item_tags", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
-        previewSounds = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_sounds", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
-        playDev = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.playDev", InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
-        playBuild = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.playBuild", InputUtil.UNKNOWN_KEY.getCode(), "category.codeclient.dev"));
+        teleportLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.left", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), navi));
+        teleportRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.right", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), navi));
+        teleportForward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.forward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), navi));
+        teleportBackward = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.tp.backward", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), navi));
+
+        previewItemTags = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_item_tags", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), dev));
+        previewSounds = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.preview_sounds", InputUtil.Type.KEYSYM, InputUtil.UNKNOWN_KEY.getCode(), dev));
+        playDev = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.playDev", InputUtil.UNKNOWN_KEY.getCode(), dev));
+        playBuild = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.codeclient.playBuild", InputUtil.UNKNOWN_KEY.getCode(), dev));
     }
 
     public static void tick() {
@@ -112,7 +116,7 @@ public class KeyBinds {
             }
 
             if(editAction.wasPressed()) {
-                mc.setScreen(new ChatScreen("/action "));
+                mc.setScreen(new ChatScreen("/action ", false));
             }
 
             if(actionUsages.wasPressed()) {
@@ -150,7 +154,7 @@ public class KeyBinds {
         var player = CodeClient.MC.player;
         if (player == null) return;
         if (keyBinding.wasPressed() && CodeClient.location instanceof Dev dev && dev.isInDevSpace()) {
-            var target = player.getPos().add(offset);
+            var target = player.getEntityPos().add(offset);
             if (dev.isInDevSpace(target)) player.setPosition(target);
         }
     }

@@ -79,7 +79,7 @@ public class GoTo extends Action {
         }
 
         CodeClient.MC.player.setVelocity(0, 0, 0);
-        if (CodeClient.MC.player.getPos().equals(target)) {
+        if (CodeClient.MC.player.getEntityPos().equals(target)) {
             active = false;
             complete = true;
             callback();
@@ -122,7 +122,7 @@ public class GoTo extends Action {
         }
         if (!active) return;
         if (CodeClient.MC.player == null) return;
-        Vec3d pos = CodeClient.MC.player.getPos();
+        Vec3d pos = CodeClient.MC.player.getEntityPos();
 
         Vec3d offset = pos.relativize(target);
         double maxLength = 50;

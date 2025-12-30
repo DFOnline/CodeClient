@@ -36,7 +36,7 @@ public abstract class MScreenHandler {
             if (!AdvancedMiddleClickFeature.activated()) return;
             if (player.isInCreativeMode()) {
                 var slot = (Slot) slots.get(slotIndex);
-                var clone = AdvancedMiddleClickFeature.getCopy(slot, getCursorStack());
+                var clone = AdvancedMiddleClickFeature.getCopy(slot, getCursorStack(), actionType);
                 if (clone != null) {
                     setCursorStack(clone);
                 }

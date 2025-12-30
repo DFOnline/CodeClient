@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev.menu;
 
 import dev.dfonline.codeclient.ChestFeature;
+import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
@@ -31,15 +32,16 @@ public class AdvancedMiddleClickFeature extends Feature {
         return new AdvancedMiddleClick(screen);
     }
 
-    public static ItemStack getCopy(Slot slot, ItemStack cursor) {
+    public static ItemStack getCopy(Slot slot, ItemStack cursor, SlotActionType actionType) {
         int max = slot.getStack().getMaxCount();
+        boolean shift = actionType == SlotActionType.QUICK_MOVE; // TODO: verify this isn't inverted
         if (cursor.isEmpty() && slot.hasStack()) {
             int count = 1;
-            if (Screen.hasShiftDown()) count = max;
+            if (shift) count = max;
             return slot.getStack().copyWithCount(count);
         } else if (!cursor.isEmpty() && compare(slot.getStack(), cursor)) {
             int count = Math.min(cursor.getCount()+1, max);
-            if (Screen.hasShiftDown()) count = max;
+            if (shift) count = max;
             return slot.getStack().copyWithCount(count);
         }
         return null;
@@ -86,7 +88,7 @@ public class AdvancedMiddleClickFeature extends Feature {
 
                 int convertedSlotId = Utility.getRemoteSlot(emptySlotId)-9+(handler.slots.size()-36);
                 Slot emptySlot = handler.getSlot(convertedSlotId);
-                var stack = getCopy(slot, handler.getCursorStack()); // get the stack to set the slot to
+                var stack = getCopy(slot, handler.getCursorStack(), actionType); // get the stack to set the slot to
                 if (stack == null) return false;
 
                 if (!handler.getCursorStack().isEmpty()) {

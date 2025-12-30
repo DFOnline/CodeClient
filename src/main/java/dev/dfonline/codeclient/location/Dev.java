@@ -32,7 +32,7 @@ public class Dev extends Creator {
     }
 
     public boolean isInDevSpace() {
-        return isInDevSpace(CodeClient.MC.player.getPos());
+        return isInDevSpace(CodeClient.MC.player.getEntityPos());
     }
 
     public boolean isInDevSpace(Vec3d pos) {

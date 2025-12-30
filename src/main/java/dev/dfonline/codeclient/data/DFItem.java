@@ -1,5 +1,7 @@
 package dev.dfonline.codeclient.data;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
@@ -215,9 +217,8 @@ public class DFItem {
      * @param signature The signature of the profile.
      */
     public void setProfile(UUID uuid, String value, String signature) {
-        PropertyMap map = new PropertyMap();
-        map.put("textures", new Property("textures", value, signature));
-        item.set(DataComponentTypes.PROFILE, new ProfileComponent(Optional.empty(), Optional.ofNullable(uuid), map));
+        // TODO: test? I probably removed some necessary code.
+        item.set(DataComponentTypes.PROFILE, ProfileComponent.ofDynamic(uuid));
     }
 
     /**

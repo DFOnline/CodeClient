@@ -143,7 +143,7 @@ public class BuildPhaser extends Feature {
 
     private void startClipping() {
         PlayerAbilities abilities = CodeClient.MC.player.getAbilities();
-        lastPos = CodeClient.MC.player.getPos();
+        lastPos = CodeClient.MC.player.getEntityPos();
         wasFlying = abilities.flying;
         clipping = true;
         abilities.flying = true;
@@ -172,7 +172,7 @@ public class BuildPhaser extends Feature {
             CommandSender.queue(String.format("ptp %s %s %s %s %s", x, y, z, pitch, yaw));
 
             /*
-            Vec3d pos = plot.getPos().relativize(player.getPos());
+            Vec3d pos = plot.getPos().relativize(player.getEntityPos());
             ItemStack location = new Location(pos.x, pos.y, pos.z, player.getPitch(), player.getYaw()).toStack();
 
             ItemStack lastItem = player.getStackInHand(Hand.MAIN_HAND);

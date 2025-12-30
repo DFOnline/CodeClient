@@ -191,9 +191,9 @@ public class CodeClient implements ClientModInitializer {
         });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key, scancode, modifiers) -> !CodeClient.onKeyPressed(key, scancode, modifiers));
-            ScreenKeyboardEvents.allowKeyRelease(screen).register((screen1, key, scancode, modifiers) -> !CodeClient.onKeyReleased(key, scancode,  modifiers));
-            ScreenMouseEvents.allowMouseClick(screen).register((screen1, mouseX, mouseY, button) -> !CodeClient.onMouseClicked(mouseX, mouseY, button));
+            ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key) -> !CodeClient.onKeyPressed(key.key(), key.scancode(), key.modifiers()));
+            ScreenKeyboardEvents.allowKeyRelease(screen).register((screen1, key) -> !CodeClient.onKeyReleased(key.key(), key.scancode(), key.modifiers()));
+            ScreenMouseEvents.allowMouseClick(screen).register((screen1, click) -> !CodeClient.onMouseClicked(click.x(), click.y(), click.button()));
             ScreenMouseEvents.allowMouseScroll(screen).register((screen1, mouseX, mouseY, horizontalAmount, verticalAmount) -> !CodeClient.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
 
             if (!Config.getConfig().HasSelectedPreset && screen instanceof TitleScreen) {

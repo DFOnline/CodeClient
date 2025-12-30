@@ -291,7 +291,7 @@ public class InteractionManager {
 //                    }
 //                }
 //
-//                Vec3d eyeRel = origin.relativize(player.getPos());
+//                Vec3d eyeRel = origin.relativize(player.getEntityPos());
 //                MoveToLocation.shove(player,pos.add(eyeRel));
 //            }
 //
