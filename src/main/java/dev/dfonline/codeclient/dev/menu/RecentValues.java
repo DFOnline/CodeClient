@@ -15,6 +15,7 @@ import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.RenderLayer;
@@ -170,10 +171,10 @@ public class RecentValues extends Feature {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(Click click) {
             if (hoveredItem == null) return false;
 
-            if (button != 1) {
+            if (click.button() != 1) {
                 for (Slot slot : screen.getScreenHandler().slots) {
                     if (slot.hasStack()) continue;
                     CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(

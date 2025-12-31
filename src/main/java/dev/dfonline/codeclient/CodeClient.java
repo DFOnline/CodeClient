@@ -50,12 +50,15 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -191,9 +194,9 @@ public class CodeClient implements ClientModInitializer {
         });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key) -> !CodeClient.onKeyPressed(key.key(), key.scancode(), key.modifiers()));
-            ScreenKeyboardEvents.allowKeyRelease(screen).register((screen1, key) -> !CodeClient.onKeyReleased(key.key(), key.scancode(), key.modifiers()));
-            ScreenMouseEvents.allowMouseClick(screen).register((screen1, click) -> !CodeClient.onMouseClicked(click.x(), click.y(), click.button()));
+            ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key) -> !CodeClient.onKeyPressed(key));
+            ScreenKeyboardEvents.allowKeyRelease(screen).register((screen1, key) -> !CodeClient.onKeyReleased(key));
+            ScreenMouseEvents.allowMouseClick(screen).register((screen1, click) -> !CodeClient.onMouseClicked(click));
             ScreenMouseEvents.allowMouseScroll(screen).register((screen1, mouseX, mouseY, horizontalAmount, verticalAmount) -> !CodeClient.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
 
             if (!Config.getConfig().HasSelectedPreset && screen instanceof TitleScreen) {
@@ -438,20 +441,20 @@ public class CodeClient implements ClientModInitializer {
         return chestFeatures().map(feat -> feat.getHoverStack(instance)).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
-    public static boolean onMouseClicked(double mouseX, double mouseY, int button) {
-        return chestFeatures().anyMatch(feature -> feature.mouseClicked(mouseX, mouseY, button));
+    public static boolean onMouseClicked(Click click) {
+        return chestFeatures().anyMatch(feature -> feature.mouseClicked(click));
     }
 
-    public static boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
-        return chestFeatures().anyMatch(feature -> feature.keyPressed(keyCode, scanCode, modifiers));
+    public static boolean onKeyPressed(KeyInput key) {
+        return chestFeatures().anyMatch(feature -> feature.keyPressed(key));
     }
 
-    public static boolean onKeyReleased(int keyCode, int scanCode, int modifiers) {
-        return chestFeatures().anyMatch(feature -> feature.keyReleased(keyCode, scanCode, modifiers));
+    public static boolean onKeyReleased(KeyInput key) {
+        return chestFeatures().anyMatch(feature -> feature.keyReleased(key));
     }
 
-    public static boolean onCharTyped(char chr, int modifiers) {
-        return chestFeatures().anyMatch(feature -> feature.charTyped(chr, modifiers));
+    public static boolean onCharTyped(CharInput charInput) {
+        return chestFeatures().anyMatch(feature -> feature.charTyped(charInput));
     }
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {

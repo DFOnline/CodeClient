@@ -1,10 +1,13 @@
 package dev.dfonline.codeclient;
 
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
@@ -36,8 +39,8 @@ public class ItemSelector extends ClickableWidget {
         search = new TextFieldWidget(textRenderer, x, y, width, searchHeight, Text.translatable("itemGroup.search"));
         search.setPlaceholder(Text.translatable("itemGroup.search"));
         search.setFocused(true);
-        if (CodeClient.MC.player != null && CodeClient.MC.player.getWorld() != null) {
-            ItemGroups.updateDisplayContext(FeatureFlags.DEFAULT_ENABLED_FEATURES, true, CodeClient.MC.player.getWorld().getRegistryManager());
+        if (CodeClient.MC.player != null && CodeClient.MC.player.getEntityWorld() != null) {
+            ItemGroups.updateDisplayContext(FeatureFlags.DEFAULT_ENABLED_FEATURES, true, CodeClient.MC.player.getEntityWorld().getRegistryManager());
         }
         this.itemsWidth = width / itemSize;
         int itemsHeight = (height - searchHeight - searchItemGap) / itemSize;
@@ -87,13 +90,13 @@ public class ItemSelector extends ClickableWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (search.mouseClicked(mouseX, mouseY, button)) return true;
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (search.mouseClicked(click, doubled)) return true;
         for (Search item : items)
-            if (mouseX - this.getX() > item.x &&
-                    mouseX - this.getX() < item.x + itemSize &&
-                    mouseY - this.getY() > item.y &&
-                    mouseY - this.getY() < item.y + itemSize) {
+            if (click.x() - this.getX() > item.x &&
+                    click.x() - this.getX() < item.x + itemSize &&
+                    click.y() - this.getY() > item.y &&
+                    click.y() - this.getY() < item.y + itemSize) {
                 consumer.accept(item.item);
                 return true;
             }
@@ -101,9 +104,9 @@ public class ItemSelector extends ClickableWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
         // TODO: make enter and/or number keys select a given item
-        if (search.keyPressed(keyCode, scanCode, modifiers)) {
+        if (search.keyPressed(input)) {
             search();
             return true;
         }
@@ -111,14 +114,14 @@ public class ItemSelector extends ClickableWidget {
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyInput input) {
         search();
         return true;
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (search.charTyped(chr, modifiers)) {
+    public boolean charTyped(CharInput input) {
+        if (search.charTyped(input)) {
             search();
             return true;
         }

@@ -11,9 +11,12 @@ import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
 import dev.dfonline.codeclient.hypercube.item.Number;
 import dev.dfonline.codeclient.hypercube.item.*;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -68,9 +71,9 @@ public class InsertOverlayFeature extends Feature {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(Click click) {
             if (overlayOpen()) {
-                boolean stayOpen = selectedSlot.mouseClicked(mouseX, mouseY, button, screen);
+                boolean stayOpen = selectedSlot.mouseClicked(click, screen);
                 if (!stayOpen) {
                     selectedSlot.close();
                 }
@@ -80,20 +83,20 @@ public class InsertOverlayFeature extends Feature {
         }
 
         @Override
-        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-            if (overlayOpen()) return selectedSlot.keyPressed(keyCode, scanCode, modifiers);
+        public boolean keyPressed(KeyInput key) {
+            if (overlayOpen()) return selectedSlot.keyPressed(key);
             return false;
         }
 
         @Override
-        public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-            if (overlayOpen()) return selectedSlot.keyReleased(keyCode, scanCode, modifiers);
+        public boolean keyReleased(KeyInput key) {
+            if (overlayOpen()) return selectedSlot.keyReleased(key);
             return false;
         }
 
 
-        public boolean charTyped(char chr, int modifiers) {
-            if (overlayOpen()) return selectedSlot.charTyped(chr, modifiers);
+        public boolean charTyped(CharInput input) {
+            if (overlayOpen()) return selectedSlot.charTyped(input);
             return false;
         }
 
@@ -199,12 +202,14 @@ public class InsertOverlayFeature extends Feature {
 //                RecipeAlternativesWidget.CRAFTING_OVERLAY_HIGHLIGHTED_TEXTURE : RecipeAlternativesWidget.CRAFTING_OVERLAY_TEXTURE
             }
 
-            public boolean mouseClicked(double mouseX, double mouseY, int button, HandledScreen<?> screen) {
+            public boolean mouseClicked(Click click, HandledScreen<?> screen) {
+                var mouseX = click.x();
+                var mouseY = click.y();
                 int x = screenX;
                 int y = screenY;
                 if (mouseX > this.x + x && mouseY > this.y + y && mouseX < this.x + x + width && mouseY < this.y + y + height) {
                     if (field != null) {
-                        boolean b = field.mouseClicked(mouseX - x, mouseY - y, button);
+                        boolean b = field.mouseClicked(new Click(mouseX - x, mouseY - y, click.buttonInfo()), false);
                         if(field instanceof CustomChestField<?> chestField) {
                             item = chestField.item.toStack();
                             setSlot(item);
@@ -245,12 +250,13 @@ public class InsertOverlayFeature extends Feature {
                 return false;
             }
 
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            public boolean keyPressed(KeyInput key) {
+                var keyCode = key.getKeycode();
                 if (field != null) {
                     if (keyCode != GLFW.GLFW_KEY_ENTER) {
-                        var end = field.keyPressed(keyCode, scanCode, modifiers);
+                        var end = field.keyPressed(key);
                         if (!end && keyCode == GLFW.GLFW_KEY_TAB && field instanceof CustomChestField<?> chestField) {
-                            chestField.select((modifiers & GLFW.GLFW_MOD_SHIFT) != 1);
+                            chestField.select((key.modifiers() & GLFW.GLFW_MOD_SHIFT) != 1);
                         }
                     }
                     return true;
@@ -258,8 +264,9 @@ public class InsertOverlayFeature extends Feature {
                 return false;
             }
 
-            public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-                if (field != null) field.keyReleased(keyCode, scanCode, modifiers);
+            public boolean keyReleased(KeyInput key) {
+                var keyCode = key.getKeycode();
+                if (field != null) field.keyReleased(key);
                 if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_ESCAPE) {
                     close();
                     return true;
@@ -267,8 +274,8 @@ public class InsertOverlayFeature extends Feature {
                 return false;
             }
 
-            public boolean charTyped(char chr, int modifiers) {
-                if (field != null) return field.charTyped(chr, modifiers);
+            public boolean charTyped(CharInput charInput) {
+                if (field != null) return field.charTyped(charInput);
                 return false;
             }
 

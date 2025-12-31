@@ -5,6 +5,7 @@ import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.item.*;
 import dev.dfonline.codeclient.hypercube.item.Number;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.navigation.GuiNavigationPath;
@@ -14,6 +15,8 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -23,6 +26,7 @@ import org.lwjgl.glfw.GLFW;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class CustomChestField<ItemType extends VarItem> extends ClickableWidget {
     private final List<Drawable> widgets;
@@ -36,8 +40,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             int textboxWidth = width;
             if (item instanceof Variable var) {
                 textboxWidth = textboxWidth - height;
-                var scopeWidget = new CyclingButtonWidget.Builder<Scope>(scope -> Text.literal(scope.getShortName()).setStyle(Style.EMPTY.withColor(scope.color))).values(Scope.unsaved, Scope.saved, Scope.local, Scope.line).omitKeyText().build(x + textboxWidth, y, height, height, Text.literal(""));
-                scopeWidget.setValue(var.getScope());
+                var scopeWidget = new CyclingButtonWidget.Builder<>(scope -> Text.literal(scope.getShortName()).setStyle(Style.EMPTY.withColor(scope.color)), var::getScope).values(Scope.unsaved, Scope.saved, Scope.local, Scope.line).omitKeyText().build(x + textboxWidth, y, height, height, Text.literal(""));
                 widgets.add(scopeWidget);
             }
 //            if(item instanceof Parameter parameter) {
@@ -61,7 +64,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
             text.setText(value.getType());
             widgets.add(text);
 
-            var scopeWidget = new CyclingButtonWidget.Builder<Target>(target -> Text.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color))).values(
+            var scopeWidget = new CyclingButtonWidget.Builder<>(target -> Text.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color)), value::getTarget).values(
                     Target.Selection,
                     Target.Default,
                     Target.Killer,
@@ -71,7 +74,6 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
                     Target.Projectile,
                     Target.LastEntity
             ).omitKeyText().build(x + textboxWidth, y, targetWidth, height, Text.literal(""));
-            scopeWidget.setValue(value.getTarget());
             widgets.add(scopeWidget);
         }
         if (item instanceof Vector vec) {
@@ -149,7 +151,7 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
 //            var varItem = new FakeSlot(x + textboxWidth, y, Text.empty(), handler);
 //            if(tag.getVariable() != null) varItem.item = tag.getVariable().toStack();
 //            widgets.add(varItem);
-            widgets.add(new TextWidget(x, y, width, height, ScreenTexts.composeGenericOptionText(Text.literal(tag.getTag()), Text.literal(tag.getOption())), textRender).alignCenter());
+            widgets.add(new TextWidget(x, y, width, height, ScreenTexts.composeGenericOptionText(Text.literal(tag.getTag()), Text.literal(tag.getOption())), textRender));
         }
         this.widgets = widgets;
     }
@@ -254,12 +256,12 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         for (var widget : widgets) {
             if (widget instanceof ClickableWidget clickable) {
-                if (clickable.isMouseOver(mouseX, mouseY)) {
+                if (clickable.isMouseOver(click.x(), click.y())) {
                     clickable.setFocused(true);
-                    clickable.mouseClicked(mouseX, mouseY, button);
+                    clickable.mouseClicked(click, doubled);
                 } else clickable.setFocused(false);
             }
         }
@@ -300,7 +302,9 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
+        var keyCode = input.key();
+        var modifiers = input.modifiers();
         if(keyCode == GLFW.GLFW_KEY_TAB) {
             Integer selected = null;
             for (int i = 0; i < widgets.size(); i++) {
@@ -321,32 +325,32 @@ public class CustomChestField<ItemType extends VarItem> extends ClickableWidget 
         }
         for (var widget : widgets) {
             if (widget instanceof ClickableWidget click && click.isFocused()) {
-                return click.keyPressed(keyCode, scanCode, modifiers);
+                return click.keyPressed(input);
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyInput input) {
         for (var widget : widgets) {
             if (widget instanceof ClickableWidget click && click.isFocused()) {
                 updateItem();
-                return click.keyReleased(keyCode, scanCode, modifiers);
+                return click.keyReleased(input);
             }
         }
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(input);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharInput input) {
         for (var widget : widgets) {
             if (widget instanceof ClickableWidget click && click.isFocused()) {
                 updateItem();
-                return click.charTyped(chr, modifiers);
+                return click.charTyped(input);
             }
         }
-        return super.charTyped(chr, modifiers);
+        return super.charTyped(input);
     }
 
     @Nullable

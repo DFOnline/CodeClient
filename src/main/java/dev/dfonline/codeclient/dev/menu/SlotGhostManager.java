@@ -76,7 +76,7 @@ public class SlotGhostManager extends Feature {
 
         @Override
         public void render(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
-            if (!Screen.hasControlDown()) {
+            if (!CodeClient.MC.isCtrlPressed()) {
                 time += delta;
             }
         }

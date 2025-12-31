@@ -1,7 +1,10 @@
 package dev.dfonline.codeclient;
 
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -21,7 +24,7 @@ public abstract class ChestFeature {
         return null;
     }
 
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click) {
         return false;
     }
 
@@ -29,15 +32,15 @@ public abstract class ChestFeature {
         return false;
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput key) {
         return false;
     }
 
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyInput key) {
         return false;
     }
 
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharInput charInput) {
         return false;
     }
 

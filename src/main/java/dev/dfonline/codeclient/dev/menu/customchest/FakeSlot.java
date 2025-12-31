@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
 import dev.dfonline.codeclient.CodeClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -44,8 +45,8 @@ public class FakeSlot extends ClickableWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.isMouseOver(mouseX, mouseY) && ((!this.item.isEmpty()) || (!this.handler.getCursorStack().isEmpty()))) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (this.isMouseOver(click.x(), click.y()) && ((!this.item.isEmpty()) || (!this.handler.getCursorStack().isEmpty()))) {
             this.handler.disableSyncing();
             var swap = this.item.copy();
             this.item = this.handler.getCursorStack().copyWithCount(1);
@@ -53,7 +54,7 @@ public class FakeSlot extends ClickableWidget {
             this.handler.enableSyncing();
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Nullable

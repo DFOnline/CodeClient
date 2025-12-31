@@ -13,12 +13,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryListener;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
@@ -177,35 +180,37 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         }
     }
 
-    //
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
-            Integer clicked = getGroupFromMouse(mouseX, mouseY);
+    @Override
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.button() == 0) {
+            Integer clicked = getGroupFromMouse(click.x(), click.y());
             if (clicked != null && clicked != selectedTab) setSelectedTab(clicked);
 
-            if (isClickInScrollbar(mouseX, mouseY)) {
+            if (isClickInScrollbar(click.x(), click.y())) {
                 this.scrolling = true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0) {
+    @Override
+    public boolean mouseReleased(Click click) {
+        if (click.button() == 0) {
             this.scrolling = false;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    @Override
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
         if (this.scrolling) {
             int scrollOriginY = this.y + 18;
             int scrollEnd = scrollOriginY + 112;
-            double percentThrough = MathHelper.clamp(((float) mouseY - (float) scrollOriginY - 7.5F) / ((float) (scrollEnd - scrollOriginY) - 15.0F), 0, 1);
+            double percentThrough = MathHelper.clamp(((float) click.y() - (float) scrollOriginY - 7.5F) / ((float) (scrollEnd - scrollOriginY) - 15.0F), 0, 1);
             this.scrollPosition = ((double) this.scrollHeight / 9) * percentThrough;
             scroll();
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, offsetX, offsetY);
     }
 
     private Integer getGroupFromMouse(double mouseX, double mouseY) {
@@ -304,19 +309,23 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         this.drawMouseoverTooltip(context, mouseX, mouseY);
     }
 
-    public boolean charTyped(char chr, int modifiers) {
+    @Override
+    public boolean charTyped(CharInput input) {
         if (ignoreNextKey) {
             ignoreNextKey = false;
             return true;
         }
-        if (searchBox.charTyped(chr, modifiers)) {
+        if (searchBox.charTyped(input)) {
             populate();
             return true;
         }
         return false;
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+
+    @Override
+    public boolean keyPressed(KeyInput input) {
+        var keyCode = input.getKeycode();
         if (keyCode == GLFW.GLFW_KEY_GRAVE_ACCENT) {
             this.close();
         }
@@ -343,12 +352,12 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
                 this.setFocused(null);
                 return false;
             }
-            searchBox.keyPressed(keyCode, scanCode, modifiers);
+            searchBox.keyPressed(input);
             populate();
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_TAB || keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_LEFT) {
-            if ((modifiers & GLFW.GLFW_MOD_SHIFT) == 1 || keyCode == GLFW.GLFW_KEY_LEFT) {
+            if ((input.modifiers() & GLFW.GLFW_MOD_SHIFT) == 1 || keyCode == GLFW.GLFW_KEY_LEFT) {
                 selectedTab = selectedTab - 1;
                 if (selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
                 setSelectedTab(selectedTab);
@@ -356,7 +365,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
             return true;
         }
         if (searchBox.active) {
-            if (CodeClient.MC.options.chatKey.matchesKey(keyCode, scanCode) || KeyBinds.editBind.matchesKey(keyCode, scanCode)) {
+            if (CodeClient.MC.options.chatKey.matchesKey(input) || KeyBinds.editBind.matchesKey(input)) {
                 if (keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
                 searchBox.setFocused(true);
                 searchBox.setCursorToEnd(false);
@@ -365,7 +374,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
 
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {

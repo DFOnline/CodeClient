@@ -4,10 +4,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
@@ -114,26 +116,25 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == PRESS_KEY) {
+    public boolean keyPressed(KeyInput key) {
+        if (key.getKeycode() == PRESS_KEY) {
             this.usingMouseToSelect = false;
             this.selected++;
             this.selected %= getOptions().size();
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (key.getKeycode() == GLFW.GLFW_KEY_ESCAPE) {
             this.close();
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(key);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         int i = 0;
-
         for (SelectableButtonWidget widget : buttons) {
-            if (widget.getX() < mouseX && widget.getX() + 31 > mouseX
-                    && widget.getY() < mouseY && widget.getY() + 31 > mouseY) this.selected = i;
+            if (widget.getX() < click.x() && widget.getX() + 31 > click.x()
+                    && widget.getY() < click.y() && widget.getY() + 31 > click.y()) this.selected = i;
             widget.selected = this.selected == i;
             if (widget.selected) {
                 hasClicked = true;
@@ -141,12 +142,12 @@ public abstract class GenericSwitcher extends Screen {
             }
             ++i;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     protected boolean checkFinished() {
         if (this.client == null) return false;
-        if (hasClicked || !InputUtil.isKeyPressed(this.client.getWindow().getHandle(), HOLD_KEY)) {
+        if (hasClicked || !InputUtil.isKeyPressed(this.client.getWindow(), HOLD_KEY)) {
             Option selected = getSelected();
             if (selected != null) selected.run();
             this.client.setScreen(null);

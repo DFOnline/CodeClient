@@ -15,12 +15,13 @@ import java.util.List;
 @Mixin(WorldRenderer.class)
 public class MWorldRenderer {
 
-    @Inject(method = "getEntitiesToRender", at = @At("RETURN"), cancellable = true)
-    public void renderMain(Camera camera, Frustum frustum, List<Entity> output, CallbackInfoReturnable<Boolean> cir) {
-        if (SignOutlineRenderer.highlightedSign != null) {
-            cir.setReturnValue(true);
-            cir.cancel();
-        }
-    }
+//    FIXME: signoutline getting more broken as we speak
+//    @Inject(method = "getEntitiesToRender", at = @At("RETURN"), cancellable = true)
+//    public void renderMain(Camera camera, Frustum frustum, List<Entity> output, CallbackInfoReturnable<Boolean> cir) {
+//        if (SignOutlineRenderer.highlightedSign != null) {
+//            cir.setReturnValue(true);
+//            cir.cancel();
+//        }
+//    }
 
 }

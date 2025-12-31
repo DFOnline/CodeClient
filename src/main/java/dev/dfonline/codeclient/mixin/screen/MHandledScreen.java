@@ -25,7 +25,7 @@ public abstract class MHandledScreen {
     @Shadow @Final protected ScreenHandler handler;
 
     @Inject(method = "drawSlot", at = @At("TAIL"))
-    private void drawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
+    private void drawSlot(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         CodeClient.onDrawSlot(context,slot);
     }
 
