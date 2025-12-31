@@ -1,7 +1,8 @@
 package dev.dfonline.codeclient.data;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.gson.JsonObject;
+import com.google.common.collect.Multimap;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
@@ -10,13 +11,11 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.SequencedSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -217,8 +216,28 @@ public class DFItem {
      * @param signature The signature of the profile.
      */
     public void setProfile(UUID uuid, String value, String signature) {
-        // TODO: test? I probably removed some necessary code.
+        Multimap<String, Property> map = ImmutableMultimap.<String, Property>builder()
+                .put("textures", new Property("textures", value, signature))
+                .build();
+        this.item.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(new GameProfile(uuid, value, new PropertyMap(map))));
+    }
+
+    /**
+     * Sets the profile of the item, for use with player heads, resolved dynamically.
+     *
+     * @param uuid The UUID of the player.
+     */
+    public void setProfile(UUID uuid) {
         item.set(DataComponentTypes.PROFILE, ProfileComponent.ofDynamic(uuid));
+    }
+
+    /**
+     * Sets the profile of the item, for use with player heads, resolved dynamically.
+     *
+     * @param name The username of the player.
+     */
+    public void setProfile(String name) {
+        item.set(DataComponentTypes.PROFILE, ProfileComponent.ofDynamic(name));
     }
 
     /**
