@@ -8,7 +8,7 @@
         "entity.player.ClientPlayerInteractionManagerAccessor",
         "entity.player.MClientPlayerEntity", "entity.player.MClientPlayerInteractionManager",
         "entity.player.MPlayerEntity", "entity.player.MPlayerInventory", "network.MClientCommonPlayNetworkHandler",
-        "network.MClientConnection", "render.MDebugRenderer", "render.MSignRenderer", "render.MWorldRenderer",
+        "network.MClientConnection", "render.MSignRenderer", "render.MWorldRenderer",
         "render.hud.MDrawContext", "render.hud.MInGameHud", "render.hud.MInGameOverlayRenderer",
         "render.hud.MTitleScreen", "screen.MCreativeInventoryScreen", "screen.MHandledScreen", "screen.MHandledScreens",
         "screen.MMultiplayerScreen", "screen.chat.MChatInputSuggester", "screen.chat.MChatScreen",
