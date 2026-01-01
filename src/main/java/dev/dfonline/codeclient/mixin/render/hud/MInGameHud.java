@@ -13,6 +13,8 @@ import dev.dfonline.codeclient.hypercube.item.Scope;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Style;
@@ -36,7 +38,7 @@ public abstract class MInGameHud {
     @Shadow
     public abstract TextRenderer getTextRenderer();
 
-    @Inject(method = "render", at = @At("HEAD"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderMainHud(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/render/RenderTickCounter;)V"))
     private void onRender(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         int scaledWidth = context.getScaledWindowWidth();
         int scaledHeight = context.getScaledWindowHeight();
@@ -79,7 +81,7 @@ public abstract class MInGameHud {
                     .map(ChestPeeker::getOverlayText).orElse(null);
             if (peeker == null || peeker.isEmpty()) peeker = SignPeeker.getOverlayText();
             if (peeker != null && !peeker.isEmpty()) {
-                context.drawTooltip(textRenderer, peeker, x, yOrig);
+                context.drawTooltipImmediately(textRenderer, peeker.stream().map(text -> TooltipComponent.of(text.asOrderedText())).toList(), x, yOrig, HoveredTooltipPositioner.INSTANCE, null);
 //                context.renderTooltip();
             }
         } catch (Exception ignored) {
