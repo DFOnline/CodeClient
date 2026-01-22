@@ -5,7 +5,7 @@ import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
@@ -19,9 +19,11 @@ import net.minecraft.client.input.CharInput;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.screen.sync.ItemStackHash;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -239,8 +241,9 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         if (widget instanceof CustomChestField<?> field) {
             VarItem item = field.item;
             if (item instanceof BlockTag) {
-                Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
-//                CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.nextRevision(), slot.getIndex(), 0, SlotActionType.PICKUP, item.toStack(), int2ObjectMap));
+                var hash = ItemStackHash.fromItemStack(item.toStack(), CodeClient.MC.getNetworkHandler().getComponentHasher());
+                Int2ObjectMap<ItemStackHash> modified = Int2ObjectMaps.singleton(slot.getIndex(), hash);
+                CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.nextRevision(),(short)slot.getIndex(),(byte)0,SlotActionType.PICKUP,modified,hash));
             } else {
                 doNotUpdate = true;
                 super.onMouseClick(slot, slot.id, 0, SlotActionType.SWAP);

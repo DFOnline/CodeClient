@@ -95,8 +95,6 @@ import java.util.stream.Stream;
 
 public class CodeClient implements ClientModInitializer {
 
-    // FIXME: fix everything using new ClickSlotC2SPacket
-
     public static final String MOD_NAME = "CodeClient";
     public static final String MOD_ID = "codeclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
