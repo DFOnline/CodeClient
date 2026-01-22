@@ -67,7 +67,10 @@ public class ScopeSwitcher extends GenericSwitcher {
         ItemStack stack = CodeClient.MC.player.getStackInHand(Hand.MAIN_HAND);
 
         DFItem item = DFItem.of(stack);
+
+        if (!item.hasHypercubeKey("varitem")) return;
         PublicBukkitValues pbv = item.getPublicBukkitValues();
+        if (pbv == null) return;
         Optional<String> varItem = pbv.getHypercubeStringValue("varitem");
         if (varItem.isEmpty()) return;
         JsonObject var = JsonParser.parseString(varItem.get()).getAsJsonObject();
