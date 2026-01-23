@@ -12,7 +12,7 @@ public class Dev extends Creator {
     }
 
     public void setDevSpawn(double x, double z) {
-        setOrigin((int) (x + 10.5), (int) (z - 10.5));
+        setOrigin((int) (x + 11.5), (int) (z - 10.5));
     }
 
     public ReferenceBook getReferenceBook() {
