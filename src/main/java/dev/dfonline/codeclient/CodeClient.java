@@ -224,7 +224,6 @@ public class CodeClient implements ClientModInitializer {
         feat(new BlockBreakDeltaCalculator());
         feat(new Navigation());
         feat(new NoClip());
-        feat(new ReportBrokenBlocks());
         feat(new InsertOverlayFeature());
         feat(new SlotGhostManager());
         feat(new ActionViewer());
