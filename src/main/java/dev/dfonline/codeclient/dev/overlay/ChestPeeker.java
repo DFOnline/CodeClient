@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.Scope;
@@ -81,7 +82,9 @@ public class ChestPeeker extends Feature {
                         ClientPlayNetworkHandler network = CodeClient.MC.getNetworkHandler();
                         if (network == null) return;
 
+                        Utility.sendHandItem(ItemStack.EMPTY);
                         network.sendPacket(new PickItemFromBlockC2SPacket(currentBlock, true));
+                        Utility.sendHandItem(CodeClient.MC.player.getMainHandStack());
                         expectingItems = true;
                         return;
                     }
