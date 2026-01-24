@@ -17,7 +17,6 @@ public enum ConfigPreset {
         config.CodeLayerInteractionMode = Config.LayerInteractionMode.OFF;
         config.RecentChestInsert = false;
         config.ChestPeeker = false;
-        config.ReportBrokenBlock = false;
         config.ScopeSwitcher = false;
         config.TeleportUp = false;
         config.TeleportDown = false;
@@ -31,7 +30,6 @@ public enum ConfigPreset {
         config.ActionViewer = true;
         config.RecentValues = 0;
         config.ValueDetails = true;
-        config.PhaseToggle = false;
         config.DestroyItemResetMode = Config.DestroyItemReset.OFF;
         config.ShowVariableScopeBelowName = true;
         config.CPUDisplay = true;
@@ -64,7 +62,6 @@ public enum ConfigPreset {
         config.ParameterGhosts = false;
         config.ActionViewer = true;
         config.ValueDetails = true;
-        config.PhaseToggle = true;
         config.DestroyItemResetMode = Config.DestroyItemReset.OFF;
         config.ShowVariableScopeBelowName = true;
         config.CPUDisplay = true;
@@ -95,7 +92,6 @@ public enum ConfigPreset {
         config.ParameterGhosts = true;
         config.ActionViewer = true;
         config.ValueDetails = true;
-        config.PhaseToggle = true;
         config.DestroyItemResetMode = Config.DestroyItemReset.OFF;
         config.ShowVariableScopeBelowName = true;
         config.CPUDisplay = true;

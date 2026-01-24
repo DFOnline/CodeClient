@@ -31,7 +31,7 @@ public class Config {
     public boolean NoClipEnabled = false;
     public boolean PlaceOnAir = false;
     public int AirSpeed = 10;
-    public boolean CodeClientAPI = false;
+    public boolean CodeClientAPI = true;
     public boolean CCDBUG = true;
     public boolean CustomBlockInteractions = true;
     public boolean CustomTagInteraction = false;
@@ -54,7 +54,6 @@ public class Config {
     public boolean ChestPeeker = true;
     public int ChestPeekerX = 0;
     public int ChestPeekerY = -4;
-    public boolean ReportBrokenBlock = true;
     public boolean ScopeSwitcher = true;
     public float UpAngle = 50;
     public float DownAngle = 50;
@@ -147,7 +146,6 @@ public class Config {
             object.addProperty("ChestPeeker", ChestPeeker);
             object.addProperty("ChestPeekerX", ChestPeekerX);
             object.addProperty("ChestPeekerY", ChestPeekerY);
-            object.addProperty("ReportBrokenBlock", ReportBrokenBlock);
             object.addProperty("ScopeSwitcher", ScopeSwitcher);
             object.addProperty("UpAngle", UpAngle);
             object.addProperty("DownAngle", DownAngle);
@@ -539,17 +537,6 @@ public class Config {
                                         true,
                                         () -> ScopeSwitcher,
                                         opt -> ScopeSwitcher = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
-                        .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.report_broken_blocks"))
-                                .description(
-                                        OptionDescription.of(Text.translatable("codeclient.config.report_broken_blocks.description1"), Text.translatable("codeclient.config.report_broken_blocks.description2")))
-                                .binding(
-                                        true,
-                                        () -> ReportBrokenBlock,
-                                        opt -> ReportBrokenBlock = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

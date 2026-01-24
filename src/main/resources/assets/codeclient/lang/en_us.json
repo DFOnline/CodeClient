@@ -103,9 +103,6 @@
   "codeclient.config.place_on_air.description2": "This will interfere with other players who don't have this mod, such as helpers!",
   "codeclient.config.scope_switcher": "Scope Switcher",
   "codeclient.config.scope_switcher.description": "Right click variables to change their scope with a custom UI.",
-  "codeclient.config.report_broken_blocks": "Report Broken Blocks",
-  "codeclient.config.report_broken_blocks.description1": "Get a message on breaking a block telling you what it did.",
-  "codeclient.config.report_broken_blocks.description2": "Only works for Player Event, Entity Event, Function, Call Function, Process, and Start Process.",
   "codeclient.config.layer_interaction": "Layer Interaction",
   "codeclient.config.layer_interaction.description": "Controls how you interact with code layers, including ones that don't exist.",
   "codeclient.config.recent_values": "Recent Values",
@@ -305,16 +302,6 @@
   "codeclient.api.removed": "Removed extra permissions from the connected app.",
   "codeclient.api.disconnected": "The connected app can no longer interact with CodeClient.",
   "codeclient.api.scope.invalid": "The connected app requested an invalid permission.",
-
-  "codeclient.interaction.broke": "You just broke %s.",
-  "codeclient.interaction.broke_empty": "You just broke an empty %s.",
-
-  "hypercube.codeblock.player_event": "Player Event",
-  "hypercube.codeblock.entity_event": "Entity Event",
-  "hypercube.codeblock.function": "Function",
-  "hypercube.codeblock.call_function": "Call Function",
-  "hypercube.codeblock.process": "Process",
-  "hypercube.codeblock.start_process": "Start Process",
 
   "codeclient.command.ping": "Your ping is %s ms.",
   "codeclient.command.dfgive.count_above_max": "Maximum stack size is %s",
