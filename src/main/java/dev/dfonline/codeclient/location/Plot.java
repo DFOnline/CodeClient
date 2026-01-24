@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 public abstract class Plot extends Location {
 
-    public static Pattern lineStarterPattern = Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS");
+    public static Pattern lineStarterPattern = Pattern.compile("(PLAYER|ENTITY|GAME) EVENT|FUNCTION|PROCESS");
 
     /**
      * The position the player was at before they were teleported, in any scenario but plot borders.
