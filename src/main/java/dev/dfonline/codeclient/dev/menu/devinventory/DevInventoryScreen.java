@@ -35,6 +35,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -128,13 +129,12 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
                     ChatType.FAIL);
         }
 
-        TextRenderer textRenderer = this.textRenderer;
         Objects.requireNonNull(this.textRenderer);
-        this.searchBox = new TextFieldWidget(textRenderer, this.x + 82, this.y + 6, 80, 9, Text.translatable("itemGroup.search"));
+        this.searchBox = new TextFieldWidget(this.textRenderer, this.x + 82, this.y + 6, 80, 9, Text.translatable("itemGroup.search"));
         this.searchBox.setMaxLength(100);
         this.searchBox.setDrawsBackground(false);
         this.searchBox.setVisible(true);
-        this.searchBox.setEditableColor(16777215);
+        this.searchBox.setEditableColor(Colors.WHITE);
         this.addSelectableChild(this.searchBox);
         // TODO: config for defaults on open
         setSelectedTab(6);
@@ -176,7 +176,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
     protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
         if (itemGroup != DevInventoryGroup.INVENTORY) {
-            context.drawText(textRenderer, itemGroup.getName(), 8, 6, 0x404040, false);
+            context.drawText(this.textRenderer, itemGroup.getName(), 8, 6, Colors.DARK_GRAY, false);
         }
     }
 
