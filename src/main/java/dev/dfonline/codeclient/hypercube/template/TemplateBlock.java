@@ -47,6 +47,7 @@ public class TemplateBlock {
         ENTITY_EVENT("ENTITY EVENT", true),
         EVENT("PLAYER EVENT", true),
         FUNC("FUNCTION", true),
+        GAME_EVENT("GAME EVENT", true),
         GAME_ACTION("GAME ACTION", true),
         IF_ENTITY("IF PLAYER", false),
         IF_GAME("IF GAME", false),

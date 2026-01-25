@@ -108,9 +108,10 @@ public class CommandJump extends Command {
     public enum JumpType {
         PLAYER_EVENT("PLAYER EVENT"),
         ENTITY_EVENT("ENTITY EVENT"),
+        GAME_EVENT("GAME EVENT"),
         FUNCTION("FUNCTION"),
         PROCESS("PROCESS"),
-        ANY("(((PLAYER)|(ENTITY)) EVENT)|(FUNCTION)|(PROCESS)"),
+        ANY("(((PLAYER)|(ENTITY)|(GAME)) EVENT)|(FUNCTION)|(PROCESS)"),
         ACTIONS("(PLAYER|ENTITY|GAME) ACTION|CALL FUNCTION|START PROCESS|CONTROL|REPEAT|SET VARIABLE|SELECT OBJECT|IF (GAME|ENTITY|PLAYER|VARIABLE)");
 
         public final Pattern pattern;

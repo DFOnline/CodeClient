@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -42,7 +43,7 @@ public class ScanPlot extends Action {
     @Override
     public void init() {
         if (CodeClient.location instanceof Dev plot) {
-            blocks = plot.scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"), Pattern.compile(".*")).keySet().stream().toList();
+            blocks = plot.scanForSigns(Plot.lineStarterPattern, Pattern.compile(".*")).keySet().stream().toList();
             scanned = new HashMap<>(blocks.size());
         }
     }
