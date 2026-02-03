@@ -93,15 +93,26 @@ public abstract class Plot extends Location {
         return hasUnderground ? 5 : 50;
     }
 
+
     public Boolean isInPlot(BlockPos pos) {
         return isInArea(pos.toCenterPos()) || isInDev(pos.toCenterPos());
+    }
+
+    public Boolean isInPlot(BlockPos pos, Size size) {
+        return isInArea(pos.toCenterPos(), size) || isInDev(pos.toCenterPos(), size);
     }
 
     /**
      * The play or build area.
      */
     public Boolean isInArea(Vec3d pos) {
-        Size size = assumeSize();
+        return isInArea(pos, assumeSize());
+    }
+
+    /**
+     * The play or build area.
+     */
+    public Boolean isInArea(Vec3d pos, Size size) {
 
         double x = pos.getX();
         double z = pos.getZ();
@@ -125,7 +136,10 @@ public abstract class Plot extends Location {
     }
 
     public Boolean isInDev(Vec3d pos) {
-        Size size = assumeSize();
+        return isInDev(pos, assumeSize());
+    }
+
+    public Boolean isInDev(Vec3d pos, Size size) {
 
         int x = (int) pos.getX();
         int z = (int) pos.getZ();

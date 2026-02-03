@@ -67,10 +67,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
-import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
@@ -317,6 +314,16 @@ public class CodeClient implements ClientModInitializer {
 
             if (packet instanceof ChunkDeltaUpdateS2CPacket update) {
                 update.visitUpdates((blockPos, blockState) -> dev.getLineStartCache().remove(blockPos));
+            }
+
+            if (dev.getSize() == null) {
+                if (packet instanceof PlayerPositionLookS2CPacket pos) {
+                    var tp = BlockPos.ofFloored(pos.change().position().x, pos.change().position().y, pos.change().position().z);
+                    if (dev.isInPlot(tp, Plot.Size.MEGA) && !dev.isInPlot(tp, Plot.Size.MASSIVE)) {
+                        dev.setSize(Plot.Size.MEGA);
+
+                    }
+                }
             }
         }
         return (MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen || MC.currentScreen instanceof StateSwitcher) && packet instanceof CloseScreenS2CPacket;
