@@ -33,7 +33,7 @@ public abstract class Plot extends Location {
     protected Boolean hasBuild;
     protected Boolean hasDev;
     protected Size size;
-    protected HashMap<BlockPos, SignText> lineStarterCache = new HashMap<>();
+    protected @Nullable HashMap<BlockPos, SignText> lineStarterCache = new HashMap<>();
     protected HashMap<BlockPos, SignText> actionCache = new HashMap<>();
 
     public void setOrigin(int x, int z) {
@@ -198,7 +198,7 @@ public abstract class Plot extends Location {
     }
 
     public void clearLineStarterCache() {
-        lineStarterCache.clear();
+        lineStarterCache = null;
     }
 
     private void fillLineStarterCache() {
@@ -207,7 +207,7 @@ public abstract class Plot extends Location {
     }
 
     public Map<BlockPos, SignText> getLineStartCache() {
-        if (lineStarterCache.isEmpty()) fillLineStarterCache();
+        if (lineStarterCache == null) fillLineStarterCache();
         return lineStarterCache;
     }
 
