@@ -143,11 +143,13 @@ public class MiniMessageHighlighter {
                 StandardTags.decorations(TextDecoration.ITALIC),
                 StandardTags.decorations(TextDecoration.UNDERLINED),
                 StandardTags.decorations(TextDecoration.STRIKETHROUGH),
-                StandardTags.reset(),
                 StandardTags.gradient(),
-                StandardTags.rainbow(),
                 StandardTags.pride(),
-                StandardTags.shadowColor()
+                StandardTags.rainbow(),
+                StandardTags.reset(),
+                StandardTags.sequentialHead(),
+                StandardTags.shadowColor(),
+                StandardTags.sprite()
         );
 
         @Override
