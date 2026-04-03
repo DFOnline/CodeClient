@@ -23,7 +23,7 @@ public class PlayerPosDebugMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void render(DebugHudLines lines, World world, WorldChunk clientChunk, WorldChunk chunk, CallbackInfo ci) {
-        if (CodeClient.location instanceof Plot plot) {
+        if (CodeClient.location instanceof Plot plot && plot.getX() != null) {
             var plotLocation = CodeClient.MC.getCameraEntity().getEntityPos().subtract(plot.getPos());
             String size = plot.getSize() == null ? "UNKNOWN" : plot.getSize().name();
             lines.addLinesToSection(SECTION_ID, List.of(String.format(
