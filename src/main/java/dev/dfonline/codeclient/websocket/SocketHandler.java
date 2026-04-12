@@ -6,6 +6,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.scope.AuthScope;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -46,7 +47,7 @@ public class SocketHandler {
 
     public void start() {
         try {
-            websocket = new SocketServer(new InetSocketAddress("localhost", PORT), this);
+            websocket = new SocketServer(new InetSocketAddress(Config.getConfig().apiBindIP, PORT), this);
             Thread socketThread = new Thread(websocket, "CodeClient-API");
             socketThread.start();
             CodeClient.LOGGER.info("Socket opened");
