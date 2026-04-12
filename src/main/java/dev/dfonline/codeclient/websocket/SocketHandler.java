@@ -46,7 +46,7 @@ public class SocketHandler {
 
     public void start() {
         try {
-            websocket = new SocketServer(new InetSocketAddress("localhost", PORT), this);
+            websocket = new SocketServer(new InetSocketAddress("0.0.0.0", PORT), this);
             Thread socketThread = new Thread(websocket, "CodeClient-API");
             socketThread.start();
             CodeClient.LOGGER.info("Socket opened");
