@@ -120,9 +120,12 @@ public class ChestPeeker extends Feature {
             if (expectingItems && packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
                 var handler = CodeClient.MC.player.playerScreenHandler;
 
-                var removedItem = handler.getSlot(slot.getSlot()).getStack();
-                net.sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), removedItem));
-                CodeClient.MC.player.playerScreenHandler.setStackInSlot(slot.getSlot(), 0, removedItem);
+                int slotIndex = slot.getSlot();
+                if (slotIndex < 0 || slotIndex >= handler.slots.size()) return false;
+
+                var removedItem = handler.getSlot(slotIndex).getStack();
+                net.sendPacket(new CreativeInventoryActionC2SPacket(slotIndex, removedItem));
+                CodeClient.MC.player.playerScreenHandler.setStackInSlot(slotIndex, 0, removedItem);
 
                 DFItem item = DFItem.of(slot.getStack());
                 ContainerComponent container = item.getContainer();
