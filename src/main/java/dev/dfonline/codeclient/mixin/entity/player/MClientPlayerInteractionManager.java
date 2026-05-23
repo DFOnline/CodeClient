@@ -71,31 +71,6 @@ public abstract class MClientPlayerInteractionManager {
         if (InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
     }
 
-    @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V"))
-    public void beforeSendPlace(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-        ItemStack handItem = player.getStackInHand(hand);
-        boolean isTemplate = DFItem.of(handItem).hasHypercubeKey("codetemplatedata");
-        if (!isTemplate) return;
-        BlockPos place = InteractionManager.getPlacePos(hitResult);
-        if (place != null && CodeClient.MC.world.getBlockState(place).isSolidBlock(CodeClient.MC.world, place)) {
-            ClientPlayNetworkHandler net = CodeClient.MC.getNetworkHandler();
-
-            if (!player.isSneaking())
-                net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
-            this.sendSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult, sequence));
-            if (!player.isSneaking())
-                net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
-            if (!player.isSneaking()) {
-                this.sendSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(place.toCenterPos(), Direction.UP, place, hitResult.isInsideBlock()), sequence));
-            }
-        }
-        ItemStack template = Items.ENDER_CHEST.getDefaultStack();
-        DFItem dfTemplate = DFItem.of(template);
-        dfTemplate.setItemData(DFItem.of(handItem).getItemData());
-        Utility.sendHandItem(dfTemplate.getItemStack());
-        item = handItem;
-    }
-
     @ModifyVariable(method = "interactBlock", at = @At("HEAD"), argsOnly = true)
     private BlockHitResult onBlockInteract(BlockHitResult hitResult) {
         return InteractionManager.onBlockInteract(hitResult);
