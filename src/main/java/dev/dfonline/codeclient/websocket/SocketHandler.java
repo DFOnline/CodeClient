@@ -210,7 +210,7 @@ public class SocketHandler {
         // Send the user the scopes to approve
         Utility.sendMessage(Text.translatable("codeclient.api.scope.prompt"));
         for (AuthScope scope : unapprovedAuthScopes) {
-            player.sendMessage(
+            Utility.sendMessage(
                     Text.empty()
                             .append(
                                     Text.literal("- ")
