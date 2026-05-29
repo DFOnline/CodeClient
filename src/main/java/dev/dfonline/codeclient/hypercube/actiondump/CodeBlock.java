@@ -1,12 +1,8 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
-import dev.dfonline.codeclient.CodeClient;
 import net.minecraft.item.ItemStack;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CodeBlock implements Searchable {
     /**

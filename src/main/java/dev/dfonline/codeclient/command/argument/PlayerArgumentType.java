@@ -30,7 +30,7 @@ public class PlayerArgumentType implements ArgumentType<String> {
         if (context.getSource() instanceof FabricClientCommandSource clientCommandSource)
             return CommandSource.suggestMatching(Collections2.transform(
                     clientCommandSource.getPlayer().networkHandler.getPlayerList(),
-                    playerEntry -> playerEntry.getProfile().getName()
+                    playerEntry -> playerEntry.getProfile().name()
             ), builder);
 
         return builder.buildFuture();

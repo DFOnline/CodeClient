@@ -6,12 +6,14 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.Dev;
+import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -41,7 +43,7 @@ public class ScanPlot extends Action {
     @Override
     public void init() {
         if (CodeClient.location instanceof Dev plot) {
-            blocks = plot.scanForSigns(Pattern.compile("(PLAYER|ENTITY) EVENT|FUNCTION|PROCESS"), Pattern.compile(".*")).keySet().stream().toList();
+            blocks = plot.scanForSigns(Plot.lineStarterPattern, Pattern.compile(".*")).keySet().stream().toList();
             scanned = new HashMap<>(blocks.size());
         }
     }
@@ -65,7 +67,7 @@ public class ScanPlot extends Action {
 
     @Nullable
     private BlockPos findNextBlock() {
-        var player = CodeClient.MC.player.getPos();
+        var player = CodeClient.MC.player.getEntityPos();
         BlockPos nearest = null;
         for (BlockPos pos : blocks) {
             if (nearest == null || pos.isWithinDistance(player, nearest.toCenterPos().distanceTo(player))) {
@@ -107,7 +109,7 @@ public class ScanPlot extends Action {
 
 
     private class PickUpBlock extends Action {
-        private BlockPos pos;
+        private final BlockPos pos;
         private Integer ticks = 0;
 
         public PickUpBlock(BlockPos pos, Callback callback) {
@@ -122,10 +124,9 @@ public class ScanPlot extends Action {
             var player = CodeClient.MC.player;
             var inter = CodeClient.MC.interactionManager;
             boolean sneaky = !player.isSneaking();
-            if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+            if (sneaky) net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
             inter.interactBlock(player, Hand.MAIN_HAND, new BlockHitResult(this.pos.toCenterPos(), Direction.UP, this.pos, false));
-            if (sneaky)
-                net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            if (sneaky) net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
         }
 
         @Override

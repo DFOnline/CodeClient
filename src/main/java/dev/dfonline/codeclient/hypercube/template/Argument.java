@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.hypercube.template;
 
 import com.google.gson.JsonObject;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import net.minecraft.item.Item;
@@ -64,9 +65,10 @@ public class Argument {
 
         @Override
         public JsonObject getData() {
+            DFItem dfItem = DFItem.of(stack);
+            dfItem.removeItemData();
             var data = new JsonObject();
             var item = new NbtCompound();
-            stack.writeNbt(item);
             data.addProperty("item", item.toString());
             return data;
         }

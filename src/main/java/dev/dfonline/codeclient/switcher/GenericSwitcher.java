@@ -3,13 +3,18 @@ package dev.dfonline.codeclient.switcher;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
@@ -21,9 +26,9 @@ import java.util.List;
  * It can reasonably hold up to 4 options.
  */
 public abstract class GenericSwitcher extends Screen {
-    private static final Identifier TEXTURE = new Identifier("textures/gui/container/gamemode_switcher.png");
-    private static final Identifier SLOT_TEXTURE = new Identifier("gamemode_switcher/slot");
-    private static final Identifier SELECTED_TEXTURE = new Identifier("gamemode_switcher/selection");
+    private static final Identifier TEXTURE = Identifier.ofVanilla("textures/gui/container/gamemode_switcher.png");
+    private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("gamemode_switcher/slot");
+    private static final Identifier SELECTED_TEXTURE = Identifier.ofVanilla("gamemode_switcher/selection");
     /**
      * Key to hold down, generally F3.
      * The selected option will be run when this is released.
@@ -72,12 +77,9 @@ public abstract class GenericSwitcher extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if (checkFinished()) return;
-        context.getMatrices().push();
-        RenderSystem.enableBlend();
         int centerX = this.width / 2 - 62;
         int centerY = this.height / 2 - 31 - 27;
-        context.drawTexture(TEXTURE, centerX, centerY, 0.0F, 0.0F, 125, 75, 128, 128);
-        context.getMatrices().pop();
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, centerX, centerY, 0, 0, 125, 75, 128, 128);
         super.render(context, mouseX, mouseY, delta);
 
         if (lastMouseX == null) lastMouseX = mouseX;
@@ -92,8 +94,8 @@ public abstract class GenericSwitcher extends Screen {
         Option selected = getSelected();
         Text selectedText = selected != null ? selected.text : Text.translatable("codeclient.switcher.select");
 
-        context.drawCenteredTextWithShadow(this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, 0xFFFFFF);
-        context.drawCenteredTextWithShadow(this.textRenderer, footer, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
+        context.drawCenteredTextWithShadow(this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, Colors.WHITE);
+        context.drawCenteredTextWithShadow(this.textRenderer, footer, this.width / 2, this.height / 2 + 5, Colors.WHITE);
 
         int i = 0;
 
@@ -102,8 +104,9 @@ public abstract class GenericSwitcher extends Screen {
                 if (button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
             }
             button.selected = this.selected == i;
-            context.drawGuiTexture(SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
-            if (button.selected) context.drawGuiTexture(SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
+            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
+            if (button.selected)
+                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
             button.render(context, mouseX, mouseY, delta);
             ++i;
         }
@@ -113,26 +116,25 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == PRESS_KEY) {
+    public boolean keyPressed(KeyInput key) {
+        if (key.getKeycode() == PRESS_KEY) {
             this.usingMouseToSelect = false;
             this.selected++;
             this.selected %= getOptions().size();
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (key.getKeycode() == GLFW.GLFW_KEY_ESCAPE) {
             this.close();
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(key);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         int i = 0;
-
         for (SelectableButtonWidget widget : buttons) {
-            if (widget.getX() < mouseX && widget.getX() + 31 > mouseX
-                    && widget.getY() < mouseY && widget.getY() + 31 > mouseY) this.selected = i;
+            if (widget.getX() < click.x() && widget.getX() + 31 > click.x()
+                    && widget.getY() < click.y() && widget.getY() + 31 > click.y()) this.selected = i;
             widget.selected = this.selected == i;
             if (widget.selected) {
                 hasClicked = true;
@@ -140,12 +142,12 @@ public abstract class GenericSwitcher extends Screen {
             }
             ++i;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     protected boolean checkFinished() {
         if (this.client == null) return false;
-        if (hasClicked || !InputUtil.isKeyPressed(this.client.getWindow().getHandle(), HOLD_KEY)) {
+        if (hasClicked || !InputUtil.isKeyPressed(this.client.getWindow(), HOLD_KEY)) {
             Option selected = getSelected();
             if (selected != null) selected.run();
             this.client.setScreen(null);
@@ -194,19 +196,15 @@ public abstract class GenericSwitcher extends Screen {
 
         @Override
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-            context.getMatrices().push();
-            context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
-            context.drawTexture(TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
-            context.getMatrices().pop();
+//            context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
 
             context.drawItem(option.icon, this.getX() + 5, this.getY() + 5);
-            context.drawItemInSlot(textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
+            context.drawStackOverlay(textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
 
             if (selected) {
-                context.getMatrices().push();
-                context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
-                context.drawTexture(TEXTURE, 0, 0, 26.0F, 75.0F, 26, 26, 128, 128);
-                context.getMatrices().pop();
+//                context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
+                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 26, 75, 26, 26, 128, 128);
             }
         }
 

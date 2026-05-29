@@ -4,26 +4,27 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
+import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PickItemFromBlockC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.registry.Registries;
+import net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -32,26 +33,41 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public class ChestPeeker extends Feature {
-    private BlockPos currentBlock = null;
-    private NbtList items = null;
-    private boolean shouldClearChest = false;
+
+    private static BlockPos currentBlock = null;
+    private static List<ItemStack> items = new ArrayList<>();
+    private static boolean itemsFetched = false;
     private int timeOut = 0;
+    private static Consumer<List<ItemStack>> currentCallback = null;
+    private static boolean expectingItems = false;
+
+    public static void pick(Consumer<List<ItemStack>> callback) {
+        currentCallback = callback;
+        currentBlock = null;
+        items = new ArrayList<>();
+        itemsFetched = false;
+    }
 
     public void tick() {
         if (timeOut > 0) {
+            if (timeOut == 1) {
+                expectingItems = false;
+            }
             timeOut--;
             return;
         }
-        if (CodeClient.MC.currentScreen != null) return;
+//        if (CodeClient.MC.currentScreen != null) return;
         if (CodeClient.MC.world == null) return;
-        if (!Config.getConfig().ChestPeeker) return;
+        if (!Config.getConfig().ChestPeeker && currentCallback == null) return;
         if (CodeClient.location instanceof Dev dev) {
             if (CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
                 BlockPos pos = block.getBlockPos();
                 if (pos.equals(currentBlock)) return;
-                if (currentBlock == null && items == null) {
+                if (currentBlock == null && !itemsFetched) { // Use itemsFetched instead of null
                     if (!dev.isInDev(pos)) {
                         return;
                     }
@@ -59,52 +75,72 @@ public class ChestPeeker extends Feature {
                         return;
                     }
                     currentBlock = pos;
-                    items = null;
-                    shouldClearChest = true;
+                    items = new ArrayList<>();
+                    itemsFetched = false;
 
-                    ItemStack item = Items.CHEST.getDefaultStack();
-                    NbtCompound bet = new NbtCompound();
-                    bet.put("Items", new NbtList());
-                    bet.putString("id", "minecraft:chest");
-                    bet.putInt("x", pos.getX());
-                    bet.putInt("y", pos.getY());
-                    bet.putInt("z", pos.getZ());
-                    item.setSubNbt("BlockEntityTag", bet);
-                    item.setCustomName(Text.literal("CodeClient chest peeker internal"));
-                    CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1, ItemStack.EMPTY));
-                    CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(1, item));
-                    return;
+                    if (!expectingItems) {
+                        ClientPlayNetworkHandler network = CodeClient.MC.getNetworkHandler();
+                        if (network == null) return;
+
+                        Utility.sendHandItem(ItemStack.EMPTY);
+                        network.sendPacket(new PickItemFromBlockC2SPacket(currentBlock, true));
+                        Utility.sendHandItem(CodeClient.MC.player.getMainHandStack());
+                        expectingItems = true;
+                        return;
+                    }
                 }
             }
         }
         currentBlock = null;
-        items = null;
+        items.clear();
+        itemsFetched = false;
     }
 
     public boolean onReceivePacket(Packet<?> packet) {
-        if (CodeClient.MC.currentScreen != null) return false;
-        if (CodeClient.MC.getNetworkHandler() == null) return false;
-        if (!Config.getConfig().ChestPeeker) return false;
+
+        var net = CodeClient.MC.getNetworkHandler();
+        if (net == null) return false;
+        if (!Config.getConfig().ChestPeeker && currentCallback == null) return false;
+        if (CodeClient.MC.player == null) return false;
+        var inv = CodeClient.MC.player.getInventory();
+
         if (CodeClient.location instanceof Dev) {
-            if (packet instanceof BlockEventS2CPacket block) {
-                if (!Objects.equals(currentBlock, block.getPos())) return false;
-                if (block.getType() != 1) return false;
-                if (block.getData() != 0) return false;
-                reset();
+            if (currentBlock != null/* && CodeClient.MC.currentScreen == null*/) {
+                if (packet instanceof BlockEventS2CPacket block) {
+                    if (!Objects.equals(currentBlock, block.getPos())) return false;
+                    if (block.getType() != 1) return false;
+                    if (block.getData() != 0) return false;
+                    clear();
+                }
+                if (expectingItems && packet instanceof UpdateSelectedSlotS2CPacket) {
+                    net.sendPacket(new UpdateSelectedSlotC2SPacket(inv.getSelectedSlot()));
+                    return true;
+                }
             }
-            if (packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
-                var nbt = slot.getStack().getNbt();
-                if (nbt == null) return false;
-                var display = nbt.getCompound("display");
-                if (display == null || !display.contains("Name", NbtElement.STRING_TYPE)) return false;
-                String name = display.getString("Name");
-                if (Objects.equals(name, ") {\"text\":\"CodeClient chest peeker internal\"}")) return false;
-                var bet = nbt.getCompound("BlockEntityTag");
-                if (bet == null) return false;
-                if (!Objects.equals(bet.getString("id"), "minecraft:chest")) return false;
-                if (currentBlock != null) items = bet.getList("Items", NbtElement.COMPOUND_TYPE);
-                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
-                shouldClearChest = false;
+            if (expectingItems && packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
+                var handler = CodeClient.MC.player.playerScreenHandler;
+
+                int slotIndex = slot.getSlot();
+                if (slotIndex < 0 || slotIndex >= handler.slots.size()) return false;
+
+                var removedItem = handler.getSlot(slotIndex).getStack();
+                net.sendPacket(new CreativeInventoryActionC2SPacket(slotIndex, removedItem));
+                CodeClient.MC.player.playerScreenHandler.setStackInSlot(slotIndex, 0, removedItem);
+
+                DFItem item = DFItem.of(slot.getStack());
+                ContainerComponent container = item.getContainer();
+                if (container == null)
+                    return ItemStack.areItemsEqual(CodeClient.MC.player.getMainHandStack(), slot.getStack());
+                items.clear();
+                container.iterateNonEmpty().forEach(stack -> items.add(stack));
+
+                itemsFetched = true;
+                expectingItems = false;
+
+                if (currentCallback != null) {
+                    currentCallback.accept(items);
+                    currentCallback = null;
+                }
                 return true;
             }
         }
@@ -113,85 +149,86 @@ public class ChestPeeker extends Feature {
 
     public List<Text> getOverlayText() {
         if (!Config.getConfig().ChestPeeker) return null;
-        if (CodeClient.location instanceof Dev && currentBlock != null && items != null) {
+        if (CodeClient.location instanceof Dev && currentBlock != null) {
             ArrayList<Text> texts = new ArrayList<>();
-            if (items.isEmpty()) {
+            if (!itemsFetched) {
+                return null;
+            } else if (items.isEmpty()) {
                 texts.add(Text.translatable("codeclient.peeker.empty").formatted(Formatting.GOLD));
             } else {
                 texts.add(Text.translatable("codeclient.peeker.contents").formatted(Formatting.GOLD));
-                for (NbtElement itemData : items) {
-                    if (itemData instanceof NbtCompound compound) {
-                        ItemStack item = Registries.ITEM.get(Identifier.tryParse(compound.getString("id"))).getDefaultStack();
-                        item.setCount(compound.getInt("Count"));
-                        NbtCompound tag = compound.getCompound("tag");
-                        item.setNbt(tag);
-                        NbtList lore = tag.getCompound("display").getList("Lore", NbtElement.STRING_TYPE);
+                for (ItemStack item : items) {
+                    DFItem dfItem = DFItem.of(item);
+                    List<Text> currentLore = dfItem.getLore();
+                    ArrayList<Text> lore = new ArrayList<>(currentLore);
 
-                        MutableText text = Text.empty();
-                        text.append(Text.literal(" • ").formatted(Formatting.DARK_GRAY));
-                        String varItem = tag.getCompound("PublicBukkitValues").getString("hypercube:varitem");
-                        if (Objects.equals(varItem, "")) {
-                            text.append(compound.getInt("Count") + "x ");
-                            text.append(item.getName());
-                        } else {
-                            try {
-                                JsonObject object = JsonParser.parseString(varItem).getAsJsonObject();
-                                Type type = Type.valueOf(object.get("id").getAsString());
-                                JsonObject data = object.get("data").getAsJsonObject();
-                                //                            JsonArray lore = data.get("display").getAsJsonObject().get("Lore").getAsJsonArray();
-                                text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
-                                if (type == Type.var) {
-                                    Scope scope = Scope.valueOf(data.get("scope").getAsString());
-                                    text.append(scope.getShortName()).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
-                                }
-                                if (type == Type.num || type == Type.txt || type == Type.comp || type == Type.var || type == Type.g_val || type == Type.pn_el) {
-                                    text.append(item.getName());
-                                }
-                                if (type == Type.loc) {
-                                    JsonObject loc = data.get("loc").getAsJsonObject();
-                                    text.append("[%.2f, %.2f, %.2f, %.2f, %.2f]".formatted(
-                                            loc.get("x").getAsFloat(),
-                                            loc.get("y").getAsFloat(),
-                                            loc.get("z").getAsFloat(),
-                                            loc.get("pitch").getAsFloat(),
-                                            loc.get("yaw").getAsFloat()));
-                                }
-                                if (type == Type.vec) {
-                                    text.append(Text.literal("<%.2f, %.2f, %.2f>".formatted(
-                                            data.get("x").getAsFloat(),
-                                            data.get("y").getAsFloat(),
-                                            data.get("z").getAsFloat())
-                                    ).fillStyle(Style.EMPTY.withColor(Type.vec.color)));
-                                }
-                                if (type == Type.snd) {
-                                    text.append(Text.Serialization.fromJson(lore.getString(0)));
-                                    text.append(Text.literal(" P: ").formatted(Formatting.GRAY));
-                                    text.append(Text.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
-                                    text.append(Text.literal(" V: ").formatted(Formatting.GRAY));
-                                    text.append(Text.literal("%.1f".formatted(data.get("vol").getAsFloat())));
-                                }
-                                if (type == Type.part) {
-                                    text.append(Text.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
-                                    text.append(Text.Serialization.fromJson(lore.getString(0)));
-                                }
-                                if (type == Type.pot) {
-                                    text.append(Text.Serialization.fromJson(lore.getString(0)));
-                                    text.append(Text.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
-                                    int dur = data.get("dur").getAsInt();
-                                    text.append(dur >= 1000000 ? "Infinite" : dur % 20 == 0 ? "%d:%02d".formatted((dur / 1200), (dur / 20) % 60) : (dur + "ticks"));
-                                }
-                                if (type == Type.bl_tag) {
-                                    text.append(Text.literal(data.get("tag").getAsString()).formatted(Formatting.YELLOW));
-                                    text.append(Text.literal(" » ").formatted(Formatting.DARK_AQUA));
-                                    text.append(Text.literal(data.get("option").getAsString()).formatted(Formatting.AQUA));
-                                }
-                                if (type == Type.hint) continue;
-                            } catch (Exception ignored) {
-                                continue;
+
+                    MutableText text = Text.empty();
+                    text.append(Text.literal(" • ").formatted(Formatting.DARK_GRAY));
+                    Optional<String> varItem = dfItem.getHypercubeStringValue("varitem");
+                    if (varItem.isEmpty()) {
+                        text.append(item.getCount() + "x ");
+                        text.append(item.getName());
+                    } else {
+                        JsonObject object = JsonParser.parseString(varItem.get()).getAsJsonObject();
+                        try {
+                            Type type = Type.valueOf(object.get("id").getAsString());
+                            JsonObject data = object.get("data").getAsJsonObject();
+                            text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
+                            if (type == Type.var) {
+                                Scope scope = Scope.valueOf(data.get("scope").getAsString());
+                                text.append(scope.getShortName()).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
                             }
+                            if (type == Type.num || type == Type.txt || type == Type.comp || type == Type.var || type == Type.g_val || type == Type.pn_el) {
+                                text.append(item.getName());
+                            }
+                            if (type == Type.loc) {
+                                JsonObject loc = data.get("loc").getAsJsonObject();
+                                text.append("[%.2f, %.2f, %.2f, %.2f, %.2f]".formatted(
+                                        loc.get("x").getAsFloat(),
+                                        loc.get("y").getAsFloat(),
+                                        loc.get("z").getAsFloat(),
+                                        loc.get("pitch").getAsFloat(),
+                                        loc.get("yaw").getAsFloat()));
+                            }
+                            if (type == Type.vec) {
+                                text.append(Text.literal("<%.2f, %.2f, %.2f>".formatted(
+                                        data.get("x").getAsFloat(),
+                                        data.get("y").getAsFloat(),
+                                        data.get("z").getAsFloat())
+                                ).fillStyle(Style.EMPTY.withColor(Type.vec.color)));
+                            }
+                            if (type == Type.snd) {
+                                text.append(lore.getFirst());
+                                text.append(Text.literal(" P: ").formatted(Formatting.GRAY));
+                                text.append(Text.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
+                                text.append(Text.literal(" V: ").formatted(Formatting.GRAY));
+                                text.append(Text.literal("%.1f".formatted(data.get("vol").getAsFloat())));
+                            }
+                            if (type == Type.part) {
+                                text.append(Text.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
+                                text.append(lore.getFirst());
+                            }
+                            if (type == Type.pot) {
+                                text.append(lore.getFirst());
+                                text.append(Text.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
+                                int dur = data.get("dur").getAsInt();
+                                text.append(dur >= 1000000 ? "Infinite" : dur % 20 == 0 ? "%d:%02d".formatted((dur / 1200), (dur / 20) % 60) : (dur + "ticks"));
+                            }
+                            if (type == Type.bl_tag) {
+                                text.append(Text.literal(data.get("tag").getAsString()).formatted(Formatting.YELLOW));
+                                text.append(Text.literal(" » ").formatted(Formatting.DARK_AQUA));
+                                text.append(Text.literal(data.get("option").getAsString()).formatted(Formatting.AQUA));
+                            }
+                            if (type == Type.hint) continue;
+                        } catch (IllegalArgumentException ignored) {
+                            text.append(Text.literal(object.get("id").getAsString().toUpperCase())
+                                    .styled(style -> style.withColor(TextColor.fromRgb(0x808080)))
+                                    .append(" "));
+                            text.append(item.getName());
                         }
-                        texts.add(text);
                     }
+                    texts.add(text);
                 }
             }
             return texts;
@@ -201,19 +238,25 @@ public class ChestPeeker extends Feature {
 
     @Override
     public void onBreakBlock(@NotNull Dev dev, @NotNull BlockPos pos, @Nullable BlockPos breakPos) {
-        reset();
+        clear();
     }
 
     @Override
     public void onClickChest(BlockHitResult hitResult) {
-        reset();
+//        clear();
+    }
+
+    private void clear() {
+        items.clear();
+        itemsFetched = false;
+        currentBlock = null;
+        timeOut = 10;
+        currentCallback = null;
     }
 
     public void reset() {
-        items = null;
-        shouldClearChest = true;
-        currentBlock = null;
-        timeOut = 10;
+        clear();
+        expectingItems = false;
     }
 
     enum Type {

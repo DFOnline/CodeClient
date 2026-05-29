@@ -1,5 +1,4 @@
 package dev.dfonline.codeclient.dev.highlighter;
-
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
@@ -87,6 +86,8 @@ public class ExpressionHighlighter extends Feature {
                 var matcher = command.regex.matcher(input);
                 if (!matcher.find(1)) {
                     continue;
+                } else if (matcher.start() > 1) {
+                    continue;
                 }
                 cachedHighlight = formatCommand(input, command, matcher.end(), range);
                 return cachedHighlight;
@@ -102,23 +103,29 @@ public class ExpressionHighlighter extends Feature {
             VarItem varItem = VarItems.parse(item);
             Component text;
 
+            boolean showPreview = false;
+
             switch (varItem.getId()) {
                 case "num", "var", "txt" -> {
-                        if (Config.getConfig().HighlightExpressions) text = highlightExpressions(input);
+                        if (Config.getConfig().HighlightExpressions) text = highlightExpressions(input, true);
                         else text = Component.text(input);
                 }
                 case "comp" -> {
                     if (Config.getConfig().HighlightMiniMessage) text = highlighter.highlight(input);
                     else text = Component.text(input);
 
+                    showPreview = true;
+
                     if (Config.getConfig().HighlightExpressions) text = highlightExpressions(text);
                 }
                 default -> {
+                    cachedHighlight = null;
                     return null;
                 }
             }
 
-            Component preview = formatter.deserialize(input);
+            Component preview = Component.empty();
+            if (showPreview) preview = formatter.deserialize(input);
 
             cachedHighlight = new HighlightedExpression(subSequence(componentToOrderedText(text), range), componentToOrderedText(preview));
             return cachedHighlight;
@@ -160,7 +167,7 @@ public class ExpressionHighlighter extends Feature {
 
             if (Config.getConfig().HighlightExpressions) highlighted = highlightExpressions(highlighted);
         } else {
-            if (Config.getConfig().HighlightExpressions) highlighted = highlightExpressions(input.substring(start,end));
+            if (Config.getConfig().HighlightExpressions) highlighted = highlightExpressions(input.substring(start,end), true);
             else highlighted = Component.text(input.substring(start,end));
         }
 
@@ -183,10 +190,12 @@ public class ExpressionHighlighter extends Feature {
     private Component highlightExpressions(Component component) {
         String raw = formatter.serialize(component);
 
-        return highlightExpressions(raw);
+        return highlightExpressions(raw, false);
     }
 
-    private Component highlightExpressions(String raw) {
+    private Component highlightExpressions(String input, boolean escapeTags) {
+        String raw = escapeTags ? formatter.escapeTags(input) : input;
+
         StringBuilder sb = new StringBuilder(raw.length());
 
         Pattern pattern = Pattern.compile("(%[a-zA-Z]+\\(?)|\\)|$");
@@ -350,4 +359,4 @@ public class ExpressionHighlighter extends Feature {
             this.parseMinimessage = parseMinimessage;
         }
     }
-}
+    }

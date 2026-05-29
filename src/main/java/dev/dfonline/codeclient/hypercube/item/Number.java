@@ -1,6 +1,7 @@
 package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
+import dev.dfonline.codeclient.data.DFItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -37,6 +38,8 @@ public class Number extends NamedItem {
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
-        return stack.setCustomName(Text.literal(this.getName()).setStyle(Style.EMPTY.withColor(Formatting.RED).withItalic(false)));
+        DFItem dfItem = DFItem.of(stack);
+        dfItem.setName(Text.literal(this.getName()).setStyle(Style.EMPTY.withColor(Formatting.RED).withItalic(false)));
+        return dfItem.getItemStack();
     }
 }

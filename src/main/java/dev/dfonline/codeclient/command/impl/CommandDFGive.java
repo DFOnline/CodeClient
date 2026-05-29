@@ -59,7 +59,7 @@ public class CommandDFGive extends Command {
                                 return -1;
                             }
 
-                            CodeClient.MC.getNetworkHandler().sendCommand("dfgive " + clipboard);
+                            CodeClient.MC.getNetworkHandler().sendChatCommand("dfgive " + clipboard);
                             return 1;
                         })
                 );
@@ -82,7 +82,7 @@ public class CommandDFGive extends Command {
             CodeClient.MC.player.giveItemStack(item);
             Utility.sendInventory();
         } else {
-            Utility.sendMessage(Text.translatable("codeclient.command.dfgive.count_above_max", item.getItem(), item.getMaxCount()), ChatType.FAIL);
+            Utility.sendMessage(Text.translatable("codeclient.command.dfgive.count_above_max", item.getMaxCount()), ChatType.FAIL);
         }
     }
 }

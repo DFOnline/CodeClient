@@ -6,13 +6,17 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.*;
+import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.scope.AuthScope;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -43,7 +47,7 @@ public class SocketHandler {
 
     public void start() {
         try {
-            websocket = new SocketServer(new InetSocketAddress("localhost", PORT), this);
+            websocket = new SocketServer(new InetSocketAddress(Config.getConfig().apiBindIP, PORT), this);
             Thread socketThread = new Thread(websocket, "CodeClient-API");
             socketThread.start();
             CodeClient.LOGGER.info("Socket opened");
@@ -228,8 +232,8 @@ public class SocketHandler {
                                             )
                             )
                             .setStyle(Style.EMPTY.withHoverEvent(
-                                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
-                            ))
+                                    new HoverEvent.ShowText(Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
+                            )), false
             );
         }
         Utility.sendMessage(Text.translatable("codeclient.api.run_auth"));
@@ -474,10 +478,9 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            if (CodeClient.MC.player == null) return;
-            NbtCompound nbt = new NbtCompound();
-            CodeClient.MC.player.writeNbt(nbt);
-            responder.send(String.valueOf(nbt.get("Inventory")));
+            var view = NbtWriteView.create(null, CodeClient.MC.player.getRegistryManager());
+            CodeClient.MC.player.getInventory().writeData(view.getListAppender("Inventory", StackWithSlot.CODEC));
+            responder.send(String.valueOf(view.getNbt().get("Inventory")));
             next();
         }
 
@@ -507,10 +510,9 @@ public class SocketHandler {
                 return;
             }
             try {
-                NbtCompound nbt = new NbtCompound();
-                CodeClient.MC.player.writeNbt(nbt);
-                nbt.put("Inventory", StringNbtReader.parse("{Inventory:" + content + "}").getList("Inventory", NbtElement.COMPOUND_TYPE));
-                CodeClient.MC.player.readNbt(nbt);
+                CodeClient.MC.player.getInventory().readData(
+                        NbtReadView.create(null, CodeClient.MC.player.getRegistryManager(), StringNbtReader.readCompound("{Inventory:" + content + "}")).getTypedListView("Inventory", StackWithSlot.CODEC)
+                );
                 Utility.sendInventory();
             } catch (CommandSyntaxException e) {
                 responder.send("invalid nbt");
@@ -545,7 +547,10 @@ public class SocketHandler {
                 return;
             }
             try {
-                CodeClient.MC.player.giveItemStack(ItemStack.fromNbt(StringNbtReader.parse(content)));
+                if (CodeClient.MC.world == null) return;
+                Optional<ItemStack> itemStack = ItemStack.CODEC.parse(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), StringNbtReader.readCompound(content)).result();
+                if (itemStack.isEmpty()) return;
+                CodeClient.MC.player.giveItemStack(itemStack.get());
                 Utility.sendInventory();
             } catch (CommandSyntaxException e) {
                 responder.send("invalid nbt");
@@ -576,7 +581,7 @@ public class SocketHandler {
         @Override
         public void start(WebSocket responder) {
             if (CodeClient.location instanceof Plot && !command.isEmpty() && CodeClient.MC.getNetworkHandler() != null) {
-                CodeClient.MC.getNetworkHandler().sendCommand(command);
+                CodeClient.MC.getNetworkHandler().sendChatCommand(command);
             } else {
                 responder.send(CodeClient.location.name());
             }

@@ -10,11 +10,9 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
+import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
@@ -54,7 +52,7 @@ public class GoTo extends Action {
         if (locationItem == null) return super.onReceivePacket(packet);
         if (packet instanceof PlayerPositionLookS2CPacket tp) {
             if (CodeClient.MC.getNetworkHandler() == null || CodeClient.MC.player == null) return false;
-            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(tp.getTeleportId()));
+            CodeClient.MC.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(tp.teleportId()));
             CodeClient.MC.player.setPosition(target);
             active = false;
             callback();
@@ -81,7 +79,7 @@ public class GoTo extends Action {
         }
 
         CodeClient.MC.player.setVelocity(0, 0, 0);
-        if (CodeClient.MC.player.getPos().equals(target)) {
+        if (CodeClient.MC.player.getEntityPos().equals(target)) {
             active = false;
             complete = true;
             callback();
@@ -99,10 +97,10 @@ public class GoTo extends Action {
         ItemStack handItem = player.getMainHandStack();
         Utility.sendHandItem(locationItem);
         boolean sneaky = !player.isSneaking();
-        if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        if (sneaky) net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
         net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, player.getBlockPos(), Direction.UP));
-        if (sneaky) net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+        if (sneaky) net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
         Utility.sendHandItem(handItem);
     }
 
@@ -124,7 +122,7 @@ public class GoTo extends Action {
         }
         if (!active) return;
         if (CodeClient.MC.player == null) return;
-        Vec3d pos = CodeClient.MC.player.getPos();
+        Vec3d pos = CodeClient.MC.player.getEntityPos();
 
         Vec3d offset = pos.relativize(target);
         double maxLength = 50;
@@ -134,7 +132,7 @@ public class GoTo extends Action {
             for (int i = 0; i < Math.min(lastTickPackets + 5, 50); i++) {
                 thisTickPackets++;
                 this.doNotSuppress = true;
-                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
+                CodeClient.MC.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, true));
             }
         }
         thisTickPackets++;

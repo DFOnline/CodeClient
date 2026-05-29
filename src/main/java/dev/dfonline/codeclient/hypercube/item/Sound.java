@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import net.minecraft.item.Item;
@@ -12,14 +13,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 public class Sound extends VarItem {
     private String sound;
     private double pitch;
     private double volume;
+    private String variant;
 
     public static final Map<String, Double> Notes;
     public static final Map<Double, String> Pitches;
@@ -84,6 +85,9 @@ public class Sound extends VarItem {
         this.sound = data.get("sound").getAsString();
         this.pitch = data.get("pitch").getAsDouble();
         this.volume = data.get("vol").getAsDouble();
+        if (data.has("variant")) {
+            this.variant = data.get("variant").getAsString();
+        }
     }
 
     public Sound() {
@@ -96,6 +100,14 @@ public class Sound extends VarItem {
 
     public String getSound() {
         return sound;
+    }
+
+    public Optional<dev.dfonline.codeclient.hypercube.actiondump.Sound> getSoundId() {
+        try {
+            return Arrays.stream(ActionDump.getActionDump().sounds).filter(sound -> Objects.equals(sound.icon.getCleanName(), this.sound)).findFirst();
+        } catch (IOException ignored) {
+            return Optional.empty();
+        }
     }
 
     public void setSound(String sound) {
@@ -133,10 +145,15 @@ public class Sound extends VarItem {
         this.data.addProperty("vol", volume);
     }
 
+    public String getVariant() {
+        return variant;
+    }
+
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
-        stack.setCustomName(Text.literal("Sound").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.SOUND.color)));
+        DFItem dfItem = DFItem.of(stack);
+        dfItem.setName(Text.literal("Sound").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.SOUND.color)));
         Text name;
         try {
             ActionDump db = ActionDump.getActionDump();
@@ -146,11 +163,12 @@ public class Sound extends VarItem {
         } catch (Exception e) {
             name = Text.literal(sound).setStyle(Style.EMPTY);
         }
-        Utility.addLore(stack,
+        Utility.addLore(dfItem.getItemStack(),
                 name,
                 Text.empty(),
-                Text.empty().append(Text.literal("Pitch: ").formatted(Formatting.GRAY)).append("%.2f".formatted(pitch)),
-                Text.empty().append(Text.literal("Volume: ").formatted(Formatting.GRAY)).append("%.2f".formatted(volume)));
-        return stack;
+                Text.empty().append(Text.literal("Pitch: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.pitch)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
+                Text.empty().append(Text.literal("Volume: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.volume)).setStyle(Style.EMPTY.withColor(Formatting.WHITE))))
+        );
+        return dfItem.getItemStack();
     }
 }

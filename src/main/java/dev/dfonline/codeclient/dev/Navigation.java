@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 public class Navigation extends Feature {
     public boolean onJump() {
         if (shouldTeleportUp()) {
-            Vec3d move = CodeClient.MC.player.getPos().add(0, 5, 0);
+            Vec3d move = CodeClient.MC.player.getEntityPos().add(0, 5, 0);
             var noClip = CodeClient.getFeature(NoClip.class).orElse(null);
             if (noClip != null && !noClip.isIgnoringWalls() && noClip.isInsideWall(move))
                 move = move.add(0, 2, 0);
@@ -32,6 +32,7 @@ public class Navigation extends Feature {
     public boolean onCrouch(boolean lastSneaking) {
         var player = CodeClient.MC.player;
         if (CodeClient.location instanceof Dev dev
+                && Config.getConfig().NoClipEnabled
                 && Config.getConfig().TeleportDown
                 && player != null
                 && dev.isInDevSpace()
@@ -39,7 +40,7 @@ public class Navigation extends Feature {
                 && !lastSneaking && player.isSneaking()
                 && (player.getPitch() >= 90 - Config.getConfig().DownAngle)
         ) {
-            Vec3d move = CodeClient.MC.player.getPos().add(0, -5, 0);
+            Vec3d move = CodeClient.MC.player.getEntityPos().add(0, -5, 0);
             if (move.y < dev.getFloorY()) move = new Vec3d(move.x, dev.getFloorY(), move.z);
             var noClip = CodeClient.getFeature(NoClip.class).orElse(null);
             if (noClip != null && !noClip.isIgnoringWalls() && noClip.isInsideWall(move)) move = move.add(0, 2, 0);
@@ -52,7 +53,8 @@ public class Navigation extends Feature {
     @Nullable
     public Float jumpHeight() {
         if (CodeClient.location instanceof Dev dev
-                && dev.isInDev(CodeClient.MC.player.getPos())
+                && dev.isInDevSpace()
+                && Config.getConfig().NoClipEnabled
                 && CodeClient.MC.player.getPitch() <= Config.getConfig().UpAngle - 90)
             return 0.91f;
         return null;

@@ -2,8 +2,6 @@ package dev.dfonline.codeclient.mixin.entity.player;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.action.impl.MoveToSpawn;
-import dev.dfonline.codeclient.config.Config;
-import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.Navigation;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.location.Dev;
@@ -11,8 +9,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.math.Vec3d;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -62,12 +61,12 @@ public abstract class MClientPlayerEntity {
                     if (position) {
                         NoClip.timesSinceMoved = 0;
                         if (rotation) {
-                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, yaw, pitch, false));
+                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.Full(pos.x, pos.y, pos.z, yaw, pitch, false, true));
                         } else {
-                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false));
+                            this.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false, true));
                         }
                     } else {
-                        this.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false));
+                        this.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false, true));
                     }
                 }
                 NoClip.lastPos = pos;
@@ -76,8 +75,8 @@ public abstract class MClientPlayerEntity {
             }
             boolean sneaking = player.isSneaking();
             if (sneaking != this.lastSneaking) {
-                ClientCommandC2SPacket.Mode mode = sneaking ? ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY : ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY;
-                this.networkHandler.sendPacket(new ClientCommandC2SPacket(player, mode));
+                PlayerInput mode = sneaking ? new PlayerInput(false, false, false, false, false, true, false) : MC.player.getLastPlayerInput();
+                this.networkHandler.sendPacket(new PlayerInputC2SPacket(mode));
                 this.lastSneaking = sneaking;
             }
         }

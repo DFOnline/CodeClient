@@ -2,14 +2,13 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.data.PublicBukkitValues;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtString;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class VarItem {
     protected JsonObject data;
@@ -33,34 +32,31 @@ public abstract class VarItem {
     }
 
     public static JsonObject prefetch(ItemStack item) throws Exception {
-        if (!item.hasNbt()) throw new Exception("Item has no nbt.");
-        NbtCompound nbt = item.getNbt();
-        if (nbt == null) throw new Exception("NBT is null.");
-        if (!nbt.contains("PublicBukkitValues", NbtElement.COMPOUND_TYPE))
-            throw new Exception("Item has no PublicBukkitValues");
-        NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-        if (!publicBukkit.contains("hypercube:varitem", NbtElement.STRING_TYPE))
-            throw new Exception("Item has no hypercube:varitem");
-        String varitem = publicBukkit.getString("hypercube:varitem");
-        return JsonParser.parseString(varitem).getAsJsonObject();
+        DFItem dfItem = DFItem.of(item);
+        PublicBukkitValues pbv = dfItem.getPublicBukkitValues();
+        Optional<String> varitem = pbv.getHypercubeStringValue("varitem");
+        if (varitem.isEmpty()) throw new Exception("Item does not have a varitem");
+        return JsonParser.parseString(varitem.get()).getAsJsonObject();
 
     }
 
     public ItemStack getIcon() {
         ItemStack item = getIconItem().getDefaultStack();
-        item.setSubNbt("CustomModelData", NbtInt.of(5000));
+        DFItem dfItem = DFItem.of(item);
+        dfItem.setCustomModelData(5000);
         return item;
     }
 
     public ItemStack toStack() {
-        var pbv = new NbtCompound();
-        var varItem = new JsonObject();
-        varItem.addProperty("id", getId());
-        varItem.add("data", data);
-        pbv.put("hypercube:varitem", NbtString.of(varItem.toString()));
-        var item = getIcon();
-        item.setSubNbt("PublicBukkitValues", pbv);
-        return item;
+        DFItem dfItem = DFItem.of(getIcon());
+        dfItem.editData(itemData -> {
+            var varItem = new JsonObject();
+            varItem.addProperty("id", getId());
+            varItem.add("data", data);
+
+            itemData.setHypercubeStringValue("varitem", varItem.toString());
+        });
+        return dfItem.getItemStack();
     }
 
     public JsonObject getData() {

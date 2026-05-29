@@ -69,8 +69,8 @@ public class CommandScanPlot extends TemplateActionCommand {
                                             .append(Text.translatable("codeclient.files.open_native").fillStyle(
                                                     Style.EMPTY
                                                             .withColor(Formatting.AQUA)
-                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, currentPath.toAbsolutePath().toString()))
-                                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(currentPath.toAbsolutePath().toString())))))
+                                                            .withClickEvent(new ClickEvent.OpenFile(currentPath.toAbsolutePath().toString()))
+                                                            .withHoverEvent(new HoverEvent.ShowText(Text.literal(currentPath.toAbsolutePath().toString())))))
                                     , ChatType.INFO);
                             invalid = false;
                             break;

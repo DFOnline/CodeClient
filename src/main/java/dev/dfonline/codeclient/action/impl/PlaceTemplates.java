@@ -5,6 +5,7 @@ import dev.dfonline.codeclient.Callback;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.action.Action;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
 import dev.dfonline.codeclient.location.Dev;
@@ -12,14 +13,15 @@ import dev.dfonline.codeclient.mixin.entity.player.ClientPlayerInteractionManage
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class PlaceTemplates extends Action {
@@ -78,15 +81,11 @@ public class PlaceTemplates extends Action {
             var scan = dev.scanForSigns(Pattern.compile(".*"));
             ArrayList<ItemStack> leftOvers = new ArrayList<>(templates);
             for (ItemStack item : templates) {
-                if (!item.hasNbt()) continue;
-                NbtCompound nbt = item.getNbt();
-                if (nbt == null) continue;
-                if (!nbt.contains("PublicBukkitValues")) continue;
-                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-                if (!publicBukkit.contains("hypercube:codetemplatedata")) continue;
-                String codeTemplateData = publicBukkit.getString("hypercube:codetemplatedata");
+                DFItem dfItem = new DFItem(item);
+                Optional<String> codeTemplateData = dfItem.getHypercubeStringValue("codetemplatedata");
+                if (codeTemplateData.isEmpty()) continue;
                 try {
-                    Template template = Template.parse64(JsonParser.parseString(codeTemplateData).getAsJsonObject().get("code").getAsString());
+                    Template template = Template.parse64(JsonParser.parseString(codeTemplateData.get()).getAsJsonObject().get("code").getAsString());
                     if (template == null || template.blocks.isEmpty()) continue;
                     TemplateBlock block = template.blocks.get(0);
                     if (block.block == null) continue;
@@ -229,12 +228,11 @@ public class PlaceTemplates extends Action {
                             if (shouldBeSwapping) {
                                 var player = CodeClient.MC.player;
                                 boolean sneaky = !player.isSneaking();
-                                if (sneaky)
-                                    net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+                                // TODO I have never actually tested if these input packets actually replicate sneaking.
+                                if (sneaky) net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
                                 net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, template.pos, Direction.UP));
                                 net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, template.pos, Direction.UP));
-                                if (sneaky)
-                                    net.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+                                if (sneaky) net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
                             }
                             Utility.makeHolding(template.template);
                             BlockHitResult blockHitResult = new BlockHitResult(template.pos().add(0, 1, 0), Direction.UP, template.pos, false);

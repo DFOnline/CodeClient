@@ -14,6 +14,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class NoClip extends Feature {
     public static final double PLAYER_FREEDOM = 0.621;
     /**
@@ -32,7 +34,8 @@ public class NoClip extends Feature {
     }
 
     public boolean isIgnoringWalls() {
-        return CodeClient.location instanceof Dev dev && CodeClient.noClipOn() && dev.isInDevSpace();
+        Optional<BuildPhaser> buildPhaser = CodeClient.getFeature(BuildPhaser.class);
+        return CodeClient.location instanceof Dev dev && CodeClient.noClipOn() && dev.isInDevSpace() && !buildPhaser.get().isClipping();
     }
 
     public Vec3d handleClientPosition(Vec3d movement) {
@@ -50,14 +53,14 @@ public class NoClip extends Feature {
             double z = Math.max(player.getZ() + movement.z * 1.3, plot.getZ() - FREEDOM);
             z = Math.min(z, plot.getZ() + size.codeLength + 1 + FREEDOM);
             if (z == plot.getZ() + size.codeLength + 1 + FREEDOM && velocity.getZ() > 0)
-                player.setVelocityClient(velocity.x, velocity.y, 0);
-            if (z == plot.getZ() - 2 && velocity.getZ() < 0) player.setVelocityClient(velocity.x, velocity.y, 0);
-            if (x == plot.getX() - (size.codeWidth + FREEDOM) && velocity.getX() < 0) player.setVelocityClient(0, velocity.y, velocity.z);
+                player.setVelocityClient(new Vec3d(velocity.x, velocity.y, 0));
+            if (z == plot.getZ() - 2 && velocity.getZ() < 0) player.setVelocityClient(new Vec3d(velocity.x, velocity.y, 0));
+            if (x == plot.getX() - (size.codeWidth + FREEDOM) && velocity.getX() < 0) player.setVelocityClient(new Vec3d(0, velocity.y, velocity.z));
 
             player.setOnGround(false);
             boolean wantsToFall = !Config.getConfig().TeleportDown && player.isSneaking() && (player.getPitch() >= 90 - Config.getConfig().DownAngle);
             if ((y < nearestFloor && !wantsToFall && !player.getAbilities().flying) || y == plot.getFloorY()) {
-                player.setVelocityClient(velocity.x, 0, velocity.z);
+                player.setVelocityClient(new Vec3d(velocity.x, 0, velocity.z));
                 y = nearestFloor;
                 player.setOnGround(true);
             }

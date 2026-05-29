@@ -1,58 +1,75 @@
 package dev.dfonline.codeclient;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
 import dev.dfonline.codeclient.command.CommandManager;
+import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
+import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.data.ItemData;
+import dev.dfonline.codeclient.data.PublicBukkitValues;
+import dev.dfonline.codeclient.data.value.DataValue;
+import dev.dfonline.codeclient.data.value.NumberDataValue;
+import dev.dfonline.codeclient.data.value.StringDataValue;
 import dev.dfonline.codeclient.dev.*;
 import dev.dfonline.codeclient.dev.debug.Debug;
 import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
+import dev.dfonline.codeclient.dev.menu.AdvancedMiddleClickFeature;
 import dev.dfonline.codeclient.dev.menu.InsertOverlayFeature;
 import dev.dfonline.codeclient.dev.menu.RecentValues;
 import dev.dfonline.codeclient.dev.menu.SlotGhostManager;
 import dev.dfonline.codeclient.dev.overlay.ActionViewer;
 import dev.dfonline.codeclient.dev.overlay.CPUDisplay;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
+import dev.dfonline.codeclient.config.preset.ConfigPresetScreen;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.*;
+import dev.dfonline.codeclient.switcher.ScopeSwitcher;
+import dev.dfonline.codeclient.switcher.SpeedSwitcher;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import dev.dfonline.codeclient.websocket.SocketHandler;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.render.BlockRenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -62,6 +79,11 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Objects;
@@ -69,6 +91,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class CodeClient implements ClientModInitializer {
+
     public static final String MOD_NAME = "CodeClient";
     public static final String MOD_ID = "codeclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
@@ -76,13 +99,14 @@ public class CodeClient implements ClientModInitializer {
     public static MinecraftClient MC = MinecraftClient.getInstance();
 
     public static AutoJoin autoJoin = AutoJoin.NONE;
+    public static Utility.Toast startupToast;
 
     @NotNull
     public static Action currentAction = new None();
     public static Action confirmingAction = null;
     public static Location lastLocation = null;
     public static Location location = null;
-    /***
+    /**
      * Used to open a screen on the next tick.
      */
     public static Screen screenToOpen = null;
@@ -108,11 +132,14 @@ public class CodeClient implements ClientModInitializer {
             }
         });
 
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.BARRIER, RenderLayer.getTranslucent());
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.STRUCTURE_VOID, RenderLayer.getTranslucent());
-        BlockRenderLayerMap.INSTANCE.putBlock(Blocks.LIGHT, RenderLayer.getTranslucent());
 
-        ClientLifecycleEvents.CLIENT_STOPPING.register(new Identifier(MOD_ID, "close"), client -> API.stop());
+        BlockRenderLayerMap.putBlock(Blocks.BARRIER, BlockRenderLayer.TRANSLUCENT);
+        BlockRenderLayerMap.putBlock(Blocks.STRUCTURE_VOID, BlockRenderLayer.TRANSLUCENT);
+        BlockRenderLayerMap.putBlock(Blocks.LIGHT, BlockRenderLayer.TRANSLUCENT);
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.of(MOD_ID, "close"), client -> API.stop());
+
+        ClientTickEvents.END_CLIENT_TICK.register(client -> CommandSender.tick());
 
         if (Config.getConfig().CodeClientAPI) {
             try {
@@ -129,30 +156,45 @@ public class CodeClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> CommandManager.init(dispatcher, registryAccess));
 
-        ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
-            if (isPreviewingItemTags) {
-                if (!stack.hasNbt()) return;
-                NbtCompound nbt = stack.getNbt();
-                if (nbt == null) return;
-                if (!nbt.contains("PublicBukkitValues")) return;
-                NbtCompound publicBukkit = nbt.getCompound("PublicBukkitValues");
-                for (var key : publicBukkit.getKeys()) {
-                    if (key.startsWith("hypercube:")) {
-                        NbtElement element = publicBukkit.get(key);
+        ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
+            if (isPreviewingItemTags && ((location instanceof Plot plot && plot.getHasDev().orElse(false)) || location instanceof Creator)) {
+                DFItem item = DFItem.of(stack);
+                ItemData itemData = item.getItemData();
+                if (itemData == null) return;
+                PublicBukkitValues publicBukkit = itemData.getPublicBukkitValues();
+                if (publicBukkit == null) return;
+                for (var key : publicBukkit.getHypercubeKeys()) {
+                    DataValue element = publicBukkit.getHypercubeValue(key);
 
-                        // Any type = yellow, number = red, string = aqua.
-                        MutableText value = Text.literal(publicBukkit.get(key).toString()).formatted(Formatting.GREEN);
-                        if (element instanceof NbtString) value.formatted(Formatting.AQUA);
-                        if (element instanceof AbstractNbtNumber) value.formatted(Formatting.RED);
-
-                        lines.add(
-                                Text.literal(key.replace("hypercube:", ""))
-                                        .withColor(0xAAFF55)
-                                        .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
-                                        .append(value)
-                        );
+                    // Any type = yellow, number = red, string = aqua.
+                    Formatting formatting = Formatting.GREEN;
+                    String stringElement = element.getValue() == null ? "?" : element.getValue().toString();
+                    if (element instanceof StringDataValue) {
+                        formatting = Formatting.AQUA;
                     }
+                    if (element instanceof NumberDataValue numberDataValue) {
+                        formatting = Formatting.RED;
+                        stringElement = String.valueOf(numberDataValue.getValue());
+                    }
+
+                    lines.add(
+                            Text.literal(key)
+                                    .withColor(0xAAFF55)
+                                    .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
+                                    .append(Text.literal(stringElement).formatted(formatting))
+                    );
                 }
+            }
+        });
+
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            ScreenKeyboardEvents.allowKeyPress(screen).register((screen1, key) -> !CodeClient.onKeyPressed(key));
+            ScreenKeyboardEvents.allowKeyRelease(screen).register((screen1, key) -> !CodeClient.onKeyReleased(key));
+            ScreenMouseEvents.allowMouseClick(screen).register((screen1, click) -> !CodeClient.onMouseClicked(click));
+            ScreenMouseEvents.allowMouseScroll(screen).register((screen1, mouseX, mouseY, horizontalAmount, verticalAmount) -> !CodeClient.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
+
+            if (!Config.getConfig().HasSelectedPreset && screen instanceof TitleScreen) {
+                client.setScreen(new ConfigPresetScreen(screen));
             }
         });
 
@@ -179,7 +221,6 @@ public class CodeClient implements ClientModInitializer {
         feat(new BlockBreakDeltaCalculator());
         feat(new Navigation());
         feat(new NoClip());
-        feat(new ReportBrokenBlocks());
         feat(new InsertOverlayFeature());
         feat(new SlotGhostManager());
         feat(new ActionViewer());
@@ -189,6 +230,12 @@ public class CodeClient implements ClientModInitializer {
         feat(new CPUDisplay());
         feat(new MessageHiding());
         feat(new ExpressionHighlighter());
+        feat(new PreviewSoundChest());
+        feat(new AdvancedMiddleClickFeature());
+        feat(new StateSwitcher.StateSwitcherFeature());
+        feat(new SpeedSwitcher.SpeedSwitcherFeature());
+        feat(new ScopeSwitcher.ScopeSwitcherFeature());
+        feat(new GiveStrings());
     }
 
     /**
@@ -205,6 +252,16 @@ public class CodeClient implements ClientModInitializer {
         return features().map(Feature::getChest).filter(Optional::isPresent).map(Optional::get);
     }
 
+    /**
+     * Get an identifier using the mod id as the namespace.
+     *
+     * @param path The path to the resource.
+     * @return Identifier under the mod id's namespace and the provided path as the path.
+     */
+    public static Identifier getId(String path) {
+        return Identifier.of(MOD_ID, path);
+    }
+
     public static void isCodeChest() {
         isCodeChest = true;
     }
@@ -216,6 +273,12 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
+        if (packet instanceof BundleS2CPacket bundle) {
+            bundle.getPackets().forEach(CodeClient::handlePacket);
+            return false;
+        }
+
+
         if (currentAction.onReceivePacket(packet)) return true;
         for (var feature : features().toList()) {
             if (feature.onReceivePacket(packet)) return true;
@@ -225,18 +288,42 @@ public class CodeClient implements ClientModInitializer {
 
         //noinspection unused
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.s2c.play.", "");
-//        if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket").contains(name)) LOGGER.info(name);
+//        if(!java.util.List.of("PlayerListS2CPacket","WorldTimeUpdateS2CPacket","GameMessageS2CPacket","KeepAliveS2CPacket", "ChunkDataS2CPacket", "UnloadChunkS2CPacket","TeamS2CPacket", "ChunkRenderDistanceCenterS2CPacket", "MessageHeaderS2CPacket", "LightUpdateS2CPacket", "OverlayMessageS2CPacket", "DebugSampleS2CPacket").contains(name)) LOGGER.info(name);
 
         if (CodeClient.location instanceof Dev dev) {
             try {
                 if (packet instanceof BlockEntityUpdateS2CPacket beu && dev.isInDev(beu.getPos()) && beu.getBlockEntityType() == BlockEntityType.SIGN) {
-                    dev.clearLineStarterCache();
+                    NbtCompound compound = beu.getNbt();
+                    if(compound.contains("front_text")) {
+                        SignText text = SignText.CODEC.decode(NbtOps.INSTANCE, beu.getNbt().get("front_text")).getOrThrow().getFirst();
+                        if (Plot.lineStarterPattern.matcher(text.getMessage(0, false).getString()).matches()) {
+                            dev.getLineStartCache().put(beu.getPos(), text);
+                        }
+                    } else {
+                        dev.clearLineStarterCache();
+                    }
                 }
             } catch (ConcurrentModificationException exception) {
                 // Not sure how this comes to happen. My guess it's the getBlockEntity call.
                 // Unfortunately, I don't know what state the game has to be in to make it fail, maybe an unloaded chunk?
                 // It's hard to check for that, apparently.
                 dev.clearLineStarterCache();
+            } catch (IllegalStateException exception) {
+                dev.clearLineStarterCache();
+            }
+
+            if (packet instanceof ChunkDeltaUpdateS2CPacket update) {
+                update.visitUpdates((blockPos, blockState) -> dev.getLineStartCache().remove(blockPos));
+            }
+
+            if (dev.getSize() == null) {
+                if (packet instanceof PlayerPositionLookS2CPacket pos) {
+                    var tp = BlockPos.ofFloored(pos.change().position().x, pos.change().position().y, pos.change().position().z);
+                    if (dev.isInPlot(tp, Plot.Size.MEGA) && !dev.isInPlot(tp, Plot.Size.MASSIVE)) {
+                        dev.setSize(Plot.Size.MEGA);
+
+                    }
+                }
             }
         }
         return (MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen || MC.currentScreen instanceof StateSwitcher) && packet instanceof CloseScreenS2CPacket;
@@ -254,7 +341,7 @@ public class CodeClient implements ClientModInitializer {
         Event.onSendPacket(packet);
         //noinspection unused
         String name = packet.getClass().getName().replace("net.minecraft.network.packet.c2s.play.", "");
-//        LOGGER.info(name);
+//        if (!name.equals("ClientTickEndC2SPacket")) LOGGER.info(name);
         return false;
     }
 
@@ -262,6 +349,8 @@ public class CodeClient implements ClientModInitializer {
         currentAction.tick();
         features().forEach(Feature::tick);
         KeyBinds.tick();
+
+//        System.out.println(location.name());
 
         if (!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
             isCodeChest = false;
@@ -307,10 +396,10 @@ public class CodeClient implements ClientModInitializer {
         }
         if (CodeClient.location instanceof Spawn spawn && MC.getNetworkHandler() != null && spawn.consumeHasJustJoined()) {
             if (autoJoin == AutoJoin.PLOT) {
-                MC.getNetworkHandler().sendCommand("join " + Config.getConfig().AutoJoinPlotId);
+                MC.getNetworkHandler().sendChatCommand("join " + Config.getConfig().AutoJoinPlotId);
                 autoJoin = AutoJoin.NONE;
             } else if (Config.getConfig().AutoFly) {
-                MC.getNetworkHandler().sendCommand("fly");
+                MC.getNetworkHandler().sendChatCommand("fly");
             }
         }
     }
@@ -355,24 +444,24 @@ public class CodeClient implements ClientModInitializer {
         return chestFeatures().map(feat -> feat.getHoverStack(instance)).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
-    public static boolean onMouseClicked(double mouseX, double mouseY, int button) {
-        return chestFeatures().anyMatch(feature -> feature.mouseClicked(mouseX, mouseY, button));
+    public static boolean onMouseClicked(Click click) {
+        return chestFeatures().anyMatch(feature -> feature.mouseClicked(click));
     }
 
-    public static boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
-        return chestFeatures().anyMatch(feature -> feature.keyPressed(keyCode, scanCode, modifiers));
+    public static boolean onKeyPressed(KeyInput key) {
+        return chestFeatures().anyMatch(feature -> feature.keyPressed(key));
     }
 
-    public static boolean onKeyReleased(int keyCode, int scanCode, int modifiers) {
-        return chestFeatures().anyMatch(feature -> feature.keyReleased(keyCode, scanCode, modifiers));
+    public static boolean onKeyReleased(KeyInput key) {
+        return chestFeatures().anyMatch(feature -> feature.keyReleased(key));
     }
 
-    public static boolean onCharTyped(char chr, int modifiers) {
-        return chestFeatures().anyMatch(feature -> feature.charTyped(chr, modifiers));
+    public static boolean onCharTyped(CharInput charInput) {
+        return chestFeatures().anyMatch(feature -> feature.charTyped(charInput));
     }
 
-    public static void onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-        chestFeatures().forEach(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
+    public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+        return chestFeatures().anyMatch(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
     }
 
     public static boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
@@ -412,6 +501,9 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static void onModeChange(Location location) {
+        if (location instanceof Dev dev) {
+            dev.clearLineStarterCache();
+        }
         if (Config.getConfig().DevForBuild && (currentAction instanceof None || currentAction instanceof DevForBuild) && location instanceof Build) {
             currentAction = new DevForBuild(() -> currentAction = new None());
             currentAction.init();
@@ -455,10 +547,44 @@ public class CodeClient implements ClientModInitializer {
     private boolean registerResourcePack(String id, Text name, ResourcePackActivationType type) throws NullPointerException {
         var prefix = String.format("[%s] ", MOD_NAME);
         return ResourceManagerHelper.registerBuiltinResourcePack(
-                new Identifier(CodeClient.MOD_ID, id),
+                getId(id),
                 getModContainer(),
                 Text.literal(prefix).formatted(Formatting.GRAY).append(name),
                 type
+        );
+    }
+
+    public static void parseVersionInfo(String response) {
+        JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+
+        var versionNumber = json.get("version_number").getAsString();
+
+        if (Config.getConfig().AutoUpdateOption != Config.AutoUpdate.UPDATE) {
+            startupToast = new Utility.Toast(Text.translatable("toast.codeclient.update_available.title", versionNumber), Text.translatable("toast.codeclient.update_available"));
+            return;
+        }
+        var files = json.getAsJsonArray("files");
+        files.forEach(file -> {
+                    var fileObject = file.getAsJsonObject();
+                    if (fileObject.get("primary").getAsBoolean()) {
+                        var url = fileObject.get("url").getAsString();
+                        LOGGER.info("Updated mod URL: {}", url);
+                        // Download the file.
+                        try (
+                                InputStream inputStream = new URI(url).toURL().openStream();
+                                ReadableByteChannel rbc = Channels.newChannel(inputStream);
+                                FileOutputStream fos = new FileOutputStream("mods/" + CodeClient.MOD_NAME + "-" + versionNumber + ".jar")
+                        ) {
+                            LOGGER.info("Starting download...");
+                            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                        } catch (Exception e) {
+                            LOGGER.error("Failed to download the file: {}", e.getMessage());
+                        } finally {
+                            LOGGER.info("Download complete.");
+                            startupToast = new Utility.Toast(Text.translatable("toast.codeclient.update.title", versionNumber), Text.translatable("toast.codeclient.update"));
+                        }
+                    }
+                }
         );
     }
 

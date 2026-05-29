@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.Nullable;
@@ -21,10 +22,10 @@ public class NumberFieldWidget extends TextFieldWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if(keyCode == GLFW.GLFW_KEY_UP) setNumber(getNumber() + 1);
-        if(keyCode == GLFW.GLFW_KEY_DOWN) setNumber(getNumber() - 1);
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        if(input.getKeycode() == GLFW.GLFW_KEY_UP) setNumber(getNumber() + 1);
+        if(input.getKeycode() == GLFW.GLFW_KEY_DOWN) setNumber(getNumber() - 1);
+        return super.keyPressed(input);
     }
 
     public NumberFieldWidget integer() {

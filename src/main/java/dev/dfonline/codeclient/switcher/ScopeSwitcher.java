@@ -3,14 +3,14 @@ package dev.dfonline.codeclient.switcher;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
+import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.data.DFItem;
+import dev.dfonline.codeclient.data.PublicBukkitValues;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -19,13 +19,25 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ScopeSwitcher extends GenericSwitcher {
-    private String option;
+    private final String option;
 
     public ScopeSwitcher(String option) {
         super(Text.translatable("codeclient.switcher.scope"), -1, GLFW.GLFW_KEY_SPACE);
         this.option = option;
+    }
+
+    public static class ScopeSwitcherFeature extends Feature {
+        @Override
+        public boolean enabled() {
+            return Config.getConfig().ScopeSwitcher;
+        }
+
+        public void open(String option) {
+            CodeClient.MC.setScreen(new ScopeSwitcher(option));
+        }
     }
 
     @Override
@@ -44,37 +56,31 @@ public class ScopeSwitcher extends GenericSwitcher {
 
     @Override
     List<Option> getOptions() {
-        ArrayList list = new ArrayList<>();
-        list.add(new Option(Text.literal(Scope.unsaved.longName).setStyle(Style.EMPTY.withColor(Scope.unsaved.color)), Items.ENDER_CHEST.getDefaultStack(), () -> run("unsaved")));
-        list.add(new Option(Text.literal(Scope.saved.longName).setStyle(Style.EMPTY.withColor(Scope.saved.color)), Items.CHEST.getDefaultStack(), () -> run("saved")));
-        list.add(new Option(Text.literal(Scope.local.longName).setStyle(Style.EMPTY.withColor(Scope.local.color)), Items.EMERALD_BLOCK.getDefaultStack(), () -> run("local")));
-        list.add(new Option(Text.literal(Scope.line.longName).setStyle(Style.EMPTY.withColor(Scope.line.color)), Items.LAPIS_BLOCK.getDefaultStack(), () -> run("line")));
-//        list.remove(3);
-        return list;
+        return List.of(new Option(Text.literal(Scope.unsaved.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.unsaved.color)), Items.ENDER_CHEST.getDefaultStack(), () -> run("unsaved")),
+                new Option(Text.literal(Scope.saved.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.saved.color)), Items.CHEST.getDefaultStack(), () -> run("saved")),
+                new Option(Text.literal(Scope.local.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.local.color)), Items.EMERALD_BLOCK.getDefaultStack(), () -> run("local")),
+                new Option(Text.literal(Scope.line.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.line.color)), Items.LAPIS_BLOCK.getDefaultStack(), () -> run("line"))
+        );
     }
 
     private void run(String name) {
         ItemStack stack = CodeClient.MC.player.getStackInHand(Hand.MAIN_HAND);
 
-        NbtCompound nbt = stack.getNbt();
-        if (nbt == null) return;
-        NbtCompound display = nbt.getCompound("display");
-        if (display != null) {
-            NbtList lore = display.getList("Lore", NbtElement.STRING_TYPE);
-            lore.set(0, Utility.textToNBT(getSelected().text()));
-            display.put("Lore", lore);
-            nbt.put("display", display);
-        }
-        NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
+        DFItem item = DFItem.of(stack);
+
+        if (!item.hasHypercubeKey("varitem")) return;
+        PublicBukkitValues pbv = item.getPublicBukkitValues();
         if (pbv == null) return;
-        NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
-        if (varItem == null) return;
-        JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
+        Optional<String> varItem = pbv.getHypercubeStringValue("varitem");
+        if (varItem.isEmpty()) return;
+        JsonObject var = JsonParser.parseString(varItem.get()).getAsJsonObject();
         if (!var.get("id").getAsString().equals("var")) return;
         JsonObject data = var.get("data").getAsJsonObject();
         data.addProperty("scope", name);
-        pbv.put("hypercube:varitem", NbtString.of(var.toString()));
-        Utility.sendHandItem(stack);
+        pbv.setHypercubeStringValue("varitem", var.toString());
+        item.getItemData().setPublicBukkitValues(pbv);
+        item.setLore(List.of(getSelected().text()));
+        Utility.sendHandItem(item.getItemStack());
         CodeClient.MC.gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
     }
 

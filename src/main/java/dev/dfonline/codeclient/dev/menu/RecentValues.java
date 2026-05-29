@@ -4,23 +4,26 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.datafixers.util.Pair;
 import dev.dfonline.codeclient.ChestFeature;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -28,7 +31,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,7 +70,7 @@ public class RecentValues extends Feature {
                 try {
                     if (!Files.exists(file.getParent())) Files.createDirectories(file.getParent());
                     JsonObject data = new JsonObject();
-                    data.addProperty("version", SharedConstants.getGameVersion().getSaveVersion().getId());
+                    data.addProperty("version", SharedConstants.getGameVersion().dataVersion().id());
                     data.add("pinned", saveItems(pinned));
                     data.add("recent", saveItems(recent));
                     Files.writeString(file, data.toString());
@@ -78,36 +80,43 @@ public class RecentValues extends Feature {
                 }
             });
         } catch (Exception err) {
-            CodeClient.LOGGER.error("Failed reading recent_values.json!");
-            err.printStackTrace();
+            CodeClient.LOGGER.error("Failed reading recent_values.json!", err);
         }
     }
 
     private JsonArray saveItems(List<ItemStack> list) {
         JsonArray out = new JsonArray();
 
+        if (CodeClient.MC.world == null) throw new RuntimeException("World is null!");
+
         for (ItemStack item : list) {
-            out.add(item.writeNbt(new NbtCompound()).asString());
+            out.add(ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), item).getOrThrow().toString());
         }
 
         return out;
     }
 
     private ItemStack readItem(int version, JsonElement item) throws Exception {
-        return ItemStack.fromNbt(DataFixTypes.HOTBAR.update(CodeClient.MC.getDataFixer(), StringNbtReader.parse(item.getAsString()), version));
+        if (CodeClient.MC.world == null) return null;
+        var fromNbt = ItemStack.CODEC.decode(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), DataFixTypes.HOTBAR.update(CodeClient.MC.getDataFixer(), StringNbtReader.readCompound(item.getAsString()), version));
+        return fromNbt.result().map(Pair::getFirst).orElse(null);
     }
 
     public void remember(ItemStack item) {
-        if (!(CodeClient.location instanceof Dev)
-                || item.getNbt() == null
-                || item.getNbt().get("PublicBukkitValues") == null
-                || item.getSubNbt("PublicBukkitValues").get("hypercube:varitem") == null) return;
+        if (CodeClient.MC.world == null) return;
+
+        DFItem dfItem = DFItem.of(item);
+        if (!(CodeClient.location instanceof Dev) || dfItem.getHypercubeStringValue("varitem").isEmpty()) return;
         for (ItemStack it : pinned) {
-            if (item.getItem() == it.getItem() && item.getNbt().equals(it.getNbt())) return;
+            if (it != null && item.getItem() == it.getItem() && item.equals(it)) return;
         }
 
         ItemStack lambdaItem = item;
-        recent.removeIf(it -> lambdaItem.getItem() == it.getItem() && lambdaItem.getNbt().equals(it.getNbt()));
+        if (item.getItem() == null) {
+            recent.remove(item);
+            return;
+        }
+        recent.removeIf(it -> it != null && lambdaItem.getItem() == it.getItem() && ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), lambdaItem).getOrThrow().equals(ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), it).getOrThrow()));
         item = item.copyWithCount(1);
         recent.add(0, item);
 
@@ -130,10 +139,10 @@ public class RecentValues extends Feature {
         public void render(DrawContext context, int mouseX, int mouseY, int screenX, int screenY, float delta) {
             hoveredItem = null;
             if(recent.isEmpty() && pinned.isEmpty()) return;
-            int xEnd = 16*15;
+            int xEnd = 16 * 20;
 
-            context.drawGuiTexture(new Identifier("recipe_book/overlay_recipe"), -screenX + 6, -5,
-                    Math.min(Math.max(pinned.size(), recent.size()),16) * 15 + 10,
+            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
+                    Math.min(Math.max(pinned.size(), recent.size()), 16) * 20 + 10,
                     (((int) Math.ceil((double) pinned.size() / 16)) + ((int) Math.ceil((double) recent.size() / 16))) * 16 + 10
             );
 
@@ -141,30 +150,31 @@ public class RecentValues extends Feature {
             hoveredOrigin = null;
             int y = screenY;
             for (List<ItemStack> group : List.of(pinned,recent)) {
-                int x = 10;
+                int x = 13;
                 for (ItemStack item : group) {
+                    if (item == null) continue;
                     context.drawItem(item, x - screenX, y - screenY);
-                    context.drawItemInSlot(CodeClient.MC.textRenderer, item, x - screenX, y - screenY);
+                    context.drawStackOverlay(CodeClient.MC.textRenderer, item, x - screenX, y - screenY);
                     if (mouseX > x && mouseY > y && mouseX < x + 15 && mouseY < y + 15) {
-                        context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX - screenX, mouseY - screenY);
+                        context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX, mouseY);
                         hoveredItem = item;
                         hoveredOrigin = group;
                     }
-                    x += 15;
+                    x += 20;
                     if (x > xEnd) {
-                        x = 10;
+                        x = 13;
                         y += 15;
                     }
                 }
-                if (x != 10) y += 15;
+                if (x != 13) y += 15;
             }
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(Click click) {
             if (hoveredItem == null) return false;
 
-            if (button != 1) {
+            if (click.button() != 1) {
                 for (Slot slot : screen.getScreenHandler().slots) {
                     if (slot.hasStack()) continue;
                     CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(

@@ -4,8 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
-import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
+import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.switcher.ScopeSwitcher;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -15,24 +15,21 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.EntityAttachments;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
@@ -45,6 +42,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class InteractionManager {
 
@@ -90,14 +88,11 @@ public class InteractionManager {
 
     public static boolean onBreakBlock(BlockPos pos) {
         if (CodeClient.location instanceof Dev dev) {
-            dev.clearLineStarterCache();
             if (!dev.isInDev(pos)) return false;
             BlockPos breakPos = isBlockBreakable(pos);
             CodeClient.onBreakBlock(dev,pos,breakPos);
-            if (Config.getConfig().CustomBlockInteractions) {
-                if (breakPos != null) {
-                    breakCodeBlock(breakPos);
-                }
+            if (breakPos != null) {
+                breakCodeBlock(breakPos);
             }
             return true;
         }
@@ -105,101 +100,102 @@ public class InteractionManager {
     }
 
     private static void breakCodeBlock(BlockPos pos) {
-        ClientWorld world = CodeClient.MC.world;
-        CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvent.of(new Identifier("minecraft:block.stone.break")), SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
-        world.setBlockState(pos, Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(0, 1, 0), Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(-1, 0, 0), Blocks.AIR.getDefaultState());
-        world.setBlockState(pos.add(0, 0, 1), Blocks.AIR.getDefaultState());
+        if (CodeClient.location instanceof Dev dev) {
+            dev.getLineStartCache().remove(pos.west());
+        }
+
+        if (Config.getConfig().CustomBlockInteractions) {
+            ClientWorld world = CodeClient.MC.world;
+            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvents.BLOCK_STONE_BREAK, SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
+            world.setBlockState(pos, Blocks.AIR.getDefaultState());
+            world.setBlockState(pos.add(0, 1, 0), Blocks.AIR.getDefaultState());
+            world.setBlockState(pos.add(-1, 0, 0), Blocks.AIR.getDefaultState());
+            world.setBlockState(pos.add(0, 0, 1), Blocks.AIR.getDefaultState());
+        }
     }
 
     public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
-            CodeClient.onClickSlot(slot,button,actionType,syncId,revision);
-            if (!slot.hasStack()) return false;
-            ItemStack item = slot.getStack();
-            if (!item.hasNbt()) return false;
-            NbtCompound nbt = item.getNbt();
-            if (nbt != null && !nbt.contains("PublicBukkitValues")) return false;
-            if (nbt != null && nbt.get("PublicBukkitValues") instanceof NbtCompound bukkitValues) {
-                if (!bukkitValues.contains("hypercube:varitem")) return false;
-                try {
-                    if (bukkitValues.get("hypercube:varitem") instanceof NbtString varItem) {
-                        if (!Config.getConfig().CustomTagInteraction) return false;
-                        if (actionType == SlotActionType.PICKUP_ALL) return false;
-                        JsonElement varElement = JsonParser.parseString(varItem.asString());
-                        if (!varElement.isJsonObject()) return false;
-                        JsonObject varObject = (JsonObject) varElement;
-                        if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
-                        if (actionType == SlotActionType.QUICK_MOVE && varObject.get("data").getAsJsonObject().has("variable"))
-                            return false;
-
-                        Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
-                        CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
-
-                        String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
-                        NbtCompound display = nbt.getCompound("display");
-                        NbtList lore = (NbtList) display.get("Lore");
-                        if (lore == null) return true;
-
-                        int i = 0;
-                        Integer tagStartIndex = null;
-                        Integer selectedIndex = null;
-                        List<String> options = new ArrayList<>();
-
-                        // TODO: Utility.getBlockTagLines
-                        for (NbtElement element : lore) {
-                            Text text = Text.Serialization.fromJson(element.asString());
-                            if (text == null) return false;
-                            TextColor color = text.getStyle().getColor();
-                            if (color == null) {
-                                List<Text> siblings = text.getSiblings();
-                                if (siblings.size() == 2)
-                                    if (text.getSiblings().get(0).getStyle().getColor().equals(TextColor.fromFormatting(Formatting.DARK_AQUA))) {
-                                        if (tagStartIndex == null) tagStartIndex = i;
-                                        options.add(text.getSiblings().get(1).getString());
-                                        selectedIndex = i;
-                                    }
-                            } else if (color.equals(TextColor.fromRgb(0x808080))) {
-                                if (tagStartIndex == null) tagStartIndex = i;
-                                options.add(text.getString());
-                            }
-                            i++;
-                        }
-
-                        if (selectedIndex == null) return true;
-
-                        int shift = button == 0 ? 1 : -1;
-                        int selectionIndex = selectedIndex - tagStartIndex;
-                        int newSelection = (selectionIndex + shift) % (options.size());
-                        if (newSelection < 0) newSelection = options.size() + newSelection;
-
-                        int optionIndex = 0;
-                        for (String option : options) {
-                            MutableText text = Text.empty();
-                            if (optionIndex == newSelection) {
-                                text.append(Text.literal("» ").formatted(Formatting.DARK_AQUA)).append(Text.literal(option).formatted(Formatting.AQUA));
-                            } else
-                                text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
-                            lore.set(tagStartIndex + optionIndex, Utility.textToNBT(text));
-                            optionIndex++;
-                        }
-                        display.put("Lore", lore);
-                        item.setSubNbt("display", display);
-                        slot.setStack(item);
-                        return true;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            if (CodeClient.onClickSlot(slot,button,actionType,syncId,revision)) return true;
+//            if (!slot.hasStack()) return false;
+//            ItemStack item = slot.getStack();
+//            DFItem dfItem = DFItem.of(item);
+//            if (dfItem.hasHypercubeKey("varitem")) {
+//                try {
+//                    Optional<String> varItem = dfItem.getItemData().getHypercubeStringValue("varitem");
+//                    if (varItem.isPresent()) {
+//                        if (!Config.getConfig().CustomTagInteraction) return false;
+//                        if (actionType == SlotActionType.PICKUP_ALL) return false;
+//                        JsonElement varElement = JsonParser.parseString(varItem.get());
+//                        if (!varElement.isJsonObject()) return false;
+//                        JsonObject varObject = (JsonObject) varElement;
+//                        if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
+//                        if (actionType == SlotActionType.QUICK_MOVE && varObject.get("data").getAsJsonObject().has("variable"))
+//                            return false;
+//
+//                        Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
+//                        CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(syncId, revision, slot.getIndex(), button, SlotActionType.PICKUP, item, int2ObjectMap));
+//
+//                        String selected = varObject.get("data").getAsJsonObject().get("option").getAsString();
+//                        List<Text> currentLore = dfItem.getLore();
+//                        ArrayList<Text> lore = new ArrayList<>(currentLore);
+//
+//                        int i = 0;
+//                        Integer tagStartIndex = null;
+//                        Integer selectedIndex = null;
+//                        List<String> options = new ArrayList<>();
+//
+//                        for (Text text : lore) {
+//                            if (text == null) return false;
+//                            TextColor color = text.getStyle().getColor();
+//                            if (color == null) {
+//                                List<Text> siblings = text.getSiblings();
+//                                if (siblings.size() == 2)
+//                                    if (text.getSiblings().get(0).getStyle().getColor().equals(TextColor.fromFormatting(Formatting.DARK_AQUA))) {
+//                                        if (tagStartIndex == null) tagStartIndex = i;
+//                                        options.add(text.getSiblings().get(1).getString());
+//                                        selectedIndex = i;
+//                                    }
+//                            } else if (color.equals(TextColor.fromRgb(0x808080))) {
+//                                if (tagStartIndex == null) tagStartIndex = i;
+//                                options.add(text.getString());
+//                            }
+//                            i++;
+//                        }
+//
+//                        if (selectedIndex == null) return true;
+//
+//                        int shift = button == 0 ? 1 : -1;
+//                        int selectionIndex = selectedIndex - tagStartIndex;
+//                        int newSelection = (selectionIndex + shift) % (options.size());
+//                        if (newSelection < 0) newSelection = options.size() + newSelection;
+//
+//                        int optionIndex = 0;
+//                        for (String option : options) {
+//                            MutableText text = Text.empty();
+//                            if (optionIndex == newSelection) {
+//                                text.append(Text.literal("» ").setStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withItalic(false))).append(Text.literal(option).setStyle(Style.EMPTY.withColor(Formatting.AQUA).withItalic(false)));
+//                            } else
+//                                text = Text.literal(option).setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0x808080)));
+//                            lore.set(tagStartIndex + optionIndex, text);
+//                            optionIndex++;
+//                        }
+//
+//                        dfItem.setLore(lore);
+//                        slot.setStack(dfItem.getItemStack());
+//                        return true;
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
         return false;
     }
 
     public static boolean isInsideWall(Vec3d playerPos) {
         Vec3d middlePos = playerPos.add(0, 0.75, 0);
-        Box box = new EntityDimensions(0.6f, 1.8f, true).getBoxAt(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
+        Box box = new EntityDimensions(0.6f, 1.8f, 1.8f * 0.85f, EntityAttachments.of(0.6f, 1.8f), true).getBoxAt(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
         CodeClient.LOGGER.info(String.valueOf(box));
         return BlockPos.stream(box).anyMatch((pos) -> {
             BlockState blockState = CodeClient.MC.world.getBlockState(pos);
@@ -253,22 +249,21 @@ public class InteractionManager {
 
     public static boolean onItemInteract(PlayerEntity player, Hand hand) {
         if (CodeClient.location instanceof Dev) {
-            if (player.isSneaking() || !Config.getConfig().ScopeSwitcher) return false;
+            var feat = CodeClient.getFeature(ScopeSwitcher.ScopeSwitcherFeature.class);
+            if (player.isSneaking() || feat.isEmpty()) return false;
 
             ItemStack stack = player.getStackInHand(hand);
+            DFItem dfItem = DFItem.of(stack);
 
-            NbtCompound nbt = stack.getNbt();
-            if (nbt == null) return false;
-            NbtCompound pbv = (NbtCompound) nbt.get("PublicBukkitValues");
-            if (pbv == null) return false;
-            NbtString varItem = (NbtString) pbv.get("hypercube:varitem");
-            if (varItem == null) return false;
-            JsonObject var = JsonParser.parseString(varItem.asString()).getAsJsonObject();
+            if (!dfItem.hasHypercubeKey("varitem")) return false;
+            Optional<String> varItem = dfItem.getHypercubeStringValue("varitem");
+            if (varItem.isEmpty()) return false;
+            JsonObject var = JsonParser.parseString(varItem.get()).getAsJsonObject();
             if (!var.get("id").getAsString().equals("var")) return false;
             JsonObject data = var.get("data").getAsJsonObject();
             String scopeName = data.get("scope").getAsString();
 
-            CodeClient.MC.setScreen(new ScopeSwitcher(scopeName));
+            feat.get().open(scopeName);
             return true;
         }
         return false;
@@ -296,7 +291,7 @@ public class InteractionManager {
 //                    }
 //                }
 //
-//                Vec3d eyeRel = origin.relativize(player.getPos());
+//                Vec3d eyeRel = origin.relativize(player.getEntityPos());
 //                MoveToLocation.shove(player,pos.add(eyeRel));
 //            }
 //

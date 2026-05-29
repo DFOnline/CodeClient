@@ -45,7 +45,7 @@ public class BlockBreakDeltaCalculator extends Feature {
     }
 
     private static class RecentBlocks {
-        private ArrayList<RecentBlock> blocks = new ArrayList();
+        private final ArrayList<RecentBlock> blocks = new ArrayList();
 
         public void addBlock(BlockPos pos) {
             blocks.add(new RecentBlock(pos, new Date()));

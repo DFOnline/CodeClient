@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.Item;
+import dev.dfonline.codeclient.data.DFItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -42,6 +42,8 @@ public abstract class NamedItem extends VarItem {
     @Override
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
-        return stack.setCustomName(Text.literal(name).setStyle(Style.EMPTY.withItalic(false)));
+        DFItem dfItem = DFItem.of(stack);
+        dfItem.setName(Text.literal(name).setStyle(Style.EMPTY.withItalic(false)));
+        return dfItem.getItemStack();
     }
 }

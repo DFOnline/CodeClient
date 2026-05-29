@@ -28,7 +28,7 @@ public class GetActionDump extends Action {
     @Override
     public void init() {
         if (CodeClient.MC == null || CodeClient.MC.getNetworkHandler() == null) return;
-        CodeClient.MC.getNetworkHandler().sendCommand("dumpactioninfo");
+        CodeClient.MC.getNetworkHandler().sendChatCommand("dumpactioninfo");
         capturedData = new StringBuilder();
         startTime = new Date();
     }

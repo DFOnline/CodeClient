@@ -21,7 +21,7 @@ public class DevForBuild extends Action {
     public void init() {
         if(CodeClient.location instanceof Plot) {
             timeout = 0;
-            CodeClient.MC.getNetworkHandler().sendCommand("dev");
+            CodeClient.MC.getNetworkHandler().sendChatCommand("dev");
         }
     }
 
