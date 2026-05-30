@@ -209,34 +209,36 @@ public class SocketHandler {
         if (unapprovedAuthScopes.isEmpty()) return;
         if (CodeClient.MC.player == null) return;
 
-        ClientPlayerEntity player = CodeClient.MC.player;
+        CodeClient.MC.executeSync(() -> {
+            ClientPlayerEntity player = CodeClient.MC.player;
 
-        // Send the user the scopes to approve
-        Utility.sendMessage(Text.translatable("codeclient.api.scope.prompt"));
-        for (AuthScope scope : unapprovedAuthScopes) {
-            player.sendMessage(
+            // Send the user the scopes to approve
+            Utility.sendMessage(Text.translatable("codeclient.api.scope.prompt"));
+            for (AuthScope scope : unapprovedAuthScopes) {
+                Utility.sendMessage(
                     Text.empty()
-                            .append(
-                                    Text.literal("- ")
-                                            .formatted(Formatting.DARK_GRAY)
-                            )
-                            .append(
-                                    Text.translatable("codeclient.api.scope.type." + scope.translationKey)
-                                            .formatted(Formatting.WHITE)
-                                            .append(" ")
-                                            .append(
-                                                    Text.literal("(")
-                                                            .append(Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey))
-                                                            .append(Text.literal(")"))
-                                                            .formatted(scope.dangerLevel.color, Formatting.ITALIC)
-                                            )
-                            )
-                            .setStyle(Style.EMPTY.withHoverEvent(
-                                    new HoverEvent.ShowText(Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
-                            )), false
-            );
-        }
-        Utility.sendMessage(Text.translatable("codeclient.api.run_auth"));
+                        .append(
+                            Text.literal("- ")
+                                .formatted(Formatting.DARK_GRAY)
+                        )
+                        .append(
+                            Text.translatable("codeclient.api.scope.type." + scope.translationKey)
+                                .formatted(Formatting.WHITE)
+                                .append(" ")
+                                .append(
+                                    Text.literal("(")
+                                        .append(Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey))
+                                        .append(Text.literal(")"))
+                                        .formatted(scope.dangerLevel.color, Formatting.ITALIC)
+                                )
+                        )
+                        .setStyle(Style.EMPTY.withHoverEvent(
+                            new HoverEvent.ShowText(Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
+                        ))
+                );
+            }
+            Utility.sendMessage(Text.translatable("codeclient.api.run_auth"));
+        });
     }
 
     private void next() {
