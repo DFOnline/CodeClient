@@ -11,11 +11,7 @@ import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionFlag;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
-import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
-import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
-import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
-import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
-import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
+import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
 import net.minecraft.text.Style;
@@ -93,6 +89,7 @@ public class Config {
     public boolean StateSwitcher = true;
     public boolean SpeedSwitcher = true;
     public boolean HasSelectedPreset = false;
+    public String apiBindIP = "127.0.0.1";
 
     public Config() {
     }
@@ -183,6 +180,7 @@ public class Config {
             object.addProperty("HighlightMiniMessage", HighlightMiniMessage);
             object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
             object.addProperty("HasSelectedPreset", HasSelectedPreset);
+            object.addProperty("apiBindIP", apiBindIP);
 
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
