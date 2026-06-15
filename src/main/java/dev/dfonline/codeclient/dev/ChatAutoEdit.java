@@ -24,7 +24,12 @@ public class ChatAutoEdit extends Feature {
         DecimalFormat format = new DecimalFormat("0.#");
         format.setMinimumFractionDigits(0);
 
-        if (item instanceof NamedItem named) {
+        if (item instanceof BucketVar bvar) {
+            chat.setText("%s %s".formatted(bvar.getKey(), bvar.getName()));
+            chat.setCursor(bvar.getKey().length() + 1, false);
+            chat.setCursorToEnd(true);
+            return;
+        } else if (item instanceof NamedItem named) {
             chat.setText(named.getName().replaceAll("§", "&"));
         } else if (item instanceof Vector vec) {
             chat.setText("%s %s %s".formatted(vec.getX(), vec.getY(), vec.getZ()));

@@ -22,6 +22,7 @@ public class VarItems {
                 case "g_val" -> new GameValue(var);
                 case "pn_el" ->
                         new Parameter(var); // Short for `pattern_element`. Parameters, each bullet in a actions Chest Parameters is a pattern internally. Apparently.
+                case "bucket_var" -> new BucketVar(var);
                 case "bl_tag" -> new BlockTag(var);
                 case "hint" -> new Hint(var); // we're so funny
                 default -> null;
