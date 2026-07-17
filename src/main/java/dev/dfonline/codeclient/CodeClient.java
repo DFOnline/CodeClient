@@ -236,6 +236,7 @@ public class CodeClient implements ClientModInitializer {
         feat(new SpeedSwitcher.SpeedSwitcherFeature());
         feat(new ScopeSwitcher.ScopeSwitcherFeature());
         feat(new GiveStrings());
+        feat(new ChatLongValue());
     }
 
     /**

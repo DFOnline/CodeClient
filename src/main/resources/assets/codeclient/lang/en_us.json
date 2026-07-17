@@ -47,6 +47,8 @@
   "codeclient.config.auto_focus_search.description.2": "This is disabled because it interferes with navigation binds.",
   "codeclient.config.chat_edits_vars": "Auto edit values",
   "codeclient.config.chat_edits_vars.description": "Opening chat whilst holding a value will automatically put the contents in chat.",
+  "codeclient.config.chat_long_value": "Longer Values",
+  "codeclient.config.chat_long_value.description": "Allows setting longer values in chat.",
   "codeclient.config.ccdbug": "CCDBUG",
   "codeclient.config.ccdbug.description": "Toggle CCDBUG, which is a variable and entity watcher for debugging.",
   "codeclient.config.givestrings": "Give result",

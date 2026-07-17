@@ -90,6 +90,7 @@ public class Config {
     public boolean SpeedSwitcher = true;
     public boolean HasSelectedPreset = false;
     public String apiBindIP = "127.0.0.1";
+    public boolean ChatLongValue = true;
 
     public Config() {
     }
@@ -181,6 +182,7 @@ public class Config {
             object.addProperty("MiniMessageTagColor", MiniMessageTagColor);
             object.addProperty("HasSelectedPreset", HasSelectedPreset);
             object.addProperty("apiBindIP", apiBindIP);
+            object.addProperty("ChatLongValue", ChatLongValue);
 
             FileManager.writeConfig(object.toString());
         } catch (Exception e) {
@@ -276,6 +278,16 @@ public class Config {
                                         true,
                                         () -> ChatEditsVars,
                                         opt -> ChatEditsVars = opt
+                                )
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("codeclient.config.chat_long_value"))
+                                .description(OptionDescription.of(Text.translatable("codeclient.config.chat_long_value.description")))
+                                .binding(
+                                        true,
+                                        () -> ChatLongValue,
+                                        opt -> ChatLongValue = opt
                                 )
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())

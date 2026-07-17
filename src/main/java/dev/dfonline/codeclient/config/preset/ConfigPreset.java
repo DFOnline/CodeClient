@@ -41,6 +41,7 @@ public enum ConfigPreset {
         config.StateSwitcher = false;
         config.SpeedSwitcher = false;
         config.GiveUuidNameStrings = false;
+        config.ChatLongValue = false;
     }),
     BASIC(config ->{
         config.NoClipEnabled = false;
@@ -73,6 +74,7 @@ public enum ConfigPreset {
         config.StateSwitcher = true;
         config.SpeedSwitcher = true;
         config.GiveUuidNameStrings = true;
+        config.ChatLongValue = false;
     }),
     FULL(config -> {
         config.NoClipEnabled = true;
@@ -103,6 +105,7 @@ public enum ConfigPreset {
         config.StateSwitcher = true;
         config.SpeedSwitcher = true;
         config.GiveUuidNameStrings = true;
+        config.ChatLongValue = true;
     })
     ;
     
