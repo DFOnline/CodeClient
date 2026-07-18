@@ -1,21 +1,21 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public enum ChatType {
-    SUCCESS(Text.literal("»").formatted(Formatting.GREEN, Formatting.BOLD)),
-    FAIL(Text.literal("»").formatted(Formatting.RED, Formatting.BOLD)),
-    INFO(Text.literal("»").formatted(Formatting.AQUA, Formatting.BOLD));
+    SUCCESS(Component.literal("»").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD)),
+    FAIL(Component.literal("»").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)),
+    INFO(Component.literal("»").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
 
-    private final MutableText prefix;
+    private final MutableComponent prefix;
 
-    ChatType(MutableText prefix) {
+    ChatType(MutableComponent prefix) {
         this.prefix = prefix;
     }
 
-    public MutableText getText() {
+    public MutableComponent getText() {
         return this.prefix;
     }
 }

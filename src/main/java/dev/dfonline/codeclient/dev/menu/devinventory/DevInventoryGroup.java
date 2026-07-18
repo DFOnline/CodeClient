@@ -5,13 +5,11 @@ import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.actiondump.*;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,27 +22,27 @@ public class DevInventoryGroup {
     public static final int TAB_WIDTH = 28;
     public static final int TAB_HEIGHT = 28;
     public static final DevInventoryGroup[] GROUPS = new DevInventoryGroup[21];
-    public static final DevInventoryGroup PLAYER_EVENT = new DevInventoryGroup("event", "Player Event", Items.DIAMOND_BLOCK.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup PLAYER_IF = new DevInventoryGroup("if_player", "If Player", Items.OAK_PLANKS.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup PLAYER_ACTION = new DevInventoryGroup("player_action", "Player Action", Items.COBBLESTONE.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup ENTITY_EVENT = new DevInventoryGroup("entity_event", "Entity Event", Items.GOLD_BLOCK.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup ENTITY_IF = new DevInventoryGroup("if_entity", "If Entity", Items.BRICKS.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup ENTITY_ACTION = new DevInventoryGroup("entity_action", "Entity Action", Items.MOSSY_COBBLESTONE.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup VAR_SET = new DevInventoryGroup("set_var", "Set Variable", Items.IRON_BLOCK.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup VAR_IF = new DevInventoryGroup("if_var", "If Variable", Items.OBSIDIAN.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup GAME_EVENT = new DevInventoryGroup("game_event", "Game Event", Items.NETHERITE_BLOCK.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup GAME_IF = new DevInventoryGroup("if_game", "If Game", Items.RED_NETHER_BRICKS.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup GAME_ACTION = new DevInventoryGroup("game_action", "Game Action", Items.NETHERRACK.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup CONTROL = new DevInventoryGroup("control", "Control", Items.COAL_BLOCK.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup SELECT_OBJECT = new DevInventoryGroup("select_obj", "Select Object", Items.PURPUR_BLOCK.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup REPEAT = new DevInventoryGroup("repeat", "Repeat", Items.PRISMARINE.getDefaultStack(), true).useCodeBlock();
-    public static final DevInventoryGroup SOUNDS = new DevInventoryGroup("sound", "Sounds", Items.NAUTILUS_SHELL.getDefaultStack(), false);
-    public static final DevInventoryGroup PARTICLES = new DevInventoryGroup("particle", "Particles", Items.WHITE_DYE.getDefaultStack(), false);
-    public static final DevInventoryGroup POTIONS = new DevInventoryGroup("potion", "Potions", Items.DRAGON_BREATH.getDefaultStack(), false);
-    public static final DevInventoryGroup GAME_VALUES = new DevInventoryGroup("game_value", "Game Values", Items.NAME_TAG.getDefaultStack(), false);
-    public static final DevInventoryGroup SEARCH = new DevInventoryGroup("search", "Search All", Items.COMPASS.getDefaultStack(), false).useCodeBlock();
-    public static final DevInventoryGroup SAVED_TEMPLATES = new DevInventoryGroup("saved_templates", "Saved Templates", Items.ENDER_CHEST.getDefaultStack(), false);
-    public static final DevInventoryGroup INVENTORY = new DevInventoryGroup("inventory", "Inventory", Items.CHEST.getDefaultStack(), false).disableSearch();
+    public static final DevInventoryGroup PLAYER_EVENT = new DevInventoryGroup("event", "Player Event", Items.DIAMOND_BLOCK.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup PLAYER_IF = new DevInventoryGroup("if_player", "If Player", Items.OAK_PLANKS.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup PLAYER_ACTION = new DevInventoryGroup("player_action", "Player Action", Items.COBBLESTONE.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup ENTITY_EVENT = new DevInventoryGroup("entity_event", "Entity Event", Items.GOLD_BLOCK.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup ENTITY_IF = new DevInventoryGroup("if_entity", "If Entity", Items.BRICKS.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup ENTITY_ACTION = new DevInventoryGroup("entity_action", "Entity Action", Items.MOSSY_COBBLESTONE.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup VAR_SET = new DevInventoryGroup("set_var", "Set Variable", Items.IRON_BLOCK.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup VAR_IF = new DevInventoryGroup("if_var", "If Variable", Items.OBSIDIAN.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup GAME_EVENT = new DevInventoryGroup("game_event", "Game Event", Items.NETHERITE_BLOCK.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup GAME_IF = new DevInventoryGroup("if_game", "If Game", Items.RED_NETHER_BRICKS.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup GAME_ACTION = new DevInventoryGroup("game_action", "Game Action", Items.NETHERRACK.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup CONTROL = new DevInventoryGroup("control", "Control", Items.COAL_BLOCK.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup SELECT_OBJECT = new DevInventoryGroup("select_obj", "Select Object", Items.PURPUR_BLOCK.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup REPEAT = new DevInventoryGroup("repeat", "Repeat", Items.PRISMARINE.getDefaultInstance(), true).useCodeBlock();
+    public static final DevInventoryGroup SOUNDS = new DevInventoryGroup("sound", "Sounds", Items.NAUTILUS_SHELL.getDefaultInstance(), false);
+    public static final DevInventoryGroup PARTICLES = new DevInventoryGroup("particle", "Particles", Items.WHITE_DYE.getDefaultInstance(), false);
+    public static final DevInventoryGroup POTIONS = new DevInventoryGroup("potion", "Potions", Items.DRAGON_BREATH.getDefaultInstance(), false);
+    public static final DevInventoryGroup GAME_VALUES = new DevInventoryGroup("game_value", "Game Values", Items.NAME_TAG.getDefaultInstance(), false);
+    public static final DevInventoryGroup SEARCH = new DevInventoryGroup("search", "Search All", Items.COMPASS.getDefaultInstance(), false).useCodeBlock();
+    public static final DevInventoryGroup SAVED_TEMPLATES = new DevInventoryGroup("saved_templates", "Saved Templates", Items.ENDER_CHEST.getDefaultInstance(), false);
+    public static final DevInventoryGroup INVENTORY = new DevInventoryGroup("inventory", "Inventory", Items.CHEST.getDefaultInstance(), false).disableSearch();
     public static int TOP_HALF = -1;
     private static int global = 0;
 
@@ -111,7 +109,7 @@ public class DevInventoryGroup {
     private final int index;
     private final String id;
     private final ItemStack icon;
-    private final Text name;
+    private final Component name;
     private final boolean topHalf;
     private boolean hasSearchBar = true;
     private ItemsProvider itemsProvider = null;
@@ -119,7 +117,7 @@ public class DevInventoryGroup {
         this.index = global;
         this.id = id;
         this.icon = icon;
-        this.name = Text.of(name);
+        this.name = Component.nullToEmpty(name);
         this.topHalf = topHalf;
         if (!topHalf && TOP_HALF == -1) TOP_HALF = global + 1;
 
@@ -131,7 +129,7 @@ public class DevInventoryGroup {
     private static ArrayList<Searchable> emptyMenu() {
         ArrayList<Searchable> items = new ArrayList<>();
         for (int i = 0; i < 45; i++) {
-            items.add(new Searchable.StaticSearchable(Items.AIR.getDefaultStack()));
+            items.add(new Searchable.StaticSearchable(Items.AIR.getDefaultInstance()));
         }
         return items;
     }
@@ -150,7 +148,7 @@ public class DevInventoryGroup {
                     byte[] data = Files.readAllBytes(file);
                     ItemStack template = Utility.makeTemplate(new String(Base64.getEncoder().encode(data)));
                     DFItem item = DFItem.of(template);
-                    item.setName(Text.empty().formatted(Formatting.RED).append("Saved Template").append(Text.literal(" » ").formatted(Formatting.DARK_RED, Formatting.BOLD)).append(String.valueOf(root.relativize(file))));
+                    item.setName(Component.empty().withStyle(ChatFormatting.RED).append("Saved Template").append(Component.literal(" » ").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD)).append(String.valueOf(root.relativize(file))));
                     list.add(new Searchable.StaticSearchable(item.getItemStack()));
                 }
             }
@@ -176,7 +174,7 @@ public class DevInventoryGroup {
         return this.itemsProvider.run(query);
     }
 
-    public Text getName() {
+    public Component getName() {
         return name;
     }
 

@@ -4,10 +4,10 @@ import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
 public class Argument {
@@ -68,7 +68,7 @@ public class Argument {
             DFItem dfItem = DFItem.of(stack);
             dfItem.removeItemData();
             var data = new JsonObject();
-            var item = new NbtCompound();
+            var item = new CompoundTag();
             data.addProperty("item", item.toString());
             return data;
         }

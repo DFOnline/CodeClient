@@ -8,13 +8,13 @@ import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.template.Argument;
 import dev.dfonline.codeclient.hypercube.template.Bracket;
-import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.world.item.ItemStack;
 
 public class Action implements Searchable {
     public String name;
@@ -45,7 +45,7 @@ public class Action implements Searchable {
     public ItemStack getItem() {
         ItemStack item = icon.getItem();
         JsonObject CodeTemplateData = new JsonObject();
-        CodeTemplateData.addProperty("author", CodeClient.MC.getSession().getUsername());
+        CodeTemplateData.addProperty("author", CodeClient.MC.getUser().getName());
         CodeTemplateData.addProperty("name", icon.name);
         CodeTemplateData.addProperty("version", 1);
 

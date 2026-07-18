@@ -2,12 +2,12 @@ package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.InteractionManager;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,22 +16,22 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(HandledScreen.class)
+@Mixin(AbstractContainerScreen.class)
 public abstract class MHandledScreen {
-    @Shadow protected int x;
+    @Shadow protected int leftPos;
 
-    @Shadow protected int y;
+    @Shadow protected int topPos;
 
-    @Shadow @Final protected ScreenHandler handler;
+    @Shadow @Final protected AbstractContainerMenu menu;
 
-    @Inject(method = "drawSlot", at = @At("TAIL"))
-    private void drawSlot(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+    @Inject(method = "renderSlot", at = @At("TAIL"))
+    private void drawSlot(GuiGraphics context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         CodeClient.onDrawSlot(context,slot);
     }
 
     @Inject(method = "init", at = @At("TAIL"))
     public void init(CallbackInfo ci) {
-        CodeClient.onScreenInit((HandledScreen<?>) (Object) this);
+        CodeClient.onScreenInit((AbstractContainerScreen<?>) (Object) this);
     }
 
     @Inject(method = "removed", at = @At("TAIL"))
@@ -39,28 +39,28 @@ public abstract class MHandledScreen {
         CodeClient.onScreenClosed();
     }
 
-    @Inject(method = "renderMain", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix3x2fStack;popMatrix()Lorg/joml/Matrix3x2fStack;"))
-    private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        CodeClient.onRender(context,mouseX,mouseY,this.x,this.y,delta);
+    @Inject(method = "renderContents", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix3x2fStack;popMatrix()Lorg/joml/Matrix3x2fStack;"))
+    private void render(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        CodeClient.onRender(context,mouseX,mouseY,this.leftPos,this.topPos,delta);
     }
 
-    @Redirect(method = "drawMouseoverTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;hasStack()Z"))
+    @Redirect(method = "renderTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;hasItem()Z"))
     private boolean hasStack(Slot instance) {
         ItemStack hover = CodeClient.onGetHoverStack(instance);
-        return (hover != null && !hover.isEmpty()) || instance.hasStack();
+        return (hover != null && !hover.isEmpty()) || instance.hasItem();
     }
 
-    @Redirect(method = "drawMouseoverTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;getStack()Lnet/minecraft/item/ItemStack;"))
+    @Redirect(method = "renderTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;getItem()Lnet/minecraft/world/item/ItemStack;"))
     private ItemStack getStack(Slot instance) {
         ItemStack hover = CodeClient.onGetHoverStack(instance);
-        return hover == null || hover.isEmpty() ? instance.getStack() : hover;
+        return hover == null || hover.isEmpty() ? instance.getItem() : hover;
     }
 
-    @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;clickSlot(IIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/entity/player/PlayerEntity;)V"), cancellable = true)
-    private void clickSlot(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
+    @Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;handleInventoryMouseClick(IIILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)V"), cancellable = true)
+    private void clickSlot(Slot slot, int slotId, int button, ClickType actionType, CallbackInfo ci) {
         if (slotId < 0) return;
 
-        if (InteractionManager.onClickSlot(slot,button,actionType,this.handler.syncId,this.handler.getRevision()))
+        if (InteractionManager.onClickSlot(slot,button,actionType,this.menu.containerId,this.menu.getStateId()))
             ci.cancel();
     }
 }

@@ -1,8 +1,7 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
-import net.minecraft.item.ItemStack;
-
 import java.util.List;
+import net.minecraft.world.item.ItemStack;
 
 public interface Searchable {
     List<String> getTerms();
@@ -14,7 +13,7 @@ public interface Searchable {
         private final ItemStack item;
 
         public StaticSearchable(ItemStack item) {
-            this.terms = List.of(item.getName().getString());
+            this.terms = List.of(item.getHoverName().getString());
             this.item = item;
         }
 

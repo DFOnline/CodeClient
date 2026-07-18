@@ -2,11 +2,11 @@ package dev.dfonline.codeclient.mixin.render.hud;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.toast.SystemToast;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,9 +17,9 @@ public class MTitleScreen {
     @Inject(method = "init", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
         if (CodeClient.startupToast != null) {
-            CodeClient.MC.getToastManager().add(SystemToast.create(
+            CodeClient.MC.getToastManager().addToast(SystemToast.multiline(
                     CodeClient.MC,
-                    SystemToast.Type.PACK_LOAD_FAILURE,
+                    SystemToast.SystemToastId.PACK_LOAD_FAILURE,
                     CodeClient.startupToast.title(),
                     CodeClient.startupToast.description())
             );
@@ -27,8 +27,8 @@ public class MTitleScreen {
         }
 
         if (CodeClient.autoJoin == CodeClient.AutoJoin.GAME) {
-            ServerInfo info = new ServerInfo("DiamondFire", Config.getConfig().AutoNode.prepend + "mcdiamondfire.com", ServerInfo.ServerType.OTHER);
-            ConnectScreen.connect((TitleScreen) (Object) this, CodeClient.MC, ServerAddress.parse(info.address), info, true, null);
+            ServerData info = new ServerData("DiamondFire", Config.getConfig().AutoNode.prepend + "mcdiamondfire.com", ServerData.Type.OTHER);
+            ConnectScreen.startConnecting((TitleScreen) (Object) this, CodeClient.MC, ServerAddress.parseString(info.ip), info, true, null);
 
             CodeClient.autoJoin = Config.getConfig().AutoJoinPlot ? CodeClient.AutoJoin.PLOT : CodeClient.AutoJoin.NONE;
         }

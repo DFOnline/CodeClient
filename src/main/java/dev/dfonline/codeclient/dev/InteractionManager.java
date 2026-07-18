@@ -10,33 +10,31 @@ import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.switcher.ScopeSwitcher;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.EntityAttachments;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.function.BooleanBiFunction;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.*;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityAttachments;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -56,7 +54,7 @@ public class InteractionManager {
      */
     public static BlockPos isBlockBreakable(BlockPos pos) {
         if (pos.getY() % 5 != 0) return null;
-        Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
+        Block type = CodeClient.MC.level.getBlockState(pos).getBlock();
         if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON, Blocks.CHEST).contains(type))
             return null;
         if (type == Blocks.OAK_WALL_SIGN) return pos.east();
@@ -70,14 +68,14 @@ public class InteractionManager {
      * @return The origin of the codeblock. null if there is none.
      */
     public static BlockPos targetedBlockPos(BlockPos pos) {
-        Block type = CodeClient.MC.world.getBlockState(pos).getBlock();
+        Block type = CodeClient.MC.level.getBlockState(pos).getBlock();
         if (List.of(Blocks.DIRT, Blocks.AIR).contains(type))
             return null;
         if (type == Blocks.OAK_WALL_SIGN) return pos.east();
-        if (type == Blocks.CHEST) return pos.down();
+        if (type == Blocks.CHEST) return pos.below();
         if (type == Blocks.STONE || type == Blocks.PISTON || type == Blocks.STICKY_PISTON) {
             var pos2 = pos.north();
-            if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON).contains(CodeClient.MC.world.getBlockState(pos2).getBlock()))
+            if (List.of(Blocks.STONE, Blocks.DIRT, Blocks.PISTON, Blocks.STICKY_PISTON).contains(CodeClient.MC.level.getBlockState(pos2).getBlock()))
                 return null;
             return pos2;
         }
@@ -105,16 +103,16 @@ public class InteractionManager {
         }
 
         if (Config.getConfig().CustomBlockInteractions) {
-            ClientWorld world = CodeClient.MC.world;
-            CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(SoundEvents.BLOCK_STONE_BREAK, SoundCategory.BLOCKS, 2, 0.8F, Random.create(), pos));
-            world.setBlockState(pos, Blocks.AIR.getDefaultState());
-            world.setBlockState(pos.add(0, 1, 0), Blocks.AIR.getDefaultState());
-            world.setBlockState(pos.add(-1, 0, 0), Blocks.AIR.getDefaultState());
-            world.setBlockState(pos.add(0, 0, 1), Blocks.AIR.getDefaultState());
+            ClientLevel world = CodeClient.MC.level;
+            CodeClient.MC.getSoundManager().play(new SimpleSoundInstance(SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 2, 0.8F, RandomSource.create(), pos));
+            world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+            world.setBlockAndUpdate(pos.offset(0, 1, 0), Blocks.AIR.defaultBlockState());
+            world.setBlockAndUpdate(pos.offset(-1, 0, 0), Blocks.AIR.defaultBlockState());
+            world.setBlockAndUpdate(pos.offset(0, 0, 1), Blocks.AIR.defaultBlockState());
         }
     }
 
-    public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+    public static boolean onClickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
             if (CodeClient.onClickSlot(slot,button,actionType,syncId,revision)) return true;
 //            if (!slot.hasStack()) return false;
@@ -193,13 +191,13 @@ public class InteractionManager {
         return false;
     }
 
-    public static boolean isInsideWall(Vec3d playerPos) {
-        Vec3d middlePos = playerPos.add(0, 0.75, 0);
-        Box box = new EntityDimensions(0.6f, 1.8f, 1.8f * 0.85f, EntityAttachments.of(0.6f, 1.8f), true).getBoxAt(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
+    public static boolean isInsideWall(Vec3 playerPos) {
+        Vec3 middlePos = playerPos.add(0, 0.75, 0);
+        AABB box = new EntityDimensions(0.6f, 1.8f, 1.8f * 0.85f, EntityAttachments.createDefault(0.6f, 1.8f), true).makeBoundingBox(playerPos); //Box.of(middlePos, 0.6, 5, 0.6);
         CodeClient.LOGGER.info(String.valueOf(box));
-        return BlockPos.stream(box).anyMatch((pos) -> {
-            BlockState blockState = CodeClient.MC.world.getBlockState(pos);
-            return !blockState.isAir() && VoxelShapes.matchesAnywhere(blockState.getCollisionShape(CodeClient.MC.world, pos).offset(pos.getX(), pos.getY(), pos.getZ()), VoxelShapes.cuboid(box), BooleanBiFunction.AND);
+        return BlockPos.betweenClosedStream(box).anyMatch((pos) -> {
+            BlockState blockState = CodeClient.MC.level.getBlockState(pos);
+            return !blockState.isAir() && Shapes.joinIsNotEmpty(blockState.getCollisionShape(CodeClient.MC.level, pos).move(pos.getX(), pos.getY(), pos.getZ()), Shapes.create(box), BooleanOp.AND);
         });
     }
 
@@ -210,12 +208,12 @@ public class InteractionManager {
      */
     @Nullable
     public static BlockPos getPlacePos(BlockHitResult hitResult) {
-        BlockState state = CodeClient.MC.world.getBlockState(hitResult.getBlockPos());
-        BlockPos pos = state.getBlock() == Blocks.STONE ? hitResult.getBlockPos().south() : hitResult.getBlockPos().offset(hitResult.getSide());
+        BlockState state = CodeClient.MC.level.getBlockState(hitResult.getBlockPos());
+        BlockPos pos = state.getBlock() == Blocks.STONE ? hitResult.getBlockPos().south() : hitResult.getBlockPos().relative(hitResult.getDirection());
         if (pos.getY() % 5 != 0) return null;
         Vec3i[] check = {new Vec3i(1, 0, 0), new Vec3i(1, 0, 1), new Vec3i(1, 0, 2), new Vec3i(2, 0, 0), new Vec3i(-1, 0, 0)};
         for (Vec3i offset : check) {
-            if (CodeClient.MC.world.getBlockState(pos.add(offset)).isSolidBlock(CodeClient.MC.world, pos.add(offset)))
+            if (CodeClient.MC.level.getBlockState(pos.offset(offset)).isRedstoneConductor(CodeClient.MC.level, pos.offset(offset)))
                 return null;
         }
         return pos;
@@ -227,32 +225,32 @@ public class InteractionManager {
             plot.getLineStartCache();
             BlockPos pos = hitResult.getBlockPos();
             if (plot.isInDev(pos)) {
-                if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) {
+                if (CodeClient.MC.level.getBlockState(pos).getBlock() == Blocks.CHEST) {
                     isOpeningCodeChest = true;
                 }
                 if (pos.getY() % 5 == 4) { // Is a code space level (glass)
-                    if (hitResult.getSide() == Direction.UP || hitResult.getSide() == Direction.DOWN) {
-                        if (CodeClient.MC.world.getBlockState(pos).isAir() && Config.getConfig().PlaceOnAir)
-                            return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos().add(0, 1, 0), hitResult.isInsideBlock());
+                    if (hitResult.getDirection() == Direction.UP || hitResult.getDirection() == Direction.DOWN) {
+                        if (CodeClient.MC.level.getBlockState(pos).isAir() && Config.getConfig().PlaceOnAir)
+                            return new BlockHitResult(hitResult.getLocation(), Direction.UP, hitResult.getBlockPos().offset(0, 1, 0), hitResult.isInside());
                         if (Config.getConfig().CustomBlockInteractions)
-                            return new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos(), hitResult.isInsideBlock());
+                            return new BlockHitResult(hitResult.getLocation(), Direction.UP, hitResult.getBlockPos(), hitResult.isInside());
                     }
                 }
             }
-            if (hitResult.getSide() == Direction.DOWN) {
-                BlockHitResult newHitResult = new BlockHitResult(hitResult.getPos(), Direction.UP, hitResult.getBlockPos().add(0, -1, 0), hitResult.isInsideBlock());
+            if (hitResult.getDirection() == Direction.DOWN) {
+                BlockHitResult newHitResult = new BlockHitResult(hitResult.getLocation(), Direction.UP, hitResult.getBlockPos().offset(0, -1, 0), hitResult.isInside());
                 return newHitResult;
             }
         }
         return hitResult;
     }
 
-    public static boolean onItemInteract(PlayerEntity player, Hand hand) {
+    public static boolean onItemInteract(Player player, InteractionHand hand) {
         if (CodeClient.location instanceof Dev) {
             var feat = CodeClient.getFeature(ScopeSwitcher.ScopeSwitcherFeature.class);
-            if (player.isSneaking() || feat.isEmpty()) return false;
+            if (player.isShiftKeyDown() || feat.isEmpty()) return false;
 
-            ItemStack stack = player.getStackInHand(hand);
+            ItemStack stack = player.getItemInHand(hand);
             DFItem dfItem = DFItem.of(stack);
 
             if (!dfItem.hasHypercubeKey("varitem")) return false;
@@ -329,7 +327,7 @@ public class InteractionManager {
 //    }
 
     @Nullable
-    public static VoxelShape customVoxelShape(BlockView world, BlockPos pos) {
+    public static VoxelShape customVoxelShape(BlockGetter world, BlockPos pos) {
         if (CodeClient.MC != null && CodeClient.MC.player != null && CodeClient.location instanceof Dev plot) {
             Config.LayerInteractionMode mode = Config.getConfig().CodeLayerInteractionMode;
             Boolean isInDev = plot.isInDev(pos);
@@ -346,7 +344,7 @@ public class InteractionManager {
                 boolean blockIsOutside = pos.getY() < 50
                         && (pos.getX() < plot.getX()) && (pos.getX() >= plot.getX() - (size.codeWidth + NoClip.FREEDOM))
                         && (pos.getZ() >= (plot.getZ() - 2)) && (pos.getZ() <= plot.getZ() + plot.assumeSize().codeLength + NoClip.FREEDOM);
-                if (blockIsOutside) return VoxelShapes.empty();
+                if (blockIsOutside) return Shapes.empty();
                 return null;
             }
             boolean isLevel = pos.getY() % 5 == 4;
@@ -360,10 +358,10 @@ public class InteractionManager {
                             mode == Config.LayerInteractionMode.ON
                                     || pos.getY() + 1 < CodeClient.MC.player.getEyeY()
                     )
-                            && !world.getBlockState(pos.add(0, 1, 0)).isSolidBlock(world, pos);
-            if (hideCodeSpace) return VoxelShapes.cuboid(0, 1 - 1d / (4096), 0, 1, 1, 1);
+                            && !world.getBlockState(pos.offset(0, 1, 0)).isRedstoneConductor(world, pos);
+            if (hideCodeSpace) return Shapes.box(0, 1 - 1d / (4096), 0, 1, 1, 1);
             if (noClipAllowsBlock && mode != Config.LayerInteractionMode.OFF && pos.getY() + 1 > CodeClient.MC.player.getEyeY() && isLevel)
-                return VoxelShapes.empty();
+                return Shapes.empty();
         }
         return null;
     }

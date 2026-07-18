@@ -1,17 +1,17 @@
 package dev.dfonline.codeclient;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.phys.BlockHitResult;
 
 public abstract class Feature {
     private ChestFeature chest;
@@ -33,7 +33,7 @@ public abstract class Feature {
     public boolean onSendPacket(Packet<?> packet) {
         return false;
     }
-    public void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {}
+    public void render(PoseStack matrices, MultiBufferSource.BufferSource vertexConsumers, double cameraX, double cameraY, double cameraZ) {}
     public void onModeChange(Location location) {}
     public void onClickChest(BlockHitResult hitResult) {}
     /**
@@ -50,11 +50,11 @@ public abstract class Feature {
      * @return ChestFeature instance.
      */
     @Nullable
-    protected ChestFeature makeChestFeature(HandledScreen<?> screen) {
+    protected ChestFeature makeChestFeature(AbstractContainerScreen<?> screen) {
         return null;
     }
 
-    public final void openChest(HandledScreen<?> screen) {
+    public final void openChest(AbstractContainerScreen<?> screen) {
         chest = makeChestFeature(screen);
     }
 

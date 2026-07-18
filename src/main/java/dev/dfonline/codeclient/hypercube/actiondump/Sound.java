@@ -1,9 +1,8 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.ItemStack;
-
 import java.util.List;
+import net.minecraft.world.item.ItemStack;
 
 public class Sound extends VarItem implements Searchable {
     public String sound;

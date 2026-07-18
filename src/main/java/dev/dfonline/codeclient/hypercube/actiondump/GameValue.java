@@ -1,11 +1,10 @@
 package dev.dfonline.codeclient.hypercube.actiondump;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.ItemStack;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.world.item.ItemStack;
 
 public class GameValue extends VarItem implements Searchable {
     public String[] aliases;

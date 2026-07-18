@@ -8,8 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
-
+import net.minecraft.commands.SharedSuggestionProvider;
 import java.util.concurrent.CompletableFuture;
 
 public class PlayerArgumentType implements ArgumentType<String> {
@@ -28,8 +27,8 @@ public class PlayerArgumentType implements ArgumentType<String> {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof FabricClientCommandSource clientCommandSource)
-            return CommandSource.suggestMatching(Collections2.transform(
-                    clientCommandSource.getPlayer().networkHandler.getPlayerList(),
+            return SharedSuggestionProvider.suggest(Collections2.transform(
+                    clientCommandSource.getPlayer().connection.getOnlinePlayers(),
                     playerEntry -> playerEntry.getProfile().name()
             ), builder);
 

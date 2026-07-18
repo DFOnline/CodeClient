@@ -6,58 +6,58 @@ import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.screen.sync.ItemStackHash;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.HashedStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-public class CustomChestMenu extends HandledScreen<CustomChestHandler> implements ScreenHandlerProvider<CustomChestHandler> {
+public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler> implements MenuAccess<CustomChestHandler> {
 
     // copy vanilla
-    private final Identifier SLOT_HIGHLIGHT_BACK_TEXTURE = Identifier.ofVanilla("container/slot_highlight_back");
-    private final Identifier SLOT_HIGHLIGHT_FRONT_TEXTURE = Identifier.ofVanilla("container/slot_highlight_front");
+    private final Identifier SLOT_HIGHLIGHT_BACK_TEXTURE = Identifier.withDefaultNamespace("container/slot_highlight_back");
+    private final Identifier SLOT_HIGHLIGHT_FRONT_TEXTURE = Identifier.withDefaultNamespace("container/slot_highlight_front");
 
     private final CustomChestNumbers Size;
-    private final HashMap<Integer, Widget> widgets = new HashMap<>();
+    private final HashMap<Integer, LayoutElement> widgets = new HashMap<>();
     private final ArrayList<VarItem> varItems = new ArrayList<>();
     private double scroll = 0;
     private boolean doNotUpdate = false;
     private boolean update = true;
 
-    public CustomChestMenu(CustomChestHandler handler, PlayerInventory inventory, Text title) {
+    public CustomChestMenu(CustomChestHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
-        this.handler.inventory.addListener(ignored -> {
+        this.menu.inventory.addListener(ignored -> {
             if(!doNotUpdate) {
                 update();
                 doNotUpdate = false;
             }
         });
         Size = handler.numbers;
-        this.titleY = 4;
-        this.playerInventoryTitleY = 123;
-        this.backgroundHeight = Size.MENU_HEIGHT;
-        this.backgroundWidth = Size.MENU_WIDTH;
+        this.titleLabelY = 4;
+        this.inventoryLabelY = 123;
+        this.imageHeight = Size.MENU_HEIGHT;
+        this.imageWidth = Size.MENU_WIDTH;
     }
 
     @Override
@@ -67,25 +67,25 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    protected void handledScreenTick() {
+    protected void containerTick() {
         if (update) {
             update((int) scroll);
             update = false;
         }
-        super.handledScreenTick();
+        super.containerTick();
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        context.getMatrices().pushMatrix();
-        context.getMatrices().translate(this.x, this.y);
-        for (Widget widget : widgets.values()) {
-            if (widget instanceof Drawable drawable) {
-                drawable.render(context, mouseX - this.x, mouseY - this.y, delta);
+        context.pose().pushMatrix();
+        context.pose().translate(this.leftPos, this.topPos);
+        for (LayoutElement widget : widgets.values()) {
+            if (widget instanceof Renderable drawable) {
+                drawable.render(context, mouseX - this.leftPos, mouseY - this.topPos, delta);
             }
         }
-        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
+        List<Slot> subList = this.getMenu().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
 
@@ -95,34 +95,34 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
             if (i + scroll < 27) {
 
-                int relX = mouseX - this.x;
-                int relY = mouseY - this.y;
+                int relX = mouseX - this.leftPos;
+                int relY = mouseY - this.topPos;
                 if (
                         relX > x
                                 && relX < x + 18
                                 && relY > y
                                 && relY < y + 18
                 ) {
-                    focusedSlot = slot;
+                    hoveredSlot = slot;
 
-                    context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_TEXTURE, x-4, y-4, 24, 24); // draw back
-                    drawSlot(context, new Slot(slot.inventory, slot.id, x, y), mouseX, mouseY);
-                    context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_TEXTURE, x-4, y-4, 24, 24); // draw front
+                    context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_TEXTURE, x-4, y-4, 24, 24); // draw back
+                    renderSlot(context, new Slot(slot.container, slot.index, x, y), mouseX, mouseY);
+                    context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_TEXTURE, x-4, y-4, 24, 24); // draw front
 
                     //drawSlotHighlight(context, x, y, -10);
                 } else {
-                    drawSlot(context, new Slot(slot.inventory, slot.id, x, y), mouseX, mouseY);
+                    renderSlot(context, new Slot(slot.container, slot.index, x, y), mouseX, mouseY);
                 }
             } else {
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+                context.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
             }
         }
 
-        if (focusedSlot != null) {
-            if (focusedSlot.hasStack())
-                context.drawItemTooltip(textRenderer, focusedSlot.getStack(), mouseX, mouseY);
+        if (hoveredSlot != null) {
+            if (hoveredSlot.hasItem())
+                context.setTooltipForNextFrame(font, hoveredSlot.getItem(), mouseX, mouseY);
         }
-        context.getMatrices().popMatrix();
+        context.pose().popMatrix();
     }
 
     public void update() {
@@ -133,17 +133,17 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
         Integer focused = null;
         for (int i = 0; i < widgets.size(); i++) {
             var widget = widgets.get(i);
-            if (widget instanceof ClickableWidget clickable) {
+            if (widget instanceof AbstractWidget clickable) {
                 if (clickable.isFocused()) focused = (i + previousScroll) - (int) scroll;
             }
         }
         widgets.clear();
         varItems.clear();
-        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
+        List<Slot> subList = this.getMenu().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
         for (int i = 0; i < subList.size(); i++) {
             Slot slot = subList.get(i);
-            if (!slot.hasStack()) continue;
-            ItemStack stack = slot.getStack();
+            if (!slot.hasItem()) continue;
+            ItemStack stack = slot.getItem();
             final int x = Size.WIDGET_X;
             final int y = i * 18 + Size.SLOT_Y;
             VarItem varItem = (VarItems.parse(stack));
@@ -154,13 +154,13 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 //                widget.setMaxLength(10_000);
 //                widget.setText(named.getName());
 //                widget.setFocused(Objects.equals(i,focused));
-                var widget = new CustomChestField<>(textRenderer, x, y, Size.WIDGET_WIDTH, 18, Text.of(varItem.getId()), varItem);
+                var widget = new CustomChestField<>(font, x, y, Size.WIDGET_WIDTH, 18, Component.nullToEmpty(varItem.getId()), varItem);
                 widgets.put(i, widget);
                 varItems.add(varItem);
                 continue;
             }
 
-            widgets.put(i, new TextWidget(x + 3, y, Size.WIDGET_WIDTH, 16, stack.getName(), textRenderer));
+            widgets.put(i, new StringWidget(x + 3, y, Size.WIDGET_WIDTH, 16, stack.getHoverName(), font));
         }
     }
 
@@ -168,8 +168,8 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         for (var i : widgets.keySet()) {
             var widget = widgets.get(i);
-            if (widget instanceof ClickableWidget click && click.isMouseOver(mouseX - this.x, mouseY - this.y)
-                    && click.mouseScrolled(mouseX - this.x, mouseY - this.y, horizontalAmount, verticalAmount)) {
+            if (widget instanceof AbstractWidget click && click.isMouseOver(mouseX - this.leftPos, mouseY - this.topPos)
+                    && click.mouseScrolled(mouseX - this.leftPos, mouseY - this.topPos, horizontalAmount, verticalAmount)) {
                 updateItem(i);
                 return true;
             }
@@ -181,18 +181,18 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         var mouseX = click.x();
         var mouseY = click.y();
-        List<Slot> subList = this.getScreenHandler().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS, 27));
+        List<Slot> subList = this.getMenu().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS, 27));
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
             final int x = 8;
             final int y = i * 18 - 11 + 25;
-            var customSlot = new Slot(slot.inventory, slot.getIndex(), x, y);
-            customSlot.id = slot.id;
-            double relX = mouseX - this.x;
-            double relY = mouseY - this.y;
+            var customSlot = new Slot(slot.container, slot.getContainerSlot(), x, y);
+            customSlot.index = slot.index;
+            double relX = mouseX - this.leftPos;
+            double relY = mouseY - this.topPos;
             if (
                     relX > x
                             && relX < x + 18
@@ -200,21 +200,21 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                             && relY < y + 18
             ) {
                 if (click.button() == 2) {
-                    this.onMouseClick(customSlot, slot.id, click.button(), SlotActionType.CLONE);
+                    this.slotClicked(customSlot, slot.index, click.button(), ClickType.CLONE);
                     return true;
                 }
-                if (click.hasShift()) {
-                    this.onMouseClick(customSlot, slot.id, click.button(), SlotActionType.QUICK_MOVE);
+                if (click.hasShiftDown()) {
+                    this.slotClicked(customSlot, slot.index, click.button(), ClickType.QUICK_MOVE);
                     return true;
                 }
-                this.onMouseClick(customSlot, slot.id, click.button(), SlotActionType.PICKUP);
+                this.slotClicked(customSlot, slot.index, click.button(), ClickType.PICKUP);
                 return true;
             }
         }
         boolean returnValue = false;
         for (var entry : widgets.entrySet()) {
-            if (entry.getValue() instanceof ClickableWidget clickable) {
-                boolean mouseOver = clickable.isMouseOver(mouseX - this.x, mouseY - this.y);
+            if (entry.getValue() instanceof AbstractWidget clickable) {
+                boolean mouseOver = clickable.isMouseOver(mouseX - this.leftPos, mouseY - this.topPos);
                 clickable.setFocused(mouseOver);
                 if (mouseOver && clickable.mouseClicked(click, doubled)) {
 //                    updateItem(entry.getKey());
@@ -233,39 +233,39 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     private void updateItem(int scrollRelativeSlot) {
-        if (CodeClient.MC.getNetworkHandler() == null) return;
+        if (CodeClient.MC.getConnection() == null) return;
         if (scrollRelativeSlot + scroll > 27) return;
-        Slot slot = this.getScreenHandler().slots.subList((int) scroll, (int) scroll + Size.WIDGETS).get(scrollRelativeSlot);
+        Slot slot = this.getMenu().slots.subList((int) scroll, (int) scroll + Size.WIDGETS).get(scrollRelativeSlot);
         if (scrollRelativeSlot > widgets.size()) return;
-        Widget widget = widgets.get(scrollRelativeSlot);
+        LayoutElement widget = widgets.get(scrollRelativeSlot);
         if (widget instanceof CustomChestField<?> field) {
             VarItem item = field.item;
             if (item instanceof BlockTag) {
-                var hash = ItemStackHash.fromItemStack(item.toStack(), CodeClient.MC.getNetworkHandler().getComponentHasher());
-                Int2ObjectMap<ItemStackHash> modified = Int2ObjectMaps.singleton(slot.getIndex(), hash);
-                CodeClient.MC.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.nextRevision(),(short)slot.getIndex(),(byte)0,SlotActionType.PICKUP,modified,hash));
+                var hash = HashedStack.create(item.toStack(), CodeClient.MC.getConnection().decoratedHashOpsGenenerator());
+                Int2ObjectMap<HashedStack> modified = Int2ObjectMaps.singleton(slot.getContainerSlot(), hash);
+                CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(menu.containerId, menu.incrementStateId(),(short)slot.getContainerSlot(),(byte)0,ClickType.PICKUP,modified,hash));
             } else {
                 doNotUpdate = true;
-                super.onMouseClick(slot, slot.id, 0, SlotActionType.SWAP);
+                super.slotClicked(slot, slot.index, 0, ClickType.SWAP);
                 doNotUpdate = true;
-                CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, item.toStack()));
+                CodeClient.MC.getConnection().send(new ServerboundSetCreativeModeSlotPacket(36, item.toStack()));
                 doNotUpdate = true;
-                super.onMouseClick(slot, slot.id, 0, SlotActionType.SWAP);
+                super.slotClicked(slot, slot.index, 0, ClickType.SWAP);
                 doNotUpdate = true;
-                super.onMouseClick(slot, 54, 0, SlotActionType.QUICK_CRAFT);
+                super.slotClicked(slot, 54, 0, ClickType.QUICK_CRAFT);
             }
         }
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        var keyCode = input.getKeycode();
-        var hasShiftDown = input.hasShift();
+    public boolean keyPressed(KeyEvent input) {
+        var keyCode = input.input();
+        var hasShiftDown = input.hasShiftDown();
         if (keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 for (var i : widgets.keySet()) {
-                    Widget widget = widgets.get(i);
-                    if (widget instanceof ClickableWidget clickable) {
+                    LayoutElement widget = widgets.get(i);
+                    if (widget instanceof AbstractWidget clickable) {
                         if (clickable.isFocused()) {
                             clickable.setFocused(false);
                             updateItem(i);
@@ -276,8 +276,8 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
             }
             if(keyCode == GLFW.GLFW_KEY_TAB) {
                 for (var i : widgets.keySet()) {
-                    Widget widget = widgets.get(i);
-                    if (widget instanceof ClickableWidget clickable) {
+                    LayoutElement widget = widgets.get(i);
+                    if (widget instanceof AbstractWidget clickable) {
                         if (clickable.isFocused()) {
                             if(!clickable.keyPressed(input)) {
                                 if (widgets.get(hasShiftDown ? --i :   ++i) instanceof CustomChestField<?> next) next.select(!hasShiftDown);
@@ -293,8 +293,8 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 return true;
             }
             for (var i : widgets.keySet()) {
-                Widget widget = widgets.get(i);
-                if (widget instanceof ClickableWidget clickable) {
+                LayoutElement widget = widgets.get(i);
+                if (widget instanceof AbstractWidget clickable) {
                     if (clickable.isFocused()) {
                         clickable.keyPressed(input);
                         updateItem(i);
@@ -303,12 +303,12 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
                 }
             }
         }
-        boolean up = keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.forwardKey.matchesKey(input);
-        boolean down = keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.backKey.matchesKey(input);
+        boolean up = keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.keyUp.matches(input);
+        boolean down = keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.keyDown.matches(input);
         boolean pageUp = keyCode == GLFW.GLFW_KEY_PAGE_UP || (up && hasShiftDown);
         boolean pageDown = keyCode == GLFW.GLFW_KEY_PAGE_DOWN || (down && hasShiftDown);
-        boolean start = keyCode == GLFW.GLFW_KEY_HOME || (up && input.hasAlt() && !pageUp);
-        boolean end = keyCode == GLFW.GLFW_KEY_END || (down && input.hasAlt() && !pageDown);
+        boolean start = keyCode == GLFW.GLFW_KEY_HOME || (up && input.hasAltDown() && !pageUp);
+        boolean end = keyCode == GLFW.GLFW_KEY_END || (down && input.hasAltDown() && !pageDown);
         int prev = (int) scroll;
         if (pageDown) {
             scroll = Math.min(27 - Size.WIDGETS, scroll + Size.WIDGETS);
@@ -339,10 +339,10 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
 
 
     @Override
-    public boolean keyReleased(KeyInput input) {
+    public boolean keyReleased(KeyEvent input) {
         for (var i : widgets.keySet()) {
-            Widget widget = widgets.get(i);
-            if (widget instanceof ClickableWidget clickable) {
+            LayoutElement widget = widgets.get(i);
+            if (widget instanceof AbstractWidget clickable) {
                 if (clickable.isFocused()) {
                     clickable.keyReleased(input);
                     updateItem(i);
@@ -354,10 +354,10 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         for (var i : widgets.keySet()) {
-            Widget widget = widgets.get(i);
-            if (widget instanceof ClickableWidget clickable) {
+            LayoutElement widget = widgets.get(i);
+            if (widget instanceof AbstractWidget clickable) {
                 if (clickable.isFocused()) {
                     clickable.charTyped(input);
                     updateItem(i);
@@ -369,22 +369,22 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
-        super.onMouseClick(slot, slotId, button, actionType);
+    protected void slotClicked(Slot slot, int slotId, int button, ClickType actionType) {
+        super.slotClicked(slot, slotId, button, actionType);
         update((int) scroll);
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
 //        context.getMatrices().push();
 //        RenderSystem.enableBlend();
         int centerX = this.width / 2 - (Size.MENU_WIDTH / 2);
         int centerY = this.height / 2 - (Size.MENU_HEIGHT / 2);
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, centerX, centerY, 0, 0, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+        context.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, centerX, centerY, 0, 0, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
 
         boolean disabled = false;
         float scrollProgress = (float) scroll / (27 - Size.WIDGETS);
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, Size.TEXTURE,
+        context.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE,
                 centerX + Size.SCROLL_POS_X,
                 (int) (centerY + Size.SCROLL_POS_Y + scrollProgress * (Size.SCROLL_ROOM - Size.SCROLL_HEIGHT)),
                 (disabled ? Size.MENU_WIDTH + Size.SCROLL_WIDTH : Size.MENU_WIDTH),
@@ -399,7 +399,7 @@ public class CustomChestMenu extends HandledScreen<CustomChestHandler> implement
     }
 
     @Override
-    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
 //        super.drawForeground(context, mouseX, mouseY);
     }
 }

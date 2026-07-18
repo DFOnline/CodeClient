@@ -1,34 +1,32 @@
 package dev.dfonline.codeclient.dev.debug;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Plot;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.debug.DebugRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.OverlayMessageS2CPacket;
-import net.minecraft.text.PlainTextContent;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.debug.gizmo.GizmoDrawing;
-import net.minecraft.world.debug.gizmo.TextGizmo;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.gizmos.Gizmos;
+import net.minecraft.gizmos.TextGizmo;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.world.phys.Vec3;
 
 public class Debug extends Feature {
     private Double CPU = null;
-    private List<Text> text = null;
-    private HashMap<Vec3d, Text> locations = new HashMap<>();
+    private List<Component> text = null;
+    private HashMap<Vec3, Component> locations = new HashMap<>();
     private boolean active = false;
 
     @Override
@@ -42,9 +40,9 @@ public class Debug extends Feature {
     public boolean onReceivePacket(Packet<?> packet) {
         if (CodeClient.location instanceof Plot plot) {
             if (!Config.getConfig().CCDBUG) return false;
-            if (packet instanceof OverlayMessageS2CPacket overlay) {
+            if (packet instanceof ClientboundSetActionBarTextPacket overlay) {
                 var txt = overlay.text();
-                if (Text.empty().equals(txt)) {
+                if (Component.empty().equals(txt)) {
                     return false;
                 }
                 var siblings = txt.getSiblings();
@@ -53,7 +51,7 @@ public class Debug extends Feature {
                 }
                 var command = siblings.get(0);
                 if (!Objects.equals(command.getStyle().getColor(), TextColor.fromRgb(0x00ccdb))) return false;
-                if (command.getContent().equals(new PlainTextContent.Literal("text"))) {
+                if (command.getContents().equals(new PlainTextContents.LiteralContents("text"))) {
                     boolean first = true;
                     text = new ArrayList<>();
                     for (var part : siblings) {
@@ -64,8 +62,8 @@ public class Debug extends Feature {
                         text.add(part);
                     }
                 }
-                if (command.getContent().equals(new PlainTextContent.Literal("location"))) {
-                    var locList = new HashMap<Vec3d, Text>();
+                if (command.getContents().equals(new PlainTextContents.LiteralContents("location"))) {
+                    var locList = new HashMap<Vec3, Component>();
                     boolean first = true;
                     for (var part : siblings) {
                         if (first) {
@@ -80,7 +78,7 @@ public class Debug extends Feature {
                                 .toList();
                         if (pos.size() < 3) continue;
                         try {
-                            var vec = new Vec3d(Double.parseDouble(pos.get(0)), Double.parseDouble(pos.get(1)), Double.parseDouble(pos.get(2))).add(plot.getPos());
+                            var vec = new Vec3(Double.parseDouble(pos.get(0)), Double.parseDouble(pos.get(1)), Double.parseDouble(pos.get(2))).add(plot.getPos());
                             locList.put(vec, part.getSiblings().get(1));
                         } catch (Exception ignored) {
                         }
@@ -107,10 +105,10 @@ public class Debug extends Feature {
         if (!active) return;
         if (text == null) return;
         OverlayManager.setOverlayText();
-        OverlayManager.addOverlayText(Text.empty().append(Text.literal("CCDBUG").formatted(Formatting.YELLOW, Formatting.BOLD)).append(" (/abort to hide)"));
+        OverlayManager.addOverlayText(Component.empty().append(Component.literal("CCDBUG").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)).append(" (/abort to hide)"));
         if (CPU != null) {
-            OverlayManager.addOverlayText(Text.literal("CPU Usage: ").formatted(Formatting.GOLD).append(Text.literal(String.valueOf(CPU)).formatted(Formatting.AQUA)));
-            OverlayManager.addOverlayText(Text.empty());
+            OverlayManager.addOverlayText(Component.literal("CPU Usage: ").withStyle(ChatFormatting.GOLD).append(Component.literal(String.valueOf(CPU)).withStyle(ChatFormatting.AQUA)));
+            OverlayManager.addOverlayText(Component.empty());
         }
         for (var line : text) {
             OverlayManager.addOverlayText(line);
@@ -125,8 +123,8 @@ public class Debug extends Feature {
         }
     }
 
-    public void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
+    public void render(PoseStack matrices, MultiBufferSource.BufferSource vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         if (active) for (var entry : locations.entrySet())
-            GizmoDrawing.text(entry.getValue().getString(), entry.getKey(), TextGizmo.Style.centered(0xFFFFFF));
+            Gizmos.billboardText(entry.getValue().getString(), entry.getKey(), TextGizmo.Style.forColor(0xFFFFFF));
     }
 }

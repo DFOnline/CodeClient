@@ -1,18 +1,18 @@
 package dev.dfonline.codeclient.config.preset;
 
 import dev.dfonline.codeclient.config.Config;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.text.Text;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 public class ConfigPresetScreen extends Screen {
 
     private final Screen parent;
 
     public ConfigPresetScreen(final Screen parent) {
-        super(Text.translatable("screen.codeclient.config_preset.title"));
+        super(Component.translatable("screen.codeclient.config_preset.title"));
         this.parent = parent;
     }
 
@@ -25,7 +25,7 @@ public class ConfigPresetScreen extends Screen {
         final int buttonWidth = 120;
         final int spacing = 10;
 
-        this.addDrawableChild(createPresetButton(
+        this.addRenderableWidget(createPresetButton(
                 "screen.codeclient.config_preset.minimal",
                 "screen.codeclient.config_preset.minimal.tooltip",
                 centerX - (buttonWidth + spacing) - buttonWidth / 2,
@@ -33,7 +33,7 @@ public class ConfigPresetScreen extends Screen {
                 ConfigPreset.MINIMAL
         ));
 
-        this.addDrawableChild(createPresetButton(
+        this.addRenderableWidget(createPresetButton(
                 "screen.codeclient.config_preset.basic",
                 "screen.codeclient.config_preset.basic.tooltip",
                 centerX - buttonWidth / 2,
@@ -41,7 +41,7 @@ public class ConfigPresetScreen extends Screen {
                 ConfigPreset.BASIC
         ));
 
-        this.addDrawableChild(createPresetButton(
+        this.addRenderableWidget(createPresetButton(
                 "screen.codeclient.config_preset.full",
                 "screen.codeclient.config_preset.full.tooltip",
                 centerX + (buttonWidth + spacing) - buttonWidth / 2,
@@ -50,13 +50,13 @@ public class ConfigPresetScreen extends Screen {
         ));
     }
 
-    private ButtonWidget createPresetButton(final String translationKey, final String tooltipKey, final int x, final int y, final ConfigPreset preset) {
-        return ButtonWidget.builder(
-                        Text.translatable(translationKey),
+    private Button createPresetButton(final String translationKey, final String tooltipKey, final int x, final int y, final ConfigPreset preset) {
+        return Button.builder(
+                        Component.translatable(translationKey),
                         button -> applyPreset(preset)
                 ).size(120, 20)
-                .position(x, y)
-                .tooltip(Tooltip.of(Text.translatable(tooltipKey)))
+                .pos(x, y)
+                .tooltip(Tooltip.create(Component.translatable(tooltipKey)))
                 .build();
     }
 
@@ -66,40 +66,40 @@ public class ConfigPresetScreen extends Screen {
         config.HasSelectedPreset = true;
         config.save();
 
-        if (this.client != null) {
-            this.client.setScreen(this.parent);
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(this.parent);
         }
     }
 
     @Override
-    public void render(final DrawContext context, final int mouseX, final int mouseY, final float delta) {
+    public void render(final GuiGraphics context, final int mouseX, final int mouseY, final float delta) {
         super.render(context, mouseX, mouseY, delta);
 
         final int titleY = this.height / 6;
-        final Text title = Text.translatable("screen.codeclient.config_preset.title");
-        context.drawCenteredTextWithShadow(this.textRenderer, title, this.width / 2, titleY, 0xFFFFFFFF);
+        final Component title = Component.translatable("screen.codeclient.config_preset.title");
+        context.drawCenteredString(this.font, title, this.width / 2, titleY, 0xFFFFFFFF);
 
         final boolean firstRun = !Config.getConfig().HasSelectedPreset;
-        final Text mainSubtitle = firstRun
-                ? Text.translatable("screen.codeclient.config_preset.welcome.title")
-                : Text.translatable("screen.codeclient.config_preset.subtitle");
-        final Text secondarySubtitle = firstRun
-                ? Text.translatable("screen.codeclient.config_preset.welcome.subtitle")
-                : Text.empty();
+        final Component mainSubtitle = firstRun
+                ? Component.translatable("screen.codeclient.config_preset.welcome.title")
+                : Component.translatable("screen.codeclient.config_preset.subtitle");
+        final Component secondarySubtitle = firstRun
+                ? Component.translatable("screen.codeclient.config_preset.welcome.subtitle")
+                : Component.empty();
 
         final int textY = titleY + 20;
-        context.drawCenteredTextWithShadow(this.textRenderer, mainSubtitle, this.width / 2, textY, 0xFFA0E6FF);
+        context.drawCenteredString(this.font, mainSubtitle, this.width / 2, textY, 0xFFA0E6FF);
 
         if (!secondarySubtitle.getString().isEmpty()) {
-            context.drawCenteredTextWithShadow(this.textRenderer, secondarySubtitle, this.width / 2, textY + 12, 0xFFA0E6FF);
-            context.drawCenteredTextWithShadow(this.textRenderer, Text.translatable("screen.codeclient.config_preset.hover_hint"), this.width / 2, textY + 24, 0xFFCCCCCC);
+            context.drawCenteredString(this.font, secondarySubtitle, this.width / 2, textY + 12, 0xFFA0E6FF);
+            context.drawCenteredString(this.font, Component.translatable("screen.codeclient.config_preset.hover_hint"), this.width / 2, textY + 24, 0xFFCCCCCC);
         } else {
-            context.drawCenteredTextWithShadow(this.textRenderer, Text.translatable("screen.codeclient.config_preset.hover_hint"), this.width / 2, textY + 12, 0xFFCCCCCC);
+            context.drawCenteredString(this.font, Component.translatable("screen.codeclient.config_preset.hover_hint"), this.width / 2, textY + 12, 0xFFCCCCCC);
         }
 
         if (!firstRun) {
-            final Text warning = Text.translatable("screen.codeclient.config_preset.warning");
-            context.drawCenteredTextWithShadow(this.textRenderer, warning, this.width / 2, this.height / 3, 0xFFFF5555);
+            final Component warning = Component.translatable("screen.codeclient.config_preset.warning");
+            context.drawCenteredString(this.font, warning, this.width / 2, this.height / 3, 0xFFFF5555);
         }
     }
 }

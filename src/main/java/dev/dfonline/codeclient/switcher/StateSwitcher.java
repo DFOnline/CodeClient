@@ -4,17 +4,17 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.*;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
 
 public class StateSwitcher extends GenericSwitcher {
     public StateSwitcher() {
-        super(Text.translatable("codeclient.switcher.state"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F4);
+        super(Component.translatable("codeclient.switcher.state"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F4);
     }
 
     public static class StateSwitcherFeature extends Feature {
@@ -34,7 +34,7 @@ public class StateSwitcher extends GenericSwitcher {
 
     @Override
     protected void init() {
-        footer = Text.translatable("codeclient.switcher.footer.next", Text.translatable("codeclient.switcher.footer.brackets", "F4").formatted(Formatting.AQUA));
+        footer = Component.translatable("codeclient.switcher.footer.next", Component.translatable("codeclient.switcher.footer.brackets", "F4").withStyle(ChatFormatting.AQUA));
         selected = 0;
         if (CodeClient.lastLocation instanceof Plot) {
             if (CodeClient.lastLocation instanceof Play) selected = 0;
@@ -51,13 +51,13 @@ public class StateSwitcher extends GenericSwitcher {
     @Override
     List<Option> getOptions() {
         ArrayList<Option> options = new ArrayList<>();
-        options.add(new Option(Text.literal("Play"), Items.DIAMOND.getDefaultStack(), () -> joinMode("play")));
-        options.add(new Option(Text.literal("Build"), Items.GRASS_BLOCK.getDefaultStack(), () -> joinMode("build")));
-        options.add(new Option(Text.literal("Code"), Items.COMMAND_BLOCK.getDefaultStack(), () -> joinMode("dev")));
+        options.add(new Option(Component.literal("Play"), Items.DIAMOND.getDefaultInstance(), () -> joinMode("play")));
+        options.add(new Option(Component.literal("Build"), Items.GRASS_BLOCK.getDefaultInstance(), () -> joinMode("build")));
+        options.add(new Option(Component.literal("Code"), Items.COMMAND_BLOCK.getDefaultInstance(), () -> joinMode("dev")));
         return options;
     }
 
     private void joinMode(String mode) {
-        CodeClient.MC.getNetworkHandler().sendChatCommand(mode);
+        CodeClient.MC.getConnection().sendCommand(mode);
     }
 }

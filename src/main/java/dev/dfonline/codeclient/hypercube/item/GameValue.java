@@ -5,14 +5,13 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.util.Arrays;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class GameValue extends VarItem {
     private String type;
@@ -82,11 +81,11 @@ public class GameValue extends VarItem {
             ActionDump db = ActionDump.getActionDump();
             var value = Arrays.stream(db.gameValues).filter(gv -> gv.icon.getCleanName().equals(type)).findFirst();
             if (value.isEmpty()) throw new Exception("");
-            dfItem.setName(Text.literal(value.get().icon.name).setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
+            dfItem.setName(Component.literal(value.get().icon.name).setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.WHITE)));
         } catch (Exception e) {
-            dfItem.setName(Text.literal(type).setStyle(Style.EMPTY));
+            dfItem.setName(Component.literal(type).setStyle(Style.EMPTY));
         }
-        Utility.addLore(stack, Text.literal("Target: ").formatted(Formatting.GRAY).append(Text.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color))));
+        Utility.addLore(stack, Component.literal("Target: ").withStyle(ChatFormatting.GRAY).append(Component.literal(target.name()).setStyle(Style.EMPTY.withColor(target.color))));
         return stack;
     }
 }

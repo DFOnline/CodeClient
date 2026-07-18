@@ -2,15 +2,14 @@ package dev.dfonline.codeclient.action.impl;
 
 import dev.dfonline.codeclient.*;
 import dev.dfonline.codeclient.action.Action;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.Objects;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 
 public class GetActionDump extends Action {
     private final ColorMode colorMode;
@@ -27,8 +26,8 @@ public class GetActionDump extends Action {
 
     @Override
     public void init() {
-        if (CodeClient.MC == null || CodeClient.MC.getNetworkHandler() == null) return;
-        CodeClient.MC.getNetworkHandler().sendChatCommand("dumpactioninfo");
+        if (CodeClient.MC == null || CodeClient.MC.getConnection() == null) return;
+        CodeClient.MC.getConnection().sendCommand("dumpactioninfo");
         capturedData = new StringBuilder();
         startTime = new Date();
     }
@@ -36,12 +35,12 @@ public class GetActionDump extends Action {
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
         if (capturedData == null || isDone) return false;
-        if (packet instanceof GameMessageS2CPacket message) {
+        if (packet instanceof ClientboundSystemChatPacket message) {
             if (message.content().getString().startsWith("Error:")) {
                 isDone = true;
-                OverlayManager.setOverlayText(Text.translatable("codeclient.action.get_action_dump.error.could_not_start").formatted(Formatting.RED));
-                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.error.beta_broke").formatted(Formatting.RED));
-                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort", Text.literal("/abort").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+                OverlayManager.setOverlayText(Component.translatable("codeclient.action.get_action_dump.error.could_not_start").withStyle(ChatFormatting.RED));
+                OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.error.beta_broke").withStyle(ChatFormatting.RED));
+                OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.abort", Component.literal("/abort").withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.LIGHT_PURPLE));
 
                 return true;
             }
@@ -51,23 +50,23 @@ public class GetActionDump extends Action {
             lines += 1;
             length += content.length();
             OverlayManager.setOverlayText();
-            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.title").formatted(Formatting.GOLD));
-            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.size", Text.literal(String.valueOf(length)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
-            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.lines", Text.literal(String.valueOf(lines)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
-            OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.time", Text.literal(String.valueOf((float) (new Date().getTime() - startTime.getTime()) / 1000)).formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
+            OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.scanning.title").withStyle(ChatFormatting.GOLD));
+            OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.scanning.size", Component.literal(String.valueOf(length)).withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.LIGHT_PURPLE));
+            OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.scanning.lines", Component.literal(String.valueOf(lines)).withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.LIGHT_PURPLE));
+            OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.scanning.time", Component.literal(String.valueOf((float) (new Date().getTime() - startTime.getTime()) / 1000)).withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.LIGHT_PURPLE));
             if (Objects.equals(content, "}")) {
                 isDone = true;
-                OverlayManager.addOverlayText(Text.literal(""));
-                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.complete").formatted(Formatting.LIGHT_PURPLE));
-                OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.abort", Text.literal("/abort").formatted(Formatting.GREEN)).formatted(Formatting.LIGHT_PURPLE));
-                OverlayManager.addOverlayText(Text.literal(""));
+                OverlayManager.addOverlayText(Component.literal(""));
+                OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.scanning.complete").withStyle(ChatFormatting.LIGHT_PURPLE));
+                OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.abort", Component.literal("/abort").withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.LIGHT_PURPLE));
+                OverlayManager.addOverlayText(Component.literal(""));
                 try {
                     Path path = FileManager.writeFile("actiondump.json", capturedData.toString());
-                    OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.complete.file").formatted(Formatting.LIGHT_PURPLE));
-                    OverlayManager.addOverlayText(Text.literal(path.toString()).formatted(Formatting.GREEN));
+                    OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.scanning.complete.file").withStyle(ChatFormatting.LIGHT_PURPLE));
+                    OverlayManager.addOverlayText(Component.literal(path.toString()).withStyle(ChatFormatting.GREEN));
                 } catch (IOException e) {
-                    OverlayManager.addOverlayText(Text.translatable("codeclient.files.error.cant_save").formatted(Formatting.RED));
-                    OverlayManager.addOverlayText(Text.translatable("codeclient.action.get_action_dump.scanning.complete.save_error").formatted(Formatting.RED));
+                    OverlayManager.addOverlayText(Component.translatable("codeclient.files.error.cant_save").withStyle(ChatFormatting.RED));
+                    OverlayManager.addOverlayText(Component.translatable("codeclient.action.get_action_dump.scanning.complete.save_error").withStyle(ChatFormatting.RED));
                 }
                 callback();
             }

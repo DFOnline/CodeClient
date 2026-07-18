@@ -8,27 +8,27 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestField;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
-import dev.dfonline.codeclient.hypercube.item.Number;
 import dev.dfonline.codeclient.hypercube.item.*;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import dev.dfonline.codeclient.hypercube.item.Number;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class InsertOverlayFeature extends Feature {
     @Override
@@ -37,7 +37,7 @@ public class InsertOverlayFeature extends Feature {
     }
 
     @Override
-    public ChestFeature makeChestFeature(HandledScreen<?> screen) {
+    public ChestFeature makeChestFeature(AbstractContainerScreen<?> screen) {
         return new InsertOverlay(screen);
     }
 
@@ -48,13 +48,13 @@ public class InsertOverlayFeature extends Feature {
         private int screenY = 0;
 
         static {
-            var item = Items.ITEM_FRAME.getDefaultStack();
+            var item = Items.ITEM_FRAME.getDefaultInstance();
             DFItem dfItem = DFItem.of(item);
-            dfItem.setName(Text.translatable("itemGroup.search"));
+            dfItem.setName(Component.translatable("itemGroup.search"));
             searchIcon = dfItem.getItemStack();
         }
 
-        public InsertOverlay(HandledScreen<?> screen) {
+        public InsertOverlay(AbstractContainerScreen<?> screen) {
             super(screen);
         }
 
@@ -63,7 +63,7 @@ public class InsertOverlayFeature extends Feature {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
+        public void render(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {
             screenX = x;
             screenY = y;
             if (overlayOpen())
@@ -71,7 +71,7 @@ public class InsertOverlayFeature extends Feature {
         }
 
         @Override
-        public boolean mouseClicked(Click click) {
+        public boolean mouseClicked(MouseButtonEvent click) {
             if (overlayOpen()) {
                 boolean stayOpen = selectedSlot.mouseClicked(click, screen);
                 if (!stayOpen) {
@@ -83,19 +83,19 @@ public class InsertOverlayFeature extends Feature {
         }
 
         @Override
-        public boolean keyPressed(KeyInput key) {
+        public boolean keyPressed(KeyEvent key) {
             if (overlayOpen()) return selectedSlot.keyPressed(key);
             return false;
         }
 
         @Override
-        public boolean keyReleased(KeyInput key) {
+        public boolean keyReleased(KeyEvent key) {
             if (overlayOpen()) return selectedSlot.keyReleased(key);
             return false;
         }
 
 
-        public boolean charTyped(CharInput input) {
+        public boolean charTyped(CharacterEvent input) {
             if (overlayOpen()) return selectedSlot.charTyped(input);
             return false;
         }
@@ -107,9 +107,9 @@ public class InsertOverlayFeature extends Feature {
         }
 
         @Override
-        public boolean clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-            if(CodeClient.MC.player != null && slot.inventory == CodeClient.MC.player.getInventory()) return false;
-            if (actionType == SlotActionType.PICKUP && !slot.hasStack() && CodeClient.MC.player.currentScreenHandler.getCursorStack().isEmpty())
+        public boolean clickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
+            if(CodeClient.MC.player != null && slot.container == CodeClient.MC.player.getInventory()) return false;
+            if (actionType == ClickType.PICKUP && !slot.hasItem() && CodeClient.MC.player.containerMenu.getCarried().isEmpty())
                 selectedSlot = new AddWidget(slot, () -> selectedSlot = null);
             else if (selectedSlot != null) selectedSlot.close();
             return false;
@@ -122,7 +122,7 @@ public class InsertOverlayFeature extends Feature {
             private int height;
             private final List<Option> options;
             private final Slot slot;
-            private ClickableWidget field;
+            private AbstractWidget field;
             private ItemStack item = null;
             private final Runnable close;
 
@@ -136,7 +136,7 @@ public class InsertOverlayFeature extends Feature {
                 int i = 0;
                 for (var type : new VarItem[]{
                         new dev.dfonline.codeclient.hypercube.item.Text(),
-                        new Component(),
+                        new dev.dfonline.codeclient.hypercube.item.Component(),
                         new Number(),
                         new Location(),
                         new Vector(),
@@ -165,17 +165,17 @@ public class InsertOverlayFeature extends Feature {
             private void setSlot(@NotNull ItemStack stack) {
                 if(stack == searchIcon) return;
                 var mc = CodeClient.MC;
-                var manager = mc.interactionManager;
-                if (manager == null || mc.getNetworkHandler() == null) return;
-                var currentScreen = mc.currentScreen;
-                if (currentScreen instanceof HandledScreen<?> handledScreen) {
+                var manager = mc.gameMode;
+                if (manager == null || mc.getConnection() == null) return;
+                var currentScreen = mc.screen;
+                if (currentScreen instanceof AbstractContainerScreen<?> handledScreen) {
                     var player = mc.player;
-                    var sync = handledScreen.getScreenHandler().syncId;
-                    manager.clickSlot(sync, slot.id, 0, SlotActionType.SWAP, player);
-                    mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36, stack));
-                    manager.clickSlot(sync, slot.id, 0, SlotActionType.SWAP, player);
-                    manager.clickSlot(sync, 54, 0, SlotActionType.QUICK_CRAFT, player);
-                    slot.setStack(stack);
+                    var sync = handledScreen.getMenu().containerId;
+                    manager.handleInventoryMouseClick(sync, slot.index, 0, ClickType.SWAP, player);
+                    mc.getConnection().send(new ServerboundSetCreativeModeSlotPacket(36, stack));
+                    manager.handleInventoryMouseClick(sync, slot.index, 0, ClickType.SWAP, player);
+                    manager.handleInventoryMouseClick(sync, 54, 0, ClickType.QUICK_CRAFT, player);
+                    slot.setByPlayer(stack);
                 }
             }
 
@@ -187,14 +187,14 @@ public class InsertOverlayFeature extends Feature {
                 this.close.run();
             }
 
-            public void render(DrawContext context, int mouseX, int mouseY) {
+            public void render(GuiGraphics context, int mouseX, int mouseY) {
 //                context.getMatrices().translate(0.0F, 0.0F, 900.0F);
-                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, Identifier.ofVanilla("recipe_book/overlay_recipe"), x, y, width, height);
+                context.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("recipe_book/overlay_recipe"), x, y, width, height);
                 if (field != null) {
                     field.render(context, mouseX, mouseY, 0);
                 } else {
                     for (var option : options) {
-                        context.drawItem(option.type, option.x, option.y);
+                        context.renderItem(option.type, option.x, option.y);
                     }
                 }
 //                new Identifier("recipe_book/crafting_overlay_highlighted")
@@ -202,14 +202,14 @@ public class InsertOverlayFeature extends Feature {
 //                RecipeAlternativesWidget.CRAFTING_OVERLAY_HIGHLIGHTED_TEXTURE : RecipeAlternativesWidget.CRAFTING_OVERLAY_TEXTURE
             }
 
-            public boolean mouseClicked(Click click, HandledScreen<?> screen) {
+            public boolean mouseClicked(MouseButtonEvent click, AbstractContainerScreen<?> screen) {
                 var mouseX = click.x();
                 var mouseY = click.y();
                 int x = screenX;
                 int y = screenY;
                 if (mouseX > this.x + x && mouseY > this.y + y && mouseX < this.x + x + width && mouseY < this.y + y + height) {
                     if (field != null) {
-                        boolean b = field.mouseClicked(new Click(mouseX - x, mouseY - y, click.buttonInfo()), false);
+                        boolean b = field.mouseClicked(new MouseButtonEvent(mouseX - x, mouseY - y, click.buttonInfo()), false);
                         if(field instanceof CustomChestField<?> chestField) {
                             item = chestField.item.toStack();
                             setSlot(item);
@@ -231,14 +231,14 @@ public class InsertOverlayFeature extends Feature {
                             VarItem varItem = VarItems.parse(item);
                             if(varItem != null) {
                                 this.height = 26;
-                                field = new CustomChestField<>(CodeClient.MC.textRenderer, this.x + 5, this.y + 5, this.width - 10, this.height - 10, Text.literal(""), varItem);
+                                field = new CustomChestField<>(CodeClient.MC.font, this.x + 5, this.y + 5, this.width - 10, this.height - 10, Component.literal(""), varItem);
                                 ((CustomChestField<?>) field).select(true);
                                 ((CustomChestField<?>) field).selectAll();
                             }
                             else {
                                 this.width = 160 + 10;
                                 this.height = 134;
-                                field = new ItemSelector(CodeClient.MC.textRenderer,this.x + 5, this.y + 5, this.width - 10, this.height - 10,screenX,screenY, itemStack -> {
+                                field = new ItemSelector(CodeClient.MC.font,this.x + 5, this.y + 5, this.width - 10, this.height - 10,screenX,screenY, itemStack -> {
                                     item = itemStack;
                                     close();
                                 });
@@ -250,8 +250,8 @@ public class InsertOverlayFeature extends Feature {
                 return false;
             }
 
-            public boolean keyPressed(KeyInput key) {
-                var keyCode = key.getKeycode();
+            public boolean keyPressed(KeyEvent key) {
+                var keyCode = key.input();
                 if (field != null) {
                     if (keyCode != GLFW.GLFW_KEY_ENTER) {
                         var end = field.keyPressed(key);
@@ -264,8 +264,8 @@ public class InsertOverlayFeature extends Feature {
                 return false;
             }
 
-            public boolean keyReleased(KeyInput key) {
-                var keyCode = key.getKeycode();
+            public boolean keyReleased(KeyEvent key) {
+                var keyCode = key.input();
                 if (field != null) field.keyReleased(key);
                 if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_ESCAPE) {
                     close();
@@ -274,7 +274,7 @@ public class InsertOverlayFeature extends Feature {
                 return false;
             }
 
-            public boolean charTyped(CharInput charInput) {
+            public boolean charTyped(CharacterEvent charInput) {
                 if (field != null) return field.charTyped(charInput);
                 return false;
             }

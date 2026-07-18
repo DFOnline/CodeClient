@@ -7,10 +7,10 @@ import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class GetPlotSize extends Action {
     private Step step = Step.WAIT;
@@ -20,7 +20,7 @@ public class GetPlotSize extends Action {
 
     @Override
     public void init() {
-        ItemStack item = Items.PAPER.getDefaultStack();
+        ItemStack item = Items.PAPER.getDefaultInstance();
         Utility.makeHolding(item);
     }
 
@@ -35,7 +35,7 @@ public class GetPlotSize extends Action {
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
         if (CodeClient.location instanceof Dev plot) {
-            if (step == Step.TP && packet instanceof PlayerPositionLookS2CPacket position) {
+            if (step == Step.TP && packet instanceof ClientboundPlayerPositionPacket position) {
                 step = Step.DONE;
                 double size = position.change().position().z - plot.getZ();
                 if (size > 49) {

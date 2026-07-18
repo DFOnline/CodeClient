@@ -4,18 +4,18 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Navigation extends Feature {
     public boolean onJump() {
         if (shouldTeleportUp()) {
-            Vec3d move = CodeClient.MC.player.getEntityPos().add(0, 5, 0);
+            Vec3 move = CodeClient.MC.player.position().add(0, 5, 0);
             var noClip = CodeClient.getFeature(NoClip.class).orElse(null);
             if (noClip != null && !noClip.isIgnoringWalls() && noClip.isInsideWall(move))
                 move = move.add(0, 2, 0);
-            CodeClient.MC.player.setPosition(move);
+            CodeClient.MC.player.setPos(move);
             return true;
         }
         return false;
@@ -23,8 +23,8 @@ public class Navigation extends Feature {
 
     public boolean shouldTeleportUp() {
         if (CodeClient.location instanceof Dev dev) {
-            ClientPlayerEntity pl = CodeClient.MC.player;
-            return dev.isInDevSpace() && pl.isOnGround() && Config.getConfig().TeleportUp && pl.getPitch() <= Config.getConfig().UpAngle - 90;
+            LocalPlayer pl = CodeClient.MC.player;
+            return dev.isInDevSpace() && pl.onGround() && Config.getConfig().TeleportUp && pl.getXRot() <= Config.getConfig().UpAngle - 90;
         }
         return false;
     }
@@ -37,14 +37,14 @@ public class Navigation extends Feature {
                 && player != null
                 && dev.isInDevSpace()
                 && player.getY() % 5 == 0
-                && !lastSneaking && player.isSneaking()
-                && (player.getPitch() >= 90 - Config.getConfig().DownAngle)
+                && !lastSneaking && player.isShiftKeyDown()
+                && (player.getXRot() >= 90 - Config.getConfig().DownAngle)
         ) {
-            Vec3d move = CodeClient.MC.player.getEntityPos().add(0, -5, 0);
-            if (move.y < dev.getFloorY()) move = new Vec3d(move.x, dev.getFloorY(), move.z);
+            Vec3 move = CodeClient.MC.player.position().add(0, -5, 0);
+            if (move.y < dev.getFloorY()) move = new Vec3(move.x, dev.getFloorY(), move.z);
             var noClip = CodeClient.getFeature(NoClip.class).orElse(null);
             if (noClip != null && !noClip.isIgnoringWalls() && noClip.isInsideWall(move)) move = move.add(0, 2, 0);
-            CodeClient.MC.player.setPosition(move);
+            CodeClient.MC.player.setPos(move);
             return true;
         }
         return false;
@@ -55,7 +55,7 @@ public class Navigation extends Feature {
         if (CodeClient.location instanceof Dev dev
                 && dev.isInDevSpace()
                 && Config.getConfig().NoClipEnabled
-                && CodeClient.MC.player.getPitch() <= Config.getConfig().UpAngle - 90)
+                && CodeClient.MC.player.getXRot() <= Config.getConfig().UpAngle - 90)
             return 0.91f;
         return null;
     }
@@ -65,7 +65,7 @@ public class Navigation extends Feature {
         if (CodeClient.location instanceof Dev dev && dev.isInDevSpace()) {
             var config = Config.getConfig().AirSpeed;
             if(config == 10) return null;
-            return 0.026F * (CodeClient.MC.player.getMovementSpeed() * config);
+            return 0.026F * (CodeClient.MC.player.getSpeed() * config);
         }
         return null;
     }

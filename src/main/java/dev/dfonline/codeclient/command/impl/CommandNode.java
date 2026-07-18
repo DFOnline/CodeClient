@@ -5,8 +5,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.config.Config;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-
+import net.minecraft.commands.CommandBuildContext;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -53,7 +52,7 @@ public class CommandNode extends Command {
 
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.then(argument("node", word())
                 .suggests((context, builder) -> {
                     loadNodes(); // Refresh in case of config change.
@@ -62,7 +61,7 @@ public class CommandNode extends Command {
                 })
                 .executes(context -> {
                     String key = context.getArgument("node", String.class);
-                    if (CodeClient.MC.getNetworkHandler() == null) return -1;
+                    if (CodeClient.MC.getConnection() == null) return -1;
 
                     String serverId = NODE_MAP.getOrDefault(key, key);
 
@@ -75,7 +74,7 @@ public class CommandNode extends Command {
                         }
                     }
 
-                    CodeClient.MC.getNetworkHandler().sendChatCommand("server " + serverId);
+                    CodeClient.MC.getConnection().sendCommand("server " + serverId);
                     return 0;
                 }));
     }

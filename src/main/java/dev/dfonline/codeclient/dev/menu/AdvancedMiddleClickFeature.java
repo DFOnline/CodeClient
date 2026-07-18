@@ -5,17 +5,15 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-
 import java.util.Optional;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public class AdvancedMiddleClickFeature extends Feature {
 
@@ -28,28 +26,28 @@ public class AdvancedMiddleClickFeature extends Feature {
         return Config.getConfig().AdvancedMiddleClick;
     }
 
-    public ChestFeature makeChestFeature(HandledScreen<?> screen) {
+    public ChestFeature makeChestFeature(AbstractContainerScreen<?> screen) {
         return new AdvancedMiddleClick(screen);
     }
 
-    public static ItemStack getCopy(Slot slot, ItemStack cursor, SlotActionType actionType) {
-        int max = slot.getStack().getMaxCount();
-        boolean shift = actionType == SlotActionType.QUICK_MOVE; // TODO: verify this isn't inverted
-        if (cursor.isEmpty() && slot.hasStack()) {
+    public static ItemStack getCopy(Slot slot, ItemStack cursor, ClickType actionType) {
+        int max = slot.getItem().getMaxStackSize();
+        boolean shift = actionType == ClickType.QUICK_MOVE; // TODO: verify this isn't inverted
+        if (cursor.isEmpty() && slot.hasItem()) {
             int count = 1;
             if (shift) count = max;
-            return slot.getStack().copyWithCount(count);
-        } else if (!cursor.isEmpty() && compare(slot.getStack(), cursor)) {
+            return slot.getItem().copyWithCount(count);
+        } else if (!cursor.isEmpty() && compare(slot.getItem(), cursor)) {
             int count = Math.min(cursor.getCount()+1, max);
             if (shift) count = max;
-            return slot.getStack().copyWithCount(count);
+            return slot.getItem().copyWithCount(count);
         }
         return null;
     }
 
     private static boolean compare(ItemStack a, ItemStack b) {
-        if (a.itemMatches(b.getRegistryEntry())) {
-            if (a.getName().equals(b.getName())) {
+        if (a.is(b.getItemHolder())) {
+            if (a.getHoverName().equals(b.getHoverName())) {
                 return a.getComponents().equals(b.getComponents());
             }
         }
@@ -57,28 +55,28 @@ public class AdvancedMiddleClickFeature extends Feature {
     }
 
     private static class AdvancedMiddleClick extends ChestFeature {
-        public AdvancedMiddleClick(HandledScreen<?> screen) {
+        public AdvancedMiddleClick(AbstractContainerScreen<?> screen) {
             super(screen);
         }
 
         @Override
-        public boolean clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
-            ClientPlayerEntity player = MinecraftClient.getInstance().player;
-            var manager = MinecraftClient.getInstance().interactionManager;
-            var network = MinecraftClient.getInstance().getNetworkHandler();
-            if (!(manager == null || network == null || player == null) && actionType == SlotActionType.CLONE) {
-                ScreenHandler handler = player.currentScreenHandler;
+        public boolean clickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
+            LocalPlayer player = Minecraft.getInstance().player;
+            var manager = Minecraft.getInstance().gameMode;
+            var network = Minecraft.getInstance().getConnection();
+            if (!(manager == null || network == null || player == null) && actionType == ClickType.CLONE) {
+                AbstractContainerMenu handler = player.containerMenu;
 
                 // find an empty slot to use
-                var emptySlotId = player.getInventory().getEmptySlot();
+                var emptySlotId = player.getInventory().getFreeSlot();
                 int external = -1; // if the code had to use an external slot
                 if (emptySlotId == -1) {
                     // no empty slot, try to create an available slot temporarily.
-                    Optional<Slot> candidate = handler.slots.stream().filter(s -> !s.hasStack()).findFirst();
+                    Optional<Slot> candidate = handler.slots.stream().filter(s -> !s.hasItem()).findFirst();
                     if (candidate.isPresent()) {
                         Slot selected = candidate.get();
-                        external = selected.id;
-                        manager.clickSlot(syncId, external, 0, SlotActionType.SWAP, player);
+                        external = selected.index;
+                        manager.handleInventoryMouseClick(syncId, external, 0, ClickType.SWAP, player);
                         emptySlotId = 0;
                     } else {
                         // not possible to run the following code, return to vanilla behaviour
@@ -88,28 +86,28 @@ public class AdvancedMiddleClickFeature extends Feature {
 
                 int convertedSlotId = Utility.getRemoteSlot(emptySlotId)-9+(handler.slots.size()-36);
                 Slot emptySlot = handler.getSlot(convertedSlotId);
-                var stack = getCopy(slot, handler.getCursorStack(), actionType); // get the stack to set the slot to
+                var stack = getCopy(slot, handler.getCarried(), actionType); // get the stack to set the slot to
                 if (stack == null) return false;
 
-                if (!handler.getCursorStack().isEmpty()) {
-                    manager.clickSlot(syncId, convertedSlotId, 0, SlotActionType.PICKUP, player);
-                    emptySlot.getStack().setCount(0); // hides the temporary item in the empty slot.
+                if (!handler.getCarried().isEmpty()) {
+                    manager.handleInventoryMouseClick(syncId, convertedSlotId, 0, ClickType.PICKUP, player);
+                    emptySlot.getItem().setCount(0); // hides the temporary item in the empty slot.
                 }
 
                 // create the item for the server
-                network.sendPacket(new CreativeInventoryActionC2SPacket(
+                network.send(new ServerboundSetCreativeModeSlotPacket(
                         Utility.getRemoteSlot(emptySlotId), stack)
                 );
 
-                manager.clickSlot(syncId, convertedSlotId, 0, SlotActionType.PICKUP, player);
+                manager.handleInventoryMouseClick(syncId, convertedSlotId, 0, ClickType.PICKUP, player);
 
                 if (external != -1) {
-                    manager.clickSlot(syncId, external, 0, SlotActionType.SWAP, player);
+                    manager.handleInventoryMouseClick(syncId, external, 0, ClickType.SWAP, player);
                 } else {
-                    emptySlot.getStack().setCount(0); // hides the temporary item in the empty slot.
+                    emptySlot.getItem().setCount(0); // hides the temporary item in the empty slot.
                 }
 
-                handler.setCursorStack(stack); // shows the item in your cursor before the server agrees.
+                handler.setCarried(stack); // shows the item in your cursor before the server agrees.
 
 
                 return true;

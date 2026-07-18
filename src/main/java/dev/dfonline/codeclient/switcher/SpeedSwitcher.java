@@ -5,18 +5,18 @@ import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.location.Spawn;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
 
 public class SpeedSwitcher extends GenericSwitcher {
     private static int lastSpeed = 3;
 
     public SpeedSwitcher() {
-        super(Text.translatable("codeclient.switcher.speed"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F5);
+        super(Component.translatable("codeclient.switcher.speed"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F5);
     }
 
     public static class SpeedSwitcherFeature extends Feature {
@@ -36,10 +36,10 @@ public class SpeedSwitcher extends GenericSwitcher {
 
     @Override
     protected void init() {
-        footer = Text.translatable("codeclient.switcher.footer.next", Text.translatable("codeclient.switcher.footer.brackets", "F5").formatted(Formatting.AQUA));
+        footer = Component.translatable("codeclient.switcher.footer.next", Component.translatable("codeclient.switcher.footer.brackets", "F5").withStyle(ChatFormatting.AQUA));
         selected = 0;
         // 0.05 is 100% on df. 1000% is 0.5.
-        if (CodeClient.MC.player.getAbilities().getFlySpeed() == 0.05f) {
+        if (CodeClient.MC.player.getAbilities().getFlyingSpeed() == 0.05f) {
             selected = lastSpeed;
         }
         super.init();
@@ -48,17 +48,17 @@ public class SpeedSwitcher extends GenericSwitcher {
     @Override
     List<Option> getOptions() {
         return List.of(
-                new Option(Text.of("100%"), Items.FEATHER.getDefaultStack(), () -> CodeClient.MC.getNetworkHandler().sendChatCommand("fs 100")),
-                new Option(Text.of("200%"), Items.FEATHER.getDefaultStack().copyWithCount(2), () -> {
-                    CodeClient.MC.getNetworkHandler().sendChatCommand("fs 200");
+                new Option(Component.nullToEmpty("100%"), Items.FEATHER.getDefaultInstance(), () -> CodeClient.MC.getConnection().sendCommand("fs 100")),
+                new Option(Component.nullToEmpty("200%"), Items.FEATHER.getDefaultInstance().copyWithCount(2), () -> {
+                    CodeClient.MC.getConnection().sendCommand("fs 200");
                     lastSpeed = 1;
                 }),
-                new Option(Text.of("500%"), Items.FEATHER.getDefaultStack().copyWithCount(5), () -> {
-                    CodeClient.MC.getNetworkHandler().sendChatCommand("fs 500");
+                new Option(Component.nullToEmpty("500%"), Items.FEATHER.getDefaultInstance().copyWithCount(5), () -> {
+                    CodeClient.MC.getConnection().sendCommand("fs 500");
                     lastSpeed = 2;
                 }),
-                new Option(Text.of("1000%"), Items.FEATHER.getDefaultStack().copyWithCount(10), () -> {
-                    CodeClient.MC.getNetworkHandler().sendChatCommand("fs 1000");
+                new Option(Component.nullToEmpty("1000%"), Items.FEATHER.getDefaultInstance().copyWithCount(10), () -> {
+                    CodeClient.MC.getConnection().sendCommand("fs 1000");
                     lastSpeed = 3;
                 })
         );

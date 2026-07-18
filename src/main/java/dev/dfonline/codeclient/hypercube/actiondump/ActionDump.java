@@ -2,10 +2,10 @@ package dev.dfonline.codeclient.hypercube.actiondump;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.FileManager;
-import net.minecraft.block.entity.SignText;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import net.minecraft.world.level.block.entity.SignText;
 
 public class ActionDump {
     private static ActionDump instance = null;

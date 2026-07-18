@@ -3,10 +3,6 @@ package dev.dfonline.codeclient.mixin.screen.chat;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ChatInputSuggestor;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.OrderedText;
 import org.apache.commons.lang3.IntegerRange;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,27 +14,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.CommandSuggestions;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.util.FormattedCharSequence;
 
-@Mixin(ChatInputSuggestor.class)
+@Mixin(CommandSuggestions.class)
 public class MChatInputSuggester {
 
     @Shadow @Final
-    TextFieldWidget textField;
+    EditBox input;
 
     @Unique
-    private OrderedText preview = null;
-    @Inject(method = "provideRenderText", at = @At("RETURN"), cancellable = true)
-    private void provideRenderText(String partial, int position, CallbackInfoReturnable<OrderedText> cir) {
+    private FormattedCharSequence preview = null;
+    @Inject(method = "formatChat", at = @At("RETURN"), cancellable = true)
+    private void provideRenderText(String partial, int position, CallbackInfoReturnable<FormattedCharSequence> cir) {
         if (Objects.equals(partial, "")) return;
         CodeClient.getFeature(ExpressionHighlighter.class).ifPresent((action) -> {
             if (!action.enabled() || !(CodeClient.location instanceof Dev)) return;
 
             var range = IntegerRange.of(position, position + partial.length());
-            ExpressionHighlighter.HighlightedExpression expression = action.format(textField.getText(), partial, range);
+            ExpressionHighlighter.HighlightedExpression expression = action.format(input.getValue(), partial, range);
 
             if (expression == null) return;
 
-            if (preview != OrderedText.empty()) preview = expression.preview();
+            if (preview != FormattedCharSequence.composite()) preview = expression.preview();
             else preview = null;
 
             cir.setReturnValue(expression.text());
@@ -46,7 +46,7 @@ public class MChatInputSuggester {
     }
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void renderPreview(DrawContext context, int mouseX, int mouseY, CallbackInfo ci) {
+    private void renderPreview(GuiGraphics context, int mouseX, int mouseY, CallbackInfo ci) {
         CodeClient.getFeature(ExpressionHighlighter.class).ifPresent((action) -> {
             if (!action.enabled() || !(CodeClient.location instanceof Dev) || preview == null) return;
 

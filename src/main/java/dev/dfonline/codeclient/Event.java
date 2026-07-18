@@ -3,37 +3,40 @@ package dev.dfonline.codeclient;
 import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.*;
-import net.minecraft.network.listener.PacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
-import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
-import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundLoginPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 /**
  * Detects mode changes.
  */
 public class Event {
-    private static Vec3d tp;
+    private static Vec3 tp;
     private static Sequence step = Sequence.WAIT_FOR_CLEAR;
     private static boolean switchingMode = false;
 
     public static <T extends PacketListener> void handlePacket(Packet<T> packet) {
-        if (packet instanceof ClearTitleS2CPacket clear) {
-            if (clear.shouldReset()) step = Sequence.WAIT_FOR_POS;
+        if (packet instanceof ClientboundClearTitlesPacket clear) {
+            if (clear.shouldResetTimes()) step = Sequence.WAIT_FOR_POS;
         }
-        if (packet instanceof PlayerPositionLookS2CPacket pos) {
-            tp = new Vec3d(pos.change().position().x, pos.change().position().y, pos.change().position().z);
+        if (packet instanceof ClientboundPlayerPositionPacket pos) {
+            tp = new Vec3(pos.change().position().x, pos.change().position().y, pos.change().position().z);
             if (step == Sequence.WAIT_FOR_POS) step = Sequence.WAIT_FOR_MESSAGE;
         }
-        if (packet instanceof OverlayMessageS2CPacket overlay) {
+        if (packet instanceof ClientboundSetActionBarTextPacket overlay) {
             if (step == Sequence.WAIT_FOR_MESSAGE && overlay.text().getString().matches("(⏵+ - )?⧈ -?\\d+ Tokens {2}ᛥ -?\\d+ Tickets {2}⚡ -?\\d+ Sparks")) {
                 updateLocation(new Spawn());
             }
         }
-        if (packet instanceof GameMessageS2CPacket message) {
+        if (packet instanceof ClientboundSystemChatPacket message) {
             if (step == Sequence.WAIT_FOR_MESSAGE) {
                 String content = message.content().getString();
                 if (content.equals("» You are now in dev mode.")) {
@@ -47,19 +50,19 @@ public class Event {
                 }
             }
         }
-        if (packet instanceof GameJoinS2CPacket) {
+        if (packet instanceof ClientboundLoginPacket) {
             updateLocation(new Spawn());
         }
     }
 
     public static <T extends PacketListener> void onSendPacket(Packet<T> packet) {
-        if (packet instanceof CommandExecutionC2SPacket command) {
+        if (packet instanceof ServerboundChatCommandPacket command) {
             CommandSender.registerCommandSend();
             if (List.of("play", "build", "code", "dev").contains(command.command().replaceFirst("mode ", ""))) {
                 switchingMode = true;
             }
         }
-        if (packet instanceof ChatMessageC2SPacket) {
+        if (packet instanceof ServerboundChatPacket) {
             CommandSender.registerCommandSend();
         }
     }

@@ -7,26 +7,26 @@ import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Plot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class ScanPlot extends Action {
-    private static final Vec3d goToOffset = new Vec3d(0, 1.5, 0);
+    private static final Vec3 goToOffset = new Vec3(0, 1.5, 0);
     private final ArrayList<ItemStack> returnList;
     private List<BlockPos> blocks = null;
     private HashMap<BlockPos, ItemStack> scanned = null;
@@ -67,10 +67,10 @@ public class ScanPlot extends Action {
 
     @Nullable
     private BlockPos findNextBlock() {
-        var player = CodeClient.MC.player.getEntityPos();
+        var player = CodeClient.MC.player.position();
         BlockPos nearest = null;
         for (BlockPos pos : blocks) {
-            if (nearest == null || pos.isWithinDistance(player, nearest.toCenterPos().distanceTo(player))) {
+            if (nearest == null || pos.closerToCenterThan(player, nearest.getCenter().distanceTo(player))) {
                 if (scanned.containsKey(pos) && scanned.get(pos) != null) {
                     continue;
                 }
@@ -88,7 +88,7 @@ public class ScanPlot extends Action {
             callback();
             return;
         }
-        step = new GoTo(block.toCenterPos().add(goToOffset), () -> {
+        step = new GoTo(block.getCenter().add(goToOffset), () -> {
             this.step = new PickUpBlock(block, () -> {
                 this.step = null;
 //                next(progress + 1);
@@ -119,25 +119,25 @@ public class ScanPlot extends Action {
 
         @Override
         public void init() {
-            var net = CodeClient.MC.getNetworkHandler();
+            var net = CodeClient.MC.getConnection();
             Utility.makeHolding(ItemStack.EMPTY);
             var player = CodeClient.MC.player;
-            var inter = CodeClient.MC.interactionManager;
-            boolean sneaky = !player.isSneaking();
-            if (sneaky) net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
-            inter.interactBlock(player, Hand.MAIN_HAND, new BlockHitResult(this.pos.toCenterPos(), Direction.UP, this.pos, false));
-            if (sneaky) net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
+            var inter = CodeClient.MC.gameMode;
+            boolean sneaky = !player.isShiftKeyDown();
+            if (sneaky) net.send(new ServerboundPlayerInputPacket(new Input(false, false, false, false, false, true, false)));
+            inter.useItemOn(player, InteractionHand.MAIN_HAND, new BlockHitResult(this.pos.getCenter(), Direction.UP, this.pos, false));
+            if (sneaky) net.send(new ServerboundPlayerInputPacket(CodeClient.MC.player.getLastSentInput()));
         }
 
         @Override
         public boolean onReceivePacket(Packet<?> packet) {
-            var net = CodeClient.MC.getNetworkHandler();
-            if (net != null && packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
-                var data = Utility.templateDataItem(slot.getStack());
+            var net = CodeClient.MC.getConnection();
+            if (net != null && packet instanceof ClientboundContainerSetSlotPacket slot) {
+                var data = Utility.templateDataItem(slot.getItem());
                 var template = Template.parse64(data);
                 if (template == null) return false;
-                scanned.put(pos, slot.getStack());
-                net.sendPacket(new CreativeInventoryActionC2SPacket(slot.getSlot(), ItemStack.EMPTY));
+                scanned.put(pos, slot.getItem());
+                net.send(new ServerboundSetCreativeModeSlotPacket(slot.getSlot(), ItemStack.EMPTY));
                 this.callback();
                 return true;
             }

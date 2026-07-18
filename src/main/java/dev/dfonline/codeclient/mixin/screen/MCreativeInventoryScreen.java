@@ -4,9 +4,9 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,19 +14,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(CreativeInventoryScreen.class)
+@Mixin(CreativeModeInventoryScreen.class)
 public abstract class MCreativeInventoryScreen {
     @Shadow
     @Nullable
-    private Slot deleteItemSlot;
+    private Slot destroyItemSlot;
 
-    @Inject(method = "onMouseClick", at = @At("HEAD"), cancellable = true)
-    public void slotClicked(@Nullable Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
+    @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
+    public void slotClicked(@Nullable Slot slot, int slotId, int button, ClickType actionType, CallbackInfo ci) {
         if (
                 CodeClient.location instanceof Dev dev
                 && dev.isInDevSpace() // Clear the inventory regardless of mode if not in dev space
-                && actionType == SlotActionType.QUICK_MOVE
-                && slot == this.deleteItemSlot
+                && actionType == ClickType.QUICK_MOVE
+                && slot == this.destroyItemSlot
         ) {
             String cmd = Config.getConfig().DestroyItemResetMode.command;
 

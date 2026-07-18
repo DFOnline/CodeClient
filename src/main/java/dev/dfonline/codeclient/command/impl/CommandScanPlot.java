@@ -10,13 +10,13 @@ import dev.dfonline.codeclient.command.TemplateActionCommand;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.nio.file.Files;
@@ -35,7 +35,7 @@ public class CommandScanPlot extends TemplateActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.then(argument("folder", greedyString()).suggests(this::suggestDirectories).executes(context -> {
             if (CodeClient.location instanceof Dev) {
                 String arg = context.getArgument("folder", String.class);
@@ -48,10 +48,10 @@ public class CommandScanPlot extends TemplateActionCommand {
                         try {
                             Files.createDirectory(currentPath);
                         } catch (Exception ignored) {
-                            Utility.sendMessage(Text.translatable("codeclient.files.error.write_folder", currentPath));
+                            Utility.sendMessage(Component.translatable("codeclient.files.error.write_folder", currentPath));
                         }
                     } else if (!Files.isDirectory(currentPath)) {
-                        Utility.sendMessage(Text.translatable("codeclient.files.error.not_dir", currentPath), ChatType.FAIL);
+                        Utility.sendMessage(Component.translatable("codeclient.files.error.not_dir", currentPath), ChatType.FAIL);
                         return -1;
                     }
                 }
@@ -63,14 +63,14 @@ public class CommandScanPlot extends TemplateActionCommand {
                         invalid = true;
                         if (file.getFileName().toString().equals(".git")) {
                             Utility.sendMessage(
-                                    Text.empty()
-                                            .append(Text.translatable("codeclient.files.git"))
-                                            .append(Text.literal("\n"))
-                                            .append(Text.translatable("codeclient.files.open_native").fillStyle(
+                                    Component.empty()
+                                            .append(Component.translatable("codeclient.files.git"))
+                                            .append(Component.literal("\n"))
+                                            .append(Component.translatable("codeclient.files.open_native").withStyle(
                                                     Style.EMPTY
-                                                            .withColor(Formatting.AQUA)
+                                                            .withColor(ChatFormatting.AQUA)
                                                             .withClickEvent(new ClickEvent.OpenFile(currentPath.toAbsolutePath().toString()))
-                                                            .withHoverEvent(new HoverEvent.ShowText(Text.literal(currentPath.toAbsolutePath().toString())))))
+                                                            .withHoverEvent(new HoverEvent.ShowText(Component.literal(currentPath.toAbsolutePath().toString())))))
                                     , ChatType.INFO);
                             invalid = false;
                             break;
@@ -78,14 +78,14 @@ public class CommandScanPlot extends TemplateActionCommand {
                     }
                     list.close();
                 } catch (Exception ignored) {
-                    Utility.sendMessage(Text.translatable("codeclient.files.error.read_folder"), ChatType.FAIL);
+                    Utility.sendMessage(Component.translatable("codeclient.files.error.read_folder"), ChatType.FAIL);
                 }
                 if (invalid) {
-                    Utility.sendMessage(Text.translatable("codeclient.files.empty_dir"));
+                    Utility.sendMessage(Component.translatable("codeclient.files.empty_dir"));
                     return -1;
                 }
 
-                Utility.sendMessage(Text.translatable("codeclient.action.scanning").append(" ").append(Text.translatable("codeclient.action.abort")), ChatType.INFO);
+                Utility.sendMessage(Component.translatable("codeclient.action.scanning").append(" ").append(Component.translatable("codeclient.action.abort")), ChatType.INFO);
                 var scan = new ArrayList<ItemStack>();
                 Path finalCurrentPath = currentPath;
                 CodeClient.currentAction = new ScanPlot(() -> {
@@ -100,7 +100,7 @@ public class CommandScanPlot extends TemplateActionCommand {
                         try {
                             Files.write(filePath, Base64.getDecoder().decode(data));
                         } catch (Exception ignored) {
-                            Utility.sendMessage(Text.translatable("codeclient.files.error.write_file", filePath.toString()), ChatType.FAIL);
+                            Utility.sendMessage(Component.translatable("codeclient.files.error.write_file", filePath.toString()), ChatType.FAIL);
                         }
                     }
 
@@ -108,7 +108,7 @@ public class CommandScanPlot extends TemplateActionCommand {
                 CodeClient.currentAction.init();
                 return 0;
             } else {
-                Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
                 return 1;
             }
         }));

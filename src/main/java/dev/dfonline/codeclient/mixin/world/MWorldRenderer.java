@@ -1,11 +1,11 @@
 package dev.dfonline.codeclient.mixin.world;
 
 import dev.dfonline.codeclient.dev.InteractionManager;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,20 +13,20 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public class MWorldRenderer {
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
     @Shadow
     @Nullable
-    private ClientWorld world;
+    private ClientLevel level;
 
-    @Redirect(method = "fillEntityOutlineRenderStates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isAir()Z"))
+    @Redirect(method = "extractBlockOutline", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;isAir()Z"))
     private boolean isAir(BlockState instance) {
-        if (client.crosshairTarget instanceof BlockHitResult hitResult) {
-            if (InteractionManager.customVoxelShape(world, hitResult.getBlockPos()) != null) return false;
+        if (minecraft.hitResult instanceof BlockHitResult hitResult) {
+            if (InteractionManager.customVoxelShape(level, hitResult.getBlockPos()) != null) return false;
         }
         return instance.isAir();
     }

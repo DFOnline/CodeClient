@@ -6,8 +6,8 @@ import dev.dfonline.codeclient.action.impl.GoTo;
 import dev.dfonline.codeclient.command.ActionCommand;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.BlockPos;
 
 public class CommandJumpToFreeSpot extends ActionCommand {
     @Override
@@ -16,13 +16,13 @@ public class CommandJumpToFreeSpot extends ActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> {
             if (CodeClient.MC.player == null) return -1;
             if (CodeClient.location instanceof Dev dev) {
-                BlockPos freePlacePos = dev.findFreePlacePos(CodeClient.MC.player.getBlockPos());
+                BlockPos freePlacePos = dev.findFreePlacePos(CodeClient.MC.player.blockPosition());
                 if (freePlacePos == null) return -1;
-                CodeClient.currentAction = new GoTo(freePlacePos.toCenterPos().add(0, -0.5, 0), this::actionCallback);
+                CodeClient.currentAction = new GoTo(freePlacePos.getCenter().add(0, -0.5, 0), this::actionCallback);
                 CodeClient.currentAction.init();
                 return 0;
             }

@@ -9,23 +9,23 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.data.PublicBukkitValues;
 import dev.dfonline.codeclient.hypercube.item.Scope;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class ScopeSwitcher extends GenericSwitcher {
     private final String option;
 
     public ScopeSwitcher(String option) {
-        super(Text.translatable("codeclient.switcher.scope"), -1, GLFW.GLFW_KEY_SPACE);
+        super(Component.translatable("codeclient.switcher.scope"), -1, GLFW.GLFW_KEY_SPACE);
         this.option = option;
     }
 
@@ -42,7 +42,7 @@ public class ScopeSwitcher extends GenericSwitcher {
 
     @Override
     protected void init() {
-        footer = Text.translatable("codeclient.switcher.scope.select", Text.translatable("codeclient.switcher.footer.brackets", "Click").formatted(Formatting.AQUA)).formatted(Formatting.WHITE);
+        footer = Component.translatable("codeclient.switcher.scope.select", Component.translatable("codeclient.switcher.footer.brackets", "Click").withStyle(ChatFormatting.AQUA)).withStyle(ChatFormatting.WHITE);
 
         selected = switch (option) {
             case "saved" -> 1;
@@ -56,15 +56,15 @@ public class ScopeSwitcher extends GenericSwitcher {
 
     @Override
     List<Option> getOptions() {
-        return List.of(new Option(Text.literal(Scope.unsaved.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.unsaved.color)), Items.ENDER_CHEST.getDefaultStack(), () -> run("unsaved")),
-                new Option(Text.literal(Scope.saved.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.saved.color)), Items.CHEST.getDefaultStack(), () -> run("saved")),
-                new Option(Text.literal(Scope.local.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.local.color)), Items.EMERALD_BLOCK.getDefaultStack(), () -> run("local")),
-                new Option(Text.literal(Scope.line.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.line.color)), Items.LAPIS_BLOCK.getDefaultStack(), () -> run("line"))
+        return List.of(new Option(Component.literal(Scope.unsaved.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.unsaved.color)), Items.ENDER_CHEST.getDefaultInstance(), () -> run("unsaved")),
+                new Option(Component.literal(Scope.saved.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.saved.color)), Items.CHEST.getDefaultInstance(), () -> run("saved")),
+                new Option(Component.literal(Scope.local.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.local.color)), Items.EMERALD_BLOCK.getDefaultInstance(), () -> run("local")),
+                new Option(Component.literal(Scope.line.longName).setStyle(Style.EMPTY.withItalic(false).withColor(Scope.line.color)), Items.LAPIS_BLOCK.getDefaultInstance(), () -> run("line"))
         );
     }
 
     private void run(String name) {
-        ItemStack stack = CodeClient.MC.player.getStackInHand(Hand.MAIN_HAND);
+        ItemStack stack = CodeClient.MC.player.getItemInHand(InteractionHand.MAIN_HAND);
 
         DFItem item = DFItem.of(stack);
 
@@ -81,7 +81,7 @@ public class ScopeSwitcher extends GenericSwitcher {
         item.getItemData().setPublicBukkitValues(pbv);
         item.setLore(List.of(getSelected().text()));
         Utility.sendHandItem(item.getItemStack());
-        CodeClient.MC.gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
+        CodeClient.MC.gameRenderer.itemInHandRenderer.itemUsed(InteractionHand.MAIN_HAND);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class ScopeSwitcher extends GenericSwitcher {
         if (hasClicked) {
             Option selected = getSelected();
             if (selected != null) selected.run();
-            this.client.setScreen(null);
+            this.minecraft.setScreen(null);
             return true;
         }
         return false;

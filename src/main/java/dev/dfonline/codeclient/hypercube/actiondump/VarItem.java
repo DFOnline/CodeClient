@@ -2,7 +2,7 @@ package dev.dfonline.codeclient.hypercube.actiondump;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.data.DFItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class VarItem {
     public Icon icon;

@@ -1,18 +1,18 @@
 package dev.dfonline.codeclient.websocket.scope;
 
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
 
 public enum AuthScopeDangerLevel {
-    DEFAULT(Formatting.GRAY, "default"),
-    SAFE(Formatting.GREEN, "safe"),
-    CAUTION(Formatting.YELLOW, "caution"),
-    RISKY(Formatting.RED, "risky"),
-    DANGEROUS(Formatting.DARK_RED, "dangerous"),
+    DEFAULT(ChatFormatting.GRAY, "default"),
+    SAFE(ChatFormatting.GREEN, "safe"),
+    CAUTION(ChatFormatting.YELLOW, "caution"),
+    RISKY(ChatFormatting.RED, "risky"),
+    DANGEROUS(ChatFormatting.DARK_RED, "dangerous"),
     ;
 
-    public final Formatting color;
+    public final ChatFormatting color;
     public final String translationKey;
-    AuthScopeDangerLevel(Formatting color, String translationKey) {
+    AuthScopeDangerLevel(ChatFormatting color, String translationKey) {
         this.color = color;
         this.translationKey = translationKey;
     }

@@ -4,12 +4,12 @@ import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class Vector extends VarItem {
     private Double x;
@@ -90,12 +90,12 @@ public class Vector extends VarItem {
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
         DFItem dfItem = DFItem.of(stack);
-        dfItem.setName(Text.literal("Vector").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
+        dfItem.setName(Component.literal("Vector").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.WHITE)));
         Utility.addLore(
                 dfItem.getItemStack(),
-                Text.empty().append(Text.literal("X: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.x)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
-                Text.empty().append(Text.literal("Y: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.y)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
-                Text.empty().append(Text.literal("Z: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.z)).setStyle(Style.EMPTY.withColor(Formatting.WHITE))))
+                Component.empty().append(Component.literal("X: ").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY)).append(Component.literal("%.2f".formatted(this.x)).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)))),
+                Component.empty().append(Component.literal("Y: ").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY)).append(Component.literal("%.2f".formatted(this.y)).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)))),
+                Component.empty().append(Component.literal("Z: ").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY)).append(Component.literal("%.2f".formatted(this.z)).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))))
 
                 );
         return dfItem.getItemStack();

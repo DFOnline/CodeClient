@@ -7,9 +7,8 @@ import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.TemplateActionCommand;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
-
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.Component;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -25,12 +24,12 @@ public class CommandSave extends TemplateActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.then(argument("path", greedyString()).suggests(this::suggestDirectories).executes(context -> {
             if (CodeClient.MC.player == null) return -1;
-            String data = Utility.templateDataItem(CodeClient.MC.player.getMainHandStack());
+            String data = Utility.templateDataItem(CodeClient.MC.player.getMainHandItem());
             if (data == null) {
-                Utility.sendMessage(Text.translatable("codeclient.files.hold_template"), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.files.hold_template"), ChatType.FAIL);
                 return 0;
             }
 
@@ -44,10 +43,10 @@ public class CommandSave extends TemplateActionCommand {
                     try {
                         Files.createDirectory(currentPath);
                     } catch (Exception ignored) {
-                        Utility.sendMessage(Text.translatable("codeclient.files.error.write_folder", currentPath));
+                        Utility.sendMessage(Component.translatable("codeclient.files.error.write_folder", currentPath));
                     }
                 } else if (!Files.isDirectory(currentPath)) {
-                    Utility.sendMessage(Text.translatable("codeclient.files.error.not_dir", currentPath), ChatType.FAIL);
+                    Utility.sendMessage(Component.translatable("codeclient.files.error.not_dir", currentPath), ChatType.FAIL);
                     return -1;
                 }
             }
@@ -55,9 +54,9 @@ public class CommandSave extends TemplateActionCommand {
             // Write file
             try {
                 Files.write(currentPath.resolve(currentPath), Base64.getDecoder().decode(data));
-                Utility.sendMessage(Text.translatable("codeclient.files.saved", currentPath), ChatType.SUCCESS);
+                Utility.sendMessage(Component.translatable("codeclient.files.saved", currentPath), ChatType.SUCCESS);
             } catch (Exception e) {
-                Utility.sendMessage(Text.translatable("codeclient.files.error.write_file", currentPath), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.files.error.write_file", currentPath), ChatType.FAIL);
                 CodeClient.LOGGER.error(e.getMessage());
             }
             return 0;

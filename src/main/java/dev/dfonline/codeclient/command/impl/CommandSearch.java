@@ -8,13 +8,12 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
@@ -28,7 +27,7 @@ public class CommandSearch extends Command {
     }
 
     @Override
-    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
         super.register(dispatcher, registryAccess);
 
         dispatcher.register(create(literal("search"), registryAccess));
@@ -36,38 +35,38 @@ public class CommandSearch extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.then(argument("query", greedyString()).suggests((context, builder) -> CommandJump.suggestJump(CommandJump.JumpType.ACTIONS, context, builder, false)).executes(context -> {
             if (CodeClient.location instanceof Dev dev) {
                 var query = context.getArgument("query", String.class);
                 var results = dev.scanForSigns(CommandJump.JumpType.ACTIONS.pattern, Pattern.compile("^.*" + Pattern.quote(query) + ".*$", Pattern.CASE_INSENSITIVE));
 
                 if (results == null || results.isEmpty()) {
-                    Utility.sendMessage(Text.translatable("codeclient.search.no_results"), ChatType.INFO);
+                    Utility.sendMessage(Component.translatable("codeclient.search.no_results"), ChatType.INFO);
                     return 0;
                 }
 
-                var message = Text.translatable("codeclient.search.results");
+                var message = Component.translatable("codeclient.search.results");
                 results.forEach((pos, text) -> {
                     var type = text.getMessage(0, false).getString();
                     var name = text.getMessage(1, false).getString().trim();
 
-                    var highlightAction = Text.empty().append(" [⏼]").setStyle(Style.EMPTY
+                    var highlightAction = Component.empty().append(" [⏼]").setStyle(Style.EMPTY
                             .withColor(0xFF7FAA)
                             .withClickEvent(new ClickEvent.RunCommand(String.format("/highlight %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
-                            .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.search.hover.highlight", pos.getX(), pos.getY(), pos.getZ())))
+                            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("codeclient.search.hover.highlight", pos.getX(), pos.getY(), pos.getZ())))
                     );
 
                     Style actionStyle = getActionColor(type);
 
-                    var entry = Text.empty().append("\n ⏹ ").setStyle(actionStyle
+                    var entry = Component.empty().append("\n ⏹ ").setStyle(actionStyle
                                     .withHoverEvent(new HoverEvent.ShowText(
-                                            Text.empty().append(type).setStyle(actionStyle))
+                                            Component.empty().append(type).setStyle(actionStyle))
                                     )
                             )
-                            .append(Text.empty().append(name).setStyle(Style.EMPTY
+                            .append(Component.empty().append(name).setStyle(Style.EMPTY
                                     .withClickEvent(new ClickEvent.RunCommand(String.format("/ptp %s %s %s", pos.getX(), pos.getY(), pos.getZ())))
-                                    .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.search.hover.teleport", pos.getX(), pos.getY(), pos.getZ())))
+                                    .withHoverEvent(new HoverEvent.ShowText(Component.translatable("codeclient.search.hover.teleport", pos.getX(), pos.getY(), pos.getZ())))
                             ))
                             .append(highlightAction);
                     message.append(entry);
@@ -75,7 +74,7 @@ public class CommandSearch extends Command {
 
                 Utility.sendMessage(message, ChatType.SUCCESS);
             } else {
-                Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
             }
             return 0;
         }));
@@ -83,19 +82,19 @@ public class CommandSearch extends Command {
 
     private static Style getActionColor(String type) {
         return switch (type) {
-            case "CONTROL" -> Style.EMPTY.withColor(Formatting.BLACK);
-            case "SELECT OBJECT" -> Style.EMPTY.withColor(Formatting.LIGHT_PURPLE);
-            case "REPEAT" -> Style.EMPTY.withColor(Formatting.DARK_AQUA);
-            case "SET VARIABLE" -> Style.EMPTY.withColor(Formatting.WHITE);
-            case "GAME ACTION" -> Style.EMPTY.withColor(Formatting.RED);
-            case "IF GAME" -> Style.EMPTY.withColor(Formatting.DARK_RED);
-            case "ENTITY ACTION" -> Style.EMPTY.withColor(Formatting.DARK_GREEN);
-            case "PLAYER ACTION" -> Style.EMPTY.withColor(Formatting.GRAY);
-            case "IF PLAYER" -> Style.EMPTY.withColor(Formatting.GOLD);
-            case "CALL FUNCTION" -> Style.EMPTY.withColor(Formatting.BLUE);
-            case "START PROCESS" -> Style.EMPTY.withColor(Formatting.GREEN);
+            case "CONTROL" -> Style.EMPTY.withColor(ChatFormatting.BLACK);
+            case "SELECT OBJECT" -> Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE);
+            case "REPEAT" -> Style.EMPTY.withColor(ChatFormatting.DARK_AQUA);
+            case "SET VARIABLE" -> Style.EMPTY.withColor(ChatFormatting.WHITE);
+            case "GAME ACTION" -> Style.EMPTY.withColor(ChatFormatting.RED);
+            case "IF GAME" -> Style.EMPTY.withColor(ChatFormatting.DARK_RED);
+            case "ENTITY ACTION" -> Style.EMPTY.withColor(ChatFormatting.DARK_GREEN);
+            case "PLAYER ACTION" -> Style.EMPTY.withColor(ChatFormatting.GRAY);
+            case "IF PLAYER" -> Style.EMPTY.withColor(ChatFormatting.GOLD);
+            case "CALL FUNCTION" -> Style.EMPTY.withColor(ChatFormatting.BLUE);
+            case "START PROCESS" -> Style.EMPTY.withColor(ChatFormatting.GREEN);
             case "IF ENTITY" -> Style.EMPTY.withColor(0xFFA85B);
-            default -> Style.EMPTY.withColor(Formatting.DARK_GRAY);
+            default -> Style.EMPTY.withColor(ChatFormatting.DARK_GRAY);
         };
     }
 }

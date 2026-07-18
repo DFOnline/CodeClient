@@ -10,22 +10,6 @@ import dev.dfonline.codeclient.hypercube.template.Template;
 import dev.dfonline.codeclient.hypercube.template.TemplateBlock;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.mixin.entity.player.ClientPlayerInteractionManagerAccessor;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.SignText;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +19,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class PlaceTemplates extends Action {
     private final ArrayList<Operation> operations;
@@ -53,7 +52,7 @@ public class PlaceTemplates extends Action {
                 int row = i % rowSize;
                 int level = i / rowSize;
                 i++;
-                Vec3d pos = new Vec3d(plot.getX(), plot.getFloorY(), plot.getZ()).add((2 + (row * 3)) * -1, level * 5, 0);
+                Vec3 pos = new Vec3(plot.getX(), plot.getFloorY(), plot.getZ()).add((2 + (row * 3)) * -1, level * 5, 0);
                 templatesToPlace.add(new TemplateToPlace(pos, template));
             }
             this.operations = templatesToPlace;
@@ -176,21 +175,21 @@ public class PlaceTemplates extends Action {
     public void init() {
         cooldown = 4;
         assert CodeClient.MC.player != null;
-        recoverMainHand = CodeClient.MC.player.getMainHandStack();
+        recoverMainHand = CodeClient.MC.player.getMainHandItem();
     }
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if (packet instanceof OpenScreenS2CPacket) {
+        if (packet instanceof ClientboundOpenScreenPacket) {
             return true;
         }
-        if (packet instanceof ChunkDeltaUpdateS2CPacket updates) {
+        if (packet instanceof ClientboundSectionBlocksUpdatePacket updates) {
             for (Operation operation : operations) {
                 var block = new Object() {
                     boolean isTemplate = false;
                     BlockState state = null;
                 };
-                updates.visitUpdates((blockPos, blockState) -> {
+                updates.runUpdates((blockPos, blockState) -> {
                     if (operation.pos.equals(blockPos)) {
                         block.isTemplate = true;
                         block.state = blockState;
@@ -207,8 +206,8 @@ public class PlaceTemplates extends Action {
 
     @Override
     public void tick() {
-        var net = CodeClient.MC.getNetworkHandler();
-        if (CodeClient.MC.interactionManager == null || CodeClient.MC.player == null || net == null) return;
+        var net = CodeClient.MC.getConnection();
+        if (CodeClient.MC.gameMode == null || CodeClient.MC.player == null || net == null) return;
         if (CodeClient.location instanceof Dev) {
             if (operations.isEmpty()) {
                 callback();
@@ -221,28 +220,28 @@ public class PlaceTemplates extends Action {
             Operation closestOperation = null;
             operations.removeIf(Operation::isComplete);
             for (Operation operation : operations.stream().toList()) {
-                double distanceToCurrentOperation = (operation.pos().distanceTo(CodeClient.MC.player.getEyePos()));
+                double distanceToCurrentOperation = (operation.pos().distanceTo(CodeClient.MC.player.getEyePosition()));
                 if (distanceToCurrentOperation <= 5.8 && operation.isOpen() && !operation.isComplete()) {
                     if (cooldown == 0) {
                         if (operation instanceof TemplateToPlace template) {
                             if (shouldBeSwapping) {
                                 var player = CodeClient.MC.player;
-                                boolean sneaky = !player.isSneaking();
+                                boolean sneaky = !player.isShiftKeyDown();
                                 // TODO I have never actually tested if these input packets actually replicate sneaking.
-                                if (sneaky) net.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false, true, false)));
-                                net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, template.pos, Direction.UP));
-                                net.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, template.pos, Direction.UP));
-                                if (sneaky) net.sendPacket(new PlayerInputC2SPacket(CodeClient.MC.player.getLastPlayerInput()));
+                                if (sneaky) net.send(new ServerboundPlayerInputPacket(new Input(false, false, false, false, false, true, false)));
+                                net.send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, template.pos, Direction.UP));
+                                net.send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, template.pos, Direction.UP));
+                                if (sneaky) net.send(new ServerboundPlayerInputPacket(CodeClient.MC.player.getLastSentInput()));
                             }
                             Utility.makeHolding(template.template);
                             BlockHitResult blockHitResult = new BlockHitResult(template.pos().add(0, 1, 0), Direction.UP, template.pos, false);
-                            ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.interactionManager)).invokeSequencedPacket(CodeClient.MC.world, sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, blockHitResult, sequence));
+                            ((ClientPlayerInteractionManagerAccessor) (CodeClient.MC.gameMode)).invokeSequencedPacket(CodeClient.MC.level, sequence -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, blockHitResult, sequence));
                             template.setOpen(false);
                         }
                     }
                     return;
                 }
-                if ((closestOperation == null) || (distanceToCurrentOperation < closestOperation.pos().distanceTo(CodeClient.MC.player.getEyePos()))) {
+                if ((closestOperation == null) || (distanceToCurrentOperation < closestOperation.pos().distanceTo(CodeClient.MC.player.getEyePosition()))) {
                     closestOperation = operation;
                 }
             }
@@ -273,12 +272,12 @@ public class PlaceTemplates extends Action {
             this.pos = pos;
         }
 
-        public Operation(Vec3d pos) {
+        public Operation(Vec3 pos) {
             this.pos = new BlockPos((int) pos.x, (int) pos.y, (int) pos.z);
         }
 
-        public Vec3d pos() {
-            return pos.toCenterPos();
+        public Vec3 pos() {
+            return pos.getCenter();
         }
 
         public boolean isOpen() {
@@ -305,7 +304,7 @@ public class PlaceTemplates extends Action {
     private static class TemplateToPlace extends Operation {
         private final ItemStack template;
 
-        public TemplateToPlace(Vec3d pos, ItemStack template) {
+        public TemplateToPlace(Vec3 pos, ItemStack template) {
             super(pos);
             this.template = template;
         }

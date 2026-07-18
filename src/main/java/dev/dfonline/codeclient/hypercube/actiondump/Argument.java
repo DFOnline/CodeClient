@@ -3,18 +3,18 @@ package dev.dfonline.codeclient.hypercube.actiondump;
 import com.ibm.icu.text.CaseMap;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class Argument {
     public String type;
@@ -36,12 +36,12 @@ public class Argument {
     public ItemStack getItem() {
         Icon.Type type = getType();
         ItemStack item = type == null
-                ? Items.GRAY_DYE.getDefaultStack()
+                ? Items.GRAY_DYE.getDefaultInstance()
                 : type.getIcon();
 
         DFItem dfItem = DFItem.of(item);
         // First line is item name, others are lore
-        List<Text> lore = getLore();
+        List<Component> lore = getLore();
         if (lore.isEmpty()) return item;
         dfItem.setName(lore.getFirst());
         lore.removeFirst();
@@ -50,21 +50,21 @@ public class Argument {
         return item;
     }
 
-    public List<Text> getLore() {
-        ArrayList<Text> lore = new ArrayList<>();
+    public List<Component> getLore() {
+        ArrayList<Component> lore = new ArrayList<>();
         int i = 0;
         if (this.text != null) addToLore(lore, this.text);
         if (this.description != null) for (String line : this.description) {
-            MutableText text = Text.empty().formatted(Formatting.GRAY).styled(s -> s.withItalic(false));
-            MutableText typeText;
+            MutableComponent text = Component.empty().withStyle(ChatFormatting.GRAY).withStyle(s -> s.withItalic(false));
+            MutableComponent typeText;
 
             try {
                 Icon.Type type = Icon.Type.valueOf(this.type);
-                typeText = Text.literal(type.display).setStyle(Text.empty().getStyle().withColor(type.color).withItalic(false));
+                typeText = Component.literal(type.display).setStyle(Component.empty().getStyle().withColor(type.color).withItalic(false));
             } catch (IllegalArgumentException e) {
                 // Show a grayed out version of the name.
                 String properCase = CaseMap.Title.toTitle().apply(Locale.ENGLISH, null, this.type.replaceAll("_", " "));
-                typeText = Text.literal(properCase).setStyle(Text.empty().getStyle()
+                typeText = Component.literal(properCase).setStyle(Component.empty().getStyle()
                         .withColor(TextColor.fromRgb(0x808080))
                         .withItalic(false));
             }
@@ -74,12 +74,12 @@ public class Argument {
                 if (this.plural) typeText.append("(s)");
                 text.append(typeText);
                 if (this.optional) {
-                    text.append(Text.literal("*").formatted(Formatting.WHITE));
+                    text.append(Component.literal("*").withStyle(ChatFormatting.WHITE));
                 }
-                text.append(Text.literal(" - ").formatted(Formatting.DARK_GRAY));
-                text.append(Utility.textFromString(line).formatted(Formatting.GRAY));
+                text.append(Component.literal(" - ").withStyle(ChatFormatting.DARK_GRAY));
+                text.append(Utility.textFromString(line).withStyle(ChatFormatting.GRAY));
                 lore.add(text);
-            } else lore.add(Utility.textFromString(line).formatted(Formatting.GRAY));
+            } else lore.add(Utility.textFromString(line).withStyle(ChatFormatting.GRAY));
             i++;
         }
         if (this.notes != null) for (String[] lines : this.notes) {
@@ -102,7 +102,7 @@ public class Argument {
         return Objects.equals(text, "");
     }
 
-    private void addToLore(ArrayList<Text> lore, String text) {
+    private void addToLore(ArrayList<Component> lore, String text) {
         lore.add(Utility.textFromString(text));
     }
 }

@@ -10,17 +10,6 @@ import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.dev.overlay.SignPeeker;
 import dev.dfonline.codeclient.hypercube.item.Scope;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.math.ColorHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,33 +20,44 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(InGameHud.class)
+@Mixin(Gui.class)
 public abstract class MInGameHud {
 
     @Shadow
-    public abstract TextRenderer getTextRenderer();
+    public abstract Font getFont();
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderMainHud(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/render/RenderTickCounter;)V"))
-    private void onRender(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        int scaledWidth = context.getScaledWindowWidth();
-        int scaledHeight = context.getScaledWindowHeight();
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderHotbarAndDecorations(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"))
+    private void onRender(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+        int scaledWidth = context.guiWidth();
+        int scaledHeight = context.guiHeight();
 
-        TextRenderer textRenderer = getTextRenderer();
+        Font textRenderer = getFont();
 
-        List<Text> overlay = new ArrayList<>(List.copyOf(OverlayManager.getOverlayText()));
-        Text cpuUsage = OverlayManager.getCpuUsage();
+        List<Component> overlay = new ArrayList<>(List.copyOf(OverlayManager.getOverlayText()));
+        Component cpuUsage = OverlayManager.getCpuUsage();
         if (cpuUsage != null && Config.getConfig().CPUDisplayCorner == Config.CPUDisplayCornerOption.TOP_LEFT) {
             if (overlay.isEmpty()) overlay.add(cpuUsage);
             else {
                 overlay.add(0, cpuUsage);
-                overlay.add(1, Text.empty());
+                overlay.add(1, Component.empty());
             }
         }
         if (!overlay.isEmpty()) {
             int index = 0;
-            for (Text text : overlay) {
-                context.drawTextWithShadow(textRenderer, Objects.requireNonNullElseGet(text, () -> Text.literal("NULL")), 30, 30 + (index * 9), -1);
+            for (Component text : overlay) {
+                context.drawString(textRenderer, Objects.requireNonNullElseGet(text, () -> Component.literal("NULL")), 30, 30 + (index * 9), -1);
                 index++;
             }
         }
@@ -66,46 +66,46 @@ public abstract class MInGameHud {
             int margin = 30;
             int x = switch (Config.getConfig().CPUDisplayCorner) {
                 case TOP_LEFT, BOTTOM_LEFT -> margin;
-                case TOP_RIGHT, BOTTOM_RIGHT -> scaledWidth - margin - textRenderer.getWidth(cpuUsage);
+                case TOP_RIGHT, BOTTOM_RIGHT -> scaledWidth - margin - textRenderer.width(cpuUsage);
             };
             int y = switch (Config.getConfig().CPUDisplayCorner) {
                 case TOP_LEFT, TOP_RIGHT -> margin;
                 case BOTTOM_LEFT, BOTTOM_RIGHT -> scaledHeight - margin - 3;
             };
-            context.drawTextWithShadow(textRenderer, cpuUsage, x, y, -1);
+            context.drawString(textRenderer, cpuUsage, x, y, -1);
         }
         int x = (scaledWidth / 2) + Config.getConfig().ChestPeekerX;
         int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;
         try {
-            List<Text> peeker = CodeClient.getFeature(ChestPeeker.class)
+            List<Component> peeker = CodeClient.getFeature(ChestPeeker.class)
                     .map(ChestPeeker::getOverlayText).orElse(null);
             if (peeker == null || peeker.isEmpty()) peeker = SignPeeker.getOverlayText();
             if (peeker != null && !peeker.isEmpty()) {
-                context.drawTooltipImmediately(textRenderer, peeker.stream().map(text -> TooltipComponent.of(text.asOrderedText())).toList(), x, yOrig, HoveredTooltipPositioner.INSTANCE, null);
+                context.renderTooltip(textRenderer, peeker.stream().map(text -> ClientTooltipComponent.create(text.getVisualOrderText())).toList(), x, yOrig, DefaultTooltipPositioner.INSTANCE, null);
 //                context.renderTooltip();
             }
         } catch (Exception ignored) {
-            context.drawTooltip(textRenderer, Text.literal("An error occurred"), x, yOrig);
+            context.setTooltipForNextFrame(textRenderer, Component.literal("An error occurred"), x, yOrig);
 
         }
     }
 
     @Shadow
-    private ItemStack currentStack;
+    private ItemStack lastToolHighlight;
 
-    @Shadow private int heldItemTooltipFade;
+    @Shadow private int toolHighlightTimer;
 
-    @Inject(method = "renderHeldItemTooltip", at = @At(value = "HEAD"), cancellable = true)
-    public void renderHeldItemTooltip(DrawContext context, CallbackInfo ci) {
+    @Inject(method = "renderSelectedItemName", at = @At(value = "HEAD"), cancellable = true)
+    public void renderHeldItemTooltip(GuiGraphics context, CallbackInfo ci) {
 
         if (!Config.getConfig().ShowVariableScopeBelowName) return;
-        DFItem dfItem = DFItem.of(currentStack);
+        DFItem dfItem = DFItem.of(lastToolHighlight);
         if (!dfItem.hasHypercubeKey("varitem")) return;
         Optional<String> varItem = dfItem.getHypercubeStringValue("varitem");
         if (varItem.isEmpty()) return;
 
-        int scaledWidth = context.getScaledWindowWidth();
-        int scaledHeight = context.getScaledWindowHeight();
+        int scaledWidth = context.guiWidth();
+        int scaledHeight = context.guiHeight();
 
         try {
             JsonObject varItemJson = JsonParser.parseString(varItem.get()).getAsJsonObject();
@@ -120,25 +120,25 @@ public abstract class MInGameHud {
                 ci.cancel();
 
                 // Render variable name.
-                Text nameText = Text.literal(varName.getAsString());
-                int x1 = (scaledWidth - getTextRenderer().getWidth(nameText)) / 2;
+                Component nameText = Component.literal(varName.getAsString());
+                int x1 = (scaledWidth - getFont().width(nameText)) / 2;
                 int y1 = scaledHeight - 45;
-                context.drawTextWithShadow(getTextRenderer(), nameText, x1, y1, 0xffffff);
-                context.drawTextWithBackground(this.getTextRenderer(), nameText, x1, y1, 0xffffff, ColorHelper.withAlpha(255, Colors.WHITE));
+                context.drawString(getFont(), nameText, x1, y1, 0xffffff);
+                context.drawStringWithBackdrop(this.getFont(), nameText, x1, y1, 0xffffff, ARGB.color(255, CommonColors.WHITE));
 
                 // Render variable scope, if this throws an exception it can only
                 // mean Scope.valueOf() failed, as such the scope is invalid.
                 try {
                     Scope scope = Scope.valueOf(varItemJson.getAsJsonObject("data").get("scope").getAsString());
-                    int x2 = (scaledWidth - getTextRenderer().getWidth(scope.longName)) / 2;
+                    int x2 = (scaledWidth - getFont().width(scope.longName)) / 2;
                     int y2 = scaledHeight - 35;
-                    context.drawTextWithShadow(getTextRenderer(), Text.literal(scope.longName).fillStyle(Style.EMPTY.withColor(scope.color)), x2, y2, 0xffffff);
-                    context.drawTextWithBackground(this.getTextRenderer(),
-                            Text.literal(scope.longName).fillStyle(Style.EMPTY.withColor(scope.color)),
+                    context.drawString(getFont(), Component.literal(scope.longName).withStyle(Style.EMPTY.withColor(scope.color)), x2, y2, 0xffffff);
+                    context.drawStringWithBackdrop(this.getFont(),
+                            Component.literal(scope.longName).withStyle(Style.EMPTY.withColor(scope.color)),
                             x2,
                             y2,
                             0xffffff,
-                            ColorHelper.withAlpha(255, Colors.WHITE));
+                            ARGB.color(255, CommonColors.WHITE));
 
                 } catch (Exception ignored2) {
                     // 'data' or 'scope' are invalid, do nothing. (same behavior as scope on variable item)

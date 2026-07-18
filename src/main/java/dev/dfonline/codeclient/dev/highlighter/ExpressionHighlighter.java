@@ -9,12 +9,12 @@ import dev.dfonline.codeclient.hypercube.item.VarItems;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.CharacterVisitor;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.FormattedCharSink;
 import org.apache.commons.lang3.IntegerRange;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,18 +55,18 @@ public class ExpressionHighlighter extends Feature {
             TextColor.fromRgb(0xff4242)
     );
 
-    private final TextColor ERROR_COLOR = TextColor.fromFormatting(Formatting.RED);
+    private final TextColor ERROR_COLOR = TextColor.fromLegacyFormat(ChatFormatting.RED);
 
     @Override
     public boolean enabled() {
         return Config.getConfig().HighlighterEnabled;
     }
 
-    public record HighlightedExpression(OrderedText text, @Nullable OrderedText preview) {}
+    public record HighlightedExpression(FormattedCharSequence text, @Nullable FormattedCharSequence preview) {}
 
     private String cachedInput = "";
     private int cachedPosition = 0;
-    private HighlightedExpression cachedHighlight = new HighlightedExpression(OrderedText.empty(), null);
+    private HighlightedExpression cachedHighlight = new HighlightedExpression(FormattedCharSequence.composite(), null);
 
     private final MiniMessage formatter = HypercubeMiniMessage.MM;
     private final MiniMessageHighlighter highlighter = new MiniMessageHighlighter();
@@ -98,7 +98,7 @@ public class ExpressionHighlighter extends Feature {
 
         var player = CodeClient.MC.player;
         if (player == null) return null;
-        var item = player.getMainHandStack();
+        var item = player.getMainHandItem();
         try {
             VarItem varItem = VarItems.parse(item);
             Component text;
@@ -225,11 +225,11 @@ public class ExpressionHighlighter extends Feature {
 
                 String style;
                 if (!invalid) {
-                    style = color.getHexCode();
+                    style = color.formatValue();
                     sb.append(String.format("</color:%s>", style));
-                    style = getColor(depth).getHexCode();
+                    style = getColor(depth).formatValue();
                 } else {
-                    style = ERROR_COLOR.getHexCode();
+                    style = ERROR_COLOR.formatValue();
                     sb.append(String.format("</color:%s>", style));
                 }
                 sb.append(value);
@@ -250,14 +250,14 @@ public class ExpressionHighlighter extends Feature {
                     sb.append(prev);
                 }
 
-                String style = color.getHexCode();
+                String style = color.formatValue();
                 sb.append(String.format("<color:%s>", style));
                 sb.append(value);
 
                 if (value.endsWith("(")) {
                     depth++;
                     if (!invalid) {
-                        style = getColor(depth).getHexCode();
+                        style = getColor(depth).formatValue();
                     }
                     sb.append(String.format("<color:%s>", style));
                 } else if (depth > 0){
@@ -281,7 +281,7 @@ public class ExpressionHighlighter extends Feature {
         }
     }
 
-    private OrderedText subSequence(OrderedText original, int start, int end) {
+    private FormattedCharSequence subSequence(FormattedCharSequence original, int start, int end) {
         return visitor -> acceptWithAbsoluteIndex(original, (index, style, codePoint) -> {
             if (index >= start && index < end) {
                 return visitor.accept(index - start, style, codePoint);
@@ -290,14 +290,14 @@ public class ExpressionHighlighter extends Feature {
         });
     }
 
-    private OrderedText subSequence(OrderedText original, IntegerRange range) {
+    private FormattedCharSequence subSequence(FormattedCharSequence original, IntegerRange range) {
         int start = range.getMinimum();
         int end = range.getMaximum();
 
         return subSequence(original, start, end);
     }
 
-    public boolean acceptWithAbsoluteIndex(OrderedText original, CharacterVisitor visitor) {
+    public boolean acceptWithAbsoluteIndex(FormattedCharSequence original, FormattedCharSink visitor) {
         AtomicInteger index = new AtomicInteger();
         return original.accept((ignored, style, codePoint) -> {
             final boolean shouldContinue = visitor.accept(index.getAndIncrement(), style, codePoint);
@@ -309,14 +309,14 @@ public class ExpressionHighlighter extends Feature {
     }
 
     // draws the preview above the chat bar
-    public void draw(DrawContext context, int mouseX, int mouseY, OrderedText input) {
-        TextRenderer renderer = CodeClient.MC.textRenderer;
+    public void draw(GuiGraphics context, int mouseX, int mouseY, FormattedCharSequence input) {
+        Font renderer = CodeClient.MC.font;
 
-        var screen = CodeClient.MC.currentScreen;
+        var screen = CodeClient.MC.screen;
         if (screen == null) return;
 
         int y = screen.height - 25;
-        context.drawTextWithShadow(renderer, input, 4, y,0xffffff);
+        context.drawString(renderer, input, 4, y,0xffffff);
     }
 
     private enum CommandType {

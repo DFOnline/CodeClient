@@ -7,20 +7,19 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import java.util.Optional;
 
 public class CommandItemData extends Command {
@@ -30,44 +29,44 @@ public class CommandItemData extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> {
-            ClientPlayerEntity player = CodeClient.MC.player;
+            LocalPlayer player = CodeClient.MC.player;
             if (player == null) return -1;
-            ItemStack item = player.getInventory().getSelectedStack();
-            if (CodeClient.MC.world == null) return -1;
-            Optional<NbtElement> nbt = ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), item).result();
+            ItemStack item = player.getInventory().getSelectedItem();
+            if (CodeClient.MC.level == null) return -1;
+            Optional<Tag> nbt = ItemStack.CODEC.encodeStart(CodeClient.MC.player.registryAccess().createSerializationContext(NbtOps.INSTANCE), item).result();
 
             if (nbt.isEmpty()) {
-                Utility.sendMessage(Text.translatable("codeclient.command.itemdata.no_nbt"), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.command.itemdata.no_nbt"), ChatType.FAIL);
                 return 0;
             }
 
-            player.sendMessage(
-                    Text.literal(" ".repeat(15)).setStyle(Style.EMPTY.withStrikethrough(true).withColor(Formatting.DARK_GRAY))
-                            .append(Text.literal(" ").setStyle(Style.EMPTY.withStrikethrough(false).withColor(Formatting.AQUA))
-                                    .append(Text.translatable("codeclient.command.itemdata.header", Text.empty().formatted(Formatting.WHITE).append(item.getName())))
-                                    .append(Text.literal(" ")))
+            player.displayClientMessage(
+                    Component.literal(" ".repeat(15)).setStyle(Style.EMPTY.withStrikethrough(true).withColor(ChatFormatting.DARK_GRAY))
+                            .append(Component.literal(" ").setStyle(Style.EMPTY.withStrikethrough(false).withColor(ChatFormatting.AQUA))
+                                    .append(Component.translatable("codeclient.command.itemdata.header", Component.empty().withStyle(ChatFormatting.WHITE).append(item.getHoverName())))
+                                    .append(Component.literal(" ")))
                             .append(" ".repeat(15)), false
             );
-            player.sendMessage(Text.literal(nbt.get().toString()), false);
+            player.displayClientMessage(Component.literal(nbt.get().toString()), false);
 
             String unformatted = nbt.get().toString();
 
-            Optional<RegistryKey<Item>> itemKey = Registries.ITEM.getKey(item.getItem());
+            Optional<ResourceKey<Item>> itemKey = BuiltInRegistries.ITEM.getResourceKey(item.getItem());
             Utility.sendMessage(
-                    Text.translatable("codeclient.command.itemdata.copy",
-                            Text.translatable("codeclient.command.itemdata.copy.unformatted")
-                                    .setStyle(Style.EMPTY.withColor(Formatting.AQUA)
-                                            .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.hover.click_to_copy")))
+                    Component.translatable("codeclient.command.itemdata.copy",
+                            Component.translatable("codeclient.command.itemdata.copy.unformatted")
+                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
+                                            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("codeclient.hover.click_to_copy")))
                                             .withClickEvent(new ClickEvent.CopyToClipboard(unformatted))
                                     ),
 
-                            Text.translatable("codeclient.command.itemdata.copy.dfgive")
-                                    .setStyle(Style.EMPTY.withColor(Formatting.AQUA)
-                                            .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.hover.click_to_copy")))
+                            Component.translatable("codeclient.command.itemdata.copy.dfgive")
+                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
+                                            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("codeclient.hover.click_to_copy")))
                                             .withClickEvent(new ClickEvent.CopyToClipboard(
-                                                    "/dfgive " + (itemKey.isEmpty() ? "unknown" : itemKey.get().getValue()) + unformatted + " 1")
+                                                    "/dfgive " + (itemKey.isEmpty() ? "unknown" : itemKey.get().identifier()) + unformatted + " 1")
                                             )
                                     )
                     ), ChatType.SUCCESS);

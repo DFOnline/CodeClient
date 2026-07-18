@@ -8,7 +8,7 @@ import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.commands.CommandBuildContext;
 import org.jetbrains.annotations.NotNull;
 
 import static dev.dfonline.codeclient.Utility.componentToText;
@@ -23,12 +23,12 @@ public class CommandPreview extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> 0)
                 .then(
                         literal("actionbar").then(argument("text", StringArgumentType.greedyString()).executes(context -> {
                             if (CodeClient.MC.player == null) return 0;
-                            CodeClient.MC.player.sendMessage(componentToText(getText(context)), true);
+                            CodeClient.MC.player.displayClientMessage(componentToText(getText(context)), true);
                             return 0;
                         }))
                 ).then(

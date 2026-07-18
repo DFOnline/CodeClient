@@ -4,11 +4,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.data.PublicBukkitValues;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class VarItem {
     protected JsonObject data;
@@ -41,7 +40,7 @@ public abstract class VarItem {
     }
 
     public ItemStack getIcon() {
-        ItemStack item = getIconItem().getDefaultStack();
+        ItemStack item = getIconItem().getDefaultInstance();
         DFItem dfItem = DFItem.of(item);
         dfItem.setCustomModelData(5000);
         return item;

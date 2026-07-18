@@ -6,11 +6,16 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.*;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.item.component.TooltipDisplay;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,25 +31,25 @@ public class DFItem {
     ItemStack item;
     ItemData data;
 
-    private static final SequencedSet<ComponentType<?>> HIDDEN_COMPONENTS_PREVIOUSLY = ReferenceLinkedOpenHashSet.of(
-            DataComponentTypes.BANNER_PATTERNS,
-            DataComponentTypes.BEES,
-            DataComponentTypes.BLOCK_ENTITY_DATA,
-            DataComponentTypes.BLOCK_STATE,
-            DataComponentTypes.BUNDLE_CONTENTS,
-            DataComponentTypes.CHARGED_PROJECTILES,
-            DataComponentTypes.CONTAINER,
-            DataComponentTypes.CONTAINER_LOOT,
-            DataComponentTypes.FIREWORK_EXPLOSION,
-            DataComponentTypes.FIREWORKS,
-            DataComponentTypes.INSTRUMENT,
-            DataComponentTypes.JUKEBOX_PLAYABLE,
-            DataComponentTypes.MAP_ID,
-            DataComponentTypes.PAINTING_VARIANT,
-            DataComponentTypes.POT_DECORATIONS,
-            DataComponentTypes.POTION_CONTENTS,
-            DataComponentTypes.TROPICAL_FISH_PATTERN,
-            DataComponentTypes.WRITTEN_BOOK_CONTENT
+    private static final SequencedSet<DataComponentType<?>> HIDDEN_COMPONENTS_PREVIOUSLY = ReferenceLinkedOpenHashSet.of(
+            DataComponents.BANNER_PATTERNS,
+            DataComponents.BEES,
+            DataComponents.BLOCK_ENTITY_DATA,
+            DataComponents.BLOCK_STATE,
+            DataComponents.BUNDLE_CONTENTS,
+            DataComponents.CHARGED_PROJECTILES,
+            DataComponents.CONTAINER,
+            DataComponents.CONTAINER_LOOT,
+            DataComponents.FIREWORK_EXPLOSION,
+            DataComponents.FIREWORKS,
+            DataComponents.INSTRUMENT,
+            DataComponents.JUKEBOX_PLAYABLE,
+            DataComponents.MAP_ID,
+            DataComponents.PAINTING_VARIANT,
+            DataComponents.POT_DECORATIONS,
+            DataComponents.POTION_CONTENTS,
+            DataComponents.TROPICAL_FISH_PATTERN,
+            DataComponents.WRITTEN_BOOK_CONTENT
     );
 
     /**
@@ -132,7 +137,7 @@ public class DFItem {
      * @return The ItemStack.
      */
     public ItemStack getItemStack() {
-        if (data != null) item.set(DataComponentTypes.CUSTOM_DATA, getItemData().toComponent());
+        if (data != null) item.set(DataComponents.CUSTOM_DATA, getItemData().toComponent());
         return item;
     }
 
@@ -150,8 +155,8 @@ public class DFItem {
      *
      * @return The lore of the item.
      */
-    public List<Text> getLore() {
-        LoreComponent loreComponent = item.get(DataComponentTypes.LORE);
+    public List<Component> getLore() {
+        ItemLore loreComponent = item.get(DataComponents.LORE);
         if (loreComponent == null) return List.of();
         return loreComponent.lines();
     }
@@ -161,8 +166,8 @@ public class DFItem {
      *
      * @param lore The new lore to set.
      */
-    public void setLore(List<Text> lore) {
-        item.set(DataComponentTypes.LORE, new LoreComponent(lore));
+    public void setLore(List<Component> lore) {
+        item.set(DataComponents.LORE, new ItemLore(lore));
     }
 
     /**
@@ -170,8 +175,8 @@ public class DFItem {
      *
      * @return The name of the item.
      */
-    public Text getName() {
-        return item.getName();
+    public Component getName() {
+        return item.getHoverName();
     }
 
     /**
@@ -179,15 +184,15 @@ public class DFItem {
      *
      * @param name The new name to set.
      */
-    public void setName(Text name) {
-        item.set(DataComponentTypes.CUSTOM_NAME, name);
+    public void setName(Component name) {
+        item.set(DataComponents.CUSTOM_NAME, name);
     }
 
     /**
      * Hides additional information about the item, such as additional tooltip, jukebox playable, fireworks, and attribute modifiers.
      */
     public void hideFlags() {
-        item.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(false, HIDDEN_COMPONENTS_PREVIOUSLY));
+        item.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, HIDDEN_COMPONENTS_PREVIOUSLY));
     }
 
     /**
@@ -196,7 +201,7 @@ public class DFItem {
      * @param color The new dye color to set.
      */
     public void setDyeColor(int color) {
-        item.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(color));
+        item.set(DataComponents.DYED_COLOR, new DyedItemColor(color));
     }
 
     /**
@@ -205,7 +210,7 @@ public class DFItem {
      * @param modelData The new custom model data to set.
      */
     public void setCustomModelData(int modelData) {
-        item.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(List.of((float) modelData), List.of(), List.of(), List.of()));
+        item.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of((float) modelData), List.of(), List.of(), List.of()));
     }
 
     /**
@@ -219,7 +224,7 @@ public class DFItem {
         Multimap<String, Property> map = ImmutableMultimap.<String, Property>builder()
                 .put("textures", new Property("textures", value, signature))
                 .build();
-        this.item.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(new GameProfile(uuid, value, new PropertyMap(map))));
+        this.item.set(DataComponents.PROFILE, ResolvableProfile.createResolved(new GameProfile(uuid, value, new PropertyMap(map))));
     }
 
     /**
@@ -228,7 +233,7 @@ public class DFItem {
      * @param uuid The UUID of the player.
      */
     public void setProfile(UUID uuid) {
-        item.set(DataComponentTypes.PROFILE, ProfileComponent.ofDynamic(uuid));
+        item.set(DataComponents.PROFILE, ResolvableProfile.createUnresolved(uuid));
     }
 
     /**
@@ -237,14 +242,14 @@ public class DFItem {
      * @param name The username of the player.
      */
     public void setProfile(String name) {
-        item.set(DataComponentTypes.PROFILE, ProfileComponent.ofDynamic(name));
+        item.set(DataComponents.PROFILE, ResolvableProfile.createUnresolved(name));
     }
 
     /**
      * Removes the item's data.
      */
     public void removeItemData() {
-        item.remove(DataComponentTypes.CUSTOM_DATA);
+        item.remove(DataComponents.CUSTOM_DATA);
         data = null;
     }
 
@@ -257,7 +262,7 @@ public class DFItem {
      * @return The container of the item.
      */
     @Nullable
-    public ContainerComponent getContainer() {
-        return item.get(DataComponentTypes.CONTAINER);
+    public ItemContainerContents getContainer() {
+        return item.get(DataComponents.CONTAINER);
     }
 }

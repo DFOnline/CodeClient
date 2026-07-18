@@ -2,11 +2,6 @@ package dev.dfonline.codeclient.location;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.command.impl.CommandJump;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.block.entity.SignText;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -14,6 +9,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class Plot extends Location {
 
@@ -22,13 +22,13 @@ public abstract class Plot extends Location {
     /**
      * The position the player was at before they were teleported, in any scenario but plot borders.
      */
-    public Vec3d devPos;
+    public Vec3 devPos;
     protected Integer id;
     protected String name;
     protected String owner;
     protected Integer originX;
     protected Integer originZ;
-    protected Vec3d buildPos;
+    protected Vec3 buildPos;
     protected boolean hasUnderground = false;
     protected Boolean hasBuild;
     protected Boolean hasDev;
@@ -41,8 +41,8 @@ public abstract class Plot extends Location {
         this.originZ = z;
     }
 
-    public Vec3d getPos() {
-        return new Vec3d(originX, 0, originZ);
+    public Vec3 getPos() {
+        return new Vec3(originX, 0, originZ);
     }
 
     public void copyValuesFrom(Plot plot) {
@@ -85,7 +85,7 @@ public abstract class Plot extends Location {
         return originZ;
     }
 
-    public Vec3d getBuildPos() {
+    public Vec3 getBuildPos() {
         return buildPos;
     }
 
@@ -95,27 +95,27 @@ public abstract class Plot extends Location {
 
 
     public Boolean isInPlot(BlockPos pos) {
-        return isInArea(pos.toCenterPos()) || isInDev(pos.toCenterPos());
+        return isInArea(pos.getCenter()) || isInDev(pos.getCenter());
     }
 
     public Boolean isInPlot(BlockPos pos, Size size) {
-        return isInArea(pos.toCenterPos(), size) || isInDev(pos.toCenterPos(), size);
+        return isInArea(pos.getCenter(), size) || isInDev(pos.getCenter(), size);
     }
 
     /**
      * The play or build area.
      */
-    public Boolean isInArea(Vec3d pos) {
+    public Boolean isInArea(Vec3 pos) {
         return isInArea(pos, assumeSize());
     }
 
     /**
      * The play or build area.
      */
-    public Boolean isInArea(Vec3d pos, Size size) {
+    public Boolean isInArea(Vec3 pos, Size size) {
 
-        double x = pos.getX();
-        double z = pos.getZ();
+        double x = pos.x();
+        double z = pos.z();
 
         boolean inX = (x >= originX) && (x <= originX + size.size + 1);
         boolean inZ = (z >= originZ) && (z <= originZ + size.size + 1);
@@ -135,14 +135,14 @@ public abstract class Plot extends Location {
                 ;
     }
 
-    public Boolean isInDev(Vec3d pos) {
+    public Boolean isInDev(Vec3 pos) {
         return isInDev(pos, assumeSize());
     }
 
-    public Boolean isInDev(Vec3d pos, Size size) {
+    public Boolean isInDev(Vec3 pos, Size size) {
 
-        int x = (int) pos.getX();
-        int z = (int) pos.getZ();
+        int x = (int) pos.x();
+        int z = (int) pos.z();
 
         boolean inX = (x <= originX) && (x >= originX - (size.codeLength - 1));
         boolean inZ = (z >= originZ) && (z <= originZ + size.codeWidth);
@@ -157,7 +157,7 @@ public abstract class Plot extends Location {
      */
     @Nullable
     public HashMap<BlockPos, SignText> scanForSigns(Pattern name, Pattern scan) {
-        if (CodeClient.MC.world == null || originX == null || originZ == null || !(CodeClient.location instanceof Plot))
+        if (CodeClient.MC.level == null || originX == null || originZ == null || !(CodeClient.location instanceof Plot))
             return null;
         HashMap<BlockPos, SignText> signs = new HashMap<>();
         var size = assumeSize();
@@ -167,7 +167,7 @@ public abstract class Plot extends Location {
                 int zEnd = originZ + size.codeLength;
                 for (int z = originZ; z < zEnd; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
-                    BlockEntity block = CodeClient.MC.world.getBlockEntity(pos);
+                    BlockEntity block = CodeClient.MC.level.getBlockEntity(pos);
                     if (block instanceof SignBlockEntity sign) {
                         SignText text = sign.getFrontText();
                         Matcher nameMatch = name.matcher(text.getMessage(0, false).getString());
@@ -236,8 +236,8 @@ public abstract class Plot extends Location {
      * Will return <b>null</b> when there is no room.
      */
     public @Nullable BlockPos findFreePlacePos(BlockPos origin) {
-        if (originX == null || CodeClient.MC.world == null) return null;
-        var world = CodeClient.MC.world;
+        if (originX == null || CodeClient.MC.level == null) return null;
+        var world = CodeClient.MC.level;
         int y = Math.max(origin.getY(), 5);
         int x = origin.getX();
         while (y < 255) {

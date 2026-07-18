@@ -7,10 +7,9 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.config.Config;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class CommandCCConfig extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> {
             CodeClient.screenToOpen = Config.getConfig().getLibConfig().generateScreen(null);
             return 0;
@@ -39,11 +38,11 @@ public class CommandCCConfig extends Command {
             var option = context.getArgument("option", String.class);
             try {
                 Utility.sendMessage(
-                        Text.translatable("codeclient.config.command.query",
-                                Text.literal(option).formatted(Formatting.AQUA),
-                                Text.literal(String.valueOf(Config.class.getField(option).get(Config.getConfig()))).formatted(Formatting.AQUA)));
+                        Component.translatable("codeclient.config.command.query",
+                                Component.literal(option).withStyle(ChatFormatting.AQUA),
+                                Component.literal(String.valueOf(Config.class.getField(option).get(Config.getConfig()))).withStyle(ChatFormatting.AQUA)));
             } catch (Exception e) {
-                Utility.sendMessage(Text.translatable("codeclient.config.command.query.fail", Text.literal(option).formatted(Formatting.YELLOW)), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.config.command.query.fail", Component.literal(option).withStyle(ChatFormatting.YELLOW)), ChatType.FAIL);
             }
             return 0;
         }).then(argument("value", greedyString()).suggests((context, builder) -> {
@@ -74,22 +73,22 @@ public class CommandCCConfig extends Command {
                 if (field.getType().equals(boolean.class)) {
                     var bool = Boolean.valueOf(value);
                     field.set(Config.getConfig(), bool);
-                    Utility.sendMessage(Text.translatable(bool ? "codeclient.config.command.enable" : "codeclient.config.command.disable", Text.literal(option).formatted(Formatting.AQUA)), ChatType.SUCCESS);
+                    Utility.sendMessage(Component.translatable(bool ? "codeclient.config.command.enable" : "codeclient.config.command.disable", Component.literal(option).withStyle(ChatFormatting.AQUA)), ChatType.SUCCESS);
                     Config.getConfig().save();
                     return 0;
                 } else if (field.getType().isEnum()) {
                     for (Object member : field.getType().getEnumConstants()) {
                         if (((Enum<?>) member).name().equalsIgnoreCase(value)) {
                             field.set(Config.getConfig(), member);
-                            Utility.sendMessage(Text.translatable("codeclient.config.command.set", Text.literal(option).formatted(Formatting.AQUA), Text.literal(value).formatted(Formatting.AQUA)), ChatType.SUCCESS);
+                            Utility.sendMessage(Component.translatable("codeclient.config.command.set", Component.literal(option).withStyle(ChatFormatting.AQUA), Component.literal(value).withStyle(ChatFormatting.AQUA)), ChatType.SUCCESS);
                             Config.getConfig().save();
                             return 0;
                         }
                     }
-                    Utility.sendMessage(Text.translatable("codeclient.config.command.set.fail", Text.literal(option).formatted(Formatting.YELLOW), Text.literal(value).formatted(Formatting.YELLOW)), ChatType.FAIL);
+                    Utility.sendMessage(Component.translatable("codeclient.config.command.set.fail", Component.literal(option).withStyle(ChatFormatting.YELLOW), Component.literal(value).withStyle(ChatFormatting.YELLOW)), ChatType.FAIL);
                     return -1;
                 }
-                Utility.sendMessage(Text.translatable("codeclient.config.command.fail"), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.config.command.fail"), ChatType.FAIL);
             } catch (Exception ignored) {
             }
             return 0;

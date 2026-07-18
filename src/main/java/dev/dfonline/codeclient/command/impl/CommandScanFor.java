@@ -7,9 +7,8 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.ActionCommand;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
-
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.Component;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
@@ -22,18 +21,18 @@ public class CommandScanFor extends ActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.then(argument("name", greedyString()).executes(context -> {
             if (CodeClient.location instanceof Dev dev) {
                 Pattern pattern = Pattern.compile(context.getArgument("name", String.class), Pattern.CASE_INSENSITIVE);
                 var scan = dev.scanForSigns(pattern);
-                Utility.sendMessage(Text.translatable("codeclient.action.scanfor.scan_result"));
+                Utility.sendMessage(Component.translatable("codeclient.action.scanfor.scan_result"));
                 for (var res : scan.entrySet()) {
-                    Utility.sendMessage(Text.empty().append("- ").append(res.getKey().toString()).append(": ").append(res.getValue().getMessage(1, false)));
+                    Utility.sendMessage(Component.empty().append("- ").append(res.getKey().toString()).append(": ").append(res.getValue().getMessage(1, false)));
                 }
                 return 0;
             }
-            Utility.sendMessage(Text.translatable("codeclient.action.scanfor.scan_fail"), ChatType.FAIL);
+            Utility.sendMessage(Component.translatable("codeclient.action.scanfor.scan_fail"), ChatType.FAIL);
             return -1;
         }));
     }

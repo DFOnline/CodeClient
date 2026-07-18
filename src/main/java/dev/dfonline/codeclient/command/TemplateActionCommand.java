@@ -5,8 +5,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dfonline.codeclient.FileManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
-
+import net.minecraft.network.chat.Component;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,7 +40,7 @@ public abstract class TemplateActionCommand extends ActionCommand {
             list.close();
             for (String possibility : possibilities) {
                 if (possibility.toLowerCase().contains(builder.getRemainingLowerCase()))
-                    builder.suggest(possibility, Text.literal("Folder"));
+                    builder.suggest(possibility, Component.literal("Folder"));
             }
         } catch (IOException ignored1) {
         }

@@ -1,30 +1,30 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class ChestFeature {
-    protected HandledScreen<?> screen;
+    protected AbstractContainerScreen<?> screen;
 
-    public ChestFeature(HandledScreen<?> screen) {
+    public ChestFeature(AbstractContainerScreen<?> screen) {
         this.screen = screen;
     }
 
-    public void render(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {}
+    public void render(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {}
 
-    public void drawSlot(DrawContext context, Slot slot) {}
+    public void drawSlot(GuiGraphics context, Slot slot) {}
 
     public ItemStack getHoverStack(Slot instance) {
         return null;
     }
 
-    public boolean mouseClicked(Click click) {
+    public boolean mouseClicked(MouseButtonEvent click) {
         return false;
     }
 
@@ -32,19 +32,19 @@ public abstract class ChestFeature {
         return false;
     }
 
-    public boolean keyPressed(KeyInput key) {
+    public boolean keyPressed(KeyEvent key) {
         return false;
     }
 
-    public boolean keyReleased(KeyInput key) {
+    public boolean keyReleased(KeyEvent key) {
         return false;
     }
 
-    public boolean charTyped(CharInput charInput) {
+    public boolean charTyped(CharacterEvent charInput) {
         return false;
     }
 
-    public boolean clickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+    public boolean clickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
         return false;
     }
 

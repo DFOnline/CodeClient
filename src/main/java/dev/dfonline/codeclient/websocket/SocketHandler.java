@@ -9,18 +9,17 @@ import dev.dfonline.codeclient.action.impl.*;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.websocket.scope.AuthScope;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.inventory.StackWithSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.storage.NbtReadView;
-import net.minecraft.storage.NbtWriteView;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.ItemStackWithSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.java_websocket.WebSocket;
 import org.jetbrains.annotations.Nullable;
 
@@ -165,7 +164,7 @@ public class SocketHandler {
         // Send the invalid scopes if any are found, and alert the user
         if (!invalidScopes.isEmpty()) {
             connection.send("invalid scope " + String.join(" ", invalidScopes));
-            Utility.sendMessage(Text.translatable("codeclient.api.scope.invalid"));
+            Utility.sendMessage(Component.translatable("codeclient.api.scope.invalid"));
             return;
         }
 
@@ -209,35 +208,35 @@ public class SocketHandler {
         if (unapprovedAuthScopes.isEmpty()) return;
         if (CodeClient.MC.player == null) return;
 
-        CodeClient.MC.executeSync(() -> {
-            ClientPlayerEntity player = CodeClient.MC.player;
+        CodeClient.MC.executeIfPossible(() -> {
+            LocalPlayer player = CodeClient.MC.player;
 
             // Send the user the scopes to approve
-            Utility.sendMessage(Text.translatable("codeclient.api.scope.prompt"));
+            Utility.sendMessage(Component.translatable("codeclient.api.scope.prompt"));
             for (AuthScope scope : unapprovedAuthScopes) {
                 Utility.sendMessage(
-                    Text.empty()
+                    Component.empty()
                         .append(
-                            Text.literal("- ")
-                                .formatted(Formatting.DARK_GRAY)
+                            Component.literal("- ")
+                                .withStyle(ChatFormatting.DARK_GRAY)
                         )
                         .append(
-                            Text.translatable("codeclient.api.scope.type." + scope.translationKey)
-                                .formatted(Formatting.WHITE)
+                            Component.translatable("codeclient.api.scope.type." + scope.translationKey)
+                                .withStyle(ChatFormatting.WHITE)
                                 .append(" ")
                                 .append(
-                                    Text.literal("(")
-                                        .append(Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey))
-                                        .append(Text.literal(")"))
-                                        .formatted(scope.dangerLevel.color, Formatting.ITALIC)
+                                    Component.literal("(")
+                                        .append(Component.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey))
+                                        .append(Component.literal(")"))
+                                        .withStyle(scope.dangerLevel.color, ChatFormatting.ITALIC)
                                 )
                         )
                         .setStyle(Style.EMPTY.withHoverEvent(
-                            new HoverEvent.ShowText(Text.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
+                            new HoverEvent.ShowText(Component.translatable("codeclient.api.danger." + scope.dangerLevel.translationKey + ".description"))
                         ))
                 );
             }
-            Utility.sendMessage(Text.translatable("codeclient.api.run_auth"));
+            Utility.sendMessage(Component.translatable("codeclient.api.run_auth"));
         });
     }
 
@@ -480,9 +479,9 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            var view = NbtWriteView.create(null, CodeClient.MC.player.getRegistryManager());
-            CodeClient.MC.player.getInventory().writeData(view.getListAppender("Inventory", StackWithSlot.CODEC));
-            responder.send(String.valueOf(view.getNbt().get("Inventory")));
+            var view = TagValueOutput.createWithContext(null, CodeClient.MC.player.registryAccess());
+            CodeClient.MC.player.getInventory().save(view.list("Inventory", ItemStackWithSlot.CODEC));
+            responder.send(String.valueOf(view.buildResult().get("Inventory")));
             next();
         }
 
@@ -512,8 +511,8 @@ public class SocketHandler {
                 return;
             }
             try {
-                CodeClient.MC.player.getInventory().readData(
-                        NbtReadView.create(null, CodeClient.MC.player.getRegistryManager(), StringNbtReader.readCompound("{Inventory:" + content + "}")).getTypedListView("Inventory", StackWithSlot.CODEC)
+                CodeClient.MC.player.getInventory().load(
+                        TagValueInput.create(null, CodeClient.MC.player.registryAccess(), TagParser.parseCompoundFully("{Inventory:" + content + "}")).listOrEmpty("Inventory", ItemStackWithSlot.CODEC)
                 );
                 Utility.sendInventory();
             } catch (CommandSyntaxException e) {
@@ -549,10 +548,10 @@ public class SocketHandler {
                 return;
             }
             try {
-                if (CodeClient.MC.world == null) return;
-                Optional<ItemStack> itemStack = ItemStack.CODEC.parse(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), StringNbtReader.readCompound(content)).result();
+                if (CodeClient.MC.level == null) return;
+                Optional<ItemStack> itemStack = ItemStack.CODEC.parse(CodeClient.MC.player.registryAccess().createSerializationContext(NbtOps.INSTANCE), TagParser.parseCompoundFully(content)).result();
                 if (itemStack.isEmpty()) return;
-                CodeClient.MC.player.giveItemStack(itemStack.get());
+                CodeClient.MC.player.addItem(itemStack.get());
                 Utility.sendInventory();
             } catch (CommandSyntaxException e) {
                 responder.send("invalid nbt");
@@ -582,8 +581,8 @@ public class SocketHandler {
 
         @Override
         public void start(WebSocket responder) {
-            if (CodeClient.location instanceof Plot && !command.isEmpty() && CodeClient.MC.getNetworkHandler() != null) {
-                CodeClient.MC.getNetworkHandler().sendChatCommand(command);
+            if (CodeClient.location instanceof Plot && !command.isEmpty() && CodeClient.MC.getConnection() != null) {
+                CodeClient.MC.getConnection().sendCommand(command);
             } else {
                 responder.send(CodeClient.location.name());
             }

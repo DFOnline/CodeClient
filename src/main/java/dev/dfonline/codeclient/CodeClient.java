@@ -3,6 +3,7 @@ package dev.dfonline.codeclient;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.action.impl.DevForBuild;
@@ -46,35 +47,38 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.SignText;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.render.BlockRenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.PacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
+import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +100,7 @@ public class CodeClient implements ClientModInitializer {
     public static final String MOD_ID = "codeclient";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
     public static final Gson gson = new Gson();
-    public static MinecraftClient MC = MinecraftClient.getInstance();
+    public static Minecraft MC = Minecraft.getInstance();
 
     public static AutoJoin autoJoin = AutoJoin.NONE;
     public static Utility.Toast startupToast;
@@ -120,12 +124,12 @@ public class CodeClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        MC = MinecraftClient.getInstance();
+        MC = Minecraft.getInstance();
 
         loadFeatures();
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
-            if (MC.player == null || MC.world == null) clean();
+            if (MC.player == null || MC.level == null) clean();
             if (screenToOpen != null) {
                 MC.setScreen(screenToOpen);
                 screenToOpen = null;
@@ -133,11 +137,11 @@ public class CodeClient implements ClientModInitializer {
         });
 
 
-        BlockRenderLayerMap.putBlock(Blocks.BARRIER, BlockRenderLayer.TRANSLUCENT);
-        BlockRenderLayerMap.putBlock(Blocks.STRUCTURE_VOID, BlockRenderLayer.TRANSLUCENT);
-        BlockRenderLayerMap.putBlock(Blocks.LIGHT, BlockRenderLayer.TRANSLUCENT);
+        BlockRenderLayerMap.putBlock(Blocks.BARRIER, ChunkSectionLayer.TRANSLUCENT);
+        BlockRenderLayerMap.putBlock(Blocks.STRUCTURE_VOID, ChunkSectionLayer.TRANSLUCENT);
+        BlockRenderLayerMap.putBlock(Blocks.LIGHT, ChunkSectionLayer.TRANSLUCENT);
 
-        ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.of(MOD_ID, "close"), client -> API.stop());
+        ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.fromNamespaceAndPath(MOD_ID, "close"), client -> API.stop());
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> CommandSender.tick());
 
@@ -167,21 +171,21 @@ public class CodeClient implements ClientModInitializer {
                     DataValue element = publicBukkit.getHypercubeValue(key);
 
                     // Any type = yellow, number = red, string = aqua.
-                    Formatting formatting = Formatting.GREEN;
+                    ChatFormatting formatting = ChatFormatting.GREEN;
                     String stringElement = element.getValue() == null ? "?" : element.getValue().toString();
                     if (element instanceof StringDataValue) {
-                        formatting = Formatting.AQUA;
+                        formatting = ChatFormatting.AQUA;
                     }
                     if (element instanceof NumberDataValue numberDataValue) {
-                        formatting = Formatting.RED;
+                        formatting = ChatFormatting.RED;
                         stringElement = String.valueOf(numberDataValue.getValue());
                     }
 
                     lines.add(
-                            Text.literal(key)
+                            Component.literal(key)
                                     .withColor(0xAAFF55)
-                                    .append(Text.literal(" = ").formatted(Formatting.DARK_GRAY))
-                                    .append(Text.literal(stringElement).formatted(formatting))
+                                    .append(Component.literal(" = ").withStyle(ChatFormatting.DARK_GRAY))
+                                    .append(Component.literal(stringElement).withStyle(formatting))
                     );
                 }
             }
@@ -199,7 +203,7 @@ public class CodeClient implements ClientModInitializer {
         });
 
         try {
-            registerResourcePack("dark_mode", Text.literal("Dark Mode").formatted(Formatting.WHITE));
+            registerResourcePack("dark_mode", Component.literal("Dark Mode").withStyle(ChatFormatting.WHITE));
         } catch (NullPointerException exception) {
             LOGGER.warn("Could not load dark mode resource pack!");
         }
@@ -260,7 +264,7 @@ public class CodeClient implements ClientModInitializer {
      * @return Identifier under the mod id's namespace and the provided path as the path.
      */
     public static Identifier getId(String path) {
-        return Identifier.of(MOD_ID, path);
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     public static void isCodeChest() {
@@ -274,8 +278,8 @@ public class CodeClient implements ClientModInitializer {
     }
 
     public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
-        if (packet instanceof BundleS2CPacket bundle) {
-            bundle.getPackets().forEach(CodeClient::handlePacket);
+        if (packet instanceof ClientboundBundlePacket bundle) {
+            bundle.subPackets().forEach(CodeClient::handlePacket);
             return false;
         }
 
@@ -293,10 +297,10 @@ public class CodeClient implements ClientModInitializer {
 
         if (CodeClient.location instanceof Dev dev) {
             try {
-                if (packet instanceof BlockEntityUpdateS2CPacket beu && dev.isInDev(beu.getPos()) && beu.getBlockEntityType() == BlockEntityType.SIGN) {
-                    NbtCompound compound = beu.getNbt();
+                if (packet instanceof ClientboundBlockEntityDataPacket beu && dev.isInDev(beu.getPos()) && beu.getType() == BlockEntityType.SIGN) {
+                    CompoundTag compound = beu.getTag();
                     if(compound.contains("front_text")) {
-                        SignText text = SignText.CODEC.decode(NbtOps.INSTANCE, beu.getNbt().get("front_text")).getOrThrow().getFirst();
+                        SignText text = SignText.DIRECT_CODEC.decode(NbtOps.INSTANCE, beu.getTag().get("front_text")).getOrThrow().getFirst();
                         if (Plot.lineStarterPattern.matcher(text.getMessage(0, false).getString()).matches()) {
                             dev.getLineStartCache().put(beu.getPos(), text);
                         }
@@ -313,13 +317,13 @@ public class CodeClient implements ClientModInitializer {
                 dev.clearLineStarterCache();
             }
 
-            if (packet instanceof ChunkDeltaUpdateS2CPacket update) {
-                update.visitUpdates((blockPos, blockState) -> dev.getLineStartCache().remove(blockPos));
+            if (packet instanceof ClientboundSectionBlocksUpdatePacket update) {
+                update.runUpdates((blockPos, blockState) -> dev.getLineStartCache().remove(blockPos));
             }
 
             if (dev.getSize() == null) {
-                if (packet instanceof PlayerPositionLookS2CPacket pos) {
-                    var tp = BlockPos.ofFloored(pos.change().position().x, pos.change().position().y, pos.change().position().z);
+                if (packet instanceof ClientboundPlayerPositionPacket pos) {
+                    var tp = BlockPos.containing(pos.change().position().x, pos.change().position().y, pos.change().position().z);
                     if (dev.isInPlot(tp, Plot.Size.MEGA) && !dev.isInPlot(tp, Plot.Size.MASSIVE)) {
                         dev.setSize(Plot.Size.MEGA);
 
@@ -327,7 +331,7 @@ public class CodeClient implements ClientModInitializer {
                 }
             }
         }
-        return (MC.currentScreen instanceof GameMenuScreen || MC.currentScreen instanceof ChatScreen || MC.currentScreen instanceof StateSwitcher) && packet instanceof CloseScreenS2CPacket;
+        return (MC.screen instanceof PauseScreen || MC.screen instanceof ChatScreen || MC.screen instanceof StateSwitcher) && packet instanceof ClientboundContainerClosePacket;
     }
 
     /**
@@ -353,7 +357,7 @@ public class CodeClient implements ClientModInitializer {
 
 //        System.out.println(location.name());
 
-        if (!(location instanceof Dev) || !(MC.currentScreen instanceof HandledScreen<?>)) {
+        if (!(location instanceof Dev) || !(MC.screen instanceof AbstractContainerScreen<?>)) {
             isCodeChest = false;
             features().forEach(Feature::closeChest);
         }
@@ -363,7 +367,7 @@ public class CodeClient implements ClientModInitializer {
             var pos = new BlockPos(dev.getX() - 1, 49, dev.getZ());
             if (dev.getSize() == null) {
                 // TODO wait for plugin messages, or make a fix now.
-                var world = CodeClient.MC.world;
+                var world = CodeClient.MC.level;
                 if (world == null) return;
                 var FIFTY = world.getBlockState(pos.south(50));
                 var FIFTY_ONE = world.getBlockState(pos.south(51));
@@ -371,45 +375,45 @@ public class CodeClient implements ClientModInitializer {
                 var HUNDRED_ONE = world.getBlockState(pos.south(101));
                 var THREE_HUNDRED = world.getBlockState(pos.south(300));
                 var THREE_HUNDRED_ONE = world.getBlockState(pos.south(301));
-                var MEGA = world.getBlockState(pos.add(-19, 0, 10));
-                var MEGA_ONE = world.getBlockState(pos.add(-20, 0, 10));
-                if (MEGA_ONE.isOf(Blocks.GRASS_BLOCK) && MEGA.isOf(Blocks.GRASS_BLOCK)) {
+                var MEGA = world.getBlockState(pos.offset(-19, 0, 10));
+                var MEGA_ONE = world.getBlockState(pos.offset(-20, 0, 10));
+                if (MEGA_ONE.is(Blocks.GRASS_BLOCK) && MEGA.is(Blocks.GRASS_BLOCK)) {
                     dev.setSize(Plot.Size.MEGA);
-                } else if (!MEGA.isOf(Blocks.VOID_AIR) && !MEGA_ONE.isOf(Blocks.VOID_AIR) && !MEGA.isOf(Blocks.GRASS_BLOCK) && !MEGA.isOf(Blocks.STONE) && !MEGA_ONE.isOf(Blocks.GRASS_BLOCK)) {
+                } else if (!MEGA.is(Blocks.VOID_AIR) && !MEGA_ONE.is(Blocks.VOID_AIR) && !MEGA.is(Blocks.GRASS_BLOCK) && !MEGA.is(Blocks.STONE) && !MEGA_ONE.is(Blocks.GRASS_BLOCK)) {
                     dev.setSize(Plot.Size.MEGA);
-                } else if (!(FIFTY.isOf(Blocks.VOID_AIR) || FIFTY_ONE.isOf(Blocks.VOID_AIR)) && (!FIFTY.isOf(FIFTY_ONE.getBlock()))) {
+                } else if (!(FIFTY.is(Blocks.VOID_AIR) || FIFTY_ONE.is(Blocks.VOID_AIR)) && (!FIFTY.is(FIFTY_ONE.getBlock()))) {
                     dev.setSize(Plot.Size.BASIC);
-                } else if (!(HUNDRED.isOf(Blocks.VOID_AIR) || HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !HUNDRED.isOf(HUNDRED_ONE.getBlock())) {
+                } else if (!(HUNDRED.is(Blocks.VOID_AIR) || HUNDRED_ONE.is(Blocks.VOID_AIR)) && !HUNDRED.is(HUNDRED_ONE.getBlock())) {
                     dev.setSize(Plot.Size.LARGE);
-                } else if (!(THREE_HUNDRED.isOf(Blocks.VOID_AIR) || THREE_HUNDRED_ONE.isOf(Blocks.VOID_AIR)) && !THREE_HUNDRED.isOf(THREE_HUNDRED_ONE.getBlock())) {
+                } else if (!(THREE_HUNDRED.is(Blocks.VOID_AIR) || THREE_HUNDRED_ONE.is(Blocks.VOID_AIR)) && !THREE_HUNDRED.is(THREE_HUNDRED_ONE.getBlock())) {
                     dev.setSize(Plot.Size.MASSIVE);
                 }
             }
             var size = dev.assumeSize();
-            assert CodeClient.MC.world != null;
-            var groundCheck = MC.world.getBlockState(new BlockPos(
+            assert CodeClient.MC.level != null;
+            var groundCheck = MC.level.getBlockState(new BlockPos(
                     Math.max(Math.min((int) MC.player.getX(), dev.getX() - 1), dev.getX() - (size.codeWidth)),
                     49,
                     Math.max(Math.min((int) MC.player.getZ(), dev.getZ() + size.codeLength), dev.getZ())
             ));
-            if (!groundCheck.isOf(Blocks.VOID_AIR))
-                dev.setHasUnderground(!groundCheck.isOf(Blocks.GRASS_BLOCK) && !groundCheck.isOf(Blocks.STONE));
+            if (!groundCheck.is(Blocks.VOID_AIR))
+                dev.setHasUnderground(!groundCheck.is(Blocks.GRASS_BLOCK) && !groundCheck.is(Blocks.STONE));
         }
-        if (CodeClient.location instanceof Spawn spawn && MC.getNetworkHandler() != null && spawn.consumeHasJustJoined()) {
+        if (CodeClient.location instanceof Spawn spawn && MC.getConnection() != null && spawn.consumeHasJustJoined()) {
             if (autoJoin == AutoJoin.PLOT) {
-                MC.getNetworkHandler().sendChatCommand("join " + Config.getConfig().AutoJoinPlotId);
+                MC.getConnection().sendCommand("join " + Config.getConfig().AutoJoinPlotId);
                 autoJoin = AutoJoin.NONE;
             } else if (Config.getConfig().AutoFly) {
-                MC.getNetworkHandler().sendChatCommand("fly");
+                MC.getConnection().sendCommand("fly");
             }
         }
     }
 
-    public static void onRender(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
+    public static void onRender(PoseStack matrices, MultiBufferSource.BufferSource vertexConsumers, double cameraX, double cameraY, double cameraZ) {
         features().forEach(feature -> feature.render(matrices, vertexConsumers, cameraX, cameraY, cameraZ));
 
         if (shouldReload) {
-            MC.worldRenderer.reload();
+            MC.levelRenderer.allChanged();
             shouldReload = false;
         }
     }
@@ -422,7 +426,7 @@ public class CodeClient implements ClientModInitializer {
         features().forEach(feature -> feature.onBreakBlock(dev, pos, breakPos));
     }
 
-    public static void onScreenInit(HandledScreen<?> screen) {
+    public static void onScreenInit(AbstractContainerScreen<?> screen) {
         features().forEach(Feature::closeChest);
         if (!isCodeChest) return;
         features().forEach(feat -> feat.openChest(screen));
@@ -433,11 +437,11 @@ public class CodeClient implements ClientModInitializer {
         features().forEach(Feature::closeChest);
     }
 
-    public static void onRender(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
+    public static void onRender(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {
         chestFeatures().forEach(feat -> feat.render(context, mouseX, mouseY, x, y, delta));
     }
 
-    public static void onDrawSlot(DrawContext context, Slot slot) {
+    public static void onDrawSlot(GuiGraphics context, Slot slot) {
         chestFeatures().forEach(feat -> feat.drawSlot(context, slot));
     }
 
@@ -445,23 +449,23 @@ public class CodeClient implements ClientModInitializer {
         return chestFeatures().map(feat -> feat.getHoverStack(instance)).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
-    public static boolean onMouseClicked(Click click) {
+    public static boolean onMouseClicked(MouseButtonEvent click) {
         return chestFeatures().anyMatch(feature -> feature.mouseClicked(click));
     }
 
-    public static boolean onKeyPressed(KeyInput key) {
+    public static boolean onKeyPressed(KeyEvent key) {
         return chestFeatures().anyMatch(feature -> feature.keyPressed(key));
     }
 
-    public static boolean onKeyReleased(KeyInput key) {
+    public static boolean onKeyReleased(KeyEvent key) {
         return chestFeatures().anyMatch(feature -> feature.keyReleased(key));
     }
 
-    public static boolean onCharTyped(CharInput charInput) {
+    public static boolean onCharTyped(CharacterEvent charInput) {
         return chestFeatures().anyMatch(feature -> feature.charTyped(charInput));
     }
 
-    public static boolean onClickSlot(Slot slot, int button, SlotActionType actionType, int syncId, int revision) {
+    public static boolean onClickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
         return chestFeatures().anyMatch(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
     }
 
@@ -474,7 +478,7 @@ public class CodeClient implements ClientModInitializer {
         if (!Config.getConfig().NoClipEnabled) return false;
         if (!(location instanceof Dev)) return false;
         if (!(currentAction instanceof None)) return false;
-        return MC.player.getAbilities().creativeMode;
+        return MC.player.getAbilities().instabuild;
     }
 
     /**
@@ -532,7 +536,7 @@ public class CodeClient implements ClientModInitializer {
      * @return if the resource pack was created
      * @throws NullPointerException if the mod container is not found
      */
-    private boolean registerResourcePack(String id, Text name) throws NullPointerException {
+    private boolean registerResourcePack(String id, Component name) throws NullPointerException {
         return registerResourcePack(id, name, ResourcePackActivationType.NORMAL);
     }
 
@@ -545,12 +549,12 @@ public class CodeClient implements ClientModInitializer {
      * @return if the resource pack was created
      * @throws NullPointerException if the mod container is not found
      */
-    private boolean registerResourcePack(String id, Text name, ResourcePackActivationType type) throws NullPointerException {
+    private boolean registerResourcePack(String id, Component name, ResourcePackActivationType type) throws NullPointerException {
         var prefix = String.format("[%s] ", MOD_NAME);
         return ResourceManagerHelper.registerBuiltinResourcePack(
                 getId(id),
                 getModContainer(),
-                Text.literal(prefix).formatted(Formatting.GRAY).append(name),
+                Component.literal(prefix).withStyle(ChatFormatting.GRAY).append(name),
                 type
         );
     }
@@ -561,7 +565,7 @@ public class CodeClient implements ClientModInitializer {
         var versionNumber = json.get("version_number").getAsString();
 
         if (Config.getConfig().AutoUpdateOption != Config.AutoUpdate.UPDATE) {
-            startupToast = new Utility.Toast(Text.translatable("toast.codeclient.update_available.title", versionNumber), Text.translatable("toast.codeclient.update_available"));
+            startupToast = new Utility.Toast(Component.translatable("toast.codeclient.update_available.title", versionNumber), Component.translatable("toast.codeclient.update_available"));
             return;
         }
         var files = json.getAsJsonArray("files");
@@ -582,7 +586,7 @@ public class CodeClient implements ClientModInitializer {
                             LOGGER.error("Failed to download the file: {}", e.getMessage());
                         } finally {
                             LOGGER.info("Download complete.");
-                            startupToast = new Utility.Toast(Text.translatable("toast.codeclient.update.title", versionNumber), Text.translatable("toast.codeclient.update"));
+                            startupToast = new Utility.Toast(Component.translatable("toast.codeclient.update.title", versionNumber), Component.translatable("toast.codeclient.update"));
                         }
                     }
                 }

@@ -6,12 +6,11 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -29,23 +28,23 @@ public class CommandCalc extends Command {
 
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.then(argument("calc", greedyString())
                 .executes(context -> {
                     String expr = context.getArgument("calc", String.class);
-                    if (CodeClient.MC.getNetworkHandler() == null) return -1;
+                    if (CodeClient.MC.getConnection() == null) return -1;
 
                     try {
                         String result = String.valueOf(calc(expr));
-                        Text message = Text.translatable("codeclient.command.calc.success", expr, result)
-                                        .fillStyle(Style.EMPTY
-                                        .withHoverEvent(new HoverEvent.ShowText(Text.translatable("codeclient.hover.click_to_copy")))
+                        Component message = Component.translatable("codeclient.command.calc.success", expr, result)
+                                        .withStyle(Style.EMPTY
+                                        .withHoverEvent(new HoverEvent.ShowText(Component.translatable("codeclient.hover.click_to_copy")))
                                         .withClickEvent(new ClickEvent.CopyToClipboard(result)));
 
                         Utility.sendMessage(message, ChatType.SUCCESS);
                         
                     } catch (Exception e) {
-                        Utility.sendMessage(Text.translatable("codeclient.command.calc.failure", expr), ChatType.FAIL);
+                        Utility.sendMessage(Component.translatable("codeclient.command.calc.failure", expr), ChatType.FAIL);
                     }
                     return 0;
                 }));

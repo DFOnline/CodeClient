@@ -9,24 +9,6 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.component.type.ContainerComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PickItemFromBlockC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.network.packet.s2c.play.BlockEventS2CPacket;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +17,24 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
+import net.minecraft.network.protocol.game.ServerboundPickItemFromBlockPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class ChestPeeker extends Feature {
 
@@ -61,17 +61,17 @@ public class ChestPeeker extends Feature {
             return;
         }
 //        if (CodeClient.MC.currentScreen != null) return;
-        if (CodeClient.MC.world == null) return;
+        if (CodeClient.MC.level == null) return;
         if (!Config.getConfig().ChestPeeker && currentCallback == null) return;
         if (CodeClient.location instanceof Dev dev) {
-            if (CodeClient.MC.crosshairTarget instanceof BlockHitResult block) {
+            if (CodeClient.MC.hitResult instanceof BlockHitResult block) {
                 BlockPos pos = block.getBlockPos();
                 if (pos.equals(currentBlock)) return;
                 if (currentBlock == null && !itemsFetched) { // Use itemsFetched instead of null
                     if (!dev.isInDev(pos)) {
                         return;
                     }
-                    if (CodeClient.MC.world.getBlockState(pos).getBlock() != Blocks.CHEST) {
+                    if (CodeClient.MC.level.getBlockState(pos).getBlock() != Blocks.CHEST) {
                         return;
                     }
                     currentBlock = pos;
@@ -79,12 +79,12 @@ public class ChestPeeker extends Feature {
                     itemsFetched = false;
 
                     if (!expectingItems) {
-                        ClientPlayNetworkHandler network = CodeClient.MC.getNetworkHandler();
+                        ClientPacketListener network = CodeClient.MC.getConnection();
                         if (network == null) return;
 
                         Utility.sendHandItem(ItemStack.EMPTY);
-                        network.sendPacket(new PickItemFromBlockC2SPacket(currentBlock, true));
-                        Utility.sendHandItem(CodeClient.MC.player.getMainHandStack());
+                        network.send(new ServerboundPickItemFromBlockPacket(currentBlock, true));
+                        Utility.sendHandItem(CodeClient.MC.player.getMainHandItem());
                         expectingItems = true;
                         return;
                     }
@@ -98,7 +98,7 @@ public class ChestPeeker extends Feature {
 
     public boolean onReceivePacket(Packet<?> packet) {
 
-        var net = CodeClient.MC.getNetworkHandler();
+        var net = CodeClient.MC.getConnection();
         if (net == null) return false;
         if (!Config.getConfig().ChestPeeker && currentCallback == null) return false;
         if (CodeClient.MC.player == null) return false;
@@ -106,33 +106,33 @@ public class ChestPeeker extends Feature {
 
         if (CodeClient.location instanceof Dev) {
             if (currentBlock != null/* && CodeClient.MC.currentScreen == null*/) {
-                if (packet instanceof BlockEventS2CPacket block) {
+                if (packet instanceof ClientboundBlockEventPacket block) {
                     if (!Objects.equals(currentBlock, block.getPos())) return false;
-                    if (block.getType() != 1) return false;
-                    if (block.getData() != 0) return false;
+                    if (block.getB0() != 1) return false;
+                    if (block.getB1() != 0) return false;
                     clear();
                 }
-                if (expectingItems && packet instanceof UpdateSelectedSlotS2CPacket) {
-                    net.sendPacket(new UpdateSelectedSlotC2SPacket(inv.getSelectedSlot()));
+                if (expectingItems && packet instanceof ClientboundSetHeldSlotPacket) {
+                    net.send(new ServerboundSetCarriedItemPacket(inv.getSelectedSlot()));
                     return true;
                 }
             }
-            if (expectingItems && packet instanceof ScreenHandlerSlotUpdateS2CPacket slot) {
-                var handler = CodeClient.MC.player.playerScreenHandler;
+            if (expectingItems && packet instanceof ClientboundContainerSetSlotPacket slot) {
+                var handler = CodeClient.MC.player.inventoryMenu;
 
                 int slotIndex = slot.getSlot();
                 if (slotIndex < 0 || slotIndex >= handler.slots.size()) return false;
 
-                var removedItem = handler.getSlot(slotIndex).getStack();
-                net.sendPacket(new CreativeInventoryActionC2SPacket(slotIndex, removedItem));
-                CodeClient.MC.player.playerScreenHandler.setStackInSlot(slotIndex, 0, removedItem);
+                var removedItem = handler.getSlot(slotIndex).getItem();
+                net.send(new ServerboundSetCreativeModeSlotPacket(slotIndex, removedItem));
+                CodeClient.MC.player.inventoryMenu.setItem(slotIndex, 0, removedItem);
 
-                DFItem item = DFItem.of(slot.getStack());
-                ContainerComponent container = item.getContainer();
+                DFItem item = DFItem.of(slot.getItem());
+                ItemContainerContents container = item.getContainer();
                 if (container == null)
-                    return ItemStack.areItemsEqual(CodeClient.MC.player.getMainHandStack(), slot.getStack());
+                    return ItemStack.isSameItem(CodeClient.MC.player.getMainHandItem(), slot.getItem());
                 items.clear();
-                container.iterateNonEmpty().forEach(stack -> items.add(stack));
+                container.nonEmptyItems().forEach(stack -> items.add(stack));
 
                 itemsFetched = true;
                 expectingItems = false;
@@ -147,40 +147,40 @@ public class ChestPeeker extends Feature {
         return false;
     }
 
-    public List<Text> getOverlayText() {
+    public List<Component> getOverlayText() {
         if (!Config.getConfig().ChestPeeker) return null;
         if (CodeClient.location instanceof Dev && currentBlock != null) {
-            ArrayList<Text> texts = new ArrayList<>();
+            ArrayList<Component> texts = new ArrayList<>();
             if (!itemsFetched) {
                 return null;
             } else if (items.isEmpty()) {
-                texts.add(Text.translatable("codeclient.peeker.empty").formatted(Formatting.GOLD));
+                texts.add(Component.translatable("codeclient.peeker.empty").withStyle(ChatFormatting.GOLD));
             } else {
-                texts.add(Text.translatable("codeclient.peeker.contents").formatted(Formatting.GOLD));
+                texts.add(Component.translatable("codeclient.peeker.contents").withStyle(ChatFormatting.GOLD));
                 for (ItemStack item : items) {
                     DFItem dfItem = DFItem.of(item);
-                    List<Text> currentLore = dfItem.getLore();
-                    ArrayList<Text> lore = new ArrayList<>(currentLore);
+                    List<Component> currentLore = dfItem.getLore();
+                    ArrayList<Component> lore = new ArrayList<>(currentLore);
 
 
-                    MutableText text = Text.empty();
-                    text.append(Text.literal(" • ").formatted(Formatting.DARK_GRAY));
+                    MutableComponent text = Component.empty();
+                    text.append(Component.literal(" • ").withStyle(ChatFormatting.DARK_GRAY));
                     Optional<String> varItem = dfItem.getHypercubeStringValue("varitem");
                     if (varItem.isEmpty()) {
                         text.append(item.getCount() + "x ");
-                        text.append(item.getName());
+                        text.append(item.getHoverName());
                     } else {
                         JsonObject object = JsonParser.parseString(varItem.get()).getAsJsonObject();
                         try {
                             Type type = Type.valueOf(object.get("id").getAsString());
                             JsonObject data = object.get("data").getAsJsonObject();
-                            text.append(Text.literal(type.name.toUpperCase()).fillStyle(Style.EMPTY.withColor(type.color)).append(" "));
+                            text.append(Component.literal(type.name.toUpperCase()).withStyle(Style.EMPTY.withColor(type.color)).append(" "));
                             if (type == Type.var) {
                                 Scope scope = Scope.valueOf(data.get("scope").getAsString());
-                                text.append(scope.getShortName()).fillStyle(Style.EMPTY.withColor(scope.color)).append(" ");
+                                text.append(scope.getShortName()).withStyle(Style.EMPTY.withColor(scope.color)).append(" ");
                             }
                             if (type == Type.num || type == Type.txt || type == Type.comp || type == Type.var || type == Type.g_val || type == Type.pn_el) {
-                                text.append(item.getName());
+                                text.append(item.getHoverName());
                             }
                             if (type == Type.loc) {
                                 JsonObject loc = data.get("loc").getAsJsonObject();
@@ -192,40 +192,40 @@ public class ChestPeeker extends Feature {
                                         loc.get("yaw").getAsFloat()));
                             }
                             if (type == Type.vec) {
-                                text.append(Text.literal("<%.2f, %.2f, %.2f>".formatted(
+                                text.append(Component.literal("<%.2f, %.2f, %.2f>".formatted(
                                         data.get("x").getAsFloat(),
                                         data.get("y").getAsFloat(),
                                         data.get("z").getAsFloat())
-                                ).fillStyle(Style.EMPTY.withColor(Type.vec.color)));
+                                ).withStyle(Style.EMPTY.withColor(Type.vec.color)));
                             }
                             if (type == Type.snd) {
                                 text.append(lore.getFirst());
-                                text.append(Text.literal(" P: ").formatted(Formatting.GRAY));
-                                text.append(Text.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
-                                text.append(Text.literal(" V: ").formatted(Formatting.GRAY));
-                                text.append(Text.literal("%.1f".formatted(data.get("vol").getAsFloat())));
+                                text.append(Component.literal(" P: ").withStyle(ChatFormatting.GRAY));
+                                text.append(Component.literal("%.1f".formatted(data.get("pitch").getAsFloat())));
+                                text.append(Component.literal(" V: ").withStyle(ChatFormatting.GRAY));
+                                text.append(Component.literal("%.1f".formatted(data.get("vol").getAsFloat())));
                             }
                             if (type == Type.part) {
-                                text.append(Text.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
+                                text.append(Component.literal("%dx ".formatted(data.get("cluster").getAsJsonObject().get("amount").getAsInt())));
                                 text.append(lore.getFirst());
                             }
                             if (type == Type.pot) {
                                 text.append(lore.getFirst());
-                                text.append(Text.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
+                                text.append(Component.literal(" %d ".formatted(data.get("amp").getAsInt() + 1)));
                                 int dur = data.get("dur").getAsInt();
                                 text.append(dur >= 1000000 ? "Infinite" : dur % 20 == 0 ? "%d:%02d".formatted((dur / 1200), (dur / 20) % 60) : (dur + "ticks"));
                             }
                             if (type == Type.bl_tag) {
-                                text.append(Text.literal(data.get("tag").getAsString()).formatted(Formatting.YELLOW));
-                                text.append(Text.literal(" » ").formatted(Formatting.DARK_AQUA));
-                                text.append(Text.literal(data.get("option").getAsString()).formatted(Formatting.AQUA));
+                                text.append(Component.literal(data.get("tag").getAsString()).withStyle(ChatFormatting.YELLOW));
+                                text.append(Component.literal(" » ").withStyle(ChatFormatting.DARK_AQUA));
+                                text.append(Component.literal(data.get("option").getAsString()).withStyle(ChatFormatting.AQUA));
                             }
                             if (type == Type.hint) continue;
                         } catch (IllegalArgumentException ignored) {
-                            text.append(Text.literal(object.get("id").getAsString().toUpperCase())
-                                    .styled(style -> style.withColor(TextColor.fromRgb(0x808080)))
+                            text.append(Component.literal(object.get("id").getAsString().toUpperCase())
+                                    .withStyle(style -> style.withColor(TextColor.fromRgb(0x808080)))
                                     .append(" "));
-                            text.append(item.getName());
+                            text.append(item.getHoverName());
                         }
                     }
                     texts.add(text);
@@ -260,18 +260,18 @@ public class ChestPeeker extends Feature {
     }
 
     enum Type {
-        txt("str", Formatting.AQUA),
+        txt("str", ChatFormatting.AQUA),
         comp("txt", TextColor.fromRgb(0x7fd42a)),
-        num("num", Formatting.RED),
-        loc("loc", Formatting.GREEN),
+        num("num", ChatFormatting.RED),
+        loc("loc", ChatFormatting.GREEN),
         vec("vec", TextColor.fromRgb(0x2affaa)),
-        snd("snd", Formatting.BLUE),
+        snd("snd", ChatFormatting.BLUE),
         part("par", TextColor.fromRgb(0xaa55ff)),
         pot("pot", TextColor.fromRgb(0xff557f)),
-        var("var", Formatting.YELLOW),
+        var("var", ChatFormatting.YELLOW),
         g_val("val", TextColor.fromRgb(0xffd47f)),
         pn_el("param", TextColor.fromRgb(0xaaffaa)),
-        bl_tag("tag", Formatting.YELLOW),
+        bl_tag("tag", ChatFormatting.YELLOW),
         hint("hint", TextColor.fromRgb(0xaaff55));
 
         public final String name;
@@ -282,9 +282,9 @@ public class ChestPeeker extends Feature {
             this.color = color;
         }
 
-        Type(String name, Formatting color) {
+        Type(String name, ChatFormatting color) {
             this.name = name;
-            this.color = TextColor.fromFormatting(color);
+            this.color = TextColor.fromLegacyFormat(color);
         }
     }
 }

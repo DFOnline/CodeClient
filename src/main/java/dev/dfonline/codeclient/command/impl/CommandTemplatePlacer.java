@@ -9,11 +9,10 @@ import dev.dfonline.codeclient.action.impl.PlaceTemplates;
 import dev.dfonline.codeclient.command.TemplateActionCommand;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -27,7 +26,7 @@ public class CommandTemplatePlacer extends TemplateActionCommand {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> {
             if (CodeClient.location instanceof Dev) {
                 var action = PlaceTemplates.createPlacer(Utility.templatesInInventory(), this::actionCallback);
@@ -36,7 +35,7 @@ public class CommandTemplatePlacer extends TemplateActionCommand {
                 CodeClient.currentAction.init();
                 return 0;
             }
-            Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
+            Utility.sendMessage(Component.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
             return -1;
         }).then(argument("path", greedyString()).suggests(this::suggestTemplates).executes(context -> {
             try {
@@ -51,10 +50,10 @@ public class CommandTemplatePlacer extends TemplateActionCommand {
                     CodeClient.currentAction = new PlaceTemplates(map, this::actionCallback);
                     return 0;
                 }
-                Utility.sendMessage(Text.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.warning.dev_mode"), ChatType.FAIL);
                 return -1;
             } catch (Exception e) {
-                Utility.sendMessage(Text.translatable("codeclient.files.template_fail"), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.files.template_fail"), ChatType.FAIL);
                 return -2;
             }
         }));

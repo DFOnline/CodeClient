@@ -11,20 +11,19 @@ import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Argument;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.hit.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class SlotGhostManager extends Feature {
     private Action action;
@@ -43,7 +42,7 @@ public class SlotGhostManager extends Feature {
 
     @Override
     public void tick() {
-        if(CodeClient.MC.currentScreen == null && !InteractionManager.isOpeningCodeChest) {
+        if(CodeClient.MC.screen == null && !InteractionManager.isOpeningCodeChest) {
             reset();
         }
     }
@@ -51,10 +50,10 @@ public class SlotGhostManager extends Feature {
     @Override
     public void onClickChest(BlockHitResult hitResult) {
         action = null;
-        if (CodeClient.MC.world == null) return;
+        if (CodeClient.MC.level == null) return;
         var pos = hitResult.getBlockPos();
-        if (CodeClient.location instanceof Dev dev && dev.isInDev(pos) && CodeClient.MC.world.getBlockEntity(pos) instanceof ChestBlockEntity) {
-            var signEntity = CodeClient.MC.world.getBlockEntity(hitResult.getBlockPos().down().west());
+        if (CodeClient.location instanceof Dev dev && dev.isInDev(pos) && CodeClient.MC.level.getBlockEntity(pos) instanceof ChestBlockEntity) {
+            var signEntity = CodeClient.MC.level.getBlockEntity(hitResult.getBlockPos().below().west());
             if (signEntity instanceof SignBlockEntity sign) {
                 try {
                     action = ActionDump.getActionDump().findAction(sign.getFrontText());
@@ -65,18 +64,18 @@ public class SlotGhostManager extends Feature {
     }
 
     @Override
-    public @Nullable ChestFeature makeChestFeature(HandledScreen<?> screen) {
+    public @Nullable ChestFeature makeChestFeature(AbstractContainerScreen<?> screen) {
         return new GhostSlots(screen);
     }
 
     class GhostSlots extends ChestFeature {
-        public GhostSlots(HandledScreen<?> screen) {
+        public GhostSlots(AbstractContainerScreen<?> screen) {
             super(screen);
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
-            if (!CodeClient.MC.isCtrlPressed()) {
+        public void render(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {
+            if (!CodeClient.MC.hasControlDown()) {
                 time += delta;
             }
         }
@@ -90,34 +89,34 @@ public class SlotGhostManager extends Feature {
                 args.addAll(pos.get((int) (time / 30F) % pos.size()).arguments());
             }
 
-            if (slot.getIndex() >= args.size()) return null;
+            if (slot.getContainerSlot() >= args.size()) return null;
 
-            return args.get(slot.getIndex());
+            return args.get(slot.getContainerSlot());
         }
 
-        public void drawSlot(DrawContext context, Slot slot) {
-            if (!(CodeClient.MC.currentScreen instanceof GenericContainerScreen || CodeClient.MC.currentScreen instanceof CustomChestMenu)) {
+        public void drawSlot(GuiGraphics context, Slot slot) {
+            if (!(CodeClient.MC.screen instanceof ContainerScreen || CodeClient.MC.screen instanceof CustomChestMenu)) {
                 action = null;
             }
-            if (badAction() || slot.inventory instanceof PlayerInventory)
+            if (badAction() || slot.container instanceof Inventory)
                 return;
-            if (slot.hasStack()) return;
+            if (slot.hasItem()) return;
             Argument arg = getArgument(slot);
             if (arg == null) return;
             ItemStack itemStack = arg.getItem();
 
             if (itemStack.isEmpty()) return;
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0xA0__90_90_FF : 0x60__FF_00_00);
-            context.drawItem(itemStack, slot.x, slot.y);
-            context.drawStackOverlay(CodeClient.MC.textRenderer, itemStack, slot.x, slot.y);
+            context.renderItem(itemStack, slot.x, slot.y);
+            context.renderItemDecorations(CodeClient.MC.font, itemStack, slot.x, slot.y);
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40_FFFFFF);
         }
 
         @Override @Nullable
         public ItemStack getHoverStack(Slot slot) {
-            if (badAction() || slot.inventory instanceof PlayerInventory)
+            if (badAction() || slot.container instanceof Inventory)
                 return null;
-            if (slot.hasStack()) return null;
+            if (slot.hasItem()) return null;
             Argument arg = getArgument(slot);
             if (arg == null) return null;
             return arg.getItem();

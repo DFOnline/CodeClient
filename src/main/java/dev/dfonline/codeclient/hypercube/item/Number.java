@@ -2,12 +2,12 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.data.DFItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class Number extends NamedItem {
     @Override
@@ -39,7 +39,7 @@ public class Number extends NamedItem {
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
         DFItem dfItem = DFItem.of(stack);
-        dfItem.setName(Text.literal(this.getName()).setStyle(Style.EMPTY.withColor(Formatting.RED).withItalic(false)));
+        dfItem.setName(Component.literal(this.getName()).setStyle(Style.EMPTY.withColor(ChatFormatting.RED).withItalic(false)));
         return dfItem.getItemStack();
     }
 }

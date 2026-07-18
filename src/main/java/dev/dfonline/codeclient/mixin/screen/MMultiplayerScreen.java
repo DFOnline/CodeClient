@@ -2,11 +2,6 @@ package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.hypercube.HypercubeConstants;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.option.ServerList;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -17,8 +12,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.ServerList;
+import net.minecraft.network.chat.Component;
 
-@Mixin(MultiplayerScreen.class)
+@Mixin(JoinMultiplayerScreen.class)
 public abstract class MMultiplayerScreen {
     @Unique
     private static final String[] UNOFFICIAL_DF_ADDRESSES = {"mcdiamondfire.net", "luke.cash", "reason.codes", "boobs.im", "mcdiamondfire.games"};
@@ -31,19 +31,19 @@ public abstract class MMultiplayerScreen {
 
 
     @Shadow
-    private ServerList serverList;
+    private ServerList servers;
 
-    @Inject(method = "connect(Lnet/minecraft/client/network/ServerInfo;)V", at = @At("HEAD"))
-    public void connect(ServerInfo entry, CallbackInfo ci) {
-        var matcher = UNOFFICIAL_DF_ADDRESS_PATTERN.matcher(entry.address);
+    @Inject(method = "join(Lnet/minecraft/client/multiplayer/ServerData;)V", at = @At("HEAD"))
+    public void connect(ServerData entry, CallbackInfo ci) {
+        var matcher = UNOFFICIAL_DF_ADDRESS_PATTERN.matcher(entry.ip);
 
         if (!matcher.matches()) return;
 
-        CodeClient.MC.getToastManager().add(SystemToast.create(
+        CodeClient.MC.getToastManager().addToast(SystemToast.multiline(
                 CodeClient.MC,
-                SystemToast.Type.PACK_LOAD_FAILURE,
-                Text.translatable("codeclient.toast.unofficial_address.title"),
-                Text.translatable("codeclient.toast.unofficial_address")
+                SystemToast.SystemToastId.PACK_LOAD_FAILURE,
+                Component.translatable("codeclient.toast.unofficial_address.title"),
+                Component.translatable("codeclient.toast.unofficial_address")
         ));
 
         var prefix = matcher.group("prefix");
@@ -59,8 +59,8 @@ public abstract class MMultiplayerScreen {
         if (suffix == null) {
             suffix = "";
         }
-        entry.address = prefix + address + suffix;
+        entry.ip = prefix + address + suffix;
 
-        serverList.saveFile();
+        servers.save();
     }
 }

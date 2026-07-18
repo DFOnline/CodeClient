@@ -4,13 +4,12 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.data.ItemData;
 import dev.dfonline.codeclient.data.PublicBukkitValues;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.WrittenBookItem;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.Text;
-
 import java.util.List;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.WrittenBookItem;
 
 public class ReferenceBook {
     final ItemStack book;
@@ -29,7 +28,7 @@ public class ReferenceBook {
     }
 
     public boolean isEmpty() {
-        return book.isEmpty() || book.getName().getString().contains("◆ Reference Book ◆");
+        return book.isEmpty() || book.getHoverName().getString().contains("◆ Reference Book ◆");
     }
 
     public ItemStack getItem() {
@@ -50,8 +49,8 @@ public class ReferenceBook {
         return tagless.getItemStack();
     }
 
-    public List<Text> getTooltip() {
-        return getTaglessItem().getTooltip(Item.TooltipContext.DEFAULT, CodeClient.MC.player, TooltipType.BASIC);
+    public List<Component> getTooltip() {
+        return getTaglessItem().getTooltipLines(Item.TooltipContext.EMPTY, CodeClient.MC.player, TooltipFlag.NORMAL);
     }
 
     // todo: parse into action?

@@ -7,11 +7,10 @@ import dev.dfonline.codeclient.FileManager;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-
+import net.minecraft.client.gui.Font;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import java.nio.file.Path;
 
 public class CommandWidthDump extends Command {
@@ -21,20 +20,20 @@ public class CommandWidthDump extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> {
             StringBuilder data = new StringBuilder("CODECLIENT WIDTHDUMP\nFORMAT GOES AS\n<UNICODE> <WIDTH>\n");
             for (int codePoint = Character.MIN_CODE_POINT; codePoint <= Character.MAX_CODE_POINT; codePoint++) {
                 String character = new String(Character.toChars(codePoint));
-                TextRenderer renderer = CodeClient.MC.textRenderer;
-                data.append(character).append(" ").append(renderer.getWidth(character)).append("\n");
+                Font renderer = CodeClient.MC.font;
+                data.append(character).append(" ").append(renderer.width(character)).append("\n");
             }
             String dataFinal = data.toString();
             try {
                 Path path = FileManager.writeFile("widthdump.txt", dataFinal);
-                Utility.sendMessage(Text.translatable("codeclient.files.saved", path).setStyle(Text.empty().getStyle().withClickEvent(new ClickEvent.OpenFile(path.toString()))));
+                Utility.sendMessage(Component.translatable("codeclient.files.saved", path).setStyle(Component.empty().getStyle().withClickEvent(new ClickEvent.OpenFile(path.toString()))));
             } catch (Exception ignored) {
-                Utility.sendMessage(Text.translatable("codeclient.files.error.cant_save"), ChatType.FAIL);
+                Utility.sendMessage(Component.translatable("codeclient.files.error.cant_save"), ChatType.FAIL);
                 CodeClient.LOGGER.info(dataFinal);
             }
             return 0;

@@ -1,28 +1,27 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resource.featuretoggle.FeatureFlags;
-import net.minecraft.text.Text;
-
 import java.util.ArrayList;
 import java.util.function.Consumer;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
 
-public class ItemSelector extends ClickableWidget {
-    private final TextFieldWidget search;
+public class ItemSelector extends AbstractWidget {
+    private final EditBox search;
     private final ArrayList<Search> items = new ArrayList<>();
     private final int itemsWidth;
     private final int screenX;
     private final int screenY;
-    private final TextRenderer textRenderer;
+    private final Font textRenderer;
     private final Consumer<ItemStack> consumer;
     private final int maxItems;
 
@@ -30,17 +29,17 @@ public class ItemSelector extends ClickableWidget {
     private static final int searchItemGap = 2;
     private static final int itemSize = 16;
 
-    public ItemSelector(TextRenderer textRenderer, int x, int y, int width, int height, int screenX, int screenY, Consumer<ItemStack> consumer) {
-        super(x, y, width, height, Text.literal("Select a message"));
+    public ItemSelector(Font textRenderer, int x, int y, int width, int height, int screenX, int screenY, Consumer<ItemStack> consumer) {
+        super(x, y, width, height, Component.literal("Select a message"));
         this.textRenderer = textRenderer;
         this.screenX = screenX;
         this.screenY = screenY;
         this.consumer = consumer;
-        search = new TextFieldWidget(textRenderer, x, y, width, searchHeight, Text.translatable("itemGroup.search"));
-        search.setPlaceholder(Text.translatable("itemGroup.search"));
+        search = new EditBox(textRenderer, x, y, width, searchHeight, Component.translatable("itemGroup.search"));
+        search.setHint(Component.translatable("itemGroup.search"));
         search.setFocused(true);
-        if (CodeClient.MC.player != null && CodeClient.MC.player.getEntityWorld() != null) {
-            ItemGroups.updateDisplayContext(FeatureFlags.DEFAULT_ENABLED_FEATURES, true, CodeClient.MC.player.getEntityWorld().getRegistryManager());
+        if (CodeClient.MC.player != null && CodeClient.MC.player.level() != null) {
+            CreativeModeTabs.tryRebuildTabContents(FeatureFlags.DEFAULT_FLAGS, true, CodeClient.MC.player.level().registryAccess());
         }
         this.itemsWidth = width / itemSize;
         int itemsHeight = (height - searchHeight - searchItemGap) / itemSize;
@@ -54,8 +53,8 @@ public class ItemSelector extends ClickableWidget {
         items.clear();
         int x = 0;
         int y = 0;
-        for (ItemStack item : ItemGroups.getSearchGroup().getSearchTabStacks()) {
-            if ((item.getName().getString().toLowerCase().contains(search.getText().toLowerCase().trim()))) {
+        for (ItemStack item : CreativeModeTabs.searchTab().getSearchTabDisplayItems()) {
+            if ((item.getHoverName().getString().toLowerCase().contains(search.getValue().toLowerCase().trim()))) {
                 items.add(new Search(item, x * itemSize, y * itemSize + searchItemGap + searchHeight));
                 if (++x >= itemsWidth) {
                     x = 0;
@@ -68,12 +67,12 @@ public class ItemSelector extends ClickableWidget {
 
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         search.renderWidget(context, mouseX, mouseY, delta);
         int i = 0;
         while (i < maxItems && i != items.size()) {
             var item = items.get(i);
-            context.drawItem(item.item,
+            context.renderItem(item.item,
                     this.getX() + item.x,
                     this.getY() + item.y
             );
@@ -83,14 +82,14 @@ public class ItemSelector extends ClickableWidget {
                             mouseY - this.getY() - screenY > item.y &&
                             mouseY - this.getY() - screenY < item.y + itemSize
             ) {
-                context.drawItemTooltip(textRenderer, item.item, mouseX, mouseY);
+                context.setTooltipForNextFrame(textRenderer, item.item, mouseX, mouseY);
             }
             i++;
         }
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (search.mouseClicked(click, doubled)) return true;
         for (Search item : items)
             if (click.x() - this.getX() > item.x &&
@@ -104,7 +103,7 @@ public class ItemSelector extends ClickableWidget {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         // TODO: make enter and/or number keys select a given item
         if (search.keyPressed(input)) {
             search();
@@ -114,13 +113,13 @@ public class ItemSelector extends ClickableWidget {
     }
 
     @Override
-    public boolean keyReleased(KeyInput input) {
+    public boolean keyReleased(KeyEvent input) {
         search();
         return true;
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         if (search.charTyped(input)) {
             search();
             return true;
@@ -129,7 +128,7 @@ public class ItemSelector extends ClickableWidget {
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
 
     private record Search(ItemStack item, int x, int y) {

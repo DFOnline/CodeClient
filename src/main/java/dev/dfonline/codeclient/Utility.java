@@ -8,15 +8,19 @@ import dev.dfonline.codeclient.action.impl.GetActionDump;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.template.Template;
 import net.kyori.adventure.platform.modcommon.impl.NonWrappingComponentSerializer;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 import net.kyori.adventure.text.Component;
 
@@ -35,7 +39,7 @@ public class Utility {
      * @param title       The title of the toast.
      * @param description The description of the toast.
      */
-    public record Toast(Text title, Text description) {
+    public record Toast(net.minecraft.network.chat.Component title, net.minecraft.network.chat.Component description) {
 
     }
 
@@ -52,9 +56,9 @@ public class Utility {
      * Be lazy, send your whole inventory!
      */
     public static void sendInventory() {
-        if(CodeClient.MC.getNetworkHandler() == null || CodeClient.MC.player == null) return;
+        if(CodeClient.MC.getConnection() == null || CodeClient.MC.player == null) return;
         for (int i = 0; i <= 35; i++) {
-            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(getRemoteSlot(i), CodeClient.MC.player.getInventory().getStack(i)));
+            CodeClient.MC.getConnection().send(new ServerboundSetCreativeModeSlotPacket(getRemoteSlot(i), CodeClient.MC.player.getInventory().getItem(i)));
         }
     }
 
@@ -65,10 +69,10 @@ public class Utility {
      */
     public static void makeHolding(ItemStack item) {
         if(CodeClient.MC.player == null) return;
-        PlayerInventory inv = CodeClient.MC.player.getInventory();
+        Inventory inv = CodeClient.MC.player.getInventory();
         Utility.sendHandItem(item);
         inv.setSelectedSlot(0);
-        inv.setStack(0, item);
+        inv.setItem(0, item);
     }
 
     @SuppressWarnings("unused")
@@ -104,17 +108,17 @@ public class Utility {
         return Template.parse64(codeTemplateData);
     }
 
-    public static void addLore(ItemStack stack, Text... lore) {
+    public static void addLore(ItemStack stack, net.minecraft.network.chat.Component... lore) {
         DFItem item = DFItem.of(stack);
-        List<Text> currentLore = item.getLore();
-        ArrayList<Text> newLore = new ArrayList<>(currentLore);
+        List<net.minecraft.network.chat.Component> currentLore = item.getLore();
+        ArrayList<net.minecraft.network.chat.Component> newLore = new ArrayList<>(currentLore);
         newLore.addAll(List.of(lore));
         item.setLore(newLore);
     }
 
     public static void sendHandItem(ItemStack item) {
-        if(CodeClient.MC.getNetworkHandler() == null || CodeClient.MC.player == null) return;
-        CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + CodeClient.MC.player.getInventory().getSelectedSlot(), item));
+        if(CodeClient.MC.getConnection() == null || CodeClient.MC.player == null) return;
+        CodeClient.MC.getConnection().send(new ServerboundSetCreativeModeSlotPacket(36 + CodeClient.MC.player.getInventory().getSelectedSlot(), item));
     }
 
     /**
@@ -122,10 +126,10 @@ public class Utility {
      */
     public static List<ItemStack> templatesInInventory() {
         if(CodeClient.MC.player == null) return null;
-        PlayerInventory inv = CodeClient.MC.player.getInventory();
+        Inventory inv = CodeClient.MC.player.getInventory();
         ArrayList<ItemStack> templates = new ArrayList<>();
         for (int i = 0; i < (27 + 9); i++) {
-            ItemStack item = inv.getStack(i);
+            ItemStack item = inv.getItem(i);
             DFItem dfItem = DFItem.of(item);
             if (dfItem.hasHypercubeKey("codetemplatedata")) templates.add(item);
         }
@@ -155,25 +159,25 @@ public class Utility {
      */
     @Deprecated
     public static void sendMessage(String message, ChatType type) {
-        sendMessage(Text.literal(message), type);
+        sendMessage(net.minecraft.network.chat.Component.literal(message), type);
     }
 
-    public static void sendMessage(Text message) {
+    public static void sendMessage(net.minecraft.network.chat.Component message) {
         sendMessage(message, ChatType.INFO);
     }
 
-    public static void sendMessage(Text message, @Nullable ChatType type) {
-        ClientPlayerEntity player = CodeClient.MC.player;
+    public static void sendMessage(net.minecraft.network.chat.Component message, @Nullable ChatType type) {
+        LocalPlayer player = CodeClient.MC.player;
         if (player == null) return;
         if (type == null) {
-            player.sendMessage(message, false);
+            player.displayClientMessage(message, false);
         } else {
-            player.sendMessage(Text.empty()
+            player.displayClientMessage(net.minecraft.network.chat.Component.empty()
                     .append(type.getText())
-                    .append(Text.literal(" "))
+                    .append(net.minecraft.network.chat.Component.literal(" "))
                     .append(message), false);
             if (type == ChatType.FAIL) {
-                player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO.value(), 2, 0);
+                player.playSound(SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), 2, 0);
             }
         }
     }
@@ -183,8 +187,8 @@ public class Utility {
      *
      * @return Usable in lore and as a name in nbt.
      */
-    public static NbtString textToNBT(Text text) {
-        JsonElement json = TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, text).getOrThrow();
+    public static StringTag textToNBT(net.minecraft.network.chat.Component text) {
+        JsonElement json = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, text).getOrThrow();
         if (json.isJsonObject()) {
             JsonObject obj = (JsonObject) json;
 
@@ -192,8 +196,8 @@ public class Utility {
             if (!obj.has("italic")) obj.addProperty("italic", false);
             if (!obj.has("bold")) obj.addProperty("bold", false);
 
-            return NbtString.of(obj.toString());
-        } else return NbtString.of(json.toString());
+            return StringTag.valueOf(obj.toString());
+        } else return StringTag.valueOf(json.toString());
     }
 
     /**
@@ -202,9 +206,9 @@ public class Utility {
      * @param text § formatted string.
      * @return Text with all parsed text as siblings.
      */
-    public static MutableText textFromString(String text) {
-        MutableText output = Text.empty().setStyle(Text.empty().getStyle().withColor(TextColor.fromRgb(0xFFFFFF)).withItalic(false));
-        MutableText component = Text.empty().styled(s -> s.withItalic(false));
+    public static MutableComponent textFromString(String text) {
+        MutableComponent output = net.minecraft.network.chat.Component.empty().setStyle(net.minecraft.network.chat.Component.empty().getStyle().withColor(TextColor.fromRgb(0xFFFFFF)).withItalic(false));
+        MutableComponent component = net.minecraft.network.chat.Component.empty().withStyle(s -> s.withItalic(false));
 
         Matcher m = Pattern.compile("§(([0-9a-kfmnolr])|x(§[0-9a-f]){6})|[^§]+").matcher(text);
         while (m.find()) {
@@ -213,12 +217,12 @@ public class Utility {
                 if (data.startsWith("§x")) {
                     component = component.setStyle(component.getStyle().withColor(Integer.valueOf(data.replaceAll("§x|§", ""), 16)));
                 } else {
-                    component = component.formatted(Formatting.byCode(data.charAt(1)));
+                    component = component.withStyle(ChatFormatting.getByCode(data.charAt(1)));
                 }
             } else {
                 component.append(data);
                 output.append(component);
-                component = Text.empty().setStyle(component.getStyle());
+                component = net.minecraft.network.chat.Component.empty().setStyle(component.getStyle());
             }
         }
         return output;
@@ -227,7 +231,7 @@ public class Utility {
     public static boolean isGlitchStick(ItemStack item) {
         DFItem dfItem = DFItem.of(item);
         if (!dfItem.hasHypercubeKey("item_instance")) return false;
-        return Objects.equals(dfItem.getName(), Text.literal("Glitch Stick").setStyle(Style.EMPTY.withColor(Formatting.RED).withItalic(false)));
+        return Objects.equals(dfItem.getName(), net.minecraft.network.chat.Component.literal("Glitch Stick").setStyle(Style.EMPTY.withColor(ChatFormatting.RED).withItalic(false)));
     }
 
     public static HashMap<Integer, String> getBlockTagLines(ItemStack item) {
@@ -252,23 +256,23 @@ public class Utility {
         return null;
     }
 
-    public static void textToString(Text content, StringBuilder build, GetActionDump.ColorMode colorMode) {
+    public static void textToString(net.minecraft.network.chat.Component content, StringBuilder build, GetActionDump.ColorMode colorMode) {
         TextColor lastColor = null;
-        for (Text text : content.getSiblings()) {
+        for (net.minecraft.network.chat.Component text : content.getSiblings()) {
             TextColor color = text.getStyle().getColor();
             if (color != null && (lastColor != color) && (colorMode != GetActionDump.ColorMode.NONE)) {
                 lastColor = color;
-                if (color.getName().contains("#")) {
-                    build.append(String.join(colorMode.text, color.getName().split("")).replace("#", colorMode.text + "x").toLowerCase());
+                if (color.serialize().contains("#")) {
+                    build.append(String.join(colorMode.text, color.serialize().split("")).replace("#", colorMode.text + "x").toLowerCase());
                 } else {
-                    build.append(Formatting.valueOf(String.valueOf(color).toUpperCase()).toString().replace("§", colorMode.text));
+                    build.append(ChatFormatting.valueOf(String.valueOf(color).toUpperCase()).toString().replace("§", colorMode.text));
                 }
             }
             build.append(text.getString());
         }
     }
 
-    public static String textToString(Text content) {
+    public static String textToString(net.minecraft.network.chat.Component content) {
         var builder = new StringBuilder();
         textToString(content, builder, GetActionDump.ColorMode.SECTION);
         return builder.toString();
@@ -309,22 +313,22 @@ public class Utility {
     }
 
     /**
-     * Turns a {@link net.kyori.adventure.text.Component} to an {@link OrderedText}
+     * Turns a {@link net.kyori.adventure.text.Component} to an {@link FormattedCharSequence}
      *
      * @param component The component to convert
      * @return The converted component
      */
-    public static OrderedText componentToOrderedText(Component component) {
-        return NonWrappingComponentSerializer.INSTANCE.serialize(component).asOrderedText();
+    public static FormattedCharSequence componentToOrderedText(Component component) {
+        return NonWrappingComponentSerializer.INSTANCE.serialize(component).getVisualOrderText();
     }
 
     /**
-     * Turns a {@link net.kyori.adventure.text.Component} to a {@link Text}
+     * Turns a {@link net.kyori.adventure.text.Component} to a {@link net.minecraft.network.chat.Component}
      *
      * @param component The component to convert
      * @return The converted component
      */
-    public static Text componentToText(Component component) {
+    public static net.minecraft.network.chat.Component componentToText(Component component) {
         return NonWrappingComponentSerializer.INSTANCE.serialize(component);
     }
 

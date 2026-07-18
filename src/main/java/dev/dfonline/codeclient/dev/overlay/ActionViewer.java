@@ -10,25 +10,24 @@ import dev.dfonline.codeclient.hypercube.ReferenceBook;
 import dev.dfonline.codeclient.hypercube.actiondump.Action;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.tooltip.TooltipBackgroundRenderer;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.item.Item;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.Text;
-import net.minecraft.util.hit.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
 import java.util.Iterator;
 import java.util.List;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class ActionViewer extends Feature {
     private Action action = null;
@@ -47,11 +46,11 @@ public class ActionViewer extends Feature {
 
     public void onClickChest(BlockHitResult hitResult) {
         reset();
-        var world = CodeClient.MC.world;
+        var world = CodeClient.MC.level;
         if (world == null || !Config.getConfig().ActionViewer) return;
         var position = hitResult.getBlockPos();
         if (CodeClient.location instanceof Dev dev && dev.isInDev(position) && world.getBlockEntity(position) instanceof ChestBlockEntity) {
-            var signEntity = world.getBlockEntity(position.down().west());
+            var signEntity = world.getBlockEntity(position.below().west());
             if (signEntity instanceof SignBlockEntity sign) {
                 try {
                     action = ActionDump.getActionDump().findAction(sign.getFrontText());
@@ -63,7 +62,7 @@ public class ActionViewer extends Feature {
     }
 
     @Override
-    public @Nullable ChestFeature makeChestFeature(HandledScreen<?> screen) {
+    public @Nullable ChestFeature makeChestFeature(AbstractContainerScreen<?> screen) {
         return new Overlay(screen);
     }
 
@@ -72,11 +71,11 @@ public class ActionViewer extends Feature {
         private int scroll = 0;
         ActionTooltipPositioner positioner = new ActionTooltipPositioner();
 
-        public Overlay(HandledScreen<?> screen) {
+        public Overlay(AbstractContainerScreen<?> screen) {
             super(screen);
         }
 
-        public List<Text> getOverlayText() {
+        public List<Component> getOverlayText() {
             if (CodeClient.location instanceof Dev dev) {
                 if (!Config.getConfig().ActionViewer) return null;
                 if (book != null) return book.getTooltip();
@@ -87,13 +86,13 @@ public class ActionViewer extends Feature {
                     return referenceBook.getTooltip();
                 }
                 var item = action.icon.getItem();
-                return item.getTooltip(Item.TooltipContext.DEFAULT, CodeClient.MC.player, TooltipType.BASIC);
+                return item.getTooltipLines(Item.TooltipContext.EMPTY, CodeClient.MC.player, TooltipFlag.NORMAL);
             }
             return null;
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, int x, int y, float delta) {
+        public void render(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {
             var text = getOverlayText();
             if (text == null) return;
 
@@ -105,7 +104,7 @@ public class ActionViewer extends Feature {
 
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-            if (!(screen instanceof GenericContainerScreen || screen instanceof CustomChestMenu)) return false;
+            if (!(screen instanceof ContainerScreen || screen instanceof CustomChestMenu)) return false;
             if (isValid() && tall && hover) {
                 var modifier = Config.getConfig().InvertActionViewerScroll ? -8 : 8;
 
@@ -115,18 +114,18 @@ public class ActionViewer extends Feature {
             return false;
         }
 
-        private List<TooltipComponent> transformText(List<Text> texts) {
-            var orderedText = Lists.transform(texts, Text::asOrderedText);
-            return orderedText.stream().map(TooltipComponent::of).toList();
+        private List<ClientTooltipComponent> transformText(List<Component> texts) {
+            var orderedText = Lists.transform(texts, Component::getVisualOrderText);
+            return orderedText.stream().map(ClientTooltipComponent::create).toList();
         }
 
         // this implementation of draw tooltip allows a change in the z-index of the rendered tooltip.
         // z appears to be completely useless with the changes I had to make for 1.21.8
-        private void drawTooltip(DrawContext context, HandledScreen<?> handledScreen, List<TooltipComponent> components, int x, int y, int z) {
-            var textRenderer = CodeClient.MC.textRenderer;
+        private void drawTooltip(GuiGraphics context, AbstractContainerScreen<?> handledScreen, List<ClientTooltipComponent> components, int x, int y, int z) {
+            var textRenderer = CodeClient.MC.font;
 
             if (handledScreen instanceof CustomChestMenu menu) {
-                var handler = menu.getScreenHandler();
+                var handler = menu.getMenu();
                 positioner.setBackgroundHeight(handler.numbers.MENU_HEIGHT);
                 positioner.setBackgroundWidth(handler.numbers.MENU_WIDTH);
                 x += handler.numbers.MENU_WIDTH - 176;
@@ -139,36 +138,36 @@ public class ActionViewer extends Feature {
             int tooltipWidth = 0;
             int tooltipHeight = components.size() == 1 ? -2 : 0;
 
-            TooltipComponent tooltipComponent;
-            for (Iterator<TooltipComponent> iterator = components.iterator(); iterator.hasNext(); tooltipHeight += tooltipComponent.getHeight(textRenderer)) {
+            ClientTooltipComponent tooltipComponent;
+            for (Iterator<ClientTooltipComponent> iterator = components.iterator(); iterator.hasNext(); tooltipHeight += tooltipComponent.getHeight(textRenderer)) {
                 tooltipComponent = iterator.next();
                 int width = tooltipComponent.getWidth(textRenderer);
                 if (width > tooltipWidth) {
                     tooltipWidth = width;
                 }
             }
-            Vector2ic vector = positioner.getPosition(context.getScaledWindowWidth(), context.getScaledWindowHeight(), x, y, tooltipWidth, tooltipHeight);
+            Vector2ic vector = positioner.positionTooltip(context.guiWidth(), context.guiHeight(), x, y, tooltipWidth, tooltipHeight);
 //            context.getMatrices().push();
 
             var finalWidth = tooltipWidth;
             var finalHeight = tooltipHeight;
 //            context.draw((vertexConsumer) -> );
-            TooltipBackgroundRenderer.render(context, vector.x(), vector.y(), finalWidth, finalHeight, null);
+            TooltipRenderUtil.renderTooltipBackground(context, vector.x(), vector.y(), finalWidth, finalHeight, null);
 //            context.getMatrices().translate(0.0F, 0.0F, (float) z);
 
             int textY = vector.y();
             for (int index = 0; index < components.size(); ++index) {
                 tooltipComponent = components.get(index);
-                TooltipComponent finalTooltipComponent = tooltipComponent;
+                ClientTooltipComponent finalTooltipComponent = tooltipComponent;
 //                context.draw(consumer -> );
-                finalTooltipComponent.drawText(context, textRenderer, vector.x(), textY);
+                finalTooltipComponent.renderText(context, textRenderer, vector.x(), textY);
                 textY += tooltipComponent.getHeight(textRenderer) + (index == 0 ? 2 : 0);
             }
 
 //            context.getMatrices().pop();
         }
 
-        private class ActionTooltipPositioner implements TooltipPositioner {
+        private class ActionTooltipPositioner implements ClientTooltipPositioner {
             private int backgroundHeight = 166;
             private int backgroundWidth = 176;
             private int mouseX = 0, mouseY = 0;
@@ -176,7 +175,7 @@ public class ActionViewer extends Feature {
             private ActionTooltipPositioner() {
             }
 
-            public Vector2ic getPosition(int screenWidth, int screenHeight, int x, int y, int width, int height) {
+            public Vector2ic positionTooltip(int screenWidth, int screenHeight, int x, int y, int width, int height) {
                 var vector = new Vector2i(x, y);
                 var centered = Config.getConfig().ActionViewerLocation == Config.ActionViewerAlignment.CENTER;
 

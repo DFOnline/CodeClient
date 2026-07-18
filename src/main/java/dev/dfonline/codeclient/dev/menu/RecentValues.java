@@ -14,24 +14,21 @@ import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.datafixer.DataFixTypes;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
-
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -70,7 +67,7 @@ public class RecentValues extends Feature {
                 try {
                     if (!Files.exists(file.getParent())) Files.createDirectories(file.getParent());
                     JsonObject data = new JsonObject();
-                    data.addProperty("version", SharedConstants.getGameVersion().dataVersion().id());
+                    data.addProperty("version", SharedConstants.getCurrentVersion().dataVersion().version());
                     data.add("pinned", saveItems(pinned));
                     data.add("recent", saveItems(recent));
                     Files.writeString(file, data.toString());
@@ -87,23 +84,23 @@ public class RecentValues extends Feature {
     private JsonArray saveItems(List<ItemStack> list) {
         JsonArray out = new JsonArray();
 
-        if (CodeClient.MC.world == null) throw new RuntimeException("World is null!");
+        if (CodeClient.MC.level == null) throw new RuntimeException("World is null!");
 
         for (ItemStack item : list) {
-            out.add(ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), item).getOrThrow().toString());
+            out.add(ItemStack.CODEC.encodeStart(CodeClient.MC.player.registryAccess().createSerializationContext(NbtOps.INSTANCE), item).getOrThrow().toString());
         }
 
         return out;
     }
 
     private ItemStack readItem(int version, JsonElement item) throws Exception {
-        if (CodeClient.MC.world == null) return null;
-        var fromNbt = ItemStack.CODEC.decode(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), DataFixTypes.HOTBAR.update(CodeClient.MC.getDataFixer(), StringNbtReader.readCompound(item.getAsString()), version));
+        if (CodeClient.MC.level == null) return null;
+        var fromNbt = ItemStack.CODEC.decode(CodeClient.MC.player.registryAccess().createSerializationContext(NbtOps.INSTANCE), DataFixTypes.HOTBAR.updateToCurrentVersion(CodeClient.MC.getFixerUpper(), TagParser.parseCompoundFully(item.getAsString()), version));
         return fromNbt.result().map(Pair::getFirst).orElse(null);
     }
 
     public void remember(ItemStack item) {
-        if (CodeClient.MC.world == null) return;
+        if (CodeClient.MC.level == null) return;
 
         DFItem dfItem = DFItem.of(item);
         if (!(CodeClient.location instanceof Dev) || dfItem.getHypercubeStringValue("varitem").isEmpty()) return;
@@ -116,7 +113,7 @@ public class RecentValues extends Feature {
             recent.remove(item);
             return;
         }
-        recent.removeIf(it -> it != null && lambdaItem.getItem() == it.getItem() && ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), lambdaItem).getOrThrow().equals(ItemStack.CODEC.encodeStart(CodeClient.MC.player.getRegistryManager().getOps(NbtOps.INSTANCE), it).getOrThrow()));
+        recent.removeIf(it -> it != null && lambdaItem.getItem() == it.getItem() && ItemStack.CODEC.encodeStart(CodeClient.MC.player.registryAccess().createSerializationContext(NbtOps.INSTANCE), lambdaItem).getOrThrow().equals(ItemStack.CODEC.encodeStart(CodeClient.MC.player.registryAccess().createSerializationContext(NbtOps.INSTANCE), it).getOrThrow()));
         item = item.copyWithCount(1);
         recent.add(0, item);
 
@@ -126,22 +123,22 @@ public class RecentValues extends Feature {
     }
 
     @Override
-    public ChestFeature makeChestFeature(HandledScreen<?> screen) {
+    public ChestFeature makeChestFeature(AbstractContainerScreen<?> screen) {
         return new RecentValuesOverlay(screen);
     }
 
     class RecentValuesOverlay extends ChestFeature {
-        public RecentValuesOverlay(HandledScreen<?> screen) {
+        public RecentValuesOverlay(AbstractContainerScreen<?> screen) {
             super(screen);
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, int screenX, int screenY, float delta) {
+        public void render(GuiGraphics context, int mouseX, int mouseY, int screenX, int screenY, float delta) {
             hoveredItem = null;
             if(recent.isEmpty() && pinned.isEmpty()) return;
             int xEnd = 16 * 20;
 
-            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, Identifier.ofVanilla("recipe_book/overlay_recipe"), -screenX + 6, -5,
+            context.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("recipe_book/overlay_recipe"), -screenX + 6, -5,
                     Math.min(Math.max(pinned.size(), recent.size()), 16) * 20 + 10,
                     (((int) Math.ceil((double) pinned.size() / 16)) + ((int) Math.ceil((double) recent.size() / 16))) * 16 + 10
             );
@@ -153,10 +150,10 @@ public class RecentValues extends Feature {
                 int x = 13;
                 for (ItemStack item : group) {
                     if (item == null) continue;
-                    context.drawItem(item, x - screenX, y - screenY);
-                    context.drawStackOverlay(CodeClient.MC.textRenderer, item, x - screenX, y - screenY);
+                    context.renderItem(item, x - screenX, y - screenY);
+                    context.renderItemDecorations(CodeClient.MC.font, item, x - screenX, y - screenY);
                     if (mouseX > x && mouseY > y && mouseX < x + 15 && mouseY < y + 15) {
-                        context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX, mouseY);
+                        context.setTooltipForNextFrame(CodeClient.MC.font, item, mouseX, mouseY);
                         hoveredItem = item;
                         hoveredOrigin = group;
                     }
@@ -171,45 +168,45 @@ public class RecentValues extends Feature {
         }
 
         @Override
-        public boolean mouseClicked(Click click) {
+        public boolean mouseClicked(MouseButtonEvent click) {
             if (hoveredItem == null) return false;
 
             if (click.button() != 1) {
-                for (Slot slot : screen.getScreenHandler().slots) {
-                    if (slot.hasStack()) continue;
-                    CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(
-                            SoundEvents.ENTITY_ITEM_PICKUP,
-                            SoundCategory.PLAYERS,
-                            2, 1f, Random.create(),
-                            CodeClient.MC.player.getBlockPos()
+                for (Slot slot : screen.getMenu().slots) {
+                    if (slot.hasItem()) continue;
+                    CodeClient.MC.getSoundManager().play(new SimpleSoundInstance(
+                            SoundEvents.ITEM_PICKUP,
+                            SoundSource.PLAYERS,
+                            2, 1f, RandomSource.create(),
+                            CodeClient.MC.player.blockPosition()
                     ));
 
                     if (!CodeClient.MC.player.isCreative()) return false;
-                    ItemStack previous = CodeClient.MC.player.getInventory().getStack(0);
-                    CodeClient.MC.interactionManager.clickCreativeStack(hoveredItem, 36);
-                    CodeClient.MC.interactionManager.clickSlot(
-                            screen.getScreenHandler().syncId,
-                            slot.id, 0, SlotActionType.SWAP, CodeClient.MC.player
+                    ItemStack previous = CodeClient.MC.player.getInventory().getItem(0);
+                    CodeClient.MC.gameMode.handleCreativeModeItemAdd(hoveredItem, 36);
+                    CodeClient.MC.gameMode.handleInventoryMouseClick(
+                            screen.getMenu().containerId,
+                            slot.index, 0, ClickType.SWAP, CodeClient.MC.player
                     );
-                    CodeClient.MC.interactionManager.clickCreativeStack(previous, 36);
+                    CodeClient.MC.gameMode.handleCreativeModeItemAdd(previous, 36);
                     return true;
                 }
             } else {
                 hoveredOrigin.remove(hoveredItem);
                 if (hoveredOrigin == pinned) {
-                    CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(
+                    CodeClient.MC.getSoundManager().play(new SimpleSoundInstance(
                             SoundEvents.UI_BUTTON_CLICK.value(),
-                            SoundCategory.PLAYERS,
-                            2, 0.5f, Random.create(),
-                            CodeClient.MC.player.getBlockPos()
+                            SoundSource.PLAYERS,
+                            2, 0.5f, RandomSource.create(),
+                            CodeClient.MC.player.blockPosition()
                     ));
                     return true;
                 }
-                CodeClient.MC.getSoundManager().play(new PositionedSoundInstance(
+                CodeClient.MC.getSoundManager().play(new SimpleSoundInstance(
                         SoundEvents.UI_BUTTON_CLICK.value(),
-                        SoundCategory.PLAYERS,
-                        2, 0.6f, Random.create(),
-                        CodeClient.MC.player.getBlockPos()
+                        SoundSource.PLAYERS,
+                        2, 0.6f, RandomSource.create(),
+                        CodeClient.MC.player.blockPosition()
                 ));
                 pinned.add(hoveredItem);
                 return true;

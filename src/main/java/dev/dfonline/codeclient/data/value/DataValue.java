@@ -1,11 +1,11 @@
 package dev.dfonline.codeclient.data.value;
 
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
 /**
  * Represents a value of a key that can be of a specific type,
@@ -29,16 +29,16 @@ public class DataValue {
      * @param nbt The NbtElement to create the DataValue from.
      * @return The new DataValue.
      */
-    public static DataValue fromNbt(NbtElement nbt) {
-        if (nbt instanceof NbtString) {
+    public static DataValue fromNbt(Tag nbt) {
+        if (nbt instanceof StringTag) {
             Optional<String> value = nbt.asString();
             if (value.isEmpty()) {
                 return new UnknownDataValue(nbt);
             }
             return new StringDataValue(value.get());
         }
-        if (nbt instanceof AbstractNbtNumber) {
-            return new NumberDataValue(((AbstractNbtNumber) nbt).doubleValue());
+        if (nbt instanceof NumericTag) {
+            return new NumberDataValue(((NumericTag) nbt).doubleValue());
         }
         return new UnknownDataValue(nbt);
     }

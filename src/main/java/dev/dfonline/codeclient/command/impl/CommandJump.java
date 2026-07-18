@@ -10,10 +10,10 @@ import dev.dfonline.codeclient.action.impl.GoTo;
 import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.block.entity.SignText;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.entity.SignText;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class CommandJump extends Command {
                 first = results.keySet().stream().findFirst();
                 if (first.isEmpty()) return; // there is no partial match, so the player doesn't get sent
             }
-            CodeClient.currentAction = new GoTo(first.get().toCenterPos(), () -> CodeClient.currentAction = new None());
+            CodeClient.currentAction = new GoTo(first.get().getCenter(), () -> CodeClient.currentAction = new None());
             CodeClient.currentAction.init();
         }
     }
@@ -65,7 +65,7 @@ public class CommandJump extends Command {
 
             for (String possibility : possibilities) {
                 if (possibility.toLowerCase().contains(builder.getRemainingLowerCase()))
-                    builder.suggest(possibility, Text.literal(type.name().toLowerCase()));
+                    builder.suggest(possibility, Component.literal(type.name().toLowerCase()));
             }
         }
         return CompletableFuture.completedFuture(builder.build());
@@ -82,7 +82,7 @@ public class CommandJump extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.then(literal("player").then(argument("name", greedyString()).suggests((context, builder) -> suggestJump(JumpType.PLAYER_EVENT, context, builder, true)).executes(context -> {
                     var name = context.getArgument("name", String.class);
                     jump(JumpType.PLAYER_EVENT, name);

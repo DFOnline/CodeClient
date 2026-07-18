@@ -11,35 +11,34 @@ import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Searchable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryListener;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeInventoryListener;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -51,15 +50,15 @@ import java.util.Objects;
 import static dev.dfonline.codeclient.dev.menu.devinventory.DevInventoryGroup.*;
 
 @Environment(EnvType.CLIENT)
-public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.CreativeScreenHandler> {
-    static final SimpleInventory Inventory = new SimpleInventory(45);
+public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
+    static final SimpleContainer Inventory = new SimpleContainer(45);
     private static final Identifier TEXTURE = CodeClient.getId("textures/gui/container/dev_inventory/tabs.png");
 //    private static final String TAB_TEXTURE_PREFIX = "container/creative_inventory/tab_";
-    private static final Text DELETE_ITEM_SLOT_TEXT = Text.translatable("inventory.binSlot");
+    private static final Component DELETE_ITEM_SLOT_TEXT = Component.translatable("inventory.binSlot");
     private static int selectedTab;
     private double scrollPosition;
     private int scrollHeight = 0;
-    private TextFieldWidget searchBox;
+    private EditBox searchBox;
     @Nullable
     private List<Slot> survivalInventorySwapList;
     private List<Searchable> searchResults;
@@ -69,82 +68,82 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
     private boolean ignoreNextKey = false;
     private boolean scrolling = false;
 
-    public DevInventoryScreen(ClientPlayerEntity player) {
-        super(new CreativeInventoryScreen.CreativeScreenHandler(player), player.getInventory(), ScreenTexts.EMPTY);
+    public DevInventoryScreen(LocalPlayer player) {
+        super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
 
 
 //        super(player, FeatureSet.empty(), CodeClient.MC.options.getOperatorItemsTab().getValue());
-        player.currentScreenHandler = this.handler;
-        this.backgroundHeight = 136;
-        this.backgroundWidth = 195;
+        player.containerMenu = this.menu;
+        this.imageHeight = 136;
+        this.imageWidth = 195;
     }
 
-    public void handledScreenTick() {
-        super.handledScreenTick();
+    public void containerTick() {
+        super.containerTick();
 //        if (this.searchBox != null) {
 //            this.searchBox.tick();
 //        }
     }
 
-    protected void onMouseClick(@Nullable Slot slot, int slotId, int button, SlotActionType actionType) {
+    protected void slotClicked(@Nullable Slot slot, int slotId, int button, ClickType actionType) {
         if (slot == null) return;
-        this.searchBox.setCursorToEnd(false);
-        this.searchBox.setSelectionEnd(0);
+        this.searchBox.moveCursorToEnd(false);
+        this.searchBox.setHighlightPos(0);
 
         if (slot == this.deleteItemSlot) {
-            (this.handler).setCursorStack(ItemStack.EMPTY);
+            (this.menu).setCarried(ItemStack.EMPTY);
             return;
         }
 
-        if (slot.inventory instanceof SimpleInventory) {
-            if (actionType == SlotActionType.PICKUP) {
-                if (this.handler.getCursorStack().getItem().equals(Items.AIR))
-                    this.handler.setCursorStack(slot.getStack());
-                else this.handler.setCursorStack(Items.AIR.getDefaultStack());
+        if (slot.container instanceof SimpleContainer) {
+            if (actionType == ClickType.PICKUP) {
+                if (this.menu.getCarried().getItem().equals(Items.AIR))
+                    this.menu.setCarried(slot.getItem());
+                else this.menu.setCarried(Items.AIR.getDefaultInstance());
             }
         }
-        if (slot.inventory instanceof PlayerInventory) {
-            ItemStack slotStack = slot.getStack();
-            ItemStack cursorItem = this.handler.getCursorStack();
+        if (slot.container instanceof Inventory) {
+            ItemStack slotStack = slot.getItem();
+            ItemStack cursorItem = this.menu.getCarried();
 
-            slot.setStack(cursorItem);
-            this.handler.setCursorStack(slotStack);
-            this.handler.syncState();
-            this.listener.onSlotUpdate(this.handler, slot.id - 9, slot.getStack());
+            slot.setByPlayer(cursorItem);
+            this.menu.setCarried(slotStack);
+            this.menu.sendAllDataToRemote();
+            this.listener.slotChanged(this.menu, slot.index - 9, slot.getItem());
 //            CodeClient.MC.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot.id,slot.getStack()));
         }
     }
 
     protected void init() {
         super.init();
-        if (this.client == null || this.client.player == null) return;
+        if (this.minecraft == null || this.minecraft.player == null) return;
 
         try {
             ActionDump.getActionDump();
         } catch (IOException | JsonParseException e) {
             CodeClient.LOGGER.error(e.getMessage());
             Utility.sendMessage(
-                    Text.translatable("codeclient.parse_db", Text.literal("https://github.com/DFOnline/CodeClient/wiki/actiondump").formatted(Formatting.AQUA, Formatting.UNDERLINE))
+                    Component.translatable("codeclient.parse_db", Component.literal("https://github.com/DFOnline/CodeClient/wiki/actiondump").withStyle(ChatFormatting.AQUA, ChatFormatting.UNDERLINE))
                             .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/DFOnline/CodeClient/wiki/actiondump")))),
                     ChatType.FAIL);
         }
 
-        Objects.requireNonNull(this.textRenderer);
-        this.searchBox = new TextFieldWidget(this.textRenderer, this.x + 82, this.y + 6, 80, 9, Text.translatable("itemGroup.search"));
+        Objects.requireNonNull(this.font);
+        this.searchBox = new EditBox(this.font, this.leftPos + 82, this.topPos + 6, 80, 9, Component.translatable("itemGroup.search"));
         this.searchBox.setMaxLength(100);
-        this.searchBox.setDrawsBackground(false);
+        this.searchBox.setBordered(false);
         this.searchBox.setVisible(true);
-        this.searchBox.setEditableColor(Colors.WHITE);
-        this.addSelectableChild(this.searchBox);
+        this.searchBox.setTextColor(CommonColors.WHITE);
+        this.addWidget(this.searchBox);
         // TODO: config for defaults on open
         setSelectedTab(6);
         if (Config.getConfig().FocusSearch)
             searchBox.setFocused(true);
-        searchBox.setCursorToEnd(false);
-        searchBox.setSelectionEnd(0);
-        this.client.player.playerScreenHandler.removeListener(this.listener);
-        this.listener = new CreativeInventoryListener(this.client);
-        this.client.player.playerScreenHandler.addListener(this.listener);
+        searchBox.moveCursorToEnd(false);
+        searchBox.setHighlightPos(0);
+        this.minecraft.player.inventoryMenu.removeSlotListener(this.listener);
+        this.listener = new CreativeInventoryListener(this.minecraft);
+        this.minecraft.player.inventoryMenu.addSlotListener(this.listener);
     }
 
 //    public void resize(MinecraftClient client, int width, int height) {
@@ -159,8 +158,8 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
 
     public void removed() {
         super.removed();
-        if (this.client != null && this.client.player != null && this.client.player.getInventory() != null) {
-            this.client.player.playerScreenHandler.removeListener(this.listener);
+        if (this.minecraft != null && this.minecraft.player != null && this.minecraft.player.getInventory() != null) {
+            this.minecraft.player.inventoryMenu.removeSlotListener(this.listener);
         }
     }
 
@@ -173,15 +172,15 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
 //    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
 //    }
 
-    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
         if (itemGroup != DevInventoryGroup.INVENTORY) {
-            context.drawText(this.textRenderer, itemGroup.getName(), 8, 6, Colors.DARK_GRAY, false);
+            context.drawString(this.font, itemGroup.getName(), 8, 6, CommonColors.DARK_GRAY, false);
         }
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == 0) {
             Integer clicked = getGroupFromMouse(click.x(), click.y());
             if (clicked != null && clicked != selectedTab) setSelectedTab(clicked);
@@ -194,7 +193,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (click.button() == 0) {
             this.scrolling = false;
         }
@@ -202,11 +201,11 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (this.scrolling) {
-            int scrollOriginY = this.y + 18;
+            int scrollOriginY = this.topPos + 18;
             int scrollEnd = scrollOriginY + 112;
-            double percentThrough = MathHelper.clamp(((float) click.y() - (float) scrollOriginY - 7.5F) / ((float) (scrollEnd - scrollOriginY) - 15.0F), 0, 1);
+            double percentThrough = Mth.clamp(((float) click.y() - (float) scrollOriginY - 7.5F) / ((float) (scrollEnd - scrollOriginY) - 15.0F), 0, 1);
             this.scrollPosition = ((double) this.scrollHeight / 9) * percentThrough;
             scroll();
         }
@@ -214,8 +213,8 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
     }
 
     private Integer getGroupFromMouse(double mouseX, double mouseY) {
-        double x = mouseX - (double) this.x;
-        double y = mouseY - (double) this.y;
+        double x = mouseX - (double) this.leftPos;
+        double y = mouseY - (double) this.topPos;
         DevInventoryGroup[] groups = DevInventoryGroup.GROUPS;
 
         for (int i = 0; i < groups.length; ++i) {
@@ -228,23 +227,23 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
     }
 
     private void setSelectedTab(int tab) {
-        searchBox.setText("");
+        searchBox.setValue("");
         DevInventoryGroup group = GROUPS[tab];
         searchBox.active = group.hasSearchBar();
 
         selectedTab = tab;
 
-        if (this.client == null || this.client.player == null) return;
+        if (this.minecraft == null || this.minecraft.player == null) return;
         if (group == DevInventoryGroup.INVENTORY && this.survivalInventorySwapList == null) {
-            ScreenHandler playerScreenHandler = this.client.player.playerScreenHandler;
-            this.survivalInventorySwapList = ImmutableList.copyOf((this.handler).slots);
-            this.handler.slots.clear();
+            AbstractContainerMenu playerScreenHandler = this.minecraft.player.inventoryMenu;
+            this.survivalInventorySwapList = ImmutableList.copyOf((this.menu).slots);
+            this.menu.slots.clear();
             for (Slot slot : this.survivalInventorySwapList) {
-                if (slot.inventory instanceof PlayerInventory) this.handler.slots.add(slot);
+                if (slot.container instanceof Inventory) this.menu.slots.add(slot);
             }
 
             this.deleteItemSlot = new Slot(Inventory, 0, 173, 112);
-            this.handler.slots.add(this.deleteItemSlot);
+            this.menu.slots.add(this.deleteItemSlot);
 
             int slotSize = 18;
 
@@ -253,13 +252,13 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
                 int x = 9 + (slotIndex % 9) * slotSize;
                 int y = 36 + slotIndex / 9 * slotSize;
 
-                Slot slot = new Slot(playerScreenHandler.slots.get(slotIndex).inventory, slotIndex, x, y);
-                this.handler.slots.add(slot);
+                Slot slot = new Slot(playerScreenHandler.slots.get(slotIndex).container, slotIndex, x, y);
+                this.menu.slots.add(slot);
             }
             return;
         } else if (this.survivalInventorySwapList != null) {
-            this.handler.slots.clear();
-            this.handler.slots.addAll(this.survivalInventorySwapList);
+            this.menu.slots.clear();
+            this.menu.slots.addAll(this.survivalInventorySwapList);
             this.survivalInventorySwapList = null;
         }
         this.scrollPosition = 0;
@@ -271,8 +270,8 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         scrollHeight = Math.max(0, (int) Math.ceil((double) (searchResults.size() - 45) / 9) * 9);
         for (int i = 0; i < 45; i++) {
             int value = i + (int) scrollPosition * 9;
-            if (value < searchResults.size()) this.handler.slots.get(i).setStack(searchResults.get(value).getItem());
-            else this.handler.slots.get(i).setStack(Items.AIR.getDefaultStack());
+            if (value < searchResults.size()) this.menu.slots.get(i).setByPlayer(searchResults.get(value).getItem());
+            else this.menu.slots.get(i).setByPlayer(Items.AIR.getDefaultInstance());
         }
     }
 
@@ -283,7 +282,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
     //            searchResults = null;
     //            return;
     //        }
-            String text = searchBox.getText();
+            String text = searchBox.getValue();
             if (text.equals("")) text = null;
             searchResults = group.searchItems(text);
             if (searchResults != null) this.scroll();
@@ -292,25 +291,25 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         }
     }
 
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
 
         Integer hoveredGroup = getGroupFromMouse(mouseX, mouseY);
         if (hoveredGroup != null) {
             DevInventoryGroup group = GROUPS[hoveredGroup];
-            context.drawTooltip(textRenderer, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
+            context.setTooltipForNextFrame(font, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
         }
 
-        if (this.deleteItemSlot != null && this.isPointWithinBounds(this.deleteItemSlot.x, this.deleteItemSlot.y, 16, 16, mouseX, mouseY)) {
-            context.drawTooltip(textRenderer, DELETE_ITEM_SLOT_TEXT, mouseX, mouseY);
+        if (this.deleteItemSlot != null && this.isHovering(this.deleteItemSlot.x, this.deleteItemSlot.y, 16, 16, mouseX, mouseY)) {
+            context.setTooltipForNextFrame(font, DELETE_ITEM_SLOT_TEXT, mouseX, mouseY);
         }
 
-        this.drawMouseoverTooltip(context, mouseX, mouseY);
+        this.renderTooltip(context, mouseX, mouseY);
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         if (ignoreNextKey) {
             ignoreNextKey = false;
             return true;
@@ -324,18 +323,18 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
 
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        var keyCode = input.getKeycode();
+    public boolean keyPressed(KeyEvent input) {
+        var keyCode = input.input();
         if (keyCode == GLFW.GLFW_KEY_GRAVE_ACCENT) {
-            this.close();
+            this.onClose();
         }
         if (keyCode >= GLFW.GLFW_KEY_0 && keyCode <= GLFW.GLFW_KEY_9) {
             int number = keyCode - GLFW.GLFW_KEY_1;
             if (number == -1) number = 9;
-            Slot slot = this.handler.slots.get(number);
-            if (this.client == null || this.client.player == null) return false;
-            this.client.player.setStackInHand(Hand.MAIN_HAND, slot.getStack());
-            if (CodeClient.MC.getNetworkHandler() != null) Utility.sendHandItem(slot.getStack());
+            Slot slot = this.menu.slots.get(number);
+            if (this.minecraft == null || this.minecraft.player == null) return false;
+            this.minecraft.player.setItemInHand(InteractionHand.MAIN_HAND, slot.getItem());
+            if (CodeClient.MC.getConnection() != null) Utility.sendHandItem(slot.getItem());
             this.ignoreNextKey = true;
             return true;
         }
@@ -365,11 +364,11 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
             return true;
         }
         if (searchBox.active) {
-            if (CodeClient.MC.options.chatKey.matchesKey(input) || KeyBinds.editBind.matchesKey(input)) {
+            if (CodeClient.MC.options.keyChat.matches(input) || KeyBinds.editBind.matches(input)) {
                 if (keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
                 searchBox.setFocused(true);
-                searchBox.setCursorToEnd(false);
-                searchBox.setSelectionEnd(0);
+                searchBox.moveCursorToEnd(false);
+                searchBox.setHighlightPos(0);
                 ignoreNextKey = true;
                 return true;
             }
@@ -377,7 +376,7 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         return super.keyPressed(input);
     }
 
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
 
         for (DevInventoryGroup group : DevInventoryGroup.GROUPS) {
@@ -388,49 +387,49 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
         String texture = "item_search";
         if (!itemGroup.hasSearchBar()) texture = "items";
         if (itemGroup == INVENTORY) texture = "inventory";
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, ItemGroup.getTabTextureId(texture), this.x, this.y, 0.0f, 0.0f, this.backgroundWidth, this.backgroundHeight, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, CreativeModeTab.createTextureLocation(texture), this.leftPos, this.topPos, 0.0f, 0.0f, this.imageWidth, this.imageHeight, 256, 256);
 //        RenderSystem.setShaderTexture(0, TEXTURE);
         this.renderTabIcon(context, itemGroup);
 
         if (itemGroup.hasSearchBar()) this.searchBox.render(context, mouseX, mouseY, delta);
         if (itemGroup != INVENTORY) {
-            int scrollbarX = this.x + 175;
-            int scrollbarY = this.y + 18;
+            int scrollbarX = this.leftPos + 175;
+            int scrollbarY = this.topPos + 18;
             if (scrollHeight == 0)
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15, 256, 256);
+                context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15, 256, 256);
             else
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15, 256, 256);
+                context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15, 256, 256);
         } else {
-            if (this.client != null && this.client.player != null)
-                InventoryScreen.drawEntity(context, this.x + 73, this.y + 6, this.x + 105, this.y + 49, 20, 0.0625F, (float) mouseX, (float) mouseY, this.client.player);
+            if (this.minecraft != null && this.minecraft.player != null)
+                InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.leftPos + 73, this.topPos + 6, this.leftPos + 105, this.topPos + 49, 20, 0.0625F, (float) mouseX, (float) mouseY, this.minecraft.player);
         }
     }
 
     protected boolean isClickInTab(DevInventoryGroup group, double mouseX, double mouseY) {
         int x = group.getDisplayX(0);
-        int y = group.getDisplayY(0, this.backgroundHeight);
+        int y = group.getDisplayY(0, this.imageHeight);
 
         return mouseX >= x && mouseX <= (x + TAB_WIDTH)
                 && mouseY >= y && mouseY <= (y + TAB_HEIGHT);
     }
 
-    protected void renderTabIcon(DrawContext context, DevInventoryGroup group) {
+    protected void renderTabIcon(GuiGraphics context, DevInventoryGroup group) {
         boolean isSelected = group.getIndex() == selectedTab;
         boolean isTopRow = group.isTopHalf();
         int column = group.getColumn();
         int mapX = column * TAB_WIDTH;
         int mapY = 0;
-        int originX = group.getDisplayX(this.x);
-        int originY = group.getDisplayY(this.y, this.backgroundHeight);
+        int originX = group.getDisplayX(this.leftPos);
+        int originY = group.getDisplayY(this.topPos, this.imageHeight);
         if (isSelected) mapY += 32;
         if (!isTopRow) mapY += 64;
 
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, originX, originY, mapX, mapY, TAB_WIDTH, 32, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, originX, originY, mapX, mapY, TAB_WIDTH, 32, 256, 256);
 //        this.itemRenderer.zOffset = 100.0F;
         originX += 6;
         originY += 8 + (isTopRow ? 2 : -2);
         ItemStack itemStack = group.getIcon();
-        context.drawItem(itemStack, originX, originY);
+        context.renderItem(itemStack, originX, originY);
 //        this.itemRenderer.zOffset = 0.0F;
     }
 
@@ -447,8 +446,8 @@ public class DevInventoryScreen extends HandledScreen<CreativeInventoryScreen.Cr
 
     protected boolean isClickInScrollbar(double mouseX, double mouseY) {
         if (!GROUPS[selectedTab].hasSearchBar()) return false;
-        int windowX = this.x;
-        int windowY = this.y;
+        int windowX = this.leftPos;
+        int windowY = this.topPos;
         int scrollOriginX = windowX + 175;
         int scrollOriginY = windowY + 18;
         int scrollFarX = scrollOriginX + 14;

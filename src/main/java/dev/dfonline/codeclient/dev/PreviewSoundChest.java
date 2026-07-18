@@ -8,31 +8,30 @@ import dev.dfonline.codeclient.hypercube.actiondump.Sound;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
-
 import java.util.List;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
 
 public class PreviewSoundChest extends Feature {
 
     @SuppressWarnings("deprecation")
-    private static final Random threadSafeRandom = Random.createThreadSafe();
+    private static final RandomSource threadSafeRandom = RandomSource.createThreadSafe();
 
     @Override
     public void tick() {
-        if (KeyBinds.previewSounds.wasPressed() && CodeClient.MC.world != null && CodeClient.location instanceof Dev) {
+        if (KeyBinds.previewSounds.consumeClick() && CodeClient.MC.level != null && CodeClient.location instanceof Dev) {
             if (CodeClient.MC.player == null) return;
             ChestPeeker.pick(PreviewSoundChest::previewSounds);
         }
     }
 
     public static void previewSounds(List<ItemStack> items) {
-        ClientPlayerEntity player = CodeClient.MC.player;
-        if (player == null || CodeClient.MC.world == null) return;
+        LocalPlayer player = CodeClient.MC.player;
+        if (player == null || CodeClient.MC.level == null) return;
 
         for (ItemStack item : items) {
             VarItem varItem = VarItems.parse(item);
@@ -40,16 +39,16 @@ public class PreviewSoundChest extends Feature {
 
             sound.getSoundId().ifPresent(adSound -> {
                 Sound.Variant variant = adSound.getVariantFromName(sound.getVariant());
-                Identifier id = Identifier.ofVanilla(adSound.soundId);
-                SoundEvent event = SoundEvent.of(id);
+                Identifier id = Identifier.withDefaultNamespace(adSound.soundId);
+                SoundEvent event = SoundEvent.createVariableRangeEvent(id);
 
-                CodeClient.MC.world.playSound(
+                CodeClient.MC.level.playSeededSound(
                         player,
                         player.getX(),
                         player.getY(),
                         player.getZ(),
                         event,
-                        SoundCategory.MASTER,
+                        SoundSource.MASTER,
                         (float) sound.getVolume(),
                         (float) sound.getPitch(),
                         // I would copy-paste this entire method call for either variant or non-variant

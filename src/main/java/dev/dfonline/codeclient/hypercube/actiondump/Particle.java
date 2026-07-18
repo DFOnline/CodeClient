@@ -3,13 +3,12 @@ package dev.dfonline.codeclient.hypercube.actiondump;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import dev.dfonline.codeclient.data.DFItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public class Particle extends VarItem implements Searchable {
     public String particle;
@@ -50,15 +49,15 @@ public class Particle extends VarItem implements Searchable {
         ItemStack item = super.getItem("part", data);
 
         DFItem dfItem = DFItem.of(item);
-        List<Text> lore = dfItem.getLore();
-        ArrayList<Text> newLore = new ArrayList<>(lore);
+        List<Component> lore = dfItem.getLore();
+        ArrayList<Component> newLore = new ArrayList<>(lore);
 
-        newLore.add(Text.empty());
-        newLore.add(Text.literal("Additional Fields:").formatted(Formatting.GRAY));
-        if (optionFields.isEmpty()) newLore.add(Text.literal("None").formatted(Formatting.DARK_GRAY));
+        newLore.add(Component.empty());
+        newLore.add(Component.literal("Additional Fields:").withStyle(ChatFormatting.GRAY));
+        if (optionFields.isEmpty()) newLore.add(Component.literal("None").withStyle(ChatFormatting.DARK_GRAY));
         else for (ParticleField field : optionFields) {
-            if (field != null) newLore.add(Text.literal("• " + field.displayName).formatted(Formatting.WHITE));
-            else newLore.add(Text.of("NULL?"));
+            if (field != null) newLore.add(Component.literal("• " + field.displayName).withStyle(ChatFormatting.WHITE));
+            else newLore.add(Component.nullToEmpty("NULL?"));
         }
         dfItem.setLore(newLore);
 
