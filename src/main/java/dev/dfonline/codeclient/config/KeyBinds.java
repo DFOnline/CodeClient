@@ -7,7 +7,7 @@ import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.dev.menu.devinventory.DevInventoryScreen;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Play;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -65,21 +65,21 @@ public class KeyBinds {
         KeyMapping.Category dev = KeyMapping.Category.register(Identifier.parse("codeclient:dev"));
         KeyMapping.Category navi = KeyMapping.Category.register(Identifier.parse("codeclient:navigation"));
 
-        editBind = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.codepalette", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y, dev));
-        clipBind = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.phaser", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, dev));
-        openAction = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.open_action", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
-        editAction = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.edit_action", InputConstants.Type.KEYSYM, InputConstants.KEY_PERIOD, dev));
-        actionUsages = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.action_usages", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
+        editBind = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.codepalette", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y, dev));
+        clipBind = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.phaser", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, dev));
+        openAction = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.open_action", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
+        editAction = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.edit_action", InputConstants.Type.KEYSYM, InputConstants.KEY_PERIOD, dev));
+        actionUsages = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.action_usages", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
 
-        teleportLeft = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.tp.left", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
-        teleportRight = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.tp.right", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
-        teleportForward = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.tp.forward", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
-        teleportBackward = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.tp.backward", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
+        teleportLeft = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.left", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
+        teleportRight = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.right", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
+        teleportForward = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.forward", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
+        teleportBackward = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.backward", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
 
-        previewItemTags = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.preview_item_tags", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
-        previewSounds = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.preview_sounds", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
-        playDev = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.playDev", InputConstants.UNKNOWN.getValue(), dev));
-        playBuild = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.codeclient.playBuild", InputConstants.UNKNOWN.getValue(), dev));
+        previewItemTags = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.preview_item_tags", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
+        previewSounds = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.preview_sounds", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
+        playDev = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.playDev", InputConstants.UNKNOWN.getValue(), dev));
+        playBuild = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.playBuild", InputConstants.UNKNOWN.getValue(), dev));
     }
 
     public static void tick() {
