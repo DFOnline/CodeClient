@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -45,7 +45,7 @@ public class ClearPlot extends Action {
                 for (int slot : List.of(9, 14, 15, 44)) {
                     HashedStack stack = HashedStack.create(inventoryS2CPacket.items().get(slot),hasher);
                     Int2ObjectMap<HashedStack> modified = Int2ObjectMaps.singleton(slot, HashedStack.create(Items.AIR.getDefaultInstance(), hasher));
-                    CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(inventoryS2CPacket.containerId(),inventoryS2CPacket.stateId(),(short)slot,(byte)0,ClickType.PICKUP,modified,stack));
+                    CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(inventoryS2CPacket.containerId(),inventoryS2CPacket.stateId(),(short)slot,(byte)0,ContainerInput.PICKUP,modified,stack));
                 }
                 currentStep = Step.WAIT_FOR_CONFIRM;
                 return true;
@@ -56,7 +56,7 @@ public class ClearPlot extends Action {
                 if (itemStack.getItem().equals(Items.GREEN_CONCRETE)) {
                     var air = HashedStack.create(Items.AIR.getDefaultInstance(), hasher);
                     Int2ObjectMap<HashedStack> modified = Int2ObjectMaps.singleton(slot, air);
-                    CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(inventoryS2CPacket.containerId(),inventoryS2CPacket.stateId(),slot,(byte)0,ClickType.PICKUP,modified,air));
+                    CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(inventoryS2CPacket.containerId(),inventoryS2CPacket.stateId(),slot,(byte)0,ContainerInput.PICKUP,modified,air));
                     currentStep = Step.DONE;
                     this.callback();
                     return true;

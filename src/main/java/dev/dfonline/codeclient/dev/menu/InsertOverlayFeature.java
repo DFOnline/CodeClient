@@ -25,7 +25,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -107,9 +107,9 @@ public class InsertOverlayFeature extends Feature {
         }
 
         @Override
-        public boolean clickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
+        public boolean clickSlot(Slot slot, int button, ContainerInput containerInput, int syncId, int revision) {
             if(CodeClient.MC.player != null && slot.container == CodeClient.MC.player.getInventory()) return false;
-            if (actionType == ClickType.PICKUP && !slot.hasItem() && CodeClient.MC.player.containerMenu.getCarried().isEmpty())
+            if (containerInput == ContainerInput.PICKUP && !slot.hasItem() && CodeClient.MC.player.containerMenu.getCarried().isEmpty())
                 selectedSlot = new AddWidget(slot, () -> selectedSlot = null);
             else if (selectedSlot != null) selectedSlot.close();
             return false;
@@ -171,10 +171,10 @@ public class InsertOverlayFeature extends Feature {
                 if (currentScreen instanceof AbstractContainerScreen<?> handledScreen) {
                     var player = mc.player;
                     var sync = handledScreen.getMenu().containerId;
-                    manager.handleInventoryMouseClick(sync, slot.index, 0, ClickType.SWAP, player);
+                    manager.handleContainerInput(sync, slot.index, 0, ContainerInput.SWAP, player);
                     mc.getConnection().send(new ServerboundSetCreativeModeSlotPacket(36, stack));
-                    manager.handleInventoryMouseClick(sync, slot.index, 0, ClickType.SWAP, player);
-                    manager.handleInventoryMouseClick(sync, 54, 0, ClickType.QUICK_CRAFT, player);
+                    manager.handleContainerInput(sync, slot.index, 0, ContainerInput.SWAP, player);
+                    manager.handleContainerInput(sync, 54, 0, ContainerInput.QUICK_CRAFT, player);
                     slot.setByPlayer(stack);
                 }
             }

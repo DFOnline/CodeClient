@@ -6,7 +6,7 @@ import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -30,13 +30,13 @@ public abstract class MScreenHandler {
             at = @At("HEAD"),
             cancellable = true
     )
-    public void clickSlot(int slotIndex, int button, ClickType actionType, Player player, CallbackInfo ci) {
+    public void clickSlot(int slotIndex, int button, ContainerInput containerInput, Player player, CallbackInfo ci) {
         // creative inventories act differently, and don't keep track of the item in the cursor, and will trust the client.
-        if (CodeClient.location instanceof Dev &&  actionType == ClickType.CLONE) {
+        if (CodeClient.location instanceof Dev &&  containerInput == ContainerInput.CLONE) {
             if (!AdvancedMiddleClickFeature.activated()) return;
             if (player.hasInfiniteMaterials()) {
                 var slot = (Slot) slots.get(slotIndex);
-                var clone = AdvancedMiddleClickFeature.getCopy(slot, getCarried(), actionType);
+                var clone = AdvancedMiddleClickFeature.getCopy(slot, getCarried(), containerInput);
                 if (clone != null) {
                     setCarried(clone);
                 }

@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -30,9 +30,9 @@ public class AdvancedMiddleClickFeature extends Feature {
         return new AdvancedMiddleClick(screen);
     }
 
-    public static ItemStack getCopy(Slot slot, ItemStack cursor, ClickType actionType) {
+    public static ItemStack getCopy(Slot slot, ItemStack cursor, ContainerInput containerInput) {
         int max = slot.getItem().getMaxStackSize();
-        boolean shift = actionType == ClickType.QUICK_MOVE; // TODO: verify this isn't inverted
+        boolean shift = containerInput == ContainerInput.QUICK_MOVE; // TODO: verify this isn't inverted
         if (cursor.isEmpty() && slot.hasItem()) {
             int count = 1;
             if (shift) count = max;
@@ -60,11 +60,11 @@ public class AdvancedMiddleClickFeature extends Feature {
         }
 
         @Override
-        public boolean clickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
+        public boolean clickSlot(Slot slot, int button, ContainerInput containerInput, int syncId, int revision) {
             LocalPlayer player = Minecraft.getInstance().player;
             var manager = Minecraft.getInstance().gameMode;
             var network = Minecraft.getInstance().getConnection();
-            if (!(manager == null || network == null || player == null) && actionType == ClickType.CLONE) {
+            if (!(manager == null || network == null || player == null) && containerInput == ContainerInput.CLONE) {
                 AbstractContainerMenu handler = player.containerMenu;
 
                 // find an empty slot to use
@@ -76,7 +76,7 @@ public class AdvancedMiddleClickFeature extends Feature {
                     if (candidate.isPresent()) {
                         Slot selected = candidate.get();
                         external = selected.index;
-                        manager.handleInventoryMouseClick(syncId, external, 0, ClickType.SWAP, player);
+                        manager.handleContainerInput(syncId, external, 0, ContainerInput.SWAP, player);
                         emptySlotId = 0;
                     } else {
                         // not possible to run the following code, return to vanilla behaviour
@@ -86,11 +86,11 @@ public class AdvancedMiddleClickFeature extends Feature {
 
                 int convertedSlotId = Utility.getRemoteSlot(emptySlotId)-9+(handler.slots.size()-36);
                 Slot emptySlot = handler.getSlot(convertedSlotId);
-                var stack = getCopy(slot, handler.getCarried(), actionType); // get the stack to set the slot to
+                var stack = getCopy(slot, handler.getCarried(), containerInput); // get the stack to set the slot to
                 if (stack == null) return false;
 
                 if (!handler.getCarried().isEmpty()) {
-                    manager.handleInventoryMouseClick(syncId, convertedSlotId, 0, ClickType.PICKUP, player);
+                    manager.handleContainerInput(syncId, convertedSlotId, 0, ContainerInput.PICKUP, player);
                     emptySlot.getItem().setCount(0); // hides the temporary item in the empty slot.
                 }
 
@@ -99,10 +99,10 @@ public class AdvancedMiddleClickFeature extends Feature {
                         Utility.getRemoteSlot(emptySlotId), stack)
                 );
 
-                manager.handleInventoryMouseClick(syncId, convertedSlotId, 0, ClickType.PICKUP, player);
+                manager.handleContainerInput(syncId, convertedSlotId, 0, ContainerInput.PICKUP, player);
 
                 if (external != -1) {
-                    manager.handleInventoryMouseClick(syncId, external, 0, ClickType.SWAP, player);
+                    manager.handleContainerInput(syncId, external, 0, ContainerInput.SWAP, player);
                 } else {
                     emptySlot.getItem().setCount(0); // hides the temporary item in the empty slot.
                 }

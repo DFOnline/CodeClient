@@ -22,7 +22,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -112,9 +112,9 @@ public class InteractionManager {
         }
     }
 
-    public static boolean onClickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
+    public static boolean onClickSlot(Slot slot, int button, ContainerInput containerInput, int syncId, int revision) {
         if (CodeClient.location instanceof Dev) {
-            if (CodeClient.onClickSlot(slot,button,actionType,syncId,revision)) return true;
+            if (CodeClient.onClickSlot(slot,button,containerInput,syncId,revision)) return true;
 //            if (!slot.hasStack()) return false;
 //            ItemStack item = slot.getStack();
 //            DFItem dfItem = DFItem.of(item);
@@ -123,12 +123,12 @@ public class InteractionManager {
 //                    Optional<String> varItem = dfItem.getItemData().getHypercubeStringValue("varitem");
 //                    if (varItem.isPresent()) {
 //                        if (!Config.getConfig().CustomTagInteraction) return false;
-//                        if (actionType == SlotActionType.PICKUP_ALL) return false;
+//                        if (containerInput == SlotActionType.PICKUP_ALL) return false;
 //                        JsonElement varElement = JsonParser.parseString(varItem.get());
 //                        if (!varElement.isJsonObject()) return false;
 //                        JsonObject varObject = (JsonObject) varElement;
 //                        if (!(Objects.equals(varObject.get("id").getAsString(), "bl_tag"))) return false;
-//                        if (actionType == SlotActionType.QUICK_MOVE && varObject.get("data").getAsJsonObject().has("variable"))
+//                        if (containerInput == SlotActionType.QUICK_MOVE && varObject.get("data").getAsJsonObject().has("variable"))
 //                            return false;
 //
 //                        Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();

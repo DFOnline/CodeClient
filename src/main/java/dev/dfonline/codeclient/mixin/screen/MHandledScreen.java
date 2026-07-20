@@ -5,7 +5,7 @@ import dev.dfonline.codeclient.dev.InteractionManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -56,11 +56,11 @@ public abstract class MHandledScreen {
         return hover == null || hover.isEmpty() ? instance.getItem() : hover;
     }
 
-    @Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;handleInventoryMouseClick(IIILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)V"), cancellable = true)
-    private void clickSlot(Slot slot, int slotId, int button, ClickType actionType, CallbackInfo ci) {
+    @Inject(method = "slotClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;handleContainerInput(IIILnet/minecraft/world/inventory/ContainerInput;Lnet/minecraft/world/entity/player/Player;)V"), cancellable = true)
+    private void clickSlot(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
         if (slotId < 0) return;
 
-        if (InteractionManager.onClickSlot(slot,button,actionType,this.menu.containerId,this.menu.getStateId()))
+        if (InteractionManager.onClickSlot(slot,buttonNum,containerInput,this.menu.containerId,this.menu.getStateId()))
             ci.cancel();
     }
 }

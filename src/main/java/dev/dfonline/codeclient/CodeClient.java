@@ -72,7 +72,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -465,8 +465,8 @@ public class CodeClient implements ClientModInitializer {
         return chestFeatures().anyMatch(feature -> feature.charTyped(charInput));
     }
 
-    public static boolean onClickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
-        return chestFeatures().anyMatch(feature -> feature.clickSlot(slot, button, actionType, syncId, revision));
+    public static boolean onClickSlot(Slot slot, int button, ContainerInput containerInput, int syncId, int revision) {
+        return chestFeatures().anyMatch(feature -> feature.clickSlot(slot, button, containerInput, syncId, revision));
     }
 
     public static boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {

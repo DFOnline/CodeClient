@@ -28,7 +28,7 @@ import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -200,14 +200,14 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
                             && relY < y + 18
             ) {
                 if (click.button() == 2) {
-                    this.slotClicked(customSlot, slot.index, click.button(), ClickType.CLONE);
+                    this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.CLONE);
                     return true;
                 }
                 if (click.hasShiftDown()) {
-                    this.slotClicked(customSlot, slot.index, click.button(), ClickType.QUICK_MOVE);
+                    this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.QUICK_MOVE);
                     return true;
                 }
-                this.slotClicked(customSlot, slot.index, click.button(), ClickType.PICKUP);
+                this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.PICKUP);
                 return true;
             }
         }
@@ -243,16 +243,16 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
             if (item instanceof BlockTag) {
                 var hash = HashedStack.create(item.toStack(), CodeClient.MC.getConnection().decoratedHashOpsGenenerator());
                 Int2ObjectMap<HashedStack> modified = Int2ObjectMaps.singleton(slot.getContainerSlot(), hash);
-                CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(menu.containerId, menu.incrementStateId(),(short)slot.getContainerSlot(),(byte)0,ClickType.PICKUP,modified,hash));
+                CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(menu.containerId, menu.incrementStateId(),(short)slot.getContainerSlot(),(byte)0,ContainerInput.PICKUP,modified,hash));
             } else {
                 doNotUpdate = true;
-                super.slotClicked(slot, slot.index, 0, ClickType.SWAP);
+                super.slotClicked(slot, slot.index, 0, ContainerInput.SWAP);
                 doNotUpdate = true;
                 CodeClient.MC.getConnection().send(new ServerboundSetCreativeModeSlotPacket(36, item.toStack()));
                 doNotUpdate = true;
-                super.slotClicked(slot, slot.index, 0, ClickType.SWAP);
+                super.slotClicked(slot, slot.index, 0, ContainerInput.SWAP);
                 doNotUpdate = true;
-                super.slotClicked(slot, 54, 0, ClickType.QUICK_CRAFT);
+                super.slotClicked(slot, 54, 0, ContainerInput.QUICK_CRAFT);
             }
         }
     }
@@ -369,8 +369,8 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
     }
 
     @Override
-    protected void slotClicked(Slot slot, int slotId, int button, ClickType actionType) {
-        super.slotClicked(slot, slotId, button, actionType);
+    protected void slotClicked(Slot slot, int slotId, int button, ContainerInput containerInput) {
+        super.slotClicked(slot, slotId, button, containerInput);
         update((int) scroll);
     }
 

@@ -34,7 +34,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -85,7 +85,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 //        }
     }
 
-    protected void slotClicked(@Nullable Slot slot, int slotId, int button, ClickType actionType) {
+    protected void slotClicked(@Nullable Slot slot, int slotId, int button, ContainerInput containerInput) {
         if (slot == null) return;
         this.searchBox.moveCursorToEnd(false);
         this.searchBox.setHighlightPos(0);
@@ -96,7 +96,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
         }
 
         if (slot.container instanceof SimpleContainer) {
-            if (actionType == ClickType.PICKUP) {
+            if (containerInput == ContainerInput.PICKUP) {
                 if (this.menu.getCarried().getItem().equals(Items.AIR))
                     this.menu.setCarried(slot.getItem());
                 else this.menu.setCarried(Items.AIR.getDefaultInstance());

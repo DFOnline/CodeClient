@@ -26,7 +26,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.datafix.DataFixTypes;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import java.nio.file.Files;
@@ -186,7 +186,7 @@ public class RecentValues extends Feature {
                     CodeClient.MC.gameMode.handleCreativeModeItemAdd(hoveredItem, 36);
                     CodeClient.MC.gameMode.handleInventoryMouseClick(
                             screen.getMenu().containerId,
-                            slot.index, 0, ClickType.SWAP, CodeClient.MC.player
+                            slot.index, 0, ContainerInput.SWAP, CodeClient.MC.player
                     );
                     CodeClient.MC.gameMode.handleCreativeModeItemAdd(previous, 36);
                     return true;

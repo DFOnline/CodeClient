@@ -5,7 +5,7 @@ import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,11 +21,11 @@ public abstract class MCreativeInventoryScreen {
     private Slot destroyItemSlot;
 
     @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
-    public void slotClicked(@Nullable Slot slot, int slotId, int button, ClickType actionType, CallbackInfo ci) {
+    public void slotClicked(@Nullable Slot slot, int slotId, int button, ContainerInput containerInput, CallbackInfo ci) {
         if (
                 CodeClient.location instanceof Dev dev
                 && dev.isInDevSpace() // Clear the inventory regardless of mode if not in dev space
-                && actionType == ClickType.QUICK_MOVE
+                && containerInput == ContainerInput.QUICK_MOVE
                 && slot == this.destroyItemSlot
         ) {
             String cmd = Config.getConfig().DestroyItemResetMode.command;

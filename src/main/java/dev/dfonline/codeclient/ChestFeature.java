@@ -5,7 +5,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -44,7 +44,7 @@ public abstract class ChestFeature {
         return false;
     }
 
-    public boolean clickSlot(Slot slot, int button, ClickType actionType, int syncId, int revision) {
+    public boolean clickSlot(Slot slot, int button, ContainerInput containerInput, int syncId, int revision) {
         return false;
     }
 
