@@ -31,7 +31,7 @@ public abstract class MCreativeInventoryScreen {
             String cmd = Config.getConfig().DestroyItemResetMode.command;
 
             if (cmd != null) {
-                CodeClient.MC.setScreen(null);
+                CodeClient.MC.gui.setScreen(null);
                 CommandSender.queue(cmd);
                 ci.cancel();
             }

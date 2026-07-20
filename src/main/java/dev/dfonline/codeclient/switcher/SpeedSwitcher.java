@@ -27,7 +27,7 @@ public class SpeedSwitcher extends GenericSwitcher {
 
         public boolean open() {
             if (CodeClient.location instanceof Plot || CodeClient.location instanceof Spawn) {
-                CodeClient.MC.setScreen(new SpeedSwitcher());
+                CodeClient.MC.gui.setScreen(new SpeedSwitcher());
                 return true;
             }
             return false;

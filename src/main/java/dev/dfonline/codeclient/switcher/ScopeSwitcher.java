@@ -36,7 +36,7 @@ public class ScopeSwitcher extends GenericSwitcher {
         }
 
         public void open(String option) {
-            CodeClient.MC.setScreen(new ScopeSwitcher(option));
+            CodeClient.MC.gui.setScreen(new ScopeSwitcher(option));
         }
     }
 
@@ -89,7 +89,7 @@ public class ScopeSwitcher extends GenericSwitcher {
         if (hasClicked) {
             Option selected = getSelected();
             if (selected != null) selected.run();
-            this.minecraft.setScreen(null);
+            this.minecraft.gui.setScreen(null);
             return true;
         }
         return false;

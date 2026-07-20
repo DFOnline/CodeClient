@@ -25,7 +25,7 @@ public class StateSwitcher extends GenericSwitcher {
 
         public boolean open() {
             if (CodeClient.location instanceof Plot) {
-                CodeClient.MC.setScreen(new StateSwitcher());
+                CodeClient.MC.gui.setScreen(new StateSwitcher());
                 return true;
             }
             return false;

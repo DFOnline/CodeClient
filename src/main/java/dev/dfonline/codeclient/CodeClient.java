@@ -131,7 +131,7 @@ public class CodeClient implements ClientModInitializer {
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (MC.player == null || MC.level == null) clean();
             if (screenToOpen != null) {
-                MC.setScreen(screenToOpen);
+                MC.gui.setScreen(screenToOpen);
                 screenToOpen = null;
             }
         });
@@ -198,7 +198,7 @@ public class CodeClient implements ClientModInitializer {
             ScreenMouseEvents.allowMouseScroll(screen).register((screen1, mouseX, mouseY, horizontalAmount, verticalAmount) -> !CodeClient.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
 
             if (!Config.getConfig().HasSelectedPreset && screen instanceof TitleScreen) {
-                client.setScreen(new ConfigPresetScreen(screen));
+                client.gui.setScreen(new ConfigPresetScreen(screen));
             }
         });
 
@@ -331,7 +331,7 @@ public class CodeClient implements ClientModInitializer {
                 }
             }
         }
-        return (MC.screen instanceof PauseScreen || MC.screen instanceof ChatScreen || MC.screen instanceof StateSwitcher) && packet instanceof ClientboundContainerClosePacket;
+        return (MC.gui.screen() instanceof PauseScreen || MC.gui.screen() instanceof ChatScreen || MC.gui.screen() instanceof StateSwitcher) && packet instanceof ClientboundContainerClosePacket;
     }
 
     /**
@@ -357,7 +357,7 @@ public class CodeClient implements ClientModInitializer {
 
 //        System.out.println(location.name());
 
-        if (!(location instanceof Dev) || !(MC.screen instanceof AbstractContainerScreen<?>)) {
+        if (!(location instanceof Dev) || !(MC.gui.screen() instanceof AbstractContainerScreen<?>)) {
             isCodeChest = false;
             features().forEach(Feature::closeChest);
         }

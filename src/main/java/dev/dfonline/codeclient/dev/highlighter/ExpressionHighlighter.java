@@ -312,7 +312,7 @@ public class ExpressionHighlighter extends Feature {
     public void draw(GuiGraphics context, int mouseX, int mouseY, FormattedCharSequence input) {
         Font renderer = CodeClient.MC.font;
 
-        var screen = CodeClient.MC.screen;
+        var screen = CodeClient.MC.gui.screen();
         if (screen == null) return;
 
         int y = screen.height - 25;

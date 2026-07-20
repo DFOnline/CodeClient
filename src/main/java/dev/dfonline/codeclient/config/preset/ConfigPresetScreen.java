@@ -67,7 +67,7 @@ public class ConfigPresetScreen extends Screen {
         config.save();
 
         if (this.minecraft != null) {
-            this.minecraft.setScreen(this.parent);
+            this.minecraft.gui.setScreen(this.parent);
         }
     }
 

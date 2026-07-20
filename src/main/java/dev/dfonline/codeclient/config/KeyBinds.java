@@ -92,7 +92,7 @@ public class KeyBinds {
         }
         if (CodeClient.location instanceof Dev dev) {
             if (editBind.consumeClick()) {
-                CodeClient.MC.setScreen(new DevInventoryScreen(player));
+                CodeClient.MC.gui.setScreen(new DevInventoryScreen(player));
             }
 
             var mc = CodeClient.MC;
@@ -116,7 +116,7 @@ public class KeyBinds {
             }
 
             if(editAction.consumeClick()) {
-                mc.setScreen(new ChatScreen("/action ", false));
+                mc.gui.setScreen(new ChatScreen("/action ", false));
             }
 
             if(actionUsages.consumeClick()) {

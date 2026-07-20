@@ -149,7 +149,7 @@ public abstract class GenericSwitcher extends Screen {
         if (hasClicked || !InputConstants.isKeyDown(this.minecraft.getWindow(), HOLD_KEY)) {
             Option selected = getSelected();
             if (selected != null) selected.run();
-            this.minecraft.setScreen(null);
+            this.minecraft.gui.setScreen(null);
             return true;
         }
         return false;

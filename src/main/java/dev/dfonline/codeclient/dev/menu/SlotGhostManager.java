@@ -42,7 +42,7 @@ public class SlotGhostManager extends Feature {
 
     @Override
     public void tick() {
-        if(CodeClient.MC.screen == null && !InteractionManager.isOpeningCodeChest) {
+        if(CodeClient.MC.gui.screen() == null && !InteractionManager.isOpeningCodeChest) {
             reset();
         }
     }
@@ -95,7 +95,7 @@ public class SlotGhostManager extends Feature {
         }
 
         public void drawSlot(GuiGraphics context, Slot slot) {
-            if (!(CodeClient.MC.screen instanceof ContainerScreen || CodeClient.MC.screen instanceof CustomChestMenu)) {
+            if (!(CodeClient.MC.gui.screen() instanceof ContainerScreen || CodeClient.MC.gui.screen() instanceof CustomChestMenu)) {
                 action = null;
             }
             if (badAction() || slot.container instanceof Inventory)
