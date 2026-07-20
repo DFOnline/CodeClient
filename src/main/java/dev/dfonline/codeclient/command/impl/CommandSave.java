@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Base64;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
 
 public class CommandSave extends TemplateActionCommand {
     @Override

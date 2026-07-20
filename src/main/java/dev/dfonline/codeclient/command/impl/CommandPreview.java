@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 import static dev.dfonline.codeclient.Utility.componentToText;
 import static dev.dfonline.codeclient.hypercube.HypercubeMiniMessage.MM;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
 
 public class CommandPreview extends Command {
     @Override

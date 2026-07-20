@@ -26,7 +26,7 @@ import java.util.Base64;
 import java.util.Objects;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
 
 public class CommandScanPlot extends TemplateActionCommand {
     @Override
