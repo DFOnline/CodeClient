@@ -1,13 +1,13 @@
 package dev.dfonline.codeclient.mixin.render;
 
 import dev.dfonline.codeclient.dev.SignOutlineRenderer;
-import net.minecraft.client.renderer.blockentity.SignRenderer;
+import net.minecraft.client.renderer.blockentity.StandingSignRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(SignRenderer.class)
+@Mixin(StandingSignRenderer.class)
 public class MSignRenderer {
 
     /*TODO(1.21.8)

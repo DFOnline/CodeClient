@@ -184,7 +184,7 @@ public class RecentValues extends Feature {
                     if (!CodeClient.MC.player.isCreative()) return false;
                     ItemStack previous = CodeClient.MC.player.getInventory().getItem(0);
                     CodeClient.MC.gameMode.handleCreativeModeItemAdd(hoveredItem, 36);
-                    CodeClient.MC.gameMode.handleInventoryMouseClick(
+                    CodeClient.MC.gameMode.handleContainerInput(
                             screen.getMenu().containerId,
                             slot.index, 0, ContainerInput.SWAP, CodeClient.MC.player
                     );

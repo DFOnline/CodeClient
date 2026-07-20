@@ -277,7 +277,7 @@ public class PlaceTemplates extends Action {
         }
 
         public Vec3 pos() {
-            return pos.getCenter();
+            return Vec3.atCenterOf(pos);
         }
 
         public boolean isOpen() {

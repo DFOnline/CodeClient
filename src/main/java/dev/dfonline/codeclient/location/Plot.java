@@ -95,11 +95,11 @@ public abstract class Plot extends Location {
 
 
     public Boolean isInPlot(BlockPos pos) {
-        return isInArea(pos.getCenter()) || isInDev(pos.getCenter());
+        return isInArea(Vec3.atCenterOf(pos)) || isInDev(Vec3.atCenterOf(pos));
     }
 
     public Boolean isInPlot(BlockPos pos, Size size) {
-        return isInArea(pos.getCenter(), size) || isInDev(pos.getCenter(), size);
+        return isInArea(Vec3.atCenterOf(pos), size) || isInDev(Vec3.atCenterOf(pos), size);
     }
 
     /**

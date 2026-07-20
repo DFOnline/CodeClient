@@ -105,7 +105,7 @@ public class NoClip extends Feature {
     @Nullable
     public BlockState replaceBlockAt(BlockPos pos) {
         if (CodeClient.location instanceof Dev plot) {
-            Boolean isInDev = plot.isInDev(pos.getCenter());
+            Boolean isInDev = plot.isInDev(Vec3.atCenterOf(pos));
             if (isInDev == null || !isInDev) return null;
             if (display == null) return null;
             if (pos.getY() == 49) return null;
@@ -115,7 +115,7 @@ public class NoClip extends Feature {
             if (display == LineType.NONE) return null;
             if (display == LineType.LINES && offset % 3 >= 1) return Blocks.AIR.defaultBlockState();
             if (display == LineType.DOUBLE && offset % 3 == 1) return Blocks.AIR.defaultBlockState();
-            return Blocks.RED_STAINED_GLASS.defaultBlockState();
+            return Blocks.STAINED_GLASS.red().defaultBlockState();
         }
         return null;
     }

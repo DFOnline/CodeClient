@@ -179,7 +179,7 @@ public class Icon {
         LOCATION(TextColor.fromLegacyFormat(ChatFormatting.GREEN), "Location", Items.PAPER, Location::new),
         VECTOR(TextColor.fromRgb(0x2AFFAA), "Vector", Items.PRISMARINE_SHARD, Vector::new),
         SOUND(TextColor.fromLegacyFormat(ChatFormatting.BLUE), "Sound", Items.NAUTILUS_SHELL, Sound::new),
-        PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect", Items.WHITE_DYE),
+        PARTICLE(TextColor.fromRgb(0xAA55FF), "Particle Effect", Items.DYE.white()),
         POTION(TextColor.fromRgb(0xFF557F), "Potion Effect", Items.DRAGON_BREATH, Potion::new),
         VARIABLE(TextColor.fromLegacyFormat(ChatFormatting.YELLOW), "Variable", Items.MAGMA_CREAM, Variable::new),
         ANY_TYPE(TextColor.fromRgb(0xFFD47F), "Any Value", Items.POTATO),

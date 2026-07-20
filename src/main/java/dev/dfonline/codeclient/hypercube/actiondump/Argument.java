@@ -36,7 +36,7 @@ public class Argument {
     public ItemStack getItem() {
         Icon.Type type = getType();
         ItemStack item = type == null
-                ? Items.GRAY_DYE.getDefaultInstance()
+                ? Items.DYE.gray().getDefaultInstance()
                 : type.getIcon();
 
         DFItem dfItem = DFItem.of(item);

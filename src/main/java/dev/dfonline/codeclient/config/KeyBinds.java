@@ -106,11 +106,11 @@ public class KeyBinds {
                     if (mc.options.keySprint.isDown()) {
                         var sign = target.offset(-1, 0, 0);
                         if (mc.level.getBlockState(sign).is(Blocks.OAK_WALL_SIGN))
-                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(sign.getCenter(), result.getDirection(), sign, result.isInside()));
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(sign), result.getDirection(), sign, result.isInside()));
                     } else {
                         var chest = target.offset(0, 1, 0);
                         if (mc.level.getBlockState(chest).is(Blocks.CHEST))
-                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(chest.getCenter(), result.getDirection(), chest, result.isInside()));
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(chest), result.getDirection(), chest, result.isInside()));
                     }
                 }
             }

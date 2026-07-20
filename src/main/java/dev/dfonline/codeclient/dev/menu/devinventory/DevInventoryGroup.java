@@ -37,7 +37,7 @@ public class DevInventoryGroup {
     public static final DevInventoryGroup SELECT_OBJECT = new DevInventoryGroup("select_obj", "Select Object", Items.PURPUR_BLOCK.getDefaultInstance(), true).useCodeBlock();
     public static final DevInventoryGroup REPEAT = new DevInventoryGroup("repeat", "Repeat", Items.PRISMARINE.getDefaultInstance(), true).useCodeBlock();
     public static final DevInventoryGroup SOUNDS = new DevInventoryGroup("sound", "Sounds", Items.NAUTILUS_SHELL.getDefaultInstance(), false);
-    public static final DevInventoryGroup PARTICLES = new DevInventoryGroup("particle", "Particles", Items.WHITE_DYE.getDefaultInstance(), false);
+    public static final DevInventoryGroup PARTICLES = new DevInventoryGroup("particle", "Particles", Items.DYE.white().getDefaultInstance(), false);
     public static final DevInventoryGroup POTIONS = new DevInventoryGroup("potion", "Potions", Items.DRAGON_BREATH.getDefaultInstance(), false);
     public static final DevInventoryGroup GAME_VALUES = new DevInventoryGroup("game_value", "Game Values", Items.NAME_TAG.getDefaultInstance(), false);
     public static final DevInventoryGroup SEARCH = new DevInventoryGroup("search", "Search All", Items.COMPASS.getDefaultInstance(), false).useCodeBlock();
