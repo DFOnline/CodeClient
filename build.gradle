@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.13-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -28,19 +28,18 @@ repositories {
 dependencies {
     // To change the versions see the gradle.properties file.
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Fabric API.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
     // YetAnotherConfigLib.
-    modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    implementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
     // ModMenu.
-    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     // Adventure for MiniMessage parsing.
     implementation("net.kyori:adventure-api:${project.adventure_api_version}")
-    modImplementation include("net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}")
+    implementation include("net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}")
 
     // WebSocket for CodeClient API.
     implementation include("org.java-websocket:Java-WebSocket:1.5.3")
@@ -55,7 +54,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = 25
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
     // this fixes some edge cases with special characters not displaying correctly
