@@ -170,12 +170,12 @@ public class Utility {
         LocalPlayer player = CodeClient.MC.player;
         if (player == null) return;
         if (type == null) {
-            player.displayClientMessage(message, false);
+            player.sendSystemMessage(message);
         } else {
-            player.displayClientMessage(net.minecraft.network.chat.Component.empty()
+            player.sendSystemMessage(net.minecraft.network.chat.Component.empty()
                     .append(type.getText())
                     .append(net.minecraft.network.chat.Component.literal(" "))
-                    .append(message), false);
+                    .append(message));
             if (type == ChatType.FAIL) {
                 player.playSound(SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), 2, 0);
             }

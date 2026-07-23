@@ -42,14 +42,14 @@ public class CommandItemData extends Command {
                 return 0;
             }
 
-            player.displayClientMessage(
+            player.sendSystemMessage(
                     Component.literal(" ".repeat(15)).setStyle(Style.EMPTY.withStrikethrough(true).withColor(ChatFormatting.DARK_GRAY))
                             .append(Component.literal(" ").setStyle(Style.EMPTY.withStrikethrough(false).withColor(ChatFormatting.AQUA))
                                     .append(Component.translatable("codeclient.command.itemdata.header", Component.empty().withStyle(ChatFormatting.WHITE).append(item.getHoverName())))
                                     .append(Component.literal(" ")))
-                            .append(" ".repeat(15)), false
+                            .append(" ".repeat(15))
             );
-            player.displayClientMessage(Component.literal(nbt.get().toString()), false);
+            player.sendSystemMessage(Component.literal(nbt.get().toString()));
 
             String unformatted = nbt.get().toString();
 

@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 public class CommandJumpToFreeSpot extends ActionCommand {
     @Override
@@ -22,7 +23,7 @@ public class CommandJumpToFreeSpot extends ActionCommand {
             if (CodeClient.location instanceof Dev dev) {
                 BlockPos freePlacePos = dev.findFreePlacePos(CodeClient.MC.player.blockPosition());
                 if (freePlacePos == null) return -1;
-                CodeClient.currentAction = new GoTo(freePlacePos.getCenter().add(0, -0.5, 0), this::actionCallback);
+                CodeClient.currentAction = new GoTo(Vec3.atBottomCenterOf(freePlacePos), this::actionCallback);
                 CodeClient.currentAction.init();
                 return 0;
             }

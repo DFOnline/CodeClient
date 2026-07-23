@@ -29,14 +29,14 @@ public class CommandDFGive extends Command {
                         .then(argument("count", IntegerArgumentType.integer(1))
                                 .executes(ctx -> {
                                     giveItem(ctx.getArgument("item", ItemInput.class)
-                                                    .createItemStack(1, false),
+                                                    .createItemStack(1),
                                             ctx.getArgument("count", Integer.class));
                                     return 1;
                                 })
                         )
                         .executes(ctx -> {
                             giveItem(ctx.getArgument("item", ItemInput.class)
-                                    .createItemStack(1, false), 1);
+                                    .createItemStack(1), 1);
                             return 1;
                         })
                 )

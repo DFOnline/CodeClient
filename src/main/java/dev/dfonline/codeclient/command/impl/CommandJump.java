@@ -14,6 +14,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class CommandJump extends Command {
                 first = results.keySet().stream().findFirst();
                 if (first.isEmpty()) return; // there is no partial match, so the player doesn't get sent
             }
-            CodeClient.currentAction = new GoTo(first.get().getCenter(), () -> CodeClient.currentAction = new None());
+            CodeClient.currentAction = new GoTo(Vec3.atCenterOf(first.get()), () -> CodeClient.currentAction = new None());
             CodeClient.currentAction.init();
         }
     }

@@ -70,7 +70,7 @@ public class ScanPlot extends Action {
         var player = CodeClient.MC.player.position();
         BlockPos nearest = null;
         for (BlockPos pos : blocks) {
-            if (nearest == null || pos.closerToCenterThan(player, nearest.getCenter().distanceTo(player))) {
+            if (nearest == null || pos.closerToCenterThan(player, Vec3.atCenterOf(nearest).distanceTo(player))) {
                 if (scanned.containsKey(pos) && scanned.get(pos) != null) {
                     continue;
                 }
@@ -88,7 +88,7 @@ public class ScanPlot extends Action {
             callback();
             return;
         }
-        step = new GoTo(block.getCenter().add(goToOffset), () -> {
+        step = new GoTo(Vec3.atCenterOf(block).add(goToOffset), () -> {
             this.step = new PickUpBlock(block, () -> {
                 this.step = null;
 //                next(progress + 1);
@@ -125,7 +125,7 @@ public class ScanPlot extends Action {
             var inter = CodeClient.MC.gameMode;
             boolean sneaky = !player.isShiftKeyDown();
             if (sneaky) net.send(new ServerboundPlayerInputPacket(new Input(false, false, false, false, false, true, false)));
-            inter.useItemOn(player, InteractionHand.MAIN_HAND, new BlockHitResult(this.pos.getCenter(), Direction.UP, this.pos, false));
+            inter.useItemOn(player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(this.pos), Direction.UP, this.pos, false));
             if (sneaky) net.send(new ServerboundPlayerInputPacket(CodeClient.MC.player.getLastSentInput()));
         }
 

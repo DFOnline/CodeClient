@@ -132,7 +132,7 @@ public class ChestPeeker extends Feature {
                 if (container == null)
                     return ItemStack.isSameItem(CodeClient.MC.player.getMainHandItem(), slot.getItem());
                 items.clear();
-                container.nonEmptyItems().forEach(stack -> items.add(stack));
+                container.nonEmptyItems().forEach(stack -> items.add(stack.create()));
 
                 itemsFetched = true;
                 expectingItems = false;
