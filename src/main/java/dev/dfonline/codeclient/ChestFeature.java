@@ -1,6 +1,6 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -16,9 +16,9 @@ public abstract class ChestFeature {
         this.screen = screen;
     }
 
-    public void render(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {}
+    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int x, int y, float delta) {}
 
-    public void drawSlot(GuiGraphics context, Slot slot) {}
+    public void drawSlot(GuiGraphicsExtractor graphics, Slot slot) {}
 
     public ItemStack getHoverStack(Slot instance) {
         return null;

@@ -49,7 +49,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -437,12 +437,12 @@ public class CodeClient implements ClientModInitializer {
         features().forEach(Feature::closeChest);
     }
 
-    public static void onRender(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {
-        chestFeatures().forEach(feat -> feat.render(context, mouseX, mouseY, x, y, delta));
+    public static void onRender(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int x, int y, float delta) {
+        chestFeatures().forEach(feat -> feat.render(graphics, mouseX, mouseY, x, y, delta));
     }
 
-    public static void onDrawSlot(GuiGraphics context, Slot slot) {
-        chestFeatures().forEach(feat -> feat.drawSlot(context, slot));
+    public static void onDrawSlot(GuiGraphicsExtractor graphics, Slot slot) {
+        chestFeatures().forEach(feat -> feat.drawSlot(graphics, slot));
     }
 
     public static ItemStack onGetHoverStack(Slot instance) {

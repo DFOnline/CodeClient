@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.config.preset;
 
 import dev.dfonline.codeclient.config.Config;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -72,12 +72,12 @@ public class ConfigPresetScreen extends Screen {
     }
 
     @Override
-    public void render(final GuiGraphics context, final int mouseX, final int mouseY, final float delta) {
-        super.render(context, mouseX, mouseY, delta);
+    public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         final int titleY = this.height / 6;
         final Component title = Component.translatable("screen.codeclient.config_preset.title");
-        context.drawCenteredString(this.font, title, this.width / 2, titleY, 0xFFFFFFFF);
+        graphics.centeredText(this.font, title, this.width / 2, titleY, 0xFFFFFFFF);
 
         final boolean firstRun = !Config.getConfig().HasSelectedPreset;
         final Component mainSubtitle = firstRun
@@ -88,18 +88,18 @@ public class ConfigPresetScreen extends Screen {
                 : Component.empty();
 
         final int textY = titleY + 20;
-        context.drawCenteredString(this.font, mainSubtitle, this.width / 2, textY, 0xFFA0E6FF);
+        graphics.centeredText(this.font, mainSubtitle, this.width / 2, textY, 0xFFA0E6FF);
 
         if (!secondarySubtitle.getString().isEmpty()) {
-            context.drawCenteredString(this.font, secondarySubtitle, this.width / 2, textY + 12, 0xFFA0E6FF);
-            context.drawCenteredString(this.font, Component.translatable("screen.codeclient.config_preset.hover_hint"), this.width / 2, textY + 24, 0xFFCCCCCC);
+            graphics.centeredText(this.font, secondarySubtitle, this.width / 2, textY + 12, 0xFFA0E6FF);
+            graphics.centeredText(this.font, Component.translatable("screen.codeclient.config_preset.hover_hint"), this.width / 2, textY + 24, 0xFFCCCCCC);
         } else {
-            context.drawCenteredString(this.font, Component.translatable("screen.codeclient.config_preset.hover_hint"), this.width / 2, textY + 12, 0xFFCCCCCC);
+            graphics.centeredText(this.font, Component.translatable("screen.codeclient.config_preset.hover_hint"), this.width / 2, textY + 12, 0xFFCCCCCC);
         }
 
         if (!firstRun) {
             final Component warning = Component.translatable("screen.codeclient.config_preset.warning");
-            context.drawCenteredString(this.font, warning, this.width / 2, this.height / 3, 0xFFFF5555);
+            graphics.centeredText(this.font, warning, this.width / 2, this.height / 3, 0xFFFF5555);
         }
     }
 }

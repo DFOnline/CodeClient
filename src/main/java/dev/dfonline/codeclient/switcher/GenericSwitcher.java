@@ -1,10 +1,9 @@
 package dev.dfonline.codeclient.switcher;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
@@ -74,12 +73,12 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         if (checkFinished()) return;
         int centerX = this.width / 2 - 62;
         int centerY = this.height / 2 - 31 - 27;
-        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, centerX, centerY, 0, 0, 125, 75, 128, 128);
-        super.render(context, mouseX, mouseY, delta);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, centerX, centerY, 0, 0, 125, 75, 128, 128);
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         if (lastMouseX == null) lastMouseX = mouseX;
         if (lastMouseY == null) lastMouseY = mouseY;
@@ -93,8 +92,8 @@ public abstract class GenericSwitcher extends Screen {
         Option selected = getSelected();
         Component selectedText = selected != null ? selected.text : Component.translatable("codeclient.switcher.select");
 
-        context.drawCenteredString(this.font, selectedText, this.width / 2, this.height / 2 - 51, CommonColors.WHITE);
-        context.drawCenteredString(this.font, footer, this.width / 2, this.height / 2 + 5, CommonColors.WHITE);
+        graphics.centeredText(this.font, selectedText, this.width / 2, this.height / 2 - 51, CommonColors.WHITE);
+        graphics.centeredText(this.font, footer, this.width / 2, this.height / 2 + 5, CommonColors.WHITE);
 
         int i = 0;
 
@@ -103,15 +102,16 @@ public abstract class GenericSwitcher extends Screen {
                 if (button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
             }
             button.selected = this.selected == i;
-            context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
             if (button.selected)
-                context.blitSprite(RenderPipelines.GUI_TEXTURED, SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
-            button.render(context, mouseX, mouseY, delta);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
+            button.extractRenderState(graphics, mouseX, mouseY, delta);
             ++i;
         }
     }
 
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    @Override
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
     }
 
     @Override
@@ -194,16 +194,16 @@ public abstract class GenericSwitcher extends Screen {
         }
 
         @Override
-        public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-//            context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
-            context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
+        protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+//            graphics.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
 
-            context.renderItem(option.icon, this.getX() + 5, this.getY() + 5);
-            context.renderItemDecorations(font, option.icon, this.getX() + 5, this.getY() + 5);
+            graphics.item(option.icon, this.getX() + 5, this.getY() + 5);
+            graphics.itemDecorations(font, option.icon, this.getX() + 5, this.getY() + 5);
 
             if (selected) {
-//                context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
-                context.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 26, 75, 26, 26, 128, 128);
+//                graphics.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 26, 75, 26, 26, 128, 128);
             }
         }
 

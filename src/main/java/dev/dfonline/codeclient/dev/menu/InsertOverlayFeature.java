@@ -10,12 +10,12 @@ import dev.dfonline.codeclient.dev.menu.customchest.CustomChestField;
 import dev.dfonline.codeclient.dev.menu.customchest.CustomChestMenu;
 import dev.dfonline.codeclient.hypercube.item.*;
 import dev.dfonline.codeclient.hypercube.item.Number;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
@@ -62,12 +62,13 @@ public class InsertOverlayFeature extends Feature {
             return selectedSlot != null;
         }
 
+
         @Override
-        public void render(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {
+        public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int x, int y, float delta) {
             screenX = x;
             screenY = y;
             if (overlayOpen())
-                selectedSlot.render(context, mouseX, mouseY);
+                selectedSlot.extractRenderState(graphics, mouseX, mouseY);
         }
 
         @Override
@@ -167,7 +168,7 @@ public class InsertOverlayFeature extends Feature {
                 var mc = CodeClient.MC;
                 var manager = mc.gameMode;
                 if (manager == null || mc.getConnection() == null) return;
-                var currentScreen = mc.screen;
+                var currentScreen = mc.gui.screen();
                 if (currentScreen instanceof AbstractContainerScreen<?> handledScreen) {
                     var player = mc.player;
                     var sync = handledScreen.getMenu().containerId;
@@ -187,14 +188,14 @@ public class InsertOverlayFeature extends Feature {
                 this.close.run();
             }
 
-            public void render(GuiGraphics context, int mouseX, int mouseY) {
-//                context.getMatrices().translate(0.0F, 0.0F, 900.0F);
-                context.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("recipe_book/overlay_recipe"), x, y, width, height);
+            public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+//                graphics.getMatrices().translate(0.0F, 0.0F, 900.0F);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("recipe_book/overlay_recipe"), x, y, width, height);
                 if (field != null) {
-                    field.render(context, mouseX, mouseY, 0);
+                    field.extractRenderState(graphics, mouseX, mouseY, 0);
                 } else {
                     for (var option : options) {
-                        context.renderItem(option.type, option.x, option.y);
+                        graphics.item(option.type, option.x, option.y);
                     }
                 }
 //                new Identifier("recipe_book/crafting_overlay_highlighted")

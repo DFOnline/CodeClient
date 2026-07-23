@@ -12,7 +12,7 @@ import dev.dfonline.codeclient.hypercube.actiondump.Searchable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeInventoryListener;
@@ -74,8 +74,8 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 
 //        super(player, FeatureSet.empty(), CodeClient.MC.options.getOperatorItemsTab().getValue());
         player.containerMenu = this.menu;
-        this.imageHeight = 136;
-        this.imageWidth = 195;
+//        this.imageHeight = 136;
+//        this.imageWidth = 195;
     }
 
     public void containerTick() {
@@ -172,10 +172,12 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 //    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
 //    }
 
-    protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
+
+    @Override
+    protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
         if (itemGroup != DevInventoryGroup.INVENTORY) {
-            context.drawString(this.font, itemGroup.getName(), 8, 6, CommonColors.DARK_GRAY, false);
+            graphics.text(this.font, itemGroup.getName(), 8, 6, CommonColors.DARK_GRAY, false);
         }
     }
 
@@ -291,21 +293,21 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
         }
     }
 
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context, mouseX, mouseY, delta);
-        super.render(context, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        this.extractBackground(graphics, mouseX, mouseY, delta);
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         Integer hoveredGroup = getGroupFromMouse(mouseX, mouseY);
         if (hoveredGroup != null) {
             DevInventoryGroup group = GROUPS[hoveredGroup];
-            context.setTooltipForNextFrame(font, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
         }
 
         if (this.deleteItemSlot != null && this.isHovering(this.deleteItemSlot.x, this.deleteItemSlot.y, 16, 16, mouseX, mouseY)) {
-            context.setTooltipForNextFrame(font, DELETE_ITEM_SLOT_TEXT, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, DELETE_ITEM_SLOT_TEXT, mouseX, mouseY);
         }
 
-        this.renderTooltip(context, mouseX, mouseY);
+        this.extractTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
@@ -376,32 +378,33 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
         return super.keyPressed(input);
     }
 
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    @Override
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) { // TODO(26.2): name is very different, test I got the correct one
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
 
         for (DevInventoryGroup group : DevInventoryGroup.GROUPS) {
 //            RenderSystem.setShaderTexture(0, TEXTURE);
-            this.renderTabIcon(context, group);
+            this.renderTabIcon(graphics, group);
         }
 
         String texture = "item_search";
         if (!itemGroup.hasSearchBar()) texture = "items";
         if (itemGroup == INVENTORY) texture = "inventory";
-        context.blit(RenderPipelines.GUI_TEXTURED, CreativeModeTab.createTextureLocation(texture), this.leftPos, this.topPos, 0.0f, 0.0f, this.imageWidth, this.imageHeight, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CreativeModeTab.createTextureLocation(texture), this.leftPos, this.topPos, 0.0f, 0.0f, this.imageWidth, this.imageHeight, 256, 256);
 //        RenderSystem.setShaderTexture(0, TEXTURE);
-        this.renderTabIcon(context, itemGroup);
+        this.renderTabIcon(graphics, itemGroup);
 
-        if (itemGroup.hasSearchBar()) this.searchBox.render(context, mouseX, mouseY, delta);
+        if (itemGroup.hasSearchBar()) this.searchBox.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
         if (itemGroup != INVENTORY) {
             int scrollbarX = this.leftPos + 175;
             int scrollbarY = this.topPos + 18;
             if (scrollHeight == 0)
-                context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX, scrollbarY, 244, 0, 12, 15, 256, 256);
             else
-                context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15, 256, 256);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, scrollbarX, scrollbarY + (95 * (int) (this.scrollPosition * 9) / (scrollHeight)), 232, 0, 12, 15, 256, 256);
         } else {
             if (this.minecraft != null && this.minecraft.player != null)
-                InventoryScreen.renderEntityInInventoryFollowsMouse(context, this.leftPos + 73, this.topPos + 6, this.leftPos + 105, this.topPos + 49, 20, 0.0625F, (float) mouseX, (float) mouseY, this.minecraft.player);
+                InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, this.leftPos + 73, this.topPos + 6, this.leftPos + 105, this.topPos + 49, 20, 0.0625F, (float) mouseX, (float) mouseY, this.minecraft.player);
         }
     }
 
@@ -413,7 +416,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
                 && mouseY >= y && mouseY <= (y + TAB_HEIGHT);
     }
 
-    protected void renderTabIcon(GuiGraphics context, DevInventoryGroup group) {
+    protected void renderTabIcon(GuiGraphicsExtractor graphics, DevInventoryGroup group) {
         boolean isSelected = group.getIndex() == selectedTab;
         boolean isTopRow = group.isTopHalf();
         int column = group.getColumn();
@@ -424,12 +427,12 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
         if (isSelected) mapY += 32;
         if (!isTopRow) mapY += 64;
 
-        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, originX, originY, mapX, mapY, TAB_WIDTH, 32, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, originX, originY, mapX, mapY, TAB_WIDTH, 32, 256, 256);
 //        this.itemRenderer.zOffset = 100.0F;
         originX += 6;
         originY += 8 + (isTopRow ? 2 : -2);
         ItemStack itemStack = group.getIcon();
-        context.renderItem(itemStack, originX, originY);
+        graphics.item(itemStack, originX, originY);
 //        this.itemRenderer.zOffset = 0.0F;
     }
 

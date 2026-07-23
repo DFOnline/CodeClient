@@ -14,7 +14,7 @@ import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.location.Dev;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -133,12 +133,12 @@ public class RecentValues extends Feature {
         }
 
         @Override
-        public void render(GuiGraphics context, int mouseX, int mouseY, int screenX, int screenY, float delta) {
+        public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int screenX, int screenY, float delta) {
             hoveredItem = null;
             if(recent.isEmpty() && pinned.isEmpty()) return;
             int xEnd = 16 * 20;
 
-            context.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("recipe_book/overlay_recipe"), -screenX + 6, -5,
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("recipe_book/overlay_recipe"), -screenX + 6, -5,
                     Math.min(Math.max(pinned.size(), recent.size()), 16) * 20 + 10,
                     (((int) Math.ceil((double) pinned.size() / 16)) + ((int) Math.ceil((double) recent.size() / 16))) * 16 + 10
             );
@@ -150,10 +150,10 @@ public class RecentValues extends Feature {
                 int x = 13;
                 for (ItemStack item : group) {
                     if (item == null) continue;
-                    context.renderItem(item, x - screenX, y - screenY);
-                    context.renderItemDecorations(CodeClient.MC.font, item, x - screenX, y - screenY);
+                    graphics.item(item, x - screenX, y - screenY);
+                    graphics.itemDecorations(CodeClient.MC.font, item, x - screenX, y - screenY);
                     if (mouseX > x && mouseY > y && mouseX < x + 15 && mouseY < y + 15) {
-                        context.setTooltipForNextFrame(CodeClient.MC.font, item, mouseX, mouseY);
+                        graphics.setTooltipForNextFrame(CodeClient.MC.font, item, mouseX, mouseY);
                         hoveredItem = item;
                         hoveredOrigin = group;
                     }

@@ -11,7 +11,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.FormattedCharSink;
@@ -309,14 +309,14 @@ public class ExpressionHighlighter extends Feature {
     }
 
     // draws the preview above the chat bar
-    public void draw(GuiGraphics context, int mouseX, int mouseY, FormattedCharSequence input) {
+    public void draw(GuiGraphicsExtractor graphics, int mouseX, int mouseY, FormattedCharSequence input) {
         Font renderer = CodeClient.MC.font;
 
         var screen = CodeClient.MC.gui.screen();
         if (screen == null) return;
 
         int y = screen.height - 25;
-        context.drawString(renderer, input, 4, y,0xffffff);
+        graphics.text(renderer, input, 4, y,0xffffff);
     }
 
     private enum CommandType {

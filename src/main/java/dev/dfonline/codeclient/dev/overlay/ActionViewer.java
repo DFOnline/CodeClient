@@ -10,13 +10,13 @@ import dev.dfonline.codeclient.hypercube.ReferenceBook;
 import dev.dfonline.codeclient.hypercube.actiondump.Action;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
 import java.util.Iterator;
 import java.util.List;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -92,14 +92,14 @@ public class ActionViewer extends Feature {
         }
 
         @Override
-        public void render(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {
+        public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int x, int y, float delta) {
             var text = getOverlayText();
             if (text == null) return;
 
             positioner.setMousePosition(mouseX, mouseY); // I would pass these through like normal, but draw tooltip might be moved to a utility class in the future.
 
             var z = hover ? 500 : 300;
-            drawTooltip(context, screen, transformText(text), 176, scroll, z);
+            drawTooltip(graphics, screen, transformText(text), 176, scroll, z);
         }
 
         @Override
@@ -121,7 +121,7 @@ public class ActionViewer extends Feature {
 
         // this implementation of draw tooltip allows a change in the z-index of the rendered tooltip.
         // z appears to be completely useless with the changes I had to make for 1.21.8
-        private void drawTooltip(GuiGraphics context, AbstractContainerScreen<?> handledScreen, List<ClientTooltipComponent> components, int x, int y, int z) {
+        private void drawTooltip(GuiGraphicsExtractor graphics, AbstractContainerScreen<?> handledScreen, List<ClientTooltipComponent> components, int x, int y, int z) {
             var textRenderer = CodeClient.MC.font;
 
             if (handledScreen instanceof CustomChestMenu menu) {
@@ -146,25 +146,25 @@ public class ActionViewer extends Feature {
                     tooltipWidth = width;
                 }
             }
-            Vector2ic vector = positioner.positionTooltip(context.guiWidth(), context.guiHeight(), x, y, tooltipWidth, tooltipHeight);
-//            context.getMatrices().push();
+            Vector2ic vector = positioner.positionTooltip(graphics.guiWidth(), graphics.guiHeight(), x, y, tooltipWidth, tooltipHeight);
+//            graphics.getMatrices().push();
 
             var finalWidth = tooltipWidth;
             var finalHeight = tooltipHeight;
-//            context.draw((vertexConsumer) -> );
-            TooltipRenderUtil.renderTooltipBackground(context, vector.x(), vector.y(), finalWidth, finalHeight, null);
-//            context.getMatrices().translate(0.0F, 0.0F, (float) z);
+//            graphics.draw((vertexConsumer) -> );
+            TooltipRenderUtil.extractTooltipBackground(graphics, vector.x(), vector.y(), finalWidth, finalHeight, null);
+//            graphics.getMatrices().translate(0.0F, 0.0F, (float) z);
 
             int textY = vector.y();
             for (int index = 0; index < components.size(); ++index) {
                 tooltipComponent = components.get(index);
                 ClientTooltipComponent finalTooltipComponent = tooltipComponent;
-//                context.draw(consumer -> );
-                finalTooltipComponent.renderText(context, textRenderer, vector.x(), textY);
+//                graphics.draw(consumer -> );
+                finalTooltipComponent.extractText(graphics, textRenderer, vector.x(), textY);
                 textY += tooltipComponent.getHeight(textRenderer) + (index == 0 ? 2 : 0);
             }
 
-//            context.getMatrices().pop();
+//            graphics.getMatrices().pop();
         }
 
         private class ActionTooltipPositioner implements ClientTooltipPositioner {

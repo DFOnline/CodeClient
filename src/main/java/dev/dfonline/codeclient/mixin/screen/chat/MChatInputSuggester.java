@@ -3,6 +3,7 @@ package dev.dfonline.codeclient.mixin.screen.chat;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.highlighter.ExpressionHighlighter;
 import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.apache.commons.lang3.IntegerRange;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.util.FormattedCharSequence;
@@ -45,12 +45,12 @@ public class MChatInputSuggester {
         });
     }
 
-    @Inject(method = "render", at = @At("HEAD"))
-    private void renderPreview(GuiGraphics context, int mouseX, int mouseY, CallbackInfo ci) {
+    @Inject(method = "extractRenderState", at = @At("HEAD"))
+    private void renderPreview(GuiGraphicsExtractor graphics, int mouseX, int mouseY, CallbackInfo ci) {
         CodeClient.getFeature(ExpressionHighlighter.class).ifPresent((action) -> {
             if (!action.enabled() || !(CodeClient.location instanceof Dev) || preview == null) return;
 
-            action.draw(context, mouseX, mouseY, preview);
+            action.draw(graphics, mouseX, mouseY, preview);
             preview = null; // prevents a preview from showing if the player deletes all text
         });
     }

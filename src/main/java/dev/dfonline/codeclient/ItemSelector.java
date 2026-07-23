@@ -3,7 +3,7 @@ package dev.dfonline.codeclient;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -67,12 +67,12 @@ public class ItemSelector extends AbstractWidget {
 
 
     @Override
-    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        search.renderWidget(context, mouseX, mouseY, delta);
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        search.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
         int i = 0;
         while (i < maxItems && i != items.size()) {
             var item = items.get(i);
-            context.renderItem(item.item,
+            graphics.item(item.item,
                     this.getX() + item.x,
                     this.getY() + item.y
             );
@@ -82,7 +82,7 @@ public class ItemSelector extends AbstractWidget {
                             mouseY - this.getY() - screenY > item.y &&
                             mouseY - this.getY() - screenY < item.y + itemSize
             ) {
-                context.setTooltipForNextFrame(textRenderer, item.item, mouseX, mouseY);
+                graphics.setTooltipForNextFrame(textRenderer, item.item, mouseX, mouseY);
             }
             i++;
         }

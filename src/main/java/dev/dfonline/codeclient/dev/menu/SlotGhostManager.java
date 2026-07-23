@@ -11,11 +11,11 @@ import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Argument;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
 import dev.dfonline.codeclient.location.Dev;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
@@ -74,7 +74,7 @@ public class SlotGhostManager extends Feature {
         }
 
         @Override
-        public void render(GuiGraphics context, int mouseX, int mouseY, int x, int y, float delta) {
+        public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int x, int y, float delta) {
             if (!CodeClient.MC.hasControlDown()) {
                 time += delta;
             }
@@ -94,7 +94,7 @@ public class SlotGhostManager extends Feature {
             return args.get(slot.getContainerSlot());
         }
 
-        public void drawSlot(GuiGraphics context, Slot slot) {
+        public void drawSlot(GuiGraphicsExtractor graphics, Slot slot) {
             if (!(CodeClient.MC.gui.screen() instanceof ContainerScreen || CodeClient.MC.gui.screen() instanceof CustomChestMenu)) {
                 action = null;
             }
@@ -106,10 +106,10 @@ public class SlotGhostManager extends Feature {
             ItemStack itemStack = arg.getItem();
 
             if (itemStack.isEmpty()) return;
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0xA0__90_90_FF : 0x60__FF_00_00);
-            context.renderItem(itemStack, slot.x, slot.y);
-            context.renderItemDecorations(CodeClient.MC.font, itemStack, slot.x, slot.y);
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40_FFFFFF);
+            graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, arg.optional ? 0xA0__90_90_FF : 0x60__FF_00_00);
+            graphics.item(itemStack, slot.x, slot.y);
+            graphics.itemDecorations(CodeClient.MC.font, itemStack, slot.x, slot.y);
+            graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, 0x40_FFFFFF);
         }
 
         @Override @Nullable

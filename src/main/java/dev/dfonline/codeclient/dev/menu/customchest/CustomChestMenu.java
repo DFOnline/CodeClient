@@ -6,12 +6,12 @@ import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.StringWidget;
@@ -56,8 +56,8 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
         Size = handler.numbers;
         this.titleLabelY = 4;
         this.inventoryLabelY = 123;
-        this.imageHeight = Size.MENU_HEIGHT;
-        this.imageWidth = Size.MENU_WIDTH;
+//        this.imageHeight = Size.MENU_HEIGHT;
+//        this.imageWidth = Size.MENU_WIDTH;
     }
 
     @Override
@@ -76,13 +76,13 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        context.pose().pushMatrix();
-        context.pose().translate(this.leftPos, this.topPos);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(this.leftPos, this.topPos);
         for (LayoutElement widget : widgets.values()) {
             if (widget instanceof Renderable drawable) {
-                drawable.render(context, mouseX - this.leftPos, mouseY - this.topPos, delta);
+                drawable.extractRenderState(graphics, mouseX - this.leftPos, mouseY - this.topPos, delta);
             }
         }
         List<Slot> subList = this.getMenu().slots.subList((int) scroll, (int) scroll + Size.SLOTS);
@@ -105,24 +105,24 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
                 ) {
                     hoveredSlot = slot;
 
-                    context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_TEXTURE, x-4, y-4, 24, 24); // draw back
-                    renderSlot(context, new Slot(slot.container, slot.index, x, y), mouseX, mouseY);
-                    context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_TEXTURE, x-4, y-4, 24, 24); // draw front
+                    graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_TEXTURE, x-4, y-4, 24, 24); // draw back
+                    extractSlot(graphics, new Slot(slot.container, slot.index, x, y), mouseX, mouseY);
+                    graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_TEXTURE, x-4, y-4, 24, 24); // draw front
 
-                    //drawSlotHighlight(context, x, y, -10);
+                    //drawSlotHighlight(graphics, x, y, -10);
                 } else {
-                    renderSlot(context, new Slot(slot.container, slot.index, x, y), mouseX, mouseY);
+                    extractSlot(graphics, new Slot(slot.container, slot.index, x, y), mouseX, mouseY);
                 }
             } else {
-                context.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, x - 1, y - 1, Size.DISABLED_X, 0, 18, 18, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
             }
         }
 
         if (hoveredSlot != null) {
             if (hoveredSlot.hasItem())
-                context.setTooltipForNextFrame(font, hoveredSlot.getItem(), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(font, hoveredSlot.getItem(), mouseX, mouseY);
         }
-        context.pose().popMatrix();
+        graphics.pose().popMatrix();
     }
 
     public void update() {
@@ -375,16 +375,16 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
-//        context.getMatrices().push();
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) { // TODO(26.2): name is very different, test I got the correct one
+//        graphics.getMatrices().push();
 //        RenderSystem.enableBlend();
         int centerX = this.width / 2 - (Size.MENU_WIDTH / 2);
         int centerY = this.height / 2 - (Size.MENU_HEIGHT / 2);
-        context.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, centerX, centerY, 0, 0, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE, centerX, centerY, 0, 0, Size.MENU_WIDTH, Size.MENU_HEIGHT, Size.TEXTURE_WIDTH, Size.TEXTURE_HEIGHT);
 
         boolean disabled = false;
         float scrollProgress = (float) scroll / (27 - Size.WIDGETS);
-        context.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE,
+        graphics.blit(RenderPipelines.GUI_TEXTURED, Size.TEXTURE,
                 centerX + Size.SCROLL_POS_X,
                 (int) (centerY + Size.SCROLL_POS_Y + scrollProgress * (Size.SCROLL_ROOM - Size.SCROLL_HEIGHT)),
                 (disabled ? Size.MENU_WIDTH + Size.SCROLL_WIDTH : Size.MENU_WIDTH),
@@ -395,11 +395,11 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
                 Size.TEXTURE_HEIGHT
         );
 
-//        context.getMatrices().pop();
+//        graphics.getMatrices().pop();
     }
 
     @Override
-    protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
-//        super.drawForeground(context, mouseX, mouseY);
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+//        super.drawForeground(graphics, mouseX, mouseY);
     }
 }

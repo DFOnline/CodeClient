@@ -10,6 +10,8 @@ import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.dev.overlay.ChestPeeker;
 import dev.dfonline.codeclient.dev.overlay.SignPeeker;
 import dev.dfonline.codeclient.hypercube.item.Scope;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,8 +24,6 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
@@ -32,16 +32,16 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.item.ItemStack;
 
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public abstract class MInGameHud {
 
     @Shadow
     public abstract Font getFont();
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderHotbarAndDecorations(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"))
-    private void onRender(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
-        int scaledWidth = context.guiWidth();
-        int scaledHeight = context.guiHeight();
+    @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Hud;extractHotbarAndDecorations(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V"))
+    private void onRender(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        int scaledWidth = graphics.guiWidth();
+        int scaledHeight = graphics.guiHeight();
 
         Font textRenderer = getFont();
 
@@ -57,7 +57,7 @@ public abstract class MInGameHud {
         if (!overlay.isEmpty()) {
             int index = 0;
             for (Component text : overlay) {
-                context.drawString(textRenderer, Objects.requireNonNullElseGet(text, () -> Component.literal("NULL")), 30, 30 + (index * 9), -1);
+                graphics.text(textRenderer, Objects.requireNonNullElseGet(text, () -> Component.literal("NULL")), 30, 30 + (index * 9), -1);
                 index++;
             }
         }
@@ -72,7 +72,7 @@ public abstract class MInGameHud {
                 case TOP_LEFT, TOP_RIGHT -> margin;
                 case BOTTOM_LEFT, BOTTOM_RIGHT -> scaledHeight - margin - 3;
             };
-            context.drawString(textRenderer, cpuUsage, x, y, -1);
+            graphics.text(textRenderer, cpuUsage, x, y, -1);
         }
         int x = (scaledWidth / 2) + Config.getConfig().ChestPeekerX;
         int yOrig = (scaledHeight / 2) + Config.getConfig().ChestPeekerY;
@@ -81,11 +81,11 @@ public abstract class MInGameHud {
                     .map(ChestPeeker::getOverlayText).orElse(null);
             if (peeker == null || peeker.isEmpty()) peeker = SignPeeker.getOverlayText();
             if (peeker != null && !peeker.isEmpty()) {
-                context.renderTooltip(textRenderer, peeker.stream().map(text -> ClientTooltipComponent.create(text.getVisualOrderText())).toList(), x, yOrig, DefaultTooltipPositioner.INSTANCE, null);
+                graphics.tooltip(textRenderer, peeker.stream().map(text -> ClientTooltipComponent.create(text.getVisualOrderText())).toList(), x, yOrig, DefaultTooltipPositioner.INSTANCE, null);
 //                context.renderTooltip();
             }
         } catch (Exception ignored) {
-            context.setTooltipForNextFrame(textRenderer, Component.literal("An error occurred"), x, yOrig);
+            graphics.setTooltipForNextFrame(textRenderer, Component.literal("An error occurred"), x, yOrig);
 
         }
     }
@@ -95,8 +95,8 @@ public abstract class MInGameHud {
 
     @Shadow private int toolHighlightTimer;
 
-    @Inject(method = "renderSelectedItemName", at = @At(value = "HEAD"), cancellable = true)
-    public void renderHeldItemTooltip(GuiGraphics context, CallbackInfo ci) {
+    @Inject(method = "extractSelectedItemName", at = @At(value = "HEAD"), cancellable = true)
+    public void renderHeldItemTooltip(GuiGraphicsExtractor graphics, CallbackInfo ci) {
 
         if (!Config.getConfig().ShowVariableScopeBelowName) return;
         DFItem dfItem = DFItem.of(lastToolHighlight);
@@ -104,8 +104,8 @@ public abstract class MInGameHud {
         Optional<String> varItem = dfItem.getHypercubeStringValue("varitem");
         if (varItem.isEmpty()) return;
 
-        int scaledWidth = context.guiWidth();
-        int scaledHeight = context.guiHeight();
+        int scaledWidth = graphics.guiWidth();
+        int scaledHeight = graphics.guiHeight();
 
         try {
             JsonObject varItemJson = JsonParser.parseString(varItem.get()).getAsJsonObject();
@@ -123,8 +123,8 @@ public abstract class MInGameHud {
                 Component nameText = Component.literal(varName.getAsString());
                 int x1 = (scaledWidth - getFont().width(nameText)) / 2;
                 int y1 = scaledHeight - 45;
-                context.drawString(getFont(), nameText, x1, y1, 0xffffff);
-                context.drawStringWithBackdrop(this.getFont(), nameText, x1, y1, 0xffffff, ARGB.color(255, CommonColors.WHITE));
+                graphics.text(getFont(), nameText, x1, y1, 0xffffff);
+                graphics.textWithBackdrop(this.getFont(), nameText, x1, y1, 0xffffff, ARGB.color(255, CommonColors.WHITE));
 
                 // Render variable scope, if this throws an exception it can only
                 // mean Scope.valueOf() failed, as such the scope is invalid.
@@ -132,8 +132,8 @@ public abstract class MInGameHud {
                     Scope scope = Scope.valueOf(varItemJson.getAsJsonObject("data").get("scope").getAsString());
                     int x2 = (scaledWidth - getFont().width(scope.longName)) / 2;
                     int y2 = scaledHeight - 35;
-                    context.drawString(getFont(), Component.literal(scope.longName).withStyle(Style.EMPTY.withColor(scope.color)), x2, y2, 0xffffff);
-                    context.drawStringWithBackdrop(this.getFont(),
+                    graphics.text(getFont(), Component.literal(scope.longName).withStyle(Style.EMPTY.withColor(scope.color)), x2, y2, 0xffffff);
+                    graphics.textWithBackdrop(this.getFont(),
                             Component.literal(scope.longName).withStyle(Style.EMPTY.withColor(scope.color)),
                             x2,
                             y2,

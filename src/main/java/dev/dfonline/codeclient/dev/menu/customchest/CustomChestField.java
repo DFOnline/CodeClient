@@ -4,16 +4,15 @@ import com.google.common.primitives.Doubles;
 import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.item.*;
 import dev.dfonline.codeclient.hypercube.item.Number;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -249,9 +248,9 @@ public class CustomChestField<ItemType extends VarItem> extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         for (var widget : widgets) {
-            widget.render(context, mouseX, mouseY, delta);
+            widget.extractRenderState(graphics, mouseX, mouseY, delta);
         }
     }
 

@@ -2,7 +2,7 @@ package dev.dfonline.codeclient.mixin.screen;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.InteractionManager;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
@@ -24,9 +24,9 @@ public abstract class MHandledScreen {
 
     @Shadow @Final protected AbstractContainerMenu menu;
 
-    @Inject(method = "renderSlot", at = @At("TAIL"))
-    private void drawSlot(GuiGraphics context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
-        CodeClient.onDrawSlot(context,slot);
+    @Inject(method = "extractSlot", at = @At("TAIL"))
+    private void drawSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+        CodeClient.onDrawSlot(graphics,slot);
     }
 
     @Inject(method = "init", at = @At("TAIL"))
@@ -39,18 +39,18 @@ public abstract class MHandledScreen {
         CodeClient.onScreenClosed();
     }
 
-    @Inject(method = "renderContents", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix3x2fStack;popMatrix()Lorg/joml/Matrix3x2fStack;"))
-    private void render(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        CodeClient.onRender(context,mouseX,mouseY,this.leftPos,this.topPos,delta);
+    @Inject(method = "extractContents", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix3x2fStack;popMatrix()Lorg/joml/Matrix3x2fStack;"))
+    private void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        CodeClient.onRender(graphics,mouseX,mouseY,this.leftPos,this.topPos,delta);
     }
 
-    @Redirect(method = "renderTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;hasItem()Z"))
+    @Redirect(method = "extractTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;hasItem()Z"))
     private boolean hasStack(Slot instance) {
         ItemStack hover = CodeClient.onGetHoverStack(instance);
         return (hover != null && !hover.isEmpty()) || instance.hasItem();
     }
 
-    @Redirect(method = "renderTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;getItem()Lnet/minecraft/world/item/ItemStack;"))
+    @Redirect(method = "extractTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;getItem()Lnet/minecraft/world/item/ItemStack;"))
     private ItemStack getStack(Slot instance) {
         ItemStack hover = CodeClient.onGetHoverStack(instance);
         return hover == null || hover.isEmpty() ? instance.getItem() : hover;

@@ -1,7 +1,7 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
 import dev.dfonline.codeclient.CodeClient;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -29,16 +29,16 @@ public class FakeSlot extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {/*TODO(1.21.8)
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX(), this.getY(), 0, 0, this.width, this.height, 18, 18);
-        context.drawItem(item, this.getX() + 1, this.getY() + 1);
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {/*TODO(1.21.8)
+        graphics.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX(), this.getY(), 0, 0, this.width, this.height, 18, 18);
+        graphics.drawItem(item, this.getX() + 1, this.getY() + 1);
         if (this.isMouseOver(mouseX, mouseY)) {
             if (CodeClient.MC.currentScreen instanceof GenericContainerScreen sc) {
-                context.getMatrices().push();
-                context.getMatrices().translate(mouseX, mouseY, 0.0F);
+                graphics.getMatrices().push();
+                graphics.getMatrices().translate(mouseX, mouseY, 0.0F);
                 // FIXMe: remnder
             }
-            context.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX, mouseY);
+            graphics.drawItemTooltip(CodeClient.MC.textRenderer, item, mouseX, mouseY);
         }*/
     }
 
