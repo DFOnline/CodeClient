@@ -29,7 +29,6 @@ public class CommandManager {
             new CommandSave(),
             new CommandScanFor(),
             new CommandScanPlot(),
-            new CommandSearch(),
             new CommandSwap(),
             new CommandTemplatePlacer(),
             new CommandWidthDump(),
