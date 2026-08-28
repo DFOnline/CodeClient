@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.dev.menu.devinventory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
@@ -69,7 +70,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
     private boolean scrolling = false;
 
     public DevInventoryScreen(LocalPlayer player) {
-        super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
+        super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY, 195, 136);
 
 
 //        super(player, FeatureSet.empty(), CodeClient.MC.options.getOperatorItemsTab().getValue());
@@ -232,6 +233,8 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
         searchBox.setValue("");
         DevInventoryGroup group = GROUPS[tab];
         searchBox.active = group.hasSearchBar();
+        searchBox.setVisible(group.hasSearchBar());
+        if (!group.hasSearchBar()) searchBox.setFocused(false);
 
         selectedTab = tab;
 
@@ -294,13 +297,15 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
     }
 
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        this.extractBackground(graphics, mouseX, mouseY, delta);
         super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         Integer hoveredGroup = getGroupFromMouse(mouseX, mouseY);
         if (hoveredGroup != null) {
             DevInventoryGroup group = GROUPS[hoveredGroup];
-            graphics.setTooltipForNextFrame(font, GROUPS[hoveredGroup].getName(), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, group.getName(), mouseX, mouseY);
+            if (hoveredGroup != selectedTab) {
+                graphics.requestCursor(CursorTypes.POINTING_HAND);
+            }
         }
 
         if (this.deleteItemSlot != null && this.isHovering(this.deleteItemSlot.x, this.deleteItemSlot.y, 16, 16, mouseX, mouseY)) {
@@ -380,6 +385,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) { // TODO(26.2): name is very different, test I got the correct one
+        super.extractBackground(graphics, mouseX, mouseY, delta);
         DevInventoryGroup itemGroup = DevInventoryGroup.GROUPS[selectedTab];
 
         for (DevInventoryGroup group : DevInventoryGroup.GROUPS) {
@@ -394,7 +400,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 //        RenderSystem.setShaderTexture(0, TEXTURE);
         this.renderTabIcon(graphics, itemGroup);
 
-        if (itemGroup.hasSearchBar()) this.searchBox.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
+        if (itemGroup.hasSearchBar()) this.searchBox.extractRenderState(graphics, mouseX, mouseY, delta);
         if (itemGroup != INVENTORY) {
             int scrollbarX = this.leftPos + 175;
             int scrollbarY = this.topPos + 18;

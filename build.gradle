@@ -6,6 +6,16 @@ plugins {
 version = project.mod_version
 group = project.maven_group
 
+/*
+    Disable DevAuth if you're using a mod
+    like AuthMe instead.
+ */
+boolean devAuth = true;
+
+base {
+    archivesName = project.archives_base_name
+}
+
 repositories {
     // Add repositories to retrieve artifacts from in here.
     // You should only use this when depending on other mods because
@@ -23,6 +33,8 @@ repositories {
     maven {
         url 'https://maven.terraformersmc.com/'
     }
+    // DevAuth
+    maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
 }
 
 dependencies {
@@ -40,6 +52,8 @@ dependencies {
     // Adventure for MiniMessage parsing.
     implementation("net.kyori:adventure-api:${project.adventure_api_version}")
     implementation include("net.kyori:adventure-platform-fabric:${project.adventure_fabric_version}")
+
+    if (devAuth) runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 
     // WebSocket for CodeClient API.
     implementation include("org.java-websocket:Java-WebSocket:1.5.3")
@@ -71,8 +85,6 @@ java {
     if (JavaVersion.current() < javaVersion) {
         toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     }
-//    I did ./gradlew wrapper --gradle-version=9.6.1 and then suddenly I had to remove this line
-//    archivesBaseName = project.archives_base_name
     // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
     // if it is present.
     // If you remove this line, sources will not be generated.
@@ -85,7 +97,7 @@ loom {
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${project.base.archivesName.get()}" }
     }
 }
 

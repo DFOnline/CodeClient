@@ -7,7 +7,6 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
 import net.minecraft.commands.CommandBuildContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,19 +27,19 @@ public class CommandPreview extends Command {
                 .then(
                         literal("actionbar").then(argument("text", StringArgumentType.greedyString()).executes(context -> {
                             if (CodeClient.MC.player == null) return 0;
-                            CodeClient.MC.player.displayClientMessage(componentToText(getText(context)), true);
+                            CodeClient.MC.gui.hud.setOverlayMessage(componentToText(getText(context)), false);
                             return 0;
                         }))
                 ).then(
                         literal("title").then(argument("text", StringArgumentType.greedyString()).executes(context -> {
                             if (CodeClient.MC.player == null) return 0;
-                            CodeClient.MC.player.showTitle(Title.title(getText(context), Component.empty(), Title.DEFAULT_TIMES));
+                            CodeClient.MC.gui.hud.setTitle(componentToText(getText(context)));
                             return 0;
                         }))
                 ).then(
                         literal("subtitle").then(argument("text", StringArgumentType.greedyString()).executes(context -> {
                             if (CodeClient.MC.player == null) return 0;
-                            CodeClient.MC.player.showTitle(Title.title(Component.empty(), getText(context), Title.DEFAULT_TIMES));
+                            CodeClient.MC.gui.hud.setSubtitle(componentToText(getText(context)));
                             return 0;
                         }))
                 );

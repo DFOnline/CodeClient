@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.phys.BlockHitResult;
@@ -33,7 +33,7 @@ public abstract class Feature {
     public boolean onSendPacket(Packet<?> packet) {
         return false;
     }
-    public void render(PoseStack matrices, MultiBufferSource.BufferSource vertexConsumers, double cameraX, double cameraY, double cameraZ) {}
+    public void render(PoseStack matrices, SubmitNodeCollector submitter, double cameraX, double cameraY, double cameraZ) {}
     public void onModeChange(Location location) {}
     public void onClickChest(BlockHitResult hitResult) {}
     /**

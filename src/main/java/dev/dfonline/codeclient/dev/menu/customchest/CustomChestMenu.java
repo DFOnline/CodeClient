@@ -46,13 +46,13 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
     private boolean update = true;
 
     public CustomChestMenu(CustomChestHandler handler, Inventory inventory, Component title) {
-        super(handler, inventory, title);
-        this.menu.inventory.addListener(ignored -> {
+        super(handler, inventory, title, handler.numbers.MENU_WIDTH, handler.numbers.MENU_HEIGHT);
+        this.menu.callback = (_, _, _) -> {
             if(!doNotUpdate) {
                 update();
                 doNotUpdate = false;
             }
-        });
+        };
         Size = handler.numbers;
         this.titleLabelY = 4;
         this.inventoryLabelY = 123;
@@ -187,8 +187,8 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
         List<Slot> subList = this.getMenu().slots.subList((int) scroll, Math.min((int) scroll + Size.SLOTS, 27));
         for (int i = 0; i < subList.size(); i++) {
             var slot = subList.get(i);
-            final int x = 8;
-            final int y = i * 18 - 11 + 25;
+            final int x = Size.SLOT_X + 1;
+            final int y = i * 18 + Size.SLOT_Y + 1;
             var customSlot = new Slot(slot.container, slot.getContainerSlot(), x, y);
             customSlot.index = slot.index;
             double relX = mouseX - this.leftPos;
@@ -376,6 +376,7 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
 
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) { // TODO(26.2): name is very different, test I got the correct one
+        super.extractBackground(graphics, mouseX, mouseY, delta);
 //        graphics.getMatrices().push();
 //        RenderSystem.enableBlend();
         int centerX = this.width / 2 - (Size.MENU_WIDTH / 2);

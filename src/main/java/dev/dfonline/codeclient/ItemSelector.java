@@ -68,7 +68,7 @@ public class ItemSelector extends AbstractWidget {
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        search.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
+        search.extractRenderState(graphics, mouseX, mouseY, delta);
         int i = 0;
         while (i < maxItems && i != items.size()) {
             var item = items.get(i);

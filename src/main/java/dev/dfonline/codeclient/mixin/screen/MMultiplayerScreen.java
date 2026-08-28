@@ -39,12 +39,12 @@ public abstract class MMultiplayerScreen {
 
         if (!matcher.matches()) return;
 
-        CodeClient.MC.getToastManager().addToast(SystemToast.multiline(
-                CodeClient.MC,
+        SystemToast.add(
+                CodeClient.MC.gui.toastManager(),
                 SystemToast.SystemToastId.PACK_LOAD_FAILURE,
                 Component.translatable("codeclient.toast.unofficial_address.title"),
                 Component.translatable("codeclient.toast.unofficial_address")
-        ));
+        );
 
         var prefix = matcher.group("prefix");
         boolean isSubdomainAddress = Arrays.asList(PLOT_SUBDOMAIN_ADDRESSES).contains(matcher.group("address"));

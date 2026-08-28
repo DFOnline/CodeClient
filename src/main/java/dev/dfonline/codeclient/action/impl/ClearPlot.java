@@ -16,6 +16,7 @@ import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 public class ClearPlot extends Action {
     public Step currentStep = Step.WAIT_FOR_OPTIONS;
@@ -53,7 +54,7 @@ public class ClearPlot extends Action {
             if (currentStep == Step.WAIT_FOR_CONFIRM) {
                 short slot = 11;
                 ItemStack itemStack = inventoryS2CPacket.items().get(slot);
-                if (itemStack.getItem().equals(Items.GREEN_CONCRETE)) {
+                if (itemStack.getItem().equals(Blocks.CONCRETE.green().asItem())) {
                     var air = HashedStack.create(Items.AIR.getDefaultInstance(), hasher);
                     Int2ObjectMap<HashedStack> modified = Int2ObjectMaps.singleton(slot, air);
                     CodeClient.MC.getConnection().send(new ServerboundContainerClickPacket(inventoryS2CPacket.containerId(),inventoryS2CPacket.stateId(),slot,(byte)0,ContainerInput.PICKUP,modified,air));

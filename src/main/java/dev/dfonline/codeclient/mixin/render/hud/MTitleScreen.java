@@ -17,11 +17,11 @@ public class MTitleScreen {
     @Inject(method = "init", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
         if (CodeClient.startupToast != null) {
-            CodeClient.MC.getToastManager().addToast(SystemToast.multiline(
-                    CodeClient.MC,
+            SystemToast.add(
+                    CodeClient.MC.gui.toastManager(),
                     SystemToast.SystemToastId.PACK_LOAD_FAILURE,
                     CodeClient.startupToast.title(),
-                    CodeClient.startupToast.description())
+                    CodeClient.startupToast.description()
             );
             CodeClient.startupToast = null;
         }

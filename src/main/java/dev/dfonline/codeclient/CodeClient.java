@@ -39,7 +39,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
@@ -58,8 +58,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -76,9 +75,10 @@ import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +114,6 @@ public class CodeClient implements ClientModInitializer {
      * Used to open a screen on the next tick.
      */
     public static Screen screenToOpen = null;
-    public static boolean shouldReload = false;
     public static boolean isPreviewingItemTags = false;
 
     private static final HashMap<Class<? extends Feature>, Feature> features = new HashMap<>();
@@ -128,6 +127,17 @@ public class CodeClient implements ClientModInitializer {
 
         loadFeatures();
 
+        LevelRenderEvents.COLLECT_SUBMITS.register(context -> {
+            Vec3 camera = context.levelState().cameraRenderState.pos;
+            PoseStack matrices = context.poseStack();
+            matrices.pushPose();
+            try {
+                onRender(matrices, context.submitNodeCollector(), camera.x, camera.y, camera.z);
+            } finally {
+                matrices.popPose();
+            }
+        });
+
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (MC.player == null || MC.level == null) clean();
             if (screenToOpen != null) {
@@ -136,10 +146,6 @@ public class CodeClient implements ClientModInitializer {
             }
         });
 
-
-        BlockRenderLayerMap.putBlock(Blocks.BARRIER, ChunkSectionLayer.TRANSLUCENT);
-        BlockRenderLayerMap.putBlock(Blocks.STRUCTURE_VOID, ChunkSectionLayer.TRANSLUCENT);
-        BlockRenderLayerMap.putBlock(Blocks.LIGHT, ChunkSectionLayer.TRANSLUCENT);
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(Identifier.fromNamespaceAndPath(MOD_ID, "close"), client -> API.stop());
 
@@ -297,7 +303,7 @@ public class CodeClient implements ClientModInitializer {
 
         if (CodeClient.location instanceof Dev dev) {
             try {
-                if (packet instanceof ClientboundBlockEntityDataPacket beu && dev.isInDev(beu.getPos()) && beu.getType() == BlockEntityType.SIGN) {
+                if (packet instanceof ClientboundBlockEntityDataPacket beu && dev.isInDev(beu.getPos()) && beu.getType() == BlockEntityTypes.SIGN) {
                     CompoundTag compound = beu.getTag();
                     if(compound.contains("front_text")) {
                         SignText text = SignText.DIRECT_CODEC.decode(NbtOps.INSTANCE, beu.getTag().get("front_text")).getOrThrow().getFirst();
@@ -409,13 +415,9 @@ public class CodeClient implements ClientModInitializer {
         }
     }
 
-    public static void onRender(PoseStack matrices, MultiBufferSource.BufferSource vertexConsumers, double cameraX, double cameraY, double cameraZ) {
-        features().forEach(feature -> feature.render(matrices, vertexConsumers, cameraX, cameraY, cameraZ));
+    public static void onRender(PoseStack matrices, SubmitNodeCollector submitter, double cameraX, double cameraY, double cameraZ) {
+        features().forEach(feature -> feature.render(matrices, submitter, cameraX, cameraY, cameraZ));
 
-        if (shouldReload) {
-            MC.levelRenderer.allChanged();
-            shouldReload = false;
-        }
     }
 
     public static void onClickChest(BlockHitResult hitResult) {

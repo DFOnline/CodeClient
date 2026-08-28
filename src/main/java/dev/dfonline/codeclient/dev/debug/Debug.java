@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.gizmos.Gizmos;
 import net.minecraft.gizmos.TextGizmo;
 import net.minecraft.network.chat.Component;
@@ -123,7 +123,7 @@ public class Debug extends Feature {
         }
     }
 
-    public void render(PoseStack matrices, MultiBufferSource.BufferSource vertexConsumers, double cameraX, double cameraY, double cameraZ) {
+    public void render(PoseStack matrices, SubmitNodeCollector submitter, double cameraX, double cameraY, double cameraZ) {
         if (active) for (var entry : locations.entrySet())
             Gizmos.billboardText(entry.getValue().getString(), entry.getKey(), TextGizmo.Style.forColor(0xFFFFFF));
     }

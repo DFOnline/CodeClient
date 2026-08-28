@@ -46,7 +46,7 @@ public class AdvancedMiddleClickFeature extends Feature {
     }
 
     private static boolean compare(ItemStack a, ItemStack b) {
-        if (a.is(b.getItemHolder())) {
+        if (a.is(b.typeHolder())) {
             if (a.getHoverName().equals(b.getHoverName())) {
                 return a.getComponents().equals(b.getComponents());
             }

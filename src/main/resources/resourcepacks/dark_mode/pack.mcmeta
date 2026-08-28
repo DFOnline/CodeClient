@@ -1,10 +1,7 @@
 {
     "pack": {
-        "pack_format": 57,
-        "supported_formats": {
-            "min_inclusive": 22,
-            "max_inclusive": 57
-        },
+        "min_format": 88,
+        "max_format": 88,
         "description": "Darkens the UI of CodeClient (use with DefaultDarkMode)\n"
     }
 }

@@ -35,7 +35,6 @@ public class Config {
     public boolean AutoJoinPlot = false;
     public int AutoJoinPlotId = 0;
     public CharSetOption FileCharSet = CharSetOption.UTF_8;
-    public boolean InvisibleBlocksInDev = false;
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
     public boolean FocusSearch = false;
@@ -129,7 +128,6 @@ public class Config {
             object.addProperty("AutoJoinPlot", AutoJoinPlot);
             object.addProperty("AutoJoinPlotId", AutoJoinPlotId);
             object.addProperty("FileCharSet", FileCharSet.name());
-            object.addProperty("InvisibleBlocksInDev", InvisibleBlocksInDev);
             object.addProperty("AutoFly", AutoFly);
             object.addProperty("CodeLayerInteractionMode", CodeLayerInteractionMode.name());
             object.addProperty("FocusSearch", FocusSearch);
@@ -631,18 +629,6 @@ public class Config {
                         .name(Component.translatable("codeclient.config.tab.visual"))
                         .tooltip(Component.translatable("codeclient.config.tab.visual.description"))
                         //<editor-fold desc="Ungrouped">
-                        .option(Option.createBuilder(Boolean.class)
-                                .name(Component.translatable("codeclient.config.show_invisible_blocks"))
-                                .description(OptionDescription.of(Component.translatable("codeclient.config.show_invisible_blocks.description1"), Component.translatable("codeclient.config.show_invisible_blocks.description2")))
-                                .binding(
-                                        false,
-                                        () -> InvisibleBlocksInDev,
-                                        opt -> InvisibleBlocksInDev = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
-                                .available(true)
-                                .flag(OptionFlag.RELOAD_CHUNKS)
-                                .build())
                         .option(Option.createBuilder(Boolean.class)
                                 .name(Component.translatable("codeclient.config.show_variable_scope_below_name"))
                                 .description(OptionDescription.of(Component.translatable("codeclient.config.show_variable_scope_below_name.description")))
