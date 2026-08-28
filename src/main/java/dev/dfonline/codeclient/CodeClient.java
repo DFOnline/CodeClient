@@ -283,9 +283,9 @@ public class CodeClient implements ClientModInitializer {
         return Optional.empty();
     }
 
-    public static <T extends PacketListener> boolean handlePacket(Packet<T> packet) {
-        if (packet instanceof ClientboundBundlePacket bundle) {
-            bundle.subPackets().forEach(CodeClient::handlePacket);
+    public static boolean handlePacket(Packet<?> packet) {
+        // Don't handle bundle packets, MClientPacketListener will split them.
+        if (packet instanceof ClientboundBundlePacket) {
             return false;
         }
 

@@ -7,15 +7,17 @@ import dev.dfonline.codeclient.command.CommandSender;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.location.Creator;
+import dev.dfonline.codeclient.location.Plot;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.phys.Vec3;
 
@@ -24,11 +26,9 @@ public class BuildPhaser extends Feature {
     private boolean wasFlying = true;
     private Vec3 lastPos = new Vec3(0, 0, 0);
     private boolean allowPacket = false;
-    private boolean waitForTP = false;
-    private boolean updateVelocity = false;
-    private boolean dontSpamBuildWarn = false;
+    private int pendingStopTeleportTicks = 0;
+    private int pendingStopTeleportSoundTicks = 0;
     private boolean heldKeyCheck = false;
-    private Vec3 velocity = null;
 
     @Override
     public void reset() {
@@ -36,10 +36,9 @@ public class BuildPhaser extends Feature {
         wasFlying = true;
         lastPos = new Vec3(0,0,0);
         allowPacket = false;
-        waitForTP = false;
-        dontSpamBuildWarn = false;
+        pendingStopTeleportTicks = 0;
+        pendingStopTeleportSoundTicks = 0;
         heldKeyCheck = false;
-        velocity = null;
     }
 
     public boolean isClipping() {
@@ -51,6 +50,13 @@ public class BuildPhaser extends Feature {
     }
 
     public void tick() {
+        if (pendingStopTeleportTicks > 0) {
+            pendingStopTeleportTicks--;
+        }
+        if (pendingStopTeleportSoundTicks > 0) {
+            pendingStopTeleportSoundTicks--;
+        }
+
         if (CodeClient.location instanceof Creator plot) {
             if (plot.getX() == null) {
                 if (KeyBinds.clipBind.consumeClick())
@@ -73,18 +79,18 @@ public class BuildPhaser extends Feature {
                 if (clipping && !currentKeyPressed) finishClipping();
             }
             if (clipping) {
-                var player = CodeClient.MC.player;
-                var size = plot.assumeSize();
+                LocalPlayer player = CodeClient.MC.player;
+                Plot.Size size = plot.assumeSize();
                 player.setPosRaw(
-                        Math.min(Math.max(player.getX(), plot.getX() - size.codeWidth), plot.getX() + size.size + 1),
+                        Math.clamp(player.getX(), plot.getX() - size.codeWidth, plot.getX() + size.size + 1),
                         player.getY(),
-                        Math.min(Math.max(player.getZ(), plot.getZ() - size.codeLength), plot.getZ() + size.size + 1)
+                        Math.clamp(player.getZ(), plot.getZ() - size.codeLength, plot.getZ() + size.size + 1)
                 );
                 allowPacket = true;
                 CodeClient.MC.getConnection().send(new ServerboundMovePlayerPacket.Pos(lastPos.x, lastPos.y, lastPos.z, false, true));
                 CodeClient.MC.player.getAbilities().flying = true;
             }
-        } else if (clipping || waitForTP) {
+        } else if (clipping || pendingStopTeleportTicks > 0) {
             disableClipping();
         }
 
@@ -108,40 +114,40 @@ public class BuildPhaser extends Feature {
             allowPacket = false;
             return false;
         }
-        if (packet instanceof ServerboundMovePlayerPacket.Pos && updateVelocity) {
-            var player = CodeClient.MC.player;
-            if (player != null && velocity != null) {
-                player.setDeltaMovement(velocity);
-            }
-            updateVelocity = false;
-            return false;
-        }
         return clipping && (packet instanceof ServerboundMovePlayerPacket || packet instanceof ServerboundPlayerCommandPacket);
     }
 
     public boolean onReceivePacket(Packet<?> packet) {
-        if (!waitForTP) return false;
-        if (packet instanceof ClientboundPlayerPositionPacket move) {
-            var net = CodeClient.MC.getConnection();
-
-            net.send(new ServerboundAcceptTeleportationPacket(move.id()));
-            var change = move.change();
-            net.send(
-                            new ServerboundMovePlayerPacket.PosRot(lastPos.add(change.deltaMovement()), change.yRot(), change.xRot(), false, false)
-                    );
-
-            updateVelocity = true;
+        if (pendingStopTeleportSoundTicks > 0 && isTeleportSound(packet)) {
+            pendingStopTeleportSoundTicks = 0;
             return true;
         }
-        if (packet instanceof ClientboundAnimatePacket) return true;
-        if (packet instanceof ClientboundSoundEntityPacket) {
-            waitForTP = false;
+        if (pendingStopTeleportTicks <= 0) {
+            return false;
+        }
+        if (packet instanceof ClientboundPlayerPositionPacket positionPacket) {
+            CodeClient.MC.getConnection().send(new ServerboundAcceptTeleportationPacket(positionPacket.id()));
             return true;
         }
         return false;
     }
 
+    private boolean isTeleportSound(Packet<?> packet) {
+        if (!(packet instanceof ClientboundSoundEntityPacket sound)) {
+            return false;
+        }
+
+        LocalPlayer player = CodeClient.MC.player;
+        if (sound.getId() != player.getId()) {
+            return false;
+        }
+        SoundEvent event = sound.getSound().value();
+        return event.location().equals(SoundEvents.ENDERMAN_TELEPORT.location());
+    }
+
     private void startClipping() {
+        pendingStopTeleportTicks = 0;
+        pendingStopTeleportSoundTicks = 0;
         Abilities abilities = CodeClient.MC.player.getAbilities();
         lastPos = CodeClient.MC.player.position();
         wasFlying = abilities.flying;
@@ -157,17 +163,17 @@ public class BuildPhaser extends Feature {
             Abilities abilities = player.getAbilities();
             abilities.mayfly = true;
             abilities.flying = wasFlying;
-            waitForTP = true;
 
-            var size = plot.assumeSize();
+            Plot.Size size = plot.assumeSize();
 
-            var x = Math.min(Math.max(player.getX(), plot.getX() - plot.assumeSize().codeLength), plot.getX() + size.size + 1);
-            var y = player.getY();
-            var z = Math.min(Math.max(player.getZ(), plot.getZ() - plot.assumeSize().codeWidth), plot.getZ() + size.size + 1);
-            var pitch = player.getXRot();
-            var yaw = player.getYRot();
+            double x = Math.clamp(player.getX(), plot.getX() - size.codeWidth, plot.getX() + size.size + 1);
+            double y = player.getY();
+            double z = Math.clamp(player.getZ(), plot.getZ() - size.codeLength, plot.getZ() + size.size + 1);
+            float pitch = player.getXRot();
+            float yaw = player.getYRot();
 
-            velocity = player.getDeltaMovement();
+            pendingStopTeleportTicks = 60;
+            pendingStopTeleportSoundTicks = 60;
 
             CommandSender.queue(String.format("ptp %s %s %s %s %s", x, y, z, pitch, yaw));
 
@@ -194,6 +200,7 @@ public class BuildPhaser extends Feature {
 
     public void disableClipping() {
         clipping = false;
-        waitForTP = false;
+        pendingStopTeleportTicks = 0;
+        pendingStopTeleportSoundTicks = 0;
     }
 }
