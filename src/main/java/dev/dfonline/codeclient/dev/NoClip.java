@@ -122,7 +122,10 @@ public class NoClip extends Feature {
 
     @Override
     public void tick() {
-        if(isIgnoringWalls()) CodeClient.MC.player.noClip = true;
+        if(isIgnoringWalls()) {
+            CodeClient.MC.player.noClip = true;
+            CodeClient.MC.player.horizontalCollision = false;
+        }
     }
 
     enum LineType {
