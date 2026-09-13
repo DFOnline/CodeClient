@@ -9,6 +9,7 @@ import dev.dfonline.codeclient.hypercube.item.Potion;
 import dev.dfonline.codeclient.hypercube.item.Sound;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.*;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class Icon {
     private static final TextColor GOLD = TextColor.fromFormatting(Formatting.GOLD);
@@ -59,7 +61,16 @@ public class Icon {
     }
 
     public ItemStack getItem() {
-        ItemStack item = Registries.ITEM.get(Identifier.ofVanilla(material.toLowerCase())).getDefaultStack();
+        return getItem(null);
+    }
+    public ItemStack getItem(@Nullable Item realMaterial) {
+        Identifier materialIdentifier = Identifier.ofVanilla(this.material.toLowerCase());
+        ItemStack item = realMaterial == null
+                ? Registries.ITEM.get(materialIdentifier).getDefaultStack()
+                : realMaterial.getDefaultStack();
+        if (realMaterial != null) {
+            item.set(DataComponentTypes.ITEM_MODEL, materialIdentifier);
+        }
 
         DFItem dfItem = DFItem.of(item);
         ItemData data = dfItem.getItemData();
