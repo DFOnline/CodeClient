@@ -66,6 +66,7 @@ public class ExpressionHighlighter extends Feature {
 
     private String cachedInput = "";
     private int cachedPosition = 0;
+    private int cachedEnd = 0;
     private HighlightedExpression cachedHighlight = new HighlightedExpression(FormattedCharSequence.composite(), null);
 
     private final MiniMessage formatter = HypercubeMiniMessage.MM;
@@ -73,11 +74,15 @@ public class ExpressionHighlighter extends Feature {
 
     // creates an expression based on text input
     public HighlightedExpression format(String input, String partial, IntegerRange range) {
-        if (Objects.equals(input, cachedInput) && cachedPosition == range.getMinimum()) {
+        if (Objects.equals(input, cachedInput)
+                && cachedPosition == range.getMinimum()
+                && cachedEnd == range.getMaximum()
+        ) {
             return cachedHighlight;
         }
 
         cachedPosition = range.getMinimum();
+        cachedEnd = range.getMaximum();
         cachedInput = input;
 
         // parse commands

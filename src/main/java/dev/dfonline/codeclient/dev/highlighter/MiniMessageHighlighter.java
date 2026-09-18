@@ -9,8 +9,11 @@ import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.ParsingException;
 import net.kyori.adventure.text.minimessage.internal.parser.Token;
+import net.kyori.adventure.text.minimessage.internal.parser.TokenType;
 import net.kyori.adventure.text.minimessage.internal.parser.node.TagNode;
 import net.kyori.adventure.text.minimessage.internal.parser.node.ValueNode;
+import net.kyori.adventure.text.minimessage.tag.Inserting;
+import net.kyori.adventure.text.minimessage.tag.Modifying;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -25,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 // /
 //  * Parses MiniMessage input, but leaves the tags in the message for formatting in the edit box.
 //  /
+@SuppressWarnings("UnstableApiUsage")
 public class MiniMessageHighlighter {
     public MiniMessage HIGHLIGHTER = MiniMessage.builder().tags(TagResolver.resolver(
             new ShownTagResolver()
@@ -64,7 +68,7 @@ public class MiniMessageHighlighter {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private void handle(Node node, String full, StringBuilder sb, AtomicInteger index, ArrayList<String> decorations) {
+    private void handle(Node node, String full, StringBuilder sb, AtomicInteger index, ArrayList<TagNode> activeTags) {
         String style = getTagStyle();
 
         if (node instanceof TagNode tagNode) {
@@ -72,25 +76,24 @@ public class MiniMessageHighlighter {
 
             index.addAndGet(tagString.length());
 
-            appendEscapedTag(sb, tagString, style, decorations);
+            appendEscapedTag(sb, tagString, style, activeTags, full);
 
-            String tagName = tagNode.name();
-            if (StandardTags.decorations().has(tagName)) {
-                decorations.add(tagName);
+            if (isActiveTag(tagNode)) {
+                activeTags.add(tagNode);
             }
 
             // prevent "space" and "newline" tags from being added extra as they dont get parsed in the chatbox.
             if (!(tagString.contains("space") || tagString.contains("newline"))) sb.append(tagString);
         } else if (node instanceof ValueNode valueNode) {
-            String value = valueNode.value();
+            String value = getTokenString(valueNode.token(), full);
 
             index.addAndGet(value.length());
 
-            sb.append(PARSER.escapeTags(value));
+            sb.append(PARSER.escapeTags(escapeBackslashes(value)));
         }
 
         for (Node child : node.children()) {
-            handle(child, full, sb, index, decorations);
+            handle(child, full, sb, index, activeTags);
         }
 
         if (node instanceof TagNode tagNode) {
@@ -98,29 +101,39 @@ public class MiniMessageHighlighter {
             String closing = String.format("</%s>", tagName);
 
             if (full.startsWith(closing, index.get())) {
-                if (StandardTags.decorations().has(tagName)) {
-                    decorations.remove(tagName);
+                if (isActiveTag(tagNode)) {
+                    activeTags.remove(tagNode);
                 }
 
                 index.addAndGet(closing.length());
                 sb.append(closing);
-                appendEscapedTag(sb, closing, style, decorations);
+                appendEscapedTag(sb, closing, style, activeTags, full);
             }
         }
     }
 
-    private void appendEscapedTag(StringBuilder sb, String tag, String style, ArrayList<String> decorations) {
-        // idk if someone wants to figure this out, it doesn't actually seem to work with multiple decorations.
-        StringBuilder opening = new StringBuilder();
+    private void appendEscapedTag(StringBuilder sb, String tag, String style, ArrayList<TagNode> activeTags, String full) {
+        for (int i = activeTags.size() - 1; i >= 0; i--) {
+            sb.append("</").append(activeTags.get(i).name()).append(">");
+        }
 
-        StringBuilder closing = new StringBuilder();
-        decorations.forEach(decoration -> {
-            interpolate(opening, "<", decoration, ">");
-            interpolate(closing, "</", decoration, ">");
-        });
-        //
+        interpolate(sb, "<", style, ">", HIGHLIGHTER.escapeTags(escapeBackslashes(tag)), "</", style, ">");
 
-        interpolate(sb, "<", style, ">", HIGHLIGHTER.escapeTags(tag), "</", style, ">");
+        for (TagNode activeTag : activeTags) {
+            sb.append(getTokenString(activeTag.token(), full));
+        }
+    }
+
+    private boolean isActiveTag(TagNode tagNode) {
+        if (tagNode.token().type() == TokenType.OPEN_CLOSE_TAG) return false;
+
+        Tag tag = tagNode.tag();
+        return tag instanceof Modifying
+                || tag instanceof Inserting inserting && inserting.allowsChildren();
+    }
+
+    private String escapeBackslashes(String value) {
+        return value.replace("\\", "\\\\");
     }
 
     private void interpolate(StringBuilder sb, String... substrings) {

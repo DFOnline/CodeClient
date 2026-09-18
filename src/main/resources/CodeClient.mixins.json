@@ -11,7 +11,7 @@
         "network.MClientConnection", "network.MClientPacketListener",
         "render.hud.MDrawContext", "render.hud.MInGameHud", "render.hud.MInGameOverlayRenderer",
         "render.hud.MTitleScreen", "screen.MCreativeInventoryScreen", "screen.MHandledScreen", "screen.MHandledScreens",
-        "screen.MMultiplayerScreen", "screen.chat.MChatInputSuggester", "screen.chat.MChatScreen",
+        "screen.MMultiplayerScreen", "screen.chat.MChatInputSuggester", "screen.chat.MChatScreen", "screen.chat.MEditBox",
         "world.MWorldRenderer", "world.block.MAbstractBlockState",
         "world.block.MBlockItem", "world.block.MSignBlockEntity",
         "screen.MScreenHandler", "PlayerPosDebugMixin"
