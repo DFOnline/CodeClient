@@ -5,16 +5,16 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
 import dev.dfonline.codeclient.hypercube.actiondump.Icon;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class Sound extends VarItem {
     private String sound;
@@ -153,21 +153,21 @@ public class Sound extends VarItem {
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
         DFItem dfItem = DFItem.of(stack);
-        dfItem.setName(Text.literal("Sound").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.SOUND.color)));
-        Text name;
+        dfItem.setName(Component.literal("Sound").setStyle(Style.EMPTY.withItalic(false).withColor(Icon.Type.SOUND.color)));
+        Component name;
         try {
             ActionDump db = ActionDump.getActionDump();
             var value = Arrays.stream(db.sounds).filter(gv -> gv.icon.getCleanName().equals(sound)).findFirst();
             if (value.isEmpty()) throw new Exception("");
-            name = Text.literal(value.get().icon.name);
+            name = Component.literal(value.get().icon.name);
         } catch (Exception e) {
-            name = Text.literal(sound).setStyle(Style.EMPTY);
+            name = Component.literal(sound).setStyle(Style.EMPTY);
         }
         Utility.addLore(dfItem.getItemStack(),
                 name,
-                Text.empty(),
-                Text.empty().append(Text.literal("Pitch: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.pitch)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
-                Text.empty().append(Text.literal("Volume: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal("%.2f".formatted(this.volume)).setStyle(Style.EMPTY.withColor(Formatting.WHITE))))
+                Component.empty(),
+                Component.empty().append(Component.literal("Pitch: ").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY)).append(Component.literal("%.2f".formatted(this.pitch)).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)))),
+                Component.empty().append(Component.literal("Volume: ").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY)).append(Component.literal("%.2f".formatted(this.volume)).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))))
         );
         return dfItem.getItemStack();
     }

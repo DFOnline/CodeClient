@@ -7,14 +7,13 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
-import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.commands.CommandBuildContext;
 import org.jetbrains.annotations.NotNull;
 
 import static dev.dfonline.codeclient.Utility.componentToText;
 import static dev.dfonline.codeclient.hypercube.HypercubeMiniMessage.MM;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
 
 public class CommandPreview extends Command {
     @Override
@@ -23,24 +22,24 @@ public class CommandPreview extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> 0)
                 .then(
                         literal("actionbar").then(argument("text", StringArgumentType.greedyString()).executes(context -> {
                             if (CodeClient.MC.player == null) return 0;
-                            CodeClient.MC.player.sendMessage(componentToText(getText(context)), true);
+                            CodeClient.MC.gui.hud.setOverlayMessage(componentToText(getText(context)), false);
                             return 0;
                         }))
                 ).then(
                         literal("title").then(argument("text", StringArgumentType.greedyString()).executes(context -> {
                             if (CodeClient.MC.player == null) return 0;
-                            CodeClient.MC.player.showTitle(Title.title(getText(context), Component.empty(), Title.DEFAULT_TIMES));
+                            CodeClient.MC.gui.hud.setTitle(componentToText(getText(context)));
                             return 0;
                         }))
                 ).then(
                         literal("subtitle").then(argument("text", StringArgumentType.greedyString()).executes(context -> {
                             if (CodeClient.MC.player == null) return 0;
-                            CodeClient.MC.player.showTitle(Title.title(Component.empty(), getText(context), Title.DEFAULT_TIMES));
+                            CodeClient.MC.gui.hud.setSubtitle(componentToText(getText(context)));
                             return 0;
                         }))
                 );

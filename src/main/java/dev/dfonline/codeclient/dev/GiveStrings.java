@@ -4,19 +4,18 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
-import net.minecraft.text.Text;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 
 public class GiveStrings extends Feature {
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if (packet instanceof GameMessageS2CPacket message) {
-            Text content = message.content();
+        if (packet instanceof ClientboundSystemChatPacket message) {
+            Component content = message.content();
             String string = content.getString();
 
             if (CodeClient.location instanceof Dev) {
@@ -25,7 +24,7 @@ public class GiveStrings extends Feature {
                     Matcher matcher = pattern.matcher(string);
 
                     if(matcher.matches())
-                        CodeClient.MC.getNetworkHandler().sendChatCommand("str " + matcher.group(2));
+                        CodeClient.MC.getConnection().sendCommand("str " + matcher.group(2));
                 }
             }
         }

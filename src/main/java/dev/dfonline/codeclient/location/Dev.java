@@ -3,7 +3,7 @@ package dev.dfonline.codeclient.location;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.dev.NoClip;
 import dev.dfonline.codeclient.hypercube.ReferenceBook;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 
 public class Dev extends Creator {
     public Dev(double x, double z) {
@@ -20,8 +20,8 @@ public class Dev extends Creator {
         if (player == null) return null;
         var inventory = player.getInventory();
 
-        for (int index = 0; index < inventory.size(); index++) {
-            var itemStack = inventory.getStack(index);
+        for (int index = 0; index < inventory.getContainerSize(); index++) {
+            var itemStack = inventory.getItem(index);
             try {
                 return new ReferenceBook(itemStack);
             } catch (IllegalArgumentException ignored) {
@@ -32,16 +32,16 @@ public class Dev extends Creator {
     }
 
     public boolean isInDevSpace() {
-        return isInDevSpace(CodeClient.MC.player.getEntityPos());
+        return isInDevSpace(CodeClient.MC.player.position());
     }
 
-    public boolean isInDevSpace(Vec3d pos) {
+    public boolean isInDevSpace(Vec3 pos) {
             assert CodeClient.MC.player != null;
             var size = assumeSize();
             if (getX() == null) return false;
-            return pos.getX() <= getX() &&
-                    pos.getZ() >= getZ() - NoClip.FREEDOM && pos.getZ() <= getZ() + size.codeLength + 1 + NoClip.FREEDOM &&
-                    pos.getY() >= getFloorY() && pos.getY() < 256;
+            return pos.x() <= getX() &&
+                    pos.z() >= getZ() - NoClip.FREEDOM && pos.z() <= getZ() + size.codeLength + 1 + NoClip.FREEDOM &&
+                    pos.y() >= getFloorY() && pos.y() < 256;
     }
 
     @Override

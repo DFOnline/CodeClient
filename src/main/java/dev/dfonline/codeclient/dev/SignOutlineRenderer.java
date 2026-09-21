@@ -4,15 +4,7 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexRendering;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.core.BlockPos;
 
 public class SignOutlineRenderer extends Feature {
 

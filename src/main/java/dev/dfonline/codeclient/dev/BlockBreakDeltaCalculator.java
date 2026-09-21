@@ -3,7 +3,6 @@ package dev.dfonline.codeclient.dev;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
 
 /**
  * Just a little insane.

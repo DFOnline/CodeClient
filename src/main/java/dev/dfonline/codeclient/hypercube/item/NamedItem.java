@@ -2,9 +2,9 @@ package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.data.DFItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class NamedItem extends VarItem {
     private String name;
@@ -43,7 +43,7 @@ public abstract class NamedItem extends VarItem {
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
         DFItem dfItem = DFItem.of(stack);
-        dfItem.setName(Text.literal(name).setStyle(Style.EMPTY.withItalic(false)));
+        dfItem.setName(Component.literal(name).setStyle(Style.EMPTY.withItalic(false)));
         return dfItem.getItemStack();
     }
 }

@@ -1,13 +1,13 @@
 package dev.dfonline.codeclient.hypercube.item;
 
 import dev.dfonline.codeclient.config.Config;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TextColor;
 
 public enum Scope {
-    unsaved(TextColor.fromFormatting(Formatting.GRAY), "GAME", "G", "g"),
-    local(TextColor.fromFormatting(Formatting.GREEN), "LOCAL", "L", "l"),
-    saved(TextColor.fromFormatting(Formatting.YELLOW), "SAVE", "S", "s"),
+    unsaved(TextColor.fromLegacyFormat(ChatFormatting.GRAY), "GAME", "G", "g"),
+    local(TextColor.fromLegacyFormat(ChatFormatting.GREEN), "LOCAL", "L", "l"),
+    saved(TextColor.fromLegacyFormat(ChatFormatting.YELLOW), "SAVE", "S", "s"),
     line(TextColor.fromRgb(0x55aaff), "LINE", "L", "i");
 
     public final TextColor color;

@@ -7,26 +7,20 @@ import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.dev.BlockBreakDeltaCalculator;
 import dev.dfonline.codeclient.dev.InteractionManager;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.network.SequencedPacketCreator;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.multiplayer.prediction.PredictiveAction;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,110 +29,110 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public abstract class MClientPlayerInteractionManager {
     private static ItemStack item = null;
     @Shadow
-    private boolean breakingBlock;
+    private boolean isDestroying;
     @Shadow
-    private BlockPos currentBreakingPos;
+    private BlockPos destroyBlockPos;
     @Shadow
-    private float currentBreakingProgress;
+    private float destroyProgress;
     @Shadow
-    private float blockBreakingSoundCooldown;
+    private float destroyTicks;
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
     @Shadow
-    private int blockBreakingCooldown;
+    private int destroyDelay;
     @Shadow
-    private int lastSelectedSlot;
+    private int carriedIndex;
 
     @Shadow
-    protected abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
+    protected abstract void startPrediction(ClientLevel world, PredictiveAction packetCreator);
 
     @Shadow
-    public abstract int getBlockBreakingProgress();
+    public abstract int getDestroyStage();
 
     @Shadow
-    public abstract boolean breakBlock(BlockPos pos);
+    public abstract boolean destroyBlock(BlockPos pos);
 
     @Shadow
-    public abstract void cancelBlockBreaking();
+    public abstract void stopDestroyBlock();
 
-    @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "destroyBlock", at = @At("HEAD"), cancellable = true)
     public void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (InteractionManager.onBreakBlock(pos)) cir.setReturnValue(false);
     }
 
-    @ModifyVariable(method = "interactBlock", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = "useItemOn", at = @At("HEAD"), argsOnly = true)
     private BlockHitResult onBlockInteract(BlockHitResult hitResult) {
         return InteractionManager.onBlockInteract(hitResult);
     }
 
-    @Inject(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V", shift = At.Shift.AFTER))
-    public void afterSendPlace(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+    @Inject(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;startPrediction(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/multiplayer/prediction/PredictiveAction;)V", shift = At.Shift.AFTER))
+    public void afterSendPlace(LocalPlayer player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
         if (item != null) {
             Utility.sendHandItem(item);
             item = null;
         }
     }
 
-    @Inject(method = "interactItem", at = @At("HEAD"), cancellable = true)
-    public void interactItem(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+    @Inject(method = "useItem", at = @At("HEAD"), cancellable = true)
+    public void interactItem(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         if (InteractionManager.onItemInteract(player, hand)) {
-            cir.setReturnValue(ActionResult.PASS);
+            cir.setReturnValue(InteractionResult.PASS);
         }
     }
 
-    @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "startDestroyBlock", at = @At("HEAD"), cancellable = true)
     private void attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         if (!Config.getConfig().CustomBlockBreaking) return;
         if (CodeClient.location instanceof Dev dev) {
-            if (Utility.isGlitchStick(CodeClient.MC.player.getMainHandStack())) return;
+            if (Utility.isGlitchStick(CodeClient.MC.player.getMainHandItem())) return;
             if (!dev.isInDev(pos)) return;
-            if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
+            if (CodeClient.MC.level.getBlockState(pos).getBlock() == Blocks.CHEST) return;
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
             if (breakPos == null) {
                 return;
             }
-            this.breakingBlock = true;
-            this.currentBreakingPos = breakPos;
-            this.currentBreakingProgress = 0.0F;
-            this.blockBreakingSoundCooldown = 0.0F;
-            this.client.world.setBlockBreakingInfo(this.client.player.getId(), this.currentBreakingPos, this.getBlockBreakingProgress());
+            this.isDestroying = true;
+            this.destroyBlockPos = breakPos;
+            this.destroyProgress = 0.0F;
+            this.destroyTicks = 0.0F;
+            this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, this.getDestroyStage());
             cir.setReturnValue(true);
         }
     }
 
-    @Inject(method = "updateBlockBreakingProgress", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "continueDestroyBlock", at = @At("HEAD"), cancellable = true)
     private void updateBlockBreakingProgress(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         if (!Config.getConfig().CustomBlockBreaking) return;
         if (CodeClient.location instanceof Dev dev) {
-            if (Utility.isGlitchStick(CodeClient.MC.player.getMainHandStack())) return;
+            if (Utility.isGlitchStick(CodeClient.MC.player.getMainHandItem())) return;
             if (!dev.isInDev(pos)) return;
-            if (CodeClient.MC.world.getBlockState(pos).getBlock() == Blocks.CHEST) return;
+            if (CodeClient.MC.level.getBlockState(pos).getBlock() == Blocks.CHEST) return;
             cir.cancel();
             BlockPos breakPos = InteractionManager.isBlockBreakable(pos);
-            if (breakPos == null || !breakPos.equals(currentBreakingPos) || !breakingBlock) {
-                cancelBlockBreaking();
-                CodeClient.MC.interactionManager.attackBlock(pos, direction);
+            if (breakPos == null || !breakPos.equals(destroyBlockPos) || !isDestroying) {
+                stopDestroyBlock();
+                CodeClient.MC.gameMode.startDestroyBlock(pos, direction);
                 return;
             }
             CodeClient.getFeature(BlockBreakDeltaCalculator.class)
-                    .ifPresent(feat -> this.currentBreakingProgress += feat.calculateBlockDelta(breakPos));
-            if (this.currentBreakingProgress >= 1.0F) {
-                this.breakingBlock = false;
-                this.sendSequencedPacket(this.client.world, (sequence) -> {
-                    this.breakBlock(pos);
-                    return new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
+                    .ifPresent(feat -> this.destroyProgress += feat.calculateBlockDelta(breakPos));
+            if (this.destroyProgress >= 1.0F) {
+                this.isDestroying = false;
+                this.startPrediction(this.minecraft.level, (sequence) -> {
+                    this.destroyBlock(pos);
+                    return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
                 });
-                this.currentBreakingProgress = 0.0F;
-                this.blockBreakingSoundCooldown = 0.0F;
-                this.blockBreakingCooldown = 5;
+                this.destroyProgress = 0.0F;
+                this.destroyTicks = 0.0F;
+                this.destroyDelay = 5;
             }
 
-            this.client.world.setBlockBreakingInfo(this.client.player.getId(), this.currentBreakingPos, this.getBlockBreakingProgress());
+            this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, this.getDestroyStage());
             cir.setReturnValue(true);
         }
     }

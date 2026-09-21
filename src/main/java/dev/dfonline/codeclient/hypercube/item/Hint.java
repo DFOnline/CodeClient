@@ -1,17 +1,17 @@
 package dev.dfonline.codeclient.hypercube.item;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public class Hint extends VarItem {
     public static final TextColor HintGreen = TextColor.fromRgb(0xAAFF55);
-    private static final Text Parameter = Text.literal("Parameter").fillStyle(Style.EMPTY.withColor(0xAAFFAA));
-    private static final Text Line = Text.literal("LINE");
+    private static final Component Parameter = Component.literal("Parameter").withStyle(Style.EMPTY.withColor(0xAAFFAA));
+    private static final Component Line = Component.literal("LINE");
 
     @Override
     public String getId() {
@@ -40,10 +40,10 @@ public class Hint extends VarItem {
 
     public enum HintType {
         function("Function Parameters",
-                Text.empty().formatted(Formatting.GRAY)
+                Component.empty().withStyle(ChatFormatting.GRAY)
                         .append("Put").append(Parameter)
                         .append(" items in this chest to set \n")
-                        .append(Text.literal("\n"))
+                        .append(Component.literal("\n"))
                         .append("In this code line, use the ").append(Line).append(" variable \n")
                         .append("scope to access the parameter values. \n")
                         .append("\n")
@@ -53,9 +53,9 @@ public class Hint extends VarItem {
         );
 
         public final String name;
-        public final Text text;
+        public final Component text;
 
-        HintType(String name, Text text) {
+        HintType(String name, Component text) {
             this.name = name;
             this.text = text;
         }

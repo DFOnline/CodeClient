@@ -4,12 +4,12 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.block.entity.SignText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,12 +24,12 @@ public abstract class MSignBlockEntity {
     @Inject(method = "getFrontText", at = @At("HEAD"), cancellable = true)
     public void getFrontText(CallbackInfoReturnable<SignText> cir) {
         if (CodeClient.location instanceof Dev plot) {
-            if (plot.isInDev(((BlockEntity) (Object) this).getPos())) {
+            if (plot.isInDev(((BlockEntity) (Object) this).getBlockPos())) {
                 SignText orig = this.frontText;
-                Text line1 = orig.getMessage(0, false);
-                Text line2 = orig.getMessage(1, false);
-                Text line3 = orig.getMessage(2, false);
-                Text line4 = orig.getMessage(3, false);
+                Component line1 = orig.getMessage(0, false);
+                Component line2 = orig.getMessage(1, false);
+                Component line3 = orig.getMessage(2, false);
+                Component line4 = orig.getMessage(3, false);
 
                 Config config = Config.getConfig();
                 TextColor color3 = null;
@@ -39,20 +39,20 @@ public abstract class MSignBlockEntity {
                 }
                 if (color3 == null && config.Line3Color != 0) color3 = TextColor.fromRgb(config.Line3Color);
                 if (config.Line1Color != 0)
-                    line1 = Text.empty().append(line1).setStyle(Style.EMPTY.withColor(config.Line1Color));
+                    line1 = Component.empty().append(line1).setStyle(Style.EMPTY.withColor(config.Line1Color));
                 if (config.Line2Color != 0)
-                    line2 = Text.empty().append(line2).setStyle(Style.EMPTY.withColor(config.Line2Color));
-                if (color3 != null) line3 = Text.empty().append(line3).setStyle(Style.EMPTY.withColor(color3));
+                    line2 = Component.empty().append(line2).setStyle(Style.EMPTY.withColor(config.Line2Color));
+                if (color3 != null) line3 = Component.empty().append(line3).setStyle(Style.EMPTY.withColor(color3));
                 if (config.Line4Color != 0)
-                    line4 = Text.empty().append(line4).setStyle(Style.EMPTY.withColor(config.Line4Color));
+                    line4 = Component.empty().append(line4).setStyle(Style.EMPTY.withColor(config.Line4Color));
 
 
                 cir.setReturnValue(
                         orig
-                                .withMessage(0, line1)
-                                .withMessage(1, line2)
-                                .withMessage(2, line3)
-                                .withMessage(3, line4)
+                                .setMessage(0, line1)
+                                .setMessage(1, line2)
+                                .setMessage(2, line3)
+                                .setMessage(3, line4)
                 );
             }
         }

@@ -3,12 +3,12 @@ package dev.dfonline.codeclient.websocket;
 import dev.dfonline.codeclient.ChatType;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
-import net.minecraft.text.Text;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
+import net.minecraft.network.chat.Component;
 
 public class SocketServer extends WebSocketServer {
     private final SocketHandler handler;
@@ -23,7 +23,7 @@ public class SocketServer extends WebSocketServer {
         CodeClient.LOGGER.info("connection");
         handler.setConnection(conn);
         CodeClient.LOGGER.info("{} has just connected to the CodeClient API.", conn.getRemoteSocketAddress().toString());
-        Utility.sendMessage(Text.translatable("codeclient.api.connect"), ChatType.INFO);
+        Utility.sendMessage(Component.translatable("codeclient.api.connect"), ChatType.INFO);
     }
 
     @Override

@@ -14,13 +14,12 @@ import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController;
 import dev.isxander.yacl3.impl.controller.IntegerFieldControllerBuilderImpl;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.awt.Color;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 public class Config {
     private static Config instance;
@@ -36,7 +35,6 @@ public class Config {
     public boolean AutoJoinPlot = false;
     public int AutoJoinPlotId = 0;
     public CharSetOption FileCharSet = CharSetOption.UTF_8;
-    public boolean InvisibleBlocksInDev = false;
     public boolean AutoFly = false;
     public LayerInteractionMode CodeLayerInteractionMode = LayerInteractionMode.AUTO;
     public boolean FocusSearch = false;
@@ -130,7 +128,6 @@ public class Config {
             object.addProperty("AutoJoinPlot", AutoJoinPlot);
             object.addProperty("AutoJoinPlotId", AutoJoinPlotId);
             object.addProperty("FileCharSet", FileCharSet.name());
-            object.addProperty("InvisibleBlocksInDev", InvisibleBlocksInDev);
             object.addProperty("AutoFly", AutoFly);
             object.addProperty("CodeLayerInteractionMode", CodeLayerInteractionMode.name());
             object.addProperty("FocusSearch", FocusSearch);
@@ -192,16 +189,16 @@ public class Config {
 
     public YetAnotherConfigLib getLibConfig() {
         return YetAnotherConfigLib.createBuilder()
-                .title(Text.translatable("codeclient.config"))
+                .title(Component.translatable("codeclient.config"))
                 //<editor-fold desc="General">
                 .category(ConfigCategory.createBuilder()
-                        .name(Text.translatable("codeclient.config.tab.general"))
-                        .tooltip(Text.translatable("codeclient.config.tab.general.tooltip"))
+                        .name(Component.translatable("codeclient.config.tab.general"))
+                        .tooltip(Component.translatable("codeclient.config.tab.general.tooltip"))
                         .option(Option.createBuilder(AutoUpdate.class)
-                                .name(Text.translatable("codeclient.config.auto_update"))
+                                .name(Component.translatable("codeclient.config.auto_update"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.auto_update.description"))
-                                        .text(Text.translatable("codeclient.config.requires_restart"))
+                                        .text(Component.translatable("codeclient.config.auto_update.description"))
+                                        .text(Component.translatable("codeclient.config.requires_restart"))
                                         .build())
                                 .binding(
                                         AutoUpdate.OFF,
@@ -212,10 +209,10 @@ public class Config {
                                 .flag(OptionFlag.GAME_RESTART)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.api"))
+                                .name(Component.translatable("codeclient.config.api"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.api.description"))
-                                        .text(Text.translatable("codeclient.config.requires_restart"))
+                                        .text(Component.translatable("codeclient.config.api.description"))
+                                        .text(Component.translatable("codeclient.config.requires_restart"))
                                         .build())
                                 .binding(
                                         false,
@@ -226,9 +223,9 @@ public class Config {
                                 .flag(OptionFlag.GAME_RESTART)
                                 .build())
                         .option(Option.createBuilder(CharSetOption.class)
-                                .name(Text.translatable("codeclient.config.read_charset"))
+                                .name(Component.translatable("codeclient.config.read_charset"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.read_charset.description"))
+                                        .text(Component.translatable("codeclient.config.read_charset.description"))
                                         .build())
                                 .binding(
                                         CharSetOption.UTF_8,
@@ -239,9 +236,9 @@ public class Config {
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CharSetOption.class))
                                 .build())
                         .option(Option.createBuilder(CharSetOption.class)
-                                .name(Text.translatable("codeclient.config.save_charset"))
+                                .name(Component.translatable("codeclient.config.save_charset"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.save_charset.description"), Text.translatable("codeclient.config.default_recommended"))
+                                        .text(Component.translatable("codeclient.config.save_charset.description"), Component.translatable("codeclient.config.default_recommended"))
                                         .build())
                                 .binding(
                                         CharSetOption.UTF_8,
@@ -252,8 +249,8 @@ public class Config {
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CharSetOption.class))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.dev_for_build"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.dev_for_build.description")))
+                                .name(Component.translatable("codeclient.config.dev_for_build"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.dev_for_build.description")))
                                 .binding(
                                         false,
                                         () -> DevForBuild,
@@ -262,8 +259,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.auto_focus_search"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.auto_focus_search.description", Text.keybind("key.codeclient.codepalette")), Text.translatable("codeclient.config.auto_focus_search.description.2")))
+                                .name(Component.translatable("codeclient.config.auto_focus_search"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.auto_focus_search.description", Component.keybind("key.codeclient.codepalette")), Component.translatable("codeclient.config.auto_focus_search.description.2")))
                                 .binding(
                                         false,
                                         () -> FocusSearch,
@@ -272,8 +269,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.chat_edits_vars"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.chat_edits_vars.description")))
+                                .name(Component.translatable("codeclient.config.chat_edits_vars"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.chat_edits_vars.description")))
                                 .binding(
                                         true,
                                         () -> ChatEditsVars,
@@ -282,8 +279,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.chat_long_value"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.chat_long_value.description")))
+                                .name(Component.translatable("codeclient.config.chat_long_value"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.chat_long_value.description")))
                                 .binding(
                                         true,
                                         () -> ChatLongValue,
@@ -292,9 +289,9 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.ccdbug"))
+                                .name(Component.translatable("codeclient.config.ccdbug"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.ccdbug.description"))
+                                        .text(Component.translatable("codeclient.config.ccdbug.description"))
                                         .build())
                                 .binding(
                                         true,
@@ -305,13 +302,13 @@ public class Config {
                                 .build())
                         //<editor-fold desc="AutoJoin">
                         .group(OptionGroup.createBuilder()
-                                .name(Text.translatable("codeclient.config.autojoin"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.autojoin.description")))
+                                .name(Component.translatable("codeclient.config.autojoin"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.autojoin.description")))
                                 .collapsed(true)
                                 .option(Option.createBuilder(boolean.class)
-                                        .name(Text.translatable("codeclient.config.autojoin.enabled"))
+                                        .name(Component.translatable("codeclient.config.autojoin.enabled"))
                                         .description(OptionDescription.createBuilder()
-                                                .text(Text.translatable("codeclient.config.autojoin.enabled.description"))
+                                                .text(Component.translatable("codeclient.config.autojoin.enabled.description"))
                                                 .build())
                                         .binding(
                                                 false,
@@ -321,9 +318,9 @@ public class Config {
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(Node.class)
-                                        .name(Text.translatable("codeclient.config.autojoin.node"))
+                                        .name(Component.translatable("codeclient.config.autojoin.node"))
                                         .description(OptionDescription.createBuilder()
-                                                .text(Text.translatable("codeclient.config.autojoin.node.description"))
+                                                .text(Component.translatable("codeclient.config.autojoin.node.description"))
                                                 .build())
                                         .binding(
                                                 Node.None,
@@ -334,10 +331,10 @@ public class Config {
 //                                .available(AutoJoin)
                                         .build())
                                 .option(Option.createBuilder(boolean.class)
-                                        .name(Text.translatable("codeclient.config.autojoin.plot"))
+                                        .name(Component.translatable("codeclient.config.autojoin.plot"))
                                         .description(OptionDescription.createBuilder()
-                                                .text(Text.translatable("codeclient.config.autojoin.plot.description1"))
-                                                .text(Text.translatable("codeclient.config.autojoin.plot.description2"))
+                                                .text(Component.translatable("codeclient.config.autojoin.plot.description1"))
+                                                .text(Component.translatable("codeclient.config.autojoin.plot.description2"))
                                                 .build())
                                         .binding(
                                                 false,
@@ -347,9 +344,9 @@ public class Config {
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(int.class)
-                                        .name(Text.translatable("codeclient.config.autojoin.plotid"))
+                                        .name(Component.translatable("codeclient.config.autojoin.plotid"))
                                         .description(OptionDescription.createBuilder()
-                                                .text(Text.translatable("codeclient.config.autojoin.plotid.description"))
+                                                .text(Component.translatable("codeclient.config.autojoin.plotid.description"))
                                                 .build())
                                         .binding(
                                                 0,
@@ -364,12 +361,12 @@ public class Config {
                 //</editor-fold>
                 //<editor-fold desc="Navigation">
                 .category(ConfigCategory.createBuilder()
-                        .name(Text.translatable("codeclient.config.tab.navigation"))
-                        .tooltip(Text.translatable("codeclient.config.tab.navigation.description"))
+                        .name(Component.translatable("codeclient.config.tab.navigation"))
+                        .tooltip(Component.translatable("codeclient.config.tab.navigation.description"))
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.noclip"))
+                                .name(Component.translatable("codeclient.config.noclip"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.noclip.description"))
+                                        .text(Component.translatable("codeclient.config.noclip.description"))
                                         .build())
                                 .binding(
                                         false,
@@ -379,10 +376,10 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(int.class)
-                                .name(Text.translatable("codeclient.config.airstrafe_modifier"))
+                                .name(Component.translatable("codeclient.config.airstrafe_modifier"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.airstrafe_modifier.description1"))
-                                        .text(Text.translatable("codeclient.config.airstrafe_modifier.description2"))
+                                        .text(Component.translatable("codeclient.config.airstrafe_modifier.description1"))
+                                        .text(Component.translatable("codeclient.config.airstrafe_modifier.description2"))
                                         .build())
                                 .binding(
                                         10,
@@ -394,8 +391,8 @@ public class Config {
                                         .step(1))
                                 .build())
                         .option(Option.createBuilder(float.class)
-                                .name(Text.translatable("codeclient.config.angle_up"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_up.description"), Text.translatable("codeclient.config.requires_noclip")))
+                                .name(Component.translatable("codeclient.config.angle_up"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.angle_up.description"), Component.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         50F,
                                         () -> UpAngle,
@@ -404,8 +401,8 @@ public class Config {
                                 .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F, 180F).step(1F))
                                 .build())
                         .option(Option.createBuilder(float.class)
-                                .name(Text.translatable("codeclient.config.angle_down"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.angle_down.description"), Text.translatable("codeclient.config.requires_noclip")))
+                                .name(Component.translatable("codeclient.config.angle_down"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.angle_down.description"), Component.translatable("codeclient.config.requires_noclip")))
                                 .binding(50F,
                                         () -> DownAngle,
                                         opt -> DownAngle = opt
@@ -413,8 +410,8 @@ public class Config {
                                 .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0F, 180F).step(1F))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.tp_up"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_up.description"), Text.translatable("codeclient.config.requires_noclip")))
+                                .name(Component.translatable("codeclient.config.tp_up"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.tp_up.description"), Component.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         false,
                                         () -> TeleportUp,
@@ -423,8 +420,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.tp_down"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.tp_down.description"), Text.translatable("codeclient.config.requires_noclip")))
+                                .name(Component.translatable("codeclient.config.tp_down"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.tp_down.description"), Component.translatable("codeclient.config.requires_noclip")))
                                 .binding(
                                         false,
                                         () -> TeleportDown,
@@ -433,9 +430,9 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.phase_toggle"))
+                                .name(Component.translatable("codeclient.config.phase_toggle"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.phase_toggle.description"))
+                                        .text(Component.translatable("codeclient.config.phase_toggle.description"))
                                         .build())
                                 .binding(
                                         false,
@@ -448,13 +445,13 @@ public class Config {
                 //</editor-fold>
                 //<editor-fold desc="Interaction">
                 .category(ConfigCategory.createBuilder()
-                        .name(Text.translatable("codeclient.config.tab.interaction"))
-                        .tooltip(Text.translatable("codeclient.config.tab.interaction.description"))
+                        .name(Component.translatable("codeclient.config.tab.interaction"))
+                        .tooltip(Component.translatable("codeclient.config.tab.interaction.description"))
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.custom_block_interaction"))
+                                .name(Component.translatable("codeclient.config.custom_block_interaction"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.custom_block_interaction.description1"))
-                                        .text(Text.translatable("codeclient.config.custom_block_interaction.description2"))
+                                        .text(Component.translatable("codeclient.config.custom_block_interaction.description1"))
+                                        .text(Component.translatable("codeclient.config.custom_block_interaction.description2"))
                                         .build())
                                 .binding(
                                         true,
@@ -464,8 +461,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.custom_block_breaking"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.custom_block_breaking.description1"), Text.translatable("codeclient.config.custom_block_breaking.description2"), Text.translatable("codeclient.config.custom_block_breaking.description3")))
+                                .name(Component.translatable("codeclient.config.custom_block_breaking"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.custom_block_breaking.description1"), Component.translatable("codeclient.config.custom_block_breaking.description2"), Component.translatable("codeclient.config.custom_block_breaking.description3")))
                                 .binding(
                                         false,
                                         () -> CustomBlockBreaking,
@@ -486,9 +483,9 @@ public class Config {
 //                                .controller(TickBoxControllerBuilder::create)
 //                                .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.insert_overlay"))
+                                .name(Component.translatable("codeclient.config.insert_overlay"))
                                 .description(OptionDescription.of(
-                                        Text.translatable("codeclient.config.insert_overlay.description")
+                                        Component.translatable("codeclient.config.insert_overlay.description")
                                 ))
                                 .binding(
                                         true,
@@ -499,11 +496,11 @@ public class Config {
                                 .build()
                         )
                         .option(Option.createBuilder(CustomChestMenuType.class)
-                                .name(Text.translatable("codeclient.config.custom_code_chest_menu"))
+                                .name(Component.translatable("codeclient.config.custom_code_chest_menu"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.custom_code_chest_menu.description"))
-                                        .text(Text.of(CustomCodeChest.description))
-                                        .text(Text.literal("THIS IS IN BETA!").formatted(Formatting.YELLOW, Formatting.BOLD))
+                                        .text(Component.translatable("codeclient.config.custom_code_chest_menu.description"))
+                                        .text(Component.nullToEmpty(CustomCodeChest.description))
+                                        .text(Component.literal("THIS IS IN BETA!").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
                                         .build())
                                 .binding(
                                         CustomChestMenuType.OFF,
@@ -513,10 +510,10 @@ public class Config {
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CustomChestMenuType.class))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.place_on_air"))
+                                .name(Component.translatable("codeclient.config.place_on_air"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.place_on_air.description1"))
-                                        .text(Text.translatable("codeclient.config.place_on_air.description2").formatted(Formatting.YELLOW, Formatting.BOLD))
+                                        .text(Component.translatable("codeclient.config.place_on_air.description1"))
+                                        .text(Component.translatable("codeclient.config.place_on_air.description2").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
                                         .build())
                                 .binding(
                                         false,
@@ -541,8 +538,8 @@ public class Config {
 //                                        .available(false)
 //                                        .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.scope_switcher"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.scope_switcher.description")))
+                                .name(Component.translatable("codeclient.config.scope_switcher"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.scope_switcher.description")))
                                 .binding(
                                         true,
                                         () -> ScopeSwitcher,
@@ -551,10 +548,10 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(LayerInteractionMode.class)
-                                .name(Text.translatable("codeclient.config.layer_interaction"))
+                                .name(Component.translatable("codeclient.config.layer_interaction"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.layer_interaction.description"))
-                                        .text(Text.of(CodeLayerInteractionMode.description))
+                                        .text(Component.translatable("codeclient.config.layer_interaction.description"))
+                                        .text(Component.nullToEmpty(CodeLayerInteractionMode.description))
                                         .build())
                                 .binding(
                                         LayerInteractionMode.AUTO,
@@ -564,8 +561,8 @@ public class Config {
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, LayerInteractionMode.class))
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.advanced_middle_click"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.advanced_middle_click.description"), Text.translatable("codeclient.config.advanced_middle_click.description2")))
+                                .name(Component.translatable("codeclient.config.advanced_middle_click"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.advanced_middle_click.description"), Component.translatable("codeclient.config.advanced_middle_click.description2")))
                                 .binding(
                                         false,
                                         () -> AdvancedMiddleClick,
@@ -574,8 +571,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(int.class)
-                                .name(Text.translatable("codeclient.config.recent_values"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.recent_values.description")))
+                                .name(Component.translatable("codeclient.config.recent_values"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.recent_values.description")))
                                 .binding(
                                         0,
                                         () -> RecentValues,
@@ -584,8 +581,8 @@ public class Config {
                                 .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(0, 100))
                                 .build())
                         .option(Option.createBuilder(DestroyItemReset.class)
-                                .name(Text.translatable("codeclient.config.destroy_item_reset.name"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.destroy_item_reset.description")))
+                                .name(Component.translatable("codeclient.config.destroy_item_reset.name"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.destroy_item_reset.description")))
                                 .binding(
                                         DestroyItemReset.OFF,
                                         () -> DestroyItemResetMode,
@@ -594,9 +591,9 @@ public class Config {
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, DestroyItemReset.class))
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.givestrings"))
+                                .name(Component.translatable("codeclient.config.givestrings"))
                                 .description(OptionDescription.createBuilder()
-                                        .text(Text.translatable("codeclient.config.givestrings.description"))
+                                        .text(Component.translatable("codeclient.config.givestrings.description"))
                                         .build())
                                 .binding(
                                         true,
@@ -606,8 +603,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.state_switcher"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.state_switcher.description")))
+                                .name(Component.translatable("codeclient.config.state_switcher"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.state_switcher.description")))
                                 .binding(
                                         true,
                                         () -> StateSwitcher,
@@ -616,8 +613,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(boolean.class)
-                                .name(Text.translatable("codeclient.config.speed_switcher"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.speed_switcher.description")))
+                                .name(Component.translatable("codeclient.config.speed_switcher"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.speed_switcher.description")))
                                 .binding(
                                         true,
                                         () -> SpeedSwitcher,
@@ -629,24 +626,12 @@ public class Config {
                 //</editor-fold>
                 //<editor-fold desc="Visual">
                 .category(ConfigCategory.createBuilder()
-                        .name(Text.translatable("codeclient.config.tab.visual"))
-                        .tooltip(Text.translatable("codeclient.config.tab.visual.description"))
+                        .name(Component.translatable("codeclient.config.tab.visual"))
+                        .tooltip(Component.translatable("codeclient.config.tab.visual.description"))
                         //<editor-fold desc="Ungrouped">
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.show_invisible_blocks"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.show_invisible_blocks.description1"), Text.translatable("codeclient.config.show_invisible_blocks.description2")))
-                                .binding(
-                                        false,
-                                        () -> InvisibleBlocksInDev,
-                                        opt -> InvisibleBlocksInDev = opt
-                                )
-                                .controller(TickBoxControllerBuilder::create)
-                                .available(true)
-                                .flag(OptionFlag.RELOAD_CHUNKS)
-                                .build())
-                        .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.show_variable_scope_below_name"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.show_variable_scope_below_name.description")))
+                                .name(Component.translatable("codeclient.config.show_variable_scope_below_name"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.show_variable_scope_below_name.description")))
                                 .binding(
                                         true,
                                         () -> ShowVariableScopeBelowName,
@@ -655,8 +640,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.show_i_on_line_scope"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.show_i_on_line_scope.description")))
+                                .name(Component.translatable("codeclient.config.show_i_on_line_scope"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.show_i_on_line_scope.description")))
                                 .binding(
                                         false,
                                         () -> UseIForLineScope,
@@ -665,8 +650,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.show_sign_text_from_behind"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.show_sign_text_from_behind.description")))
+                                .name(Component.translatable("codeclient.config.show_sign_text_from_behind"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.show_sign_text_from_behind.description")))
                                 .binding(
                                         true,
                                         () -> SignPeeker,
@@ -675,8 +660,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.param_ghosts"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.param_ghosts.description")))
+                                .name(Component.translatable("codeclient.config.param_ghosts"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.param_ghosts.description")))
                                 .binding(
                                         true,
                                         () -> ParameterGhosts,
@@ -685,8 +670,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.value_details"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.value_details.description")))
+                                .name(Component.translatable("codeclient.config.value_details"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.value_details.description")))
                                 .binding(
                                         true,
                                         () -> ValueDetails,
@@ -695,8 +680,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.cpu_display"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.cpu_display.description")))
+                                .name(Component.translatable("codeclient.config.cpu_display"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.cpu_display.description")))
                                 .binding(
                                         true,
                                         () -> CPUDisplay,
@@ -705,8 +690,8 @@ public class Config {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
                         .option(Option.createBuilder(CPUDisplayCornerOption.class)
-                                .name(Text.translatable("codeclient.config.cpu_display_corner.name"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.cpu_display_corner.description")))
+                                .name(Component.translatable("codeclient.config.cpu_display_corner.name"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.cpu_display_corner.description")))
                                 .binding(
                                         CPUDisplayCornerOption.TOP_LEFT,
                                         () -> CPUDisplayCorner,
@@ -715,8 +700,8 @@ public class Config {
                                 .controller(nodeOption -> () -> new EnumController<>(nodeOption, CPUDisplayCornerOption.class))
                                 .build())
                         .option(Option.createBuilder(Boolean.class)
-                                .name(Text.translatable("codeclient.config.hide_scope_change_messages"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.hide_scope_change_messages.description")))
+                                .name(Component.translatable("codeclient.config.hide_scope_change_messages"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.hide_scope_change_messages.description")))
                                 .binding(
                                         true,
                                         () -> HideScopeChangeMessages,
@@ -727,11 +712,11 @@ public class Config {
                         //</editor-fold>
                         //<editor-fold desc="Action Viewer">
                         .group(OptionGroup.createBuilder()
-                                .name(Text.translatable("codeclient.config.action_viewer"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer.description")))
+                                .name(Component.translatable("codeclient.config.action_viewer"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.action_viewer.description")))
                                 .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.translatable("codeclient.config.action_viewer.enable"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer.enable.description")))
+                                        .name(Component.translatable("codeclient.config.action_viewer.enable"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.action_viewer.enable.description")))
                                         .binding(
                                                 true,
                                                 () -> ActionViewer,
@@ -740,8 +725,8 @@ public class Config {
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.translatable("codeclient.config.action_viewer.invert_scroll"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer.invert_scroll.description")))
+                                        .name(Component.translatable("codeclient.config.action_viewer.invert_scroll"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.action_viewer.invert_scroll.description")))
                                         .binding(
                                                 false,
                                                 () -> InvertActionViewerScroll,
@@ -750,8 +735,8 @@ public class Config {
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(ActionViewerAlignment.class)
-                                        .name(Text.translatable("codeclient.config.action_viewer.alignment"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.action_viewer.alignment.description")))
+                                        .name(Component.translatable("codeclient.config.action_viewer.alignment"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.action_viewer.alignment.description")))
                                         .binding(
                                                 ActionViewerAlignment.TOP,
                                                 () -> ActionViewerLocation,
@@ -763,11 +748,11 @@ public class Config {
                         //</editor-fold>
                         //<editor-fold desc="Chest Preview">
                         .group(OptionGroup.createBuilder()
-                                .name(Text.translatable("codeclient.config.chest_preview"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.chest_preview.description")))
+                                .name(Component.translatable("codeclient.config.chest_preview"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.chest_preview.description")))
                                 .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.translatable("codeclient.config.chest_preview.enable"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.chest_preview.enable.description")))
+                                        .name(Component.translatable("codeclient.config.chest_preview.enable"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.chest_preview.enable.description")))
                                         .binding(
                                                 true,
                                                 () -> ChestPeeker,
@@ -776,8 +761,8 @@ public class Config {
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(int.class)
-                                        .name(Text.translatable("codeclient.config.chest_preview.x_offset"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.chest_preview.x_offset.description")))
+                                        .name(Component.translatable("codeclient.config.chest_preview.x_offset"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.chest_preview.x_offset.description")))
                                         .binding(
                                                 0,
                                                 () -> ChestPeekerX,
@@ -786,8 +771,8 @@ public class Config {
                                         .controller(integerOption -> IntegerFieldControllerBuilder.create(integerOption).range(-500, 500))
                                         .build())
                                 .option(Option.createBuilder(int.class)
-                                        .name(Text.translatable("codeclient.config.chest_preview.y_offset"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.chest_preview.y_offset.description")))
+                                        .name(Component.translatable("codeclient.config.chest_preview.y_offset"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.chest_preview.y_offset.description")))
                                         .binding(
                                                 -4,
                                                 () -> ChestPeekerY,
@@ -799,18 +784,18 @@ public class Config {
                         //</editor-fold>
                         //<editor-fold desc="Chat Highlighter">
                         .group(OptionGroup.createBuilder()
-                                .name(Text.translatable("codeclient.config.chat_highlighter"))
+                                .name(Component.translatable("codeclient.config.chat_highlighter"))
                                 .description(OptionDescription.of(
-                                        Text.translatable("codeclient.config.chat_highlighter.description"),
-                                        Text.translatable("codeclient.config.chat_highlighter.description.extra")
+                                        Component.translatable("codeclient.config.chat_highlighter.description"),
+                                        Component.translatable("codeclient.config.chat_highlighter.description.extra")
                                 ))
                                 .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.translatable("codeclient.config.chat_highlighter.enable"))
+                                        .name(Component.translatable("codeclient.config.chat_highlighter.enable"))
                                         .description(OptionDescription.of(
-                                                Text.translatable("codeclient.config.chat_highlighter.enable.description"),
-                                                Text.empty(),
-                                                Text.translatable("codeclient.config.chat_highlighter.description").setStyle(Style.EMPTY.withColor(Formatting.GRAY)),
-                                                Text.translatable("codeclient.config.chat_highlighter.description.extra").setStyle(Style.EMPTY.withColor(Formatting.GRAY))
+                                                Component.translatable("codeclient.config.chat_highlighter.enable.description"),
+                                                Component.empty(),
+                                                Component.translatable("codeclient.config.chat_highlighter.description").setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)),
+                                                Component.translatable("codeclient.config.chat_highlighter.description.extra").setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY))
                                         ))
                                         .binding(
                                                 true,
@@ -821,10 +806,10 @@ public class Config {
                                         .build()
                                 )
                                 .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.translatable("codeclient.config.chat_highlighter.with_expressions"))
+                                        .name(Component.translatable("codeclient.config.chat_highlighter.with_expressions"))
                                         .description(OptionDescription.of(
-                                                Text.translatable("codeclient.config.chat_highlighter.with_expressions.description"),
-                                                Text.translatable("codeclient.config.chat_highlighter.with_expressions.description.example")
+                                                Component.translatable("codeclient.config.chat_highlighter.with_expressions.description"),
+                                                Component.translatable("codeclient.config.chat_highlighter.with_expressions.description.example")
                                         ))
                                         .binding(
                                                 true,
@@ -835,10 +820,10 @@ public class Config {
                                         .build()
                                 )
                                 .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.translatable("codeclient.config.chat_highlighter.with_minimessage"))
+                                        .name(Component.translatable("codeclient.config.chat_highlighter.with_minimessage"))
                                         .description(OptionDescription.of(
-                                                Text.translatable("codeclient.config.chat_highlighter.with_minimessage.description1"),
-                                                Text.translatable("codeclient.config.chat_highlighter.with_minimessage.description2")
+                                                Component.translatable("codeclient.config.chat_highlighter.with_minimessage.description1"),
+                                                Component.translatable("codeclient.config.chat_highlighter.with_minimessage.description2")
                                         ))
                                         .binding(
                                                 true,
@@ -849,9 +834,9 @@ public class Config {
                                         .build()
                                 )
                                 .option(Option.createBuilder(Color.class)
-                                        .name(Text.translatable("codeclient.config.chat_highlighter.minimessage_tag_color"))
+                                        .name(Component.translatable("codeclient.config.chat_highlighter.minimessage_tag_color"))
                                         .description(OptionDescription.of(
-                                                Text.translatable("codeclient.config.chat_highlighter.minimessage_tag_color.description")
+                                                Component.translatable("codeclient.config.chat_highlighter.minimessage_tag_color.description")
                                         ))
                                         .binding(
                                                 new Color((float) 128 / 255, (float) 128 / 255, (float) 128 / 255),
@@ -866,14 +851,14 @@ public class Config {
                         //</editor-fold>
                         //<editor-fold desc="Chest Highlight">
                         .group(OptionGroup.createBuilder()
-                                .name(Text.translatable("codeclient.config.chest_highlight"))
+                                .name(Component.translatable("codeclient.config.chest_highlight"))
                                 .description(OptionDescription.of(
-                                        Text.translatable("codeclient.config.chest_highlight.description1"),
-                                        Text.translatable("codeclient.config.chest_highlight.description2")))
+                                        Component.translatable("codeclient.config.chest_highlight.description1"),
+                                        Component.translatable("codeclient.config.chest_highlight.description2")))
                                 .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.translatable("codeclient.config.chest_highlight.enable"))
+                                        .name(Component.translatable("codeclient.config.chest_highlight.enable"))
                                         .description(OptionDescription.createBuilder()
-                                                .text(Text.translatable("codeclient.config.chest_highlight.enable.description"))
+                                                .text(Component.translatable("codeclient.config.chest_highlight.enable.description"))
                                                 .build())
                                         .binding(
                                                 true,
@@ -883,8 +868,8 @@ public class Config {
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(Boolean.class)
-                                        .name(Text.translatable("codeclient.config.chest_highlight.with_empty_hand"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.chest_highlight.with_empty_hand.description")))
+                                        .name(Component.translatable("codeclient.config.chest_highlight.with_empty_hand"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.chest_highlight.with_empty_hand.description")))
                                         .binding(
                                                 false,
                                                 () -> HighlightChestsWithAir,
@@ -893,8 +878,8 @@ public class Config {
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(int.class)
-                                        .name(Text.translatable("codeclient.config.chest_highlight.duration"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.chest_highlight.duration.description1"), Text.translatable("codeclient.config.chest_highlight.duration.description2")))
+                                        .name(Component.translatable("codeclient.config.chest_highlight.duration"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.chest_highlight.duration.description1"), Component.translatable("codeclient.config.chest_highlight.duration.description2")))
                                         .binding(
                                                 10,
                                                 () -> HighlightChestDuration,
@@ -903,9 +888,9 @@ public class Config {
                                         .controller(integerOption -> new IntegerFieldControllerBuilderImpl(integerOption).min(1))
                                         .build())
                                 .option(Option.createBuilder(Color.class)
-                                        .name(Text.translatable("codeclient.config.chest_highlight.color"))
+                                        .name(Component.translatable("codeclient.config.chest_highlight.color"))
                                         .description(OptionDescription.createBuilder()
-                                                .text(Text.translatable("codeclient.config.chest_highlight.color.description"))
+                                                .text(Component.translatable("codeclient.config.chest_highlight.color.description"))
                                                 .build())
                                         .binding(
                                                 new Color(0.2F, 1.0F, 1.0F),
@@ -918,11 +903,11 @@ public class Config {
                         //</editor-fold>
                         //<editor-fold desc="Sign Colors">
                         .group(OptionGroup.createBuilder()
-                                .name(Text.translatable("codeclient.config.sign_color"))
-                                .description(OptionDescription.of(Text.translatable("codeclient.config.sign_color.description1"), Text.translatable("codeclient.config.sign_color.description2")))
+                                .name(Component.translatable("codeclient.config.sign_color"))
+                                .description(OptionDescription.of(Component.translatable("codeclient.config.sign_color.description1"), Component.translatable("codeclient.config.sign_color.description2")))
                                 .option(Option.createBuilder(Color.class)
-                                        .name(Text.translatable("codeclient.config.sign_color.line1"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.sign_color.line1.description1"), Text.translatable("codeclient.config.sign_color.line1.description2")))
+                                        .name(Component.translatable("codeclient.config.sign_color.line1"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.sign_color.line1.description1"), Component.translatable("codeclient.config.sign_color.line1.description2")))
                                         .binding(
                                                 new Color(0xAAAAAA),
                                                 () -> new Color(Line1Color),
@@ -931,8 +916,8 @@ public class Config {
                                         .controller(ColorControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(Color.class)
-                                        .name(Text.translatable("codeclient.config.sign_color.line2"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.sign_color.line2.description1"), Text.translatable("codeclient.config.sign_color.line2.description2")))
+                                        .name(Component.translatable("codeclient.config.sign_color.line2"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.sign_color.line2.description1"), Component.translatable("codeclient.config.sign_color.line2.description2")))
                                         .binding(
                                                 new Color(0xC5C5C5),
                                                 () -> new Color(Line2Color),
@@ -941,8 +926,8 @@ public class Config {
                                         .controller(ColorControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(Color.class)
-                                        .name(Text.translatable("codeclient.config.sign_color.line3"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.sign_color.line3.description1"), Text.translatable("codeclient.config.sign_color.line3.description2")))
+                                        .name(Component.translatable("codeclient.config.sign_color.line3"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.sign_color.line3.description1"), Component.translatable("codeclient.config.sign_color.line3.description2")))
                                         .binding(
                                                 new Color(0xAAFFAA),
                                                 () -> new Color(Line3Color),
@@ -951,8 +936,8 @@ public class Config {
                                         .controller(ColorControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(boolean.class)
-                                        .name(Text.translatable("codeclient.config.sign_color.selection"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.sign_color.selection.description")))
+                                        .name(Component.translatable("codeclient.config.sign_color.selection"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.sign_color.selection.description")))
                                         .binding(
                                                 true,
                                                 () -> UseSelectionColor,
@@ -961,8 +946,8 @@ public class Config {
                                         .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .option(Option.createBuilder(Color.class)
-                                        .name(Text.translatable("codeclient.config.sign_color.line4"))
-                                        .description(OptionDescription.of(Text.translatable("codeclient.config.sign_color.line4.description1"), Text.translatable("codeclient.config.sign_color.line4.description2")))
+                                        .name(Component.translatable("codeclient.config.sign_color.line4"))
+                                        .description(OptionDescription.of(Component.translatable("codeclient.config.sign_color.line4.description1"), Component.translatable("codeclient.config.sign_color.line4.description2")))
                                         .binding(
                                                 new Color(0xFF8800),
                                                 () -> new Color(Line4Color),

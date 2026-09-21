@@ -5,10 +5,9 @@ import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.OverlayManager;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Plot;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.OverlayMessageS2CPacket;
-
 import java.util.regex.Pattern;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 
 public class CPUDisplay extends Feature {
     public int overlayTimeout = 0;
@@ -19,7 +18,7 @@ public class CPUDisplay extends Feature {
             OverlayManager.setCpuUsage(null);
             return false;
         }
-        if (!(packet instanceof OverlayMessageS2CPacket overlay)) return false;
+        if (!(packet instanceof ClientboundSetActionBarTextPacket overlay)) return false;
 
         String txt = overlay.text().getString();
 

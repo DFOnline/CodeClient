@@ -6,8 +6,8 @@ import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.location.Dev;
 import dev.dfonline.codeclient.location.Location;
 import dev.dfonline.codeclient.location.Plot;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 
 public class DevForBuild extends Action {
     private GoTo move = null;
@@ -21,7 +21,7 @@ public class DevForBuild extends Action {
     public void init() {
         if(CodeClient.location instanceof Plot) {
             timeout = 0;
-            CodeClient.MC.getNetworkHandler().sendChatCommand("dev");
+            CodeClient.MC.getConnection().sendCommand("dev");
         }
     }
 
@@ -36,7 +36,7 @@ public class DevForBuild extends Action {
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if(packet instanceof ScreenHandlerSlotUpdateS2CPacket) return true;
+        if(packet instanceof ClientboundContainerSetSlotPacket) return true;
         if(move != null) return move.onReceivePacket(packet);
         return super.onReceivePacket(packet);
     }
@@ -56,13 +56,13 @@ public class DevForBuild extends Action {
             }
             var player = CodeClient.MC.player;
             var flying = player.getAbilities().flying;
-            player.setVelocity(0,0,0);
+            player.setDeltaMovement(0,0,0);
             move = new GoTo(dev.getBuildPos(), () -> {
-                player.getInventory().clear();
-                player.setYaw(0);
-                player.setPitch(0);
+                player.getInventory().clearContent();
+                player.setYRot(0);
+                player.setXRot(0);
                 player.getAbilities().flying = flying;
-                player.setVelocity(0,0,0);
+                player.setDeltaMovement(0,0,0);
                 callback();
             });
             move.init();

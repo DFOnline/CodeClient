@@ -17,7 +17,7 @@ public class FileManager {
      * @return
      */
     public static Path Path() {
-        Path path = CodeClient.MC.runDirectory.toPath().resolve(CodeClient.MOD_ID);
+        Path path = CodeClient.MC.gameDirectory.toPath().resolve(CodeClient.MOD_ID);
         path.toFile().mkdir();
         return path;
     }

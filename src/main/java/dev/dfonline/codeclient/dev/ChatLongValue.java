@@ -6,8 +6,8 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.hypercube.item.*;
 import dev.dfonline.codeclient.hypercube.item.Number;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.util.Hand;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.world.InteractionHand;
 import org.apache.commons.lang3.StringUtils;
 
 public class ChatLongValue extends Feature {
@@ -15,10 +15,10 @@ public class ChatLongValue extends Feature {
         return Config.getConfig().ChatLongValue;
     }
 
-    public void onOpenChat(TextFieldWidget chat) {
+    public void onOpenChat(EditBox chat) {
         var player = CodeClient.MC.player;
         if (player == null) return;
-        var item = VarItems.parse(player.getMainHandStack());
+        var item = VarItems.parse(player.getMainHandItem());
         if (item instanceof Text || item instanceof Number || item instanceof Component) {
             chat.setMaxLength(10_000);
         }
@@ -37,12 +37,12 @@ public class ChatLongValue extends Feature {
             return true;
         }
 
-        if (VarItems.parse(player.getMainHandStack()) instanceof NamedItem named) {
+        if (VarItems.parse(player.getMainHandItem()) instanceof NamedItem named) {
             if (very_long || trailing_data) {
                 named.setName(chatText);
-                player.getInventory().setSelectedStack(named.toStack());
+                player.getInventory().setSelectedItem(named.toStack());
                 Utility.sendHandItem(named.toStack());
-                CodeClient.MC.gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
+                CodeClient.MC.gameRenderer.itemInHandRenderer.itemUsed(InteractionHand.MAIN_HAND);
                 return true;
             }
             return false;

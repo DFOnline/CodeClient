@@ -6,9 +6,9 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.command.Command;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.Component;
 
 public class CommandPing extends Command {
     @Override
@@ -17,15 +17,15 @@ public class CommandPing extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> {
             if (CodeClient.MC.player == null) return 0;
 
-            PlayerListEntry playerListEntry = CodeClient.MC.player.networkHandler.getPlayerListEntry(CodeClient.MC.player.getUuid());
+            PlayerInfo playerListEntry = CodeClient.MC.player.connection.getPlayerInfo(CodeClient.MC.player.getUUID());
 
             if (playerListEntry != null) {
                 int ping = playerListEntry.getLatency();
-                Utility.sendMessage(Text.translatable("codeclient.command.ping", ping), ChatType.SUCCESS);
+                Utility.sendMessage(Component.translatable("codeclient.command.ping", ping), ChatType.SUCCESS);
             }
             return 0;
         });

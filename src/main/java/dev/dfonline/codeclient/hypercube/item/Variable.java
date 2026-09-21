@@ -3,12 +3,12 @@ package dev.dfonline.codeclient.hypercube.item;
 import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class Variable extends NamedItem {
     private Scope scope;
@@ -46,8 +46,8 @@ public class Variable extends NamedItem {
     public ItemStack toStack() {
         var stack = super.toStack();
         DFItem dfItem = DFItem.of(stack);
-        dfItem.setName(Text.literal(getName()).setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
-        Utility.addLore(dfItem.getItemStack(), Text.literal(scope.longName).setStyle(Style.EMPTY.withColor(scope.color).withItalic(false)));
+        dfItem.setName(Component.literal(getName()).setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.WHITE)));
+        Utility.addLore(dfItem.getItemStack(), Component.literal(scope.longName).setStyle(Style.EMPTY.withColor(scope.color).withItalic(false)));
         return dfItem.getItemStack();
     }
 }

@@ -1,12 +1,12 @@
 package dev.dfonline.codeclient.data;
 
 import dev.dfonline.codeclient.data.value.DataValue;
-import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.nbt.CompoundTag;
 
 public class PublicBukkitValues {
     public static final String PUBLIC_BUKKIT_VALUES_KEY = "PublicBukkitValues";
@@ -19,9 +19,9 @@ public class PublicBukkitValues {
      */
     private static final String HYPERCUBE_KEY_PREFIX = "hypercube:";
 
-    private final NbtCompound publicBukkitValues;
+    private final CompoundTag publicBukkitValues;
 
-    private PublicBukkitValues(NbtCompound publicBukkitValues) {
+    private PublicBukkitValues(CompoundTag publicBukkitValues) {
         this.publicBukkitValues = publicBukkitValues;
     }
 
@@ -46,8 +46,8 @@ public class PublicBukkitValues {
      * @return The new empty PublicBukkitValues.
      */
     public static PublicBukkitValues getEmpty() {
-        var empty = new NbtCompound();
-        empty.put(PUBLIC_BUKKIT_VALUES_KEY, new NbtCompound());
+        var empty = new CompoundTag();
+        empty.put(PUBLIC_BUKKIT_VALUES_KEY, new CompoundTag());
         return new PublicBukkitValues(empty);
     }
 
@@ -57,7 +57,7 @@ public class PublicBukkitValues {
      * @return The NbtCompound of the PublicBukkitValues.
      * @apiNote This should only be used in very specific cases, the entire point of this class is to abstract the NBT data.
      */
-    public NbtCompound getNbt() {
+    public CompoundTag getNbt() {
         return publicBukkitValues;
     }
 
@@ -97,7 +97,7 @@ public class PublicBukkitValues {
      * @return The hypercube keys.
      */
     public Set<String> getHypercubeKeys() {
-        return publicBukkitValues.getKeys().stream().filter(key -> key.startsWith(HYPERCUBE_KEY_PREFIX)).map(key -> key.substring(10)).collect(Collectors.toSet());
+        return publicBukkitValues.keySet().stream().filter(key -> key.startsWith(HYPERCUBE_KEY_PREFIX)).map(key -> key.substring(10)).collect(Collectors.toSet());
     }
 
     /**
@@ -106,7 +106,7 @@ public class PublicBukkitValues {
      * @return The keys.
      */
     public Set<String> getKeys() {
-        return publicBukkitValues.getKeys();
+        return publicBukkitValues.keySet();
     }
 
     /**

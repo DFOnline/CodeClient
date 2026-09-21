@@ -117,9 +117,6 @@
   "codeclient.config.tab.visual": "Visual",
   "codeclient.config.tab.visual.description": "Purely visual elements of CodeClient, which can help in coding with information.",
 
-  "codeclient.config.show_invisible_blocks": "Show Invisible Blocks",
-  "codeclient.config.show_invisible_blocks.description1": "Show blocks like barriers and other invisible blocks whilst building or coding.",
-  "codeclient.config.show_invisible_blocks.description2": "Laggy as of now",
   "codeclient.config.show_variable_scope_below_name": "Show Variable Scope Below Name",
   "codeclient.config.show_variable_scope_below_name.description": "Show the scope of a variable below its name when held, additionally stops the variable name from disappearing.",
   "codeclient.config.show_i_on_line_scope": "Show I On Line Scope",
@@ -253,10 +250,6 @@
 
   "codeclient.hover.click_to_copy": "Click to copy to clipboard",
 
-  "codeclient.search.results": "Search Results:",
-  "codeclient.search.no_results": "No results.",
-  "codeclient.search.hover.teleport": "Click to teleport\nx: %s, y: %s, z: %s",
-  "codeclient.search.hover.highlight": "Click to highlight\nx: %s, y: %s, z: %s",
 
   "codeclient.files.template_fail": "Couldn't load templates.",
   "codeclient.files.hold_template": "You need to hold a template to save.",

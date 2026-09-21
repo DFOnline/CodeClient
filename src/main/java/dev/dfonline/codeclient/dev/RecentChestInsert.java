@@ -1,15 +1,15 @@
 package dev.dfonline.codeclient.dev;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,16 +28,22 @@ public class RecentChestInsert extends Feature {
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, double cameraX, double cameraY, double cameraZ) {
+    public void render(PoseStack matrices, SubmitNodeCollector submitter, double cameraX, double cameraY, double cameraZ) {
         if (CodeClient.location instanceof Dev) {
             if (lastChest == null) return;
-            VoxelShape shape = CodeClient.MC.world.getBlockState(lastChest).getOutlineShape(CodeClient.MC.world, lastChest).offset(lastChest.getX(), lastChest.getY(), lastChest.getZ());
-            VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayers.LINES);
+            BlockPos pos = lastChest;
+            VoxelShape shape = CodeClient.MC.level.getBlockState(pos).getShape(CodeClient.MC.level, pos);
             int color = Config.getConfig().ChestHighlightColor;
-            float a = Math.min(alpha, 1f);
+            float a = Math.min(alpha, 1.0F);
 
             color = (int) (a * 255) << 24 | (color & 0x00FFFFFF);
-            VertexRendering.drawOutline(matrices, vertexConsumer, shape, -cameraX, -cameraY, -cameraZ, color, CodeClient.MC.getWindow().getMinimumLineWidth());
+            matrices.pushPose();
+            try {
+                matrices.translate(pos.getX() - cameraX, pos.getY() - cameraY, pos.getZ() - cameraZ);
+                submitter.submitShapeOutline(matrices, shape, RenderTypes.linesTranslucent(), color, CodeClient.MC.getWindow().getAppropriateLineWidth(), true);
+            } finally {
+                matrices.popPose();
+            }
         }
     }
 
@@ -49,8 +55,8 @@ public class RecentChestInsert extends Feature {
 
     @Override
     public void onBreakBlock(@NotNull Dev dev, @NotNull BlockPos pos, @Nullable BlockPos breakPos) {
-        if(CodeClient.MC.world.getBlockState(pos).getBlock() != Blocks.CHEST) return;
-        if(Config.getConfig().HighlightChestsWithAir || !CodeClient.MC.player.getMainHandStack().isEmpty()) {
+        if(CodeClient.MC.level.getBlockState(pos).getBlock() != Blocks.CHEST) return;
+        if(Config.getConfig().HighlightChestsWithAir || !CodeClient.MC.player.getMainHandItem().isEmpty()) {
             setLastChest(pos);
         }
     }

@@ -1,42 +1,41 @@
 package dev.dfonline.codeclient;
 
-import net.minecraft.text.Text;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.network.chat.Component;
 
 /**
  * Text found in the top left of the screen.
  */
 public class OverlayManager {
-    private static ArrayList<Text> overlayText = new ArrayList<>();
+    private static ArrayList<Component> overlayText = new ArrayList<>();
 
-    private static Text cpuUsage = null;
+    private static Component cpuUsage = null;
 
-    public static List<Text> getOverlayText() {
+    public static List<Component> getOverlayText() {
         return overlayText;
     }
 
     /**
      * Clears and sets the overlay text.
      */
-    public static void setOverlayText(Text overlayText) {
+    public static void setOverlayText(Component overlayText) {
         setOverlayText(new ArrayList<>(Collections.singleton(overlayText)));
     }
 
     /**
      * Clears and sets the overlay text.
      */
-    public static void setOverlayText(ArrayList<Text> overlayText) {
+    public static void setOverlayText(ArrayList<Component> overlayText) {
         OverlayManager.overlayText = overlayText;
     }
 
-    public static Text getCpuUsage() {
+    public static Component getCpuUsage() {
         return cpuUsage;
     }
 
-    public static void setCpuUsage(Text cpuUsage) {
+    public static void setCpuUsage(Component cpuUsage) {
         OverlayManager.cpuUsage = cpuUsage;
     }
 
@@ -47,7 +46,7 @@ public class OverlayManager {
         setOverlayText(new ArrayList<>());
     }
 
-    public static void addOverlayText(Text overlayText) {
+    public static void addOverlayText(Component overlayText) {
         OverlayManager.overlayText.add(overlayText);
     }
 }

@@ -6,7 +6,7 @@ import dev.dfonline.codeclient.action.None;
 import dev.dfonline.codeclient.command.Command;
 import dev.dfonline.codeclient.dev.debug.Debug;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.commands.CommandBuildContext;
 
 public class CommandAbort extends Command {
     @Override
@@ -15,7 +15,7 @@ public class CommandAbort extends Command {
     }
 
     @Override
-    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandRegistryAccess registryAccess) {
+    public LiteralArgumentBuilder<FabricClientCommandSource> create(LiteralArgumentBuilder<FabricClientCommandSource> cmd, CommandBuildContext registryAccess) {
         return cmd.executes(context -> {
             CodeClient.confirmingAction = null;
             CodeClient.currentAction = new None();

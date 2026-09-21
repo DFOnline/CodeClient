@@ -1,25 +1,25 @@
 package dev.dfonline.codeclient.hypercube;
 
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TextColor;
 
 public enum Target {
-    Selection(Formatting.GREEN, true, true),
-    Default(Formatting.GREEN, true, true),
-    Killer(Formatting.RED, true, true),
-    Damager(Formatting.RED, true, true),
-    Shooter(Formatting.YELLOW, true, true),
-    Victim(Formatting.BLUE, true, true),
-    AllPlayers(Formatting.AQUA, true, false),
-    Projectile(Formatting.YELLOW, false, true),
-    LastEntity(Formatting.AQUA, false, true);
+    Selection(ChatFormatting.GREEN, true, true),
+    Default(ChatFormatting.GREEN, true, true),
+    Killer(ChatFormatting.RED, true, true),
+    Damager(ChatFormatting.RED, true, true),
+    Shooter(ChatFormatting.YELLOW, true, true),
+    Victim(ChatFormatting.BLUE, true, true),
+    AllPlayers(ChatFormatting.AQUA, true, false),
+    Projectile(ChatFormatting.YELLOW, false, true),
+    LastEntity(ChatFormatting.AQUA, false, true);
 
     public final TextColor color;
     public final boolean onActions;
     public final boolean onGameValue;
 
-    Target(Formatting color, boolean onActions, boolean onGameValue) {
-        this.color = TextColor.fromFormatting(color);
+    Target(ChatFormatting color, boolean onActions, boolean onGameValue) {
+        this.color = TextColor.fromLegacyFormat(color);
         this.onActions = onActions;
         this.onGameValue = onGameValue;
     }

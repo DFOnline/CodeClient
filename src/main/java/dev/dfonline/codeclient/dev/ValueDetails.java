@@ -6,10 +6,10 @@ import dev.dfonline.codeclient.hypercube.item.Number;
 import dev.dfonline.codeclient.hypercube.item.Sound;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import dev.dfonline.codeclient.hypercube.item.Variable;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix3x2fStack;
 
 public class ValueDetails extends Feature {
@@ -18,26 +18,26 @@ public class ValueDetails extends Feature {
         return Config.getConfig().ValueDetails;
     }
 
-    public void draw(DrawText drawText, TextRenderer textRenderer, ItemStack stack, int x, int y, Matrix3x2fStack matrices) {
+    public void draw(DrawText drawText, Font textRenderer, ItemStack stack, int x, int y, Matrix3x2fStack matrices) {
         var varItem = VarItems.parse(stack);
 
         if (varItem == null) return;
 
-        Text text = null;
+        Component text = null;
         if (varItem instanceof Number number) {
             String name = number.getName();
-            if (textRenderer.getWidth(Text.of(name)) > 16) {
-                var avail = textRenderer.trimToWidth(name, 16 - 2);
-                text = Text.literal(avail).formatted(Formatting.RED).append(Text.literal(".".repeat((16 - textRenderer.getWidth(Text.of(avail))) / 2)).formatted(Formatting.WHITE));
-            } else text = Text.literal(name).formatted(Formatting.RED);
+            if (textRenderer.width(Component.nullToEmpty(name)) > 16) {
+                var avail = textRenderer.plainSubstrByWidth(name, 16 - 2);
+                text = Component.literal(avail).withStyle(ChatFormatting.RED).append(Component.literal(".".repeat((16 - textRenderer.width(Component.nullToEmpty(avail))) / 2)).withStyle(ChatFormatting.WHITE));
+            } else text = Component.literal(name).withStyle(ChatFormatting.RED);
         }
         if(varItem instanceof Variable variable) {
             var scope = variable.getScope();
-            text = Text.literal(scope.getShortName()).withColor(scope.color.getRgb());
+            text = Component.literal(scope.getShortName()).withColor(scope.color.getValue());
         }
         if(varItem instanceof Sound sound) {
             var note = sound.getNote();
-            if(note != null) text = Text.literal(note);
+            if(note != null) text = Component.literal(note);
         }
 
         if (text == null) return;
@@ -48,6 +48,6 @@ public class ValueDetails extends Feature {
     }
 
     public interface DrawText {
-        void run(TextRenderer textRenderer, Text text, int x, int y, int color, boolean shadow);
+        void run(Font textRenderer, Component text, int x, int y, int color, boolean shadow);
     }
 }

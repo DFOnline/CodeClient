@@ -1,21 +1,19 @@
 package dev.dfonline.codeclient.switcher;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -26,9 +24,9 @@ import java.util.List;
  * It can reasonably hold up to 4 options.
  */
 public abstract class GenericSwitcher extends Screen {
-    private static final Identifier TEXTURE = Identifier.ofVanilla("textures/gui/container/gamemode_switcher.png");
-    private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("gamemode_switcher/slot");
-    private static final Identifier SELECTED_TEXTURE = Identifier.ofVanilla("gamemode_switcher/selection");
+    private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/gui/container/gamemode_switcher.png");
+    private static final Identifier SLOT_TEXTURE = Identifier.withDefaultNamespace("gamemode_switcher/slot");
+    private static final Identifier SELECTED_TEXTURE = Identifier.withDefaultNamespace("gamemode_switcher/selection");
     /**
      * Key to hold down, generally F3.
      * The selected option will be run when this is released.
@@ -41,12 +39,12 @@ public abstract class GenericSwitcher extends Screen {
     private final List<SelectableButtonWidget> buttons = new ArrayList<>();
     protected boolean hasClicked = false;
     protected Integer selected;
-    protected Text footer = Text.translatable("codeclient.switcher.footer");
+    protected Component footer = Component.translatable("codeclient.switcher.footer");
     private boolean usingMouseToSelect = false;
     private Integer lastMouseX;
     private Integer lastMouseY;
 
-    protected GenericSwitcher(Text title, int holdKey, int pressKey) {
+    protected GenericSwitcher(Component title, int holdKey, int pressKey) {
         super(title);
         HOLD_KEY = holdKey;
         PRESS_KEY = pressKey;
@@ -69,18 +67,18 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     @Override
-    protected void clearChildren() {
-        super.clearChildren();
+    protected void clearWidgets() {
+        super.clearWidgets();
         this.buttons.clear();
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         if (checkFinished()) return;
         int centerX = this.width / 2 - 62;
         int centerY = this.height / 2 - 31 - 27;
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, centerX, centerY, 0, 0, 125, 75, 128, 128);
-        super.render(context, mouseX, mouseY, delta);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, centerX, centerY, 0, 0, 125, 75, 128, 128);
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         if (lastMouseX == null) lastMouseX = mouseX;
         if (lastMouseY == null) lastMouseY = mouseY;
@@ -92,10 +90,10 @@ public abstract class GenericSwitcher extends Screen {
         }
 
         Option selected = getSelected();
-        Text selectedText = selected != null ? selected.text : Text.translatable("codeclient.switcher.select");
+        Component selectedText = selected != null ? selected.text : Component.translatable("codeclient.switcher.select");
 
-        context.drawCenteredTextWithShadow(this.textRenderer, selectedText, this.width / 2, this.height / 2 - 51, Colors.WHITE);
-        context.drawCenteredTextWithShadow(this.textRenderer, footer, this.width / 2, this.height / 2 + 5, Colors.WHITE);
+        graphics.centeredText(this.font, selectedText, this.width / 2, this.height / 2 - 51, CommonColors.WHITE);
+        graphics.centeredText(this.font, footer, this.width / 2, this.height / 2 + 5, CommonColors.WHITE);
 
         int i = 0;
 
@@ -104,33 +102,34 @@ public abstract class GenericSwitcher extends Screen {
                 if (button.getX() < mouseX && button.getX() + 31 > mouseX) this.selected = i;
             }
             button.selected = this.selected == i;
-            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, button.getX(), button.getY(), 26, 26);
             if (button.selected)
-                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
-            button.render(context, mouseX, mouseY, delta);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SELECTED_TEXTURE, button.getX(), button.getY(), 26, 26);
+            button.extractRenderState(graphics, mouseX, mouseY, delta);
             ++i;
         }
     }
 
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+    @Override
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
     }
 
     @Override
-    public boolean keyPressed(KeyInput key) {
-        if (key.getKeycode() == PRESS_KEY) {
+    public boolean keyPressed(KeyEvent key) {
+        if (key.input() == PRESS_KEY) {
             this.usingMouseToSelect = false;
             this.selected++;
             this.selected %= getOptions().size();
             return true;
         }
-        if (key.getKeycode() == GLFW.GLFW_KEY_ESCAPE) {
-            this.close();
+        if (key.input() == GLFW.GLFW_KEY_ESCAPE) {
+            this.onClose();
         }
         return super.keyPressed(key);
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         int i = 0;
         for (SelectableButtonWidget widget : buttons) {
             if (widget.getX() < click.x() && widget.getX() + 31 > click.x()
@@ -146,11 +145,11 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     protected boolean checkFinished() {
-        if (this.client == null) return false;
-        if (hasClicked || !InputUtil.isKeyPressed(this.client.getWindow(), HOLD_KEY)) {
+        if (this.minecraft == null) return false;
+        if (hasClicked || !InputConstants.isKeyDown(this.minecraft.getWindow(), HOLD_KEY)) {
             Option selected = getSelected();
             if (selected != null) selected.run();
-            this.client.setScreen(null);
+            this.minecraft.gui.setScreen(null);
             return true;
         }
         return false;
@@ -164,7 +163,7 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
@@ -178,14 +177,14 @@ public abstract class GenericSwitcher extends Screen {
     }
 
     @Environment(EnvType.CLIENT)
-    public record Option(Text text, ItemStack icon, Callback callback) {
+    public record Option(Component text, ItemStack icon, Callback callback) {
         public void run() {
             callback.run();
         }
     }
 
     @Environment(EnvType.CLIENT)
-    private class SelectableButtonWidget extends ClickableWidget {
+    private class SelectableButtonWidget extends AbstractWidget {
         final Option option;
         public boolean selected = false;
 
@@ -195,22 +194,22 @@ public abstract class GenericSwitcher extends Screen {
         }
 
         @Override
-        public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-//            context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
+        protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+//            graphics.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
 
-            context.drawItem(option.icon, this.getX() + 5, this.getY() + 5);
-            context.drawStackOverlay(textRenderer, option.icon, this.getX() + 5, this.getY() + 5);
+            graphics.item(option.icon, this.getX() + 5, this.getY() + 5);
+            graphics.itemDecorations(font, option.icon, this.getX() + 5, this.getY() + 5);
 
             if (selected) {
-//                context.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
-                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 26, 75, 26, 26, 128, 128);
+//                graphics.getMatrices().translate((float) this.getX(), (float) this.getY(), 0.0F);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, 26, 75, 26, 26, 128, 128);
             }
         }
 
         @Override
-        protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-            this.appendDefaultNarrations(builder);
+        protected void updateWidgetNarration(NarrationElementOutput builder) {
+            this.defaultButtonNarrationText(builder);
         }
     }
 }

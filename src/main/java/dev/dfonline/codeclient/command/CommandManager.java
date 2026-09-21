@@ -3,8 +3,7 @@ package dev.dfonline.codeclient.command;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.dfonline.codeclient.command.impl.*;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-
+import net.minecraft.commands.CommandBuildContext;
 import java.util.List;
 
 public class CommandManager {
@@ -30,7 +29,6 @@ public class CommandManager {
             new CommandSave(),
             new CommandScanFor(),
             new CommandScanPlot(),
-            new CommandSearch(),
             new CommandSwap(),
             new CommandTemplatePlacer(),
             new CommandWidthDump(),
@@ -39,7 +37,7 @@ public class CommandManager {
             new CommandHighlight()
     );
 
-    public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
         COMMANDS.forEach(command -> {
             if (command.name() == null || command.name().isEmpty() || command.name().contains(" ")) {
                 throw new IllegalStateException("Command name cannot be null, empty, or include whitespace. At class: " + command.getClass().getSimpleName());

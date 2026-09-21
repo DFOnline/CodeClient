@@ -1,14 +1,14 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-public class NumberFieldWidget extends TextFieldWidget {
+public class NumberFieldWidget extends EditBox {
     @Nullable
     public Double min = null;
     @Nullable
@@ -17,14 +17,14 @@ public class NumberFieldWidget extends TextFieldWidget {
     private @RegExp String regex = "(?<!^)-|[^\\d-.]";
     private boolean isInt = false;
 
-    public NumberFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, Text text) {
+    public NumberFieldWidget(Font textRenderer, int x, int y, int width, int height, Component text) {
         super(textRenderer, x, y, width, height, text);
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if(input.getKeycode() == GLFW.GLFW_KEY_UP) setNumber(getNumber() + 1);
-        if(input.getKeycode() == GLFW.GLFW_KEY_DOWN) setNumber(getNumber() - 1);
+    public boolean keyPressed(KeyEvent input) {
+        if(input.input() == GLFW.GLFW_KEY_UP) setNumber(getNumber() + 1);
+        if(input.input() == GLFW.GLFW_KEY_DOWN) setNumber(getNumber() - 1);
         return super.keyPressed(input);
     }
 
@@ -55,12 +55,12 @@ public class NumberFieldWidget extends TextFieldWidget {
     }
 
     @Override
-    public void setText(String text) {
+    public void setValue(String text) {
         try {
             setValue(Double.parseDouble(text));
         } catch (Exception ignored) {
         }
-        super.setText(text);
+        super.setValue(text);
     }
 
     public double getNumber() {
@@ -69,8 +69,8 @@ public class NumberFieldWidget extends TextFieldWidget {
 
     public void setNumber(double number) {
         setValue(number);
-        if(isInt) this.setText("%.0f".formatted(this.number));
-        else this.setText("%s".formatted(this.number));
+        if(isInt) this.setValue("%.0f".formatted(this.number));
+        else this.setValue("%s".formatted(this.number));
     }
 
     public int getInt() {
@@ -78,10 +78,10 @@ public class NumberFieldWidget extends TextFieldWidget {
     }
 
     @Override
-    public void write(String text) {
-        super.write(text.replaceAll(regex, ""));
+    public void insertText(String text) {
+        super.insertText(text.replaceAll(regex, ""));
         try {
-            setValue(Double.parseDouble(this.getText()));
+            setValue(Double.parseDouble(this.getValue()));
         } catch (Exception ignored) {
         }
     }

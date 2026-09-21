@@ -2,7 +2,7 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class CustomChestNumbers {
     public static final CustomChestNumbers SMALL = new CustomChestNumbers(

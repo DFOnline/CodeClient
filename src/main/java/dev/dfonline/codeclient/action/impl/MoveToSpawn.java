@@ -5,14 +5,14 @@ import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.MoveToLocation;
 import dev.dfonline.codeclient.action.Action;
 import dev.dfonline.codeclient.location.Dev;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.world.phys.Vec3;
 
 public class MoveToSpawn extends Action {
-    private final ClientPlayerEntity player = CodeClient.MC.player;
+    private final LocalPlayer player = CodeClient.MC.player;
     public Step currentStep = Step.WAIT_FOR_TELEPORT;
 
     public MoveToSpawn(Callback callback) {
@@ -21,19 +21,19 @@ public class MoveToSpawn extends Action {
 
     @Override
     public void init() {
-        CodeClient.MC.getNetworkHandler().sendChatCommand("plot spawn");
+        CodeClient.MC.getConnection().sendCommand("plot spawn");
         currentStep = Step.WAIT_FOR_TELEPORT;
     }
 
     @Override
     public boolean onReceivePacket(Packet<?> packet) {
-        if (packet instanceof PlayerPositionLookS2CPacket positionLookS2CPacket)
+        if (packet instanceof ClientboundPlayerPositionPacket positionLookS2CPacket)
             return onTeleport(positionLookS2CPacket);
-        if (packet instanceof PlaySoundS2CPacket && currentStep != Step.DONE) return true;
+        if (packet instanceof ClientboundSoundPacket && currentStep != Step.DONE) return true;
         return super.onReceivePacket(packet);
     }
 
-    public boolean onTeleport(PlayerPositionLookS2CPacket packet) {
+    public boolean onTeleport(ClientboundPlayerPositionPacket packet) {
         Dev plot = (Dev) CodeClient.location;
         if (currentStep == Step.WAIT_FOR_TELEPORT) {
             plot.setDevSpawn(packet.change().position().x, packet.change().position().z);
@@ -44,9 +44,9 @@ public class MoveToSpawn extends Action {
 
     public boolean moveModifier() {
         Dev plot = (Dev) CodeClient.location;
-        Vec3d location = new Vec3d(plot.getX(), plot.getFloorY(), plot.getZ());
+        Vec3 location = new Vec3(plot.getX(), plot.getFloorY(), plot.getZ());
         if (currentStep == Step.MOVE_TO_CORNER) {
-            if (player.getEntityPos().distanceTo(location) == 0) {
+            if (player.position().distanceTo(location) == 0) {
                 currentStep = Step.DONE;
                 this.callback();
                 return false;

@@ -4,14 +4,13 @@ import com.google.gson.JsonObject;
 import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.actiondump.ActionDump;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-
 import java.util.Arrays;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class Potion extends VarItem {
     private String potion;
@@ -90,21 +89,21 @@ public class Potion extends VarItem {
     public ItemStack toStack() {
         ItemStack stack = super.toStack();
         DFItem dfItem = DFItem.of(stack);
-        dfItem.setName(Text.literal("Potion Effect").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.WHITE)));
-        Text name;
+        dfItem.setName(Component.literal("Potion Effect").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.WHITE)));
+        Component name;
         try {
             ActionDump db = ActionDump.getActionDump();
             var value = Arrays.stream(db.potions).filter(gv -> gv.icon.getCleanName().equals(potion)).findFirst();
             if (value.isEmpty()) throw new Exception("");
-            name = Text.literal(value.get().icon.name);
+            name = Component.literal(value.get().icon.name);
         } catch (Exception e) {
-            name = Text.literal(potion).setStyle(Style.EMPTY);
+            name = Component.literal(potion).setStyle(Style.EMPTY);
         }
         Utility.addLore(dfItem.getItemStack(),
                 name,
-                Text.empty(),
-                Text.empty().append(Text.literal("Amplifier: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal(String.valueOf(amplifier + 1)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)))),
-                Text.empty().append(Text.literal("Duration: ").setStyle(Style.EMPTY.withItalic(false).withColor(Formatting.GRAY)).append(Text.literal(duration()).setStyle(Style.EMPTY.withColor(Formatting.WHITE))))
+                Component.empty(),
+                Component.empty().append(Component.literal("Amplifier: ").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY)).append(Component.literal(String.valueOf(amplifier + 1)).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)))),
+                Component.empty().append(Component.literal("Duration: ").setStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.GRAY)).append(Component.literal(duration()).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))))
         );
         return dfItem.getItemStack();
     }
