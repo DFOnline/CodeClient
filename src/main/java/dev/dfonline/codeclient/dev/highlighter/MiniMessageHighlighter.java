@@ -101,8 +101,9 @@ public class MiniMessageHighlighter {
             String closing = String.format("</%s>", tagName);
 
             if (full.startsWith(closing, index.get())) {
-                if (isActiveTag(tagNode)) {
-                    activeTags.remove(tagNode);
+                int activeTagIndex = activeTags.indexOf(tagNode);
+                if (activeTagIndex >= 0) {
+                    activeTags.subList(activeTagIndex, activeTags.size()).clear();
                 }
 
                 index.addAndGet(closing.length());

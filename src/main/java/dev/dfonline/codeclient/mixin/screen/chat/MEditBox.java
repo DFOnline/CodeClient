@@ -19,10 +19,7 @@ public abstract class MEditBox {
         throw new UnsupportedOperationException();
     }
 
-    @Redirect(
-            method = "extractWidgetRenderState",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;width(Ljava/lang/String;)I")
-    )
+    @Redirect(method = "extractWidgetRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;width(Ljava/lang/String;)I"))
     private int codeclient$getFormattedHighlightWidth(Font font, String str) {
         return font.width(applyFormat(str, displayPos));
     }
