@@ -7,6 +7,8 @@ import dev.dfonline.codeclient.config.KeyBinds;
 import dev.dfonline.codeclient.switcher.SpeedSwitcher;
 import dev.dfonline.codeclient.switcher.StateSwitcher;
 import net.minecraft.client.KeyboardHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -20,6 +22,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(KeyboardHandler.class)
 public class MKeyboard {
+    @Unique
+    private boolean codeclient$pendingChatCharacter;
+
     @Unique
     private static final int DEBUG_KEY = GLFW.GLFW_KEY_F3;
     @Unique
@@ -45,6 +50,13 @@ public class MKeyboard {
 
     @Inject(method = "keyPress", at = @At("HEAD"))
     private void onKey(long window, int action, KeyEvent input, CallbackInfo ci) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (action == GLFW.GLFW_PRESS && minecraft.gui.screen() == null && minecraft.options.keyChat.matches(input)) {
+            codeclient$pendingChatCharacter = true;
+        } else if (codeclient$pendingChatCharacter && action != GLFW.GLFW_REPEAT) {
+            codeclient$pendingChatCharacter = false;
+        }
+
         if (KeyBinds.previewItemTags.matches(input)) {
             // 1 = press, 2 = repeat, 0 = release
             CodeClient.isPreviewingItemTags = action == 1 || action == 2;
@@ -53,6 +65,10 @@ public class MKeyboard {
 
     @WrapOperation(method = "charTyped", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;charTyped(Lnet/minecraft/client/input/CharacterEvent;)Z"))
     private boolean onChar(Screen instance, CharacterEvent charInput, Operation<Boolean> original) {
+        if (codeclient$pendingChatCharacter && instance instanceof ChatScreen) {
+            codeclient$pendingChatCharacter = false;
+            return true;
+        }
         return CodeClient.onCharTyped(charInput) || original.call(instance, charInput);
     }
 }
