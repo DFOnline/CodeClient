@@ -11,7 +11,7 @@ import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.Variable;
 import dev.dfonline.codeclient.hypercube.item.Vector;
 import net.minecraft.ChatFormatting;
-import net.minecraft.component.DataComponentTypes;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.Objects;
 
 public class Icon {
     private static final TextColor GOLD = TextColor.fromLegacyFormat(ChatFormatting.GOLD);
@@ -65,10 +64,10 @@ public class Icon {
     public ItemStack getItem(@Nullable Item realMaterial) {
         Identifier materialIdentifier = Identifier.withDefaultNamespace(this.material.toLowerCase());
         ItemStack item = realMaterial == null
-                ? BuiltInRegistries.ITEM.get(materialIdentifier).getDefaultInstance()
+                ? BuiltInRegistries.ITEM.get(materialIdentifier).orElseThrow().value().getDefaultInstance()
                 : realMaterial.getDefaultInstance();
         if (realMaterial != null) {
-            item.set(DataComponentTypes.ITEM_MODEL, materialIdentifier);
+            item.set(DataComponents.ITEM_MODEL, materialIdentifier);
         }
 
         DFItem dfItem = DFItem.of(item);
