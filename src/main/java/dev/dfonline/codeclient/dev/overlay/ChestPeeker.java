@@ -8,6 +8,7 @@ import dev.dfonline.codeclient.Utility;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.Scope;
+import dev.dfonline.codeclient.hypercube.item.Variable;
 import dev.dfonline.codeclient.location.Dev;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -249,7 +250,14 @@ public class ChestPeeker extends Feature {
                             if (type == Type.bl_tag) {
                                 text.append(Component.literal(data.get("tag").getAsString()).withStyle(ChatFormatting.YELLOW));
                                 text.append(Component.literal(" » ").withStyle(ChatFormatting.DARK_AQUA));
-                                text.append(Component.literal(data.get("option").getAsString()).withStyle(ChatFormatting.AQUA));
+                                if (data.has("variable")) {
+                                    Variable variable = new Variable(data.getAsJsonObject("variable"));
+                                    Scope scope = variable.getScope();
+                                    text.append(Component.literal(scope.getShortName() + " ").withStyle(Style.EMPTY.withColor(scope.color)));
+                                    text.append(Component.literal(variable.getName()));
+                                } else {
+                                    text.append(Component.literal(data.get("option").getAsString()).withStyle(ChatFormatting.AQUA));
+                                }
                             }
                             if (type == Type.hint) continue;
                         } catch (IllegalArgumentException ignored) {
