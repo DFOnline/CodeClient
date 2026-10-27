@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
 import static dev.dfonline.codeclient.Utility.componentToOrderedText;
 
 public class ExpressionHighlighter extends Feature {
+    private static final int OBJECT_PLACEHOLDER = 0xFFFC;
+
     private final Set<String> CODES = Set.of(
             "default",
             "selected",
@@ -312,6 +314,11 @@ public class ExpressionHighlighter extends Feature {
     public boolean acceptWithAbsoluteIndex(FormattedCharSequence original, FormattedCharSink visitor) {
         AtomicInteger index = new AtomicInteger();
         return original.accept((ignored, style, codePoint) -> {
+            // Sprites and other objects are an extra placeholder character,
+            // keep it attached to the end of its tag instead of shifting every character after it.
+            if (codePoint == OBJECT_PLACEHOLDER) {
+                return visitor.accept(Math.max(index.get() - 1, 0), style, codePoint);
+            }
             final boolean shouldContinue = visitor.accept(index.getAndIncrement(), style, codePoint);
             if (Character.isHighSurrogate(Character.toString(codePoint).charAt(0))) {
                 index.getAndIncrement();
