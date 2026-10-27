@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
@@ -32,18 +33,23 @@ import net.minecraft.network.protocol.game.ServerboundPickItemFromBlockPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class ChestPeeker extends Feature {
 
-    private static BlockPos currentBlock = null;
-    private static List<ItemStack> items = new ArrayList<>();
-    private static boolean itemsFetched = false;
+    private static final int REQUEST_TIMEOUT = 20;
+
+    // volatile because I don't trust networking.
+    private static volatile BlockPos currentBlock = null;
+    private static volatile List<ItemStack> items = new ArrayList<>();
+    private static volatile boolean itemsFetched = false;
     private int timeOut = 0;
-    private static Consumer<List<ItemStack>> currentCallback = null;
-    private static boolean expectingItems = false;
+    private static volatile Consumer<List<ItemStack>> currentCallback = null;
+    private static volatile boolean expectingItems = false;
+    private static volatile int requestTicks = 0;
 
     public static void pick(Consumer<List<ItemStack>> callback) {
         currentCallback = callback;
@@ -53,10 +59,10 @@ public class ChestPeeker extends Feature {
     }
 
     public void tick() {
+        if (requestTicks > 0 && --requestTicks == 0) {
+            expectingItems = false;
+        }
         if (timeOut > 0) {
-            if (timeOut == 1) {
-                expectingItems = false;
-            }
             timeOut--;
             return;
         }
@@ -74,25 +80,30 @@ public class ChestPeeker extends Feature {
                     if (CodeClient.MC.level.getBlockState(pos).getBlock() != Blocks.CHEST) {
                         return;
                     }
+                    // Wait for the previous request to finish, then try again.
+                    if (expectingItems) {
+                        return;
+                    }
+                    ClientPacketListener network = CodeClient.MC.getConnection();
+                    if (network == null) {
+                        return;
+                    }
+
                     currentBlock = pos;
                     items = new ArrayList<>();
                     itemsFetched = false;
 
-                    if (!expectingItems) {
-                        ClientPacketListener network = CodeClient.MC.getConnection();
-                        if (network == null) return;
-
-                        Utility.sendHandItem(ItemStack.EMPTY);
-                        network.send(new ServerboundPickItemFromBlockPacket(currentBlock, true));
-                        Utility.sendHandItem(CodeClient.MC.player.getMainHandItem());
-                        expectingItems = true;
-                        return;
-                    }
+                    Utility.sendHandItem(ItemStack.EMPTY);
+                    network.send(new ServerboundPickItemFromBlockPacket(currentBlock, true));
+                    Utility.sendHandItem(CodeClient.MC.player.getMainHandItem());
+                    requestTicks = REQUEST_TIMEOUT;
+                    expectingItems = true;
+                    return;
                 }
             }
         }
         currentBlock = null;
-        items.clear();
+        items = new ArrayList<>();
         itemsFetched = false;
     }
 
@@ -112,39 +123,59 @@ public class ChestPeeker extends Feature {
                     if (block.getB1() != 0) return false;
                     clear();
                 }
-                if (expectingItems && packet instanceof ClientboundSetHeldSlotPacket) {
-                    net.send(new ServerboundSetCarriedItemPacket(inv.getSelectedSlot()));
-                    return true;
-                }
             }
-            if (expectingItems && packet instanceof ClientboundContainerSetSlotPacket slot) {
+            if (expectingItems && packet instanceof ClientboundSetHeldSlotPacket(int slot1)) {
+                net.send(new ServerboundSetCarriedItemPacket(inv.getSelectedSlot()));
+                if (slot1 != inv.getSelectedSlot()) {
+                    ItemContainerContents container = getChestContents(inv.getItem(slot1));
+                    if (container != null) receive(container);
+                }
+                return true;
+            }
+            if (expectingItems && packet instanceof ClientboundContainerSetSlotPacket slot && slot.getContainerId() == 0) {
                 var handler = CodeClient.MC.player.inventoryMenu;
 
                 int slotIndex = slot.getSlot();
                 if (slotIndex < 0 || slotIndex >= handler.slots.size()) return false;
+                var currentItem = handler.getSlot(slotIndex).getItem();
 
-                var removedItem = handler.getSlot(slotIndex).getItem();
-                net.send(new ServerboundSetCreativeModeSlotPacket(slotIndex, removedItem));
-                CodeClient.MC.player.inventoryMenu.setItem(slotIndex, 0, removedItem);
-
-                DFItem item = DFItem.of(slot.getItem());
-                ItemContainerContents container = item.getContainer();
-                if (container == null)
-                    return ItemStack.isSameItem(CodeClient.MC.player.getMainHandItem(), slot.getItem());
-                items.clear();
-                container.nonEmptyItems().forEach(stack -> items.add(stack.create()));
-
-                itemsFetched = true;
-                expectingItems = false;
-
-                if (currentCallback != null) {
-                    currentCallback.accept(items);
-                    currentCallback = null;
+                ItemContainerContents container = getChestContents(slot.getItem());
+                boolean isResponse = slotIndex == 36 + inv.getSelectedSlot() && container != null;
+                boolean isSwappedOut = slot.getItem().isEmpty() && currentItem.is(Items.CHEST);
+                if (!isResponse && !isSwappedOut) {
+                    return false;
                 }
+
+                net.send(new ServerboundSetCreativeModeSlotPacket(slotIndex, currentItem));
+                handler.setItem(slotIndex, 0, currentItem);
+                if (isResponse) receive(container);
                 return true;
             }
         }
         return false;
+    }
+
+    private static @Nullable ItemContainerContents getChestContents(ItemStack stack) {
+        if (!stack.is(Items.CHEST)) {
+            return null;
+        }
+        return DFItem.of(stack).getContainer();
+    }
+
+    private static void receive(ItemContainerContents container) {
+        List<ItemStack> received = new ArrayList<>();
+        container.nonEmptyItems().forEach(stack -> received.add(stack.create()));
+        items = received;
+
+        itemsFetched = true;
+        expectingItems = false;
+        requestTicks = 0;
+
+        var callback = currentCallback;
+        if (callback != null) {
+            currentCallback = null;
+            callback.accept(received);
+        }
     }
 
     public List<Component> getOverlayText() {
@@ -247,7 +278,7 @@ public class ChestPeeker extends Feature {
     }
 
     private void clear() {
-        items.clear();
+        items = new ArrayList<>();
         itemsFetched = false;
         currentBlock = null;
         timeOut = 10;
@@ -257,6 +288,7 @@ public class ChestPeeker extends Feature {
     public void reset() {
         clear();
         expectingItems = false;
+        requestTicks = 0;
     }
 
     enum Type {
@@ -287,4 +319,5 @@ public class ChestPeeker extends Feature {
             this.color = TextColor.fromLegacyFormat(color);
         }
     }
+
 }
