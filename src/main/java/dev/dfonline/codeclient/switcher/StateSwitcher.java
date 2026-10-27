@@ -1,10 +1,10 @@
 package dev.dfonline.codeclient.switcher;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.*;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import net.minecraft.world.item.Items;
 
 public class StateSwitcher extends GenericSwitcher {
     public StateSwitcher() {
-        super(Component.translatable("codeclient.switcher.state"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F4);
+        super(Component.translatable("codeclient.switcher.state"), InputConstants.KEY_F3, InputConstants.KEY_F4);
     }
 
     public static class StateSwitcherFeature extends Feature {

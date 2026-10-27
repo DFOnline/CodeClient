@@ -52,7 +52,7 @@ public class MoveToLocation {
             CodeClient.MC.getConnection().send(new ServerboundMovePlayerPacket.StatusOnly(false, true));
         }
         this.player.setPosRaw(x, y, z);
-        this.player.randomTeleport(x, y, z, false);
+        this.player.randomTeleport(x, y, z, false, state -> false);
         CodeClient.MC.getConnection().send(new ServerboundMovePlayerPacket.Pos(x, y, z, false, true));
     }
 

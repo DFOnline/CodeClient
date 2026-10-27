@@ -126,7 +126,7 @@ public class BuildPhaser extends Feature {
             return false;
         }
         if (packet instanceof ClientboundPlayerPositionPacket positionPacket) {
-            CodeClient.MC.getConnection().send(new ServerboundAcceptTeleportationPacket(positionPacket.id()));
+            CodeClient.MC.getConnection().send(Utility.acceptTeleport(positionPacket, CodeClient.MC.player));
             return true;
         }
         return false;

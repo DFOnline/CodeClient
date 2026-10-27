@@ -28,7 +28,7 @@ public class CommandScanFor extends ActionCommand {
                 var scan = dev.scanForSigns(pattern);
                 Utility.sendMessage(Component.translatable("codeclient.action.scanfor.scan_result"));
                 for (var res : scan.entrySet()) {
-                    Utility.sendMessage(Component.empty().append("- ").append(res.getKey().toString()).append(": ").append(res.getValue().getMessage(1, false)));
+                    Utility.sendMessage(Component.empty().append("- ").append(res.getKey().toString()).append(": ").append(res.getValue().getMessages(false).get(1)));
                 }
                 return 0;
             }

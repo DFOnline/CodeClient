@@ -42,7 +42,7 @@ public class ChatLongValue extends Feature {
                 named.setName(chatText);
                 player.getInventory().setSelectedItem(named.toStack());
                 Utility.sendHandItem(named.toStack());
-                CodeClient.MC.gameRenderer.itemInHandRenderer.itemUsed(InteractionHand.MAIN_HAND);
+                CodeClient.MC.player.firstPersonHandsAndItems().itemUsed(InteractionHand.MAIN_HAND);
                 return true;
             }
             return false;

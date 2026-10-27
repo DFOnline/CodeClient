@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.dev.overlay;
 
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import com.google.common.collect.Lists;
 import dev.dfonline.codeclient.ChestFeature;
 import dev.dfonline.codeclient.CodeClient;
@@ -53,7 +54,7 @@ public class ActionViewer extends Feature {
             var signEntity = world.getBlockEntity(position.below().west());
             if (signEntity instanceof SignBlockEntity sign) {
                 try {
-                    action = ActionDump.getActionDump().findAction(sign.getFrontText());
+                    action = ActionDump.getActionDump().findAction(sign.getText(SignTextSlot.FRONT));
                 } catch (Exception ignored) {
 
                 }

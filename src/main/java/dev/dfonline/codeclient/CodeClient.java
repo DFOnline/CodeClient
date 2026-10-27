@@ -306,8 +306,8 @@ public class CodeClient implements ClientModInitializer {
                 if (packet instanceof ClientboundBlockEntityDataPacket beu && dev.isInDev(beu.getPos()) && beu.getType() == BlockEntityTypes.SIGN) {
                     CompoundTag compound = beu.getTag();
                     if(compound.contains("front_text")) {
-                        SignText text = SignText.DIRECT_CODEC.decode(NbtOps.INSTANCE, beu.getTag().get("front_text")).getOrThrow().getFirst();
-                        if (Plot.lineStarterPattern.matcher(text.getMessage(0, false).getString()).matches()) {
+                        SignText text = SignText.CODEC.decode(NbtOps.INSTANCE, beu.getTag().get("front_text")).getOrThrow().getFirst();
+                        if (Plot.lineStarterPattern.matcher(text.getMessages(false).get(0).getString()).matches()) {
                             dev.getLineStartCache().put(beu.getPos(), text);
                         }
                     } else {

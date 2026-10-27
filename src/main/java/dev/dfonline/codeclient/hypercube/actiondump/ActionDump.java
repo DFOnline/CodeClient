@@ -31,7 +31,7 @@ public class ActionDump {
 
     @Nullable
     public Action findAction(SignText text) {
-        return findAction(text.getMessage(0,false).getString(),text.getMessage(1,false).getString());
+        return findAction(text.getMessages(false).get(0).getString(),text.getMessages(false).get(1).getString());
     }
 
     public Action findAction(String codeBlockName, String actionName) {

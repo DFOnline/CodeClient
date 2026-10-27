@@ -1,12 +1,12 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.primitives.Doubles;
 import dev.dfonline.codeclient.hypercube.Target;
 import dev.dfonline.codeclient.hypercube.item.*;
 import dev.dfonline.codeclient.hypercube.item.Number;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -304,7 +304,7 @@ public class CustomChestField<ItemType extends VarItem> extends AbstractWidget {
     public boolean keyPressed(KeyEvent input) {
         var keyCode = input.key();
         var modifiers = input.modifiers();
-        if(keyCode == GLFW.GLFW_KEY_TAB) {
+        if(keyCode == InputConstants.KEY_TAB) {
             Integer selected = null;
             for (int i = 0; i < widgets.size(); i++) {
                 var widget = widgets.get(i);
@@ -314,7 +314,7 @@ public class CustomChestField<ItemType extends VarItem> extends AbstractWidget {
                 }
             }
             if(selected == null) return false;
-            var next = selected + ((modifiers & GLFW.GLFW_MOD_SHIFT) == 1 ? -1 : 1);
+            var next = selected + ((modifiers & InputConstants.MOD_SHIFT) != 0 ? -1 : 1);
             if(next < 0 || next == widgets.size()) return false;
             if(widgets.get(next) instanceof AbstractWidget widget) {
                 widget.setFocused(true);

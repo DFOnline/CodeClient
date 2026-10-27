@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.dev.overlay;
 
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.dev.InteractionManager;
@@ -20,15 +21,15 @@ public class SignPeeker {
                 BlockPos pos = InteractionManager.isBlockBreakable(block.getBlockPos());
                 if (pos == null || (!dev.isInDev(pos)) || CodeClient.MC.level == null) return null;
                 if (CodeClient.MC.level.getBlockEntity(pos.west()) instanceof SignBlockEntity sign) {
-                    SignText text = sign.getFrontText();
+                    SignText text = sign.getText(SignTextSlot.FRONT);
                     if (CodeClient.MC.player.getX() > pos.getX()) {
                         return List.of(
-                                Component.empty().withStyle(ChatFormatting.GOLD).append(text.getMessage(0, false)),
-                                text.getMessage(1, false),
-                                Component.empty().withStyle(ChatFormatting.AQUA).append(text.getMessage(2, false)),
-                                Component.empty().withStyle(ChatFormatting.RED).append(text.getMessage(3, false)));
+                                Component.empty().withStyle(ChatFormatting.GOLD).append(text.getMessages(false).get(0)),
+                                text.getMessages(false).get(1),
+                                Component.empty().withStyle(ChatFormatting.AQUA).append(text.getMessages(false).get(2)),
+                                Component.empty().withStyle(ChatFormatting.RED).append(text.getMessages(false).get(3)));
                     }
-                    Component name = text.getMessage(1, false);
+                    Component name = text.getMessages(false).get(1);
                     if (CodeClient.MC.font.width(name) > 90) return List.of(name);
                 }
             }

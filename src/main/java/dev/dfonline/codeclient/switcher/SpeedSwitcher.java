@@ -1,11 +1,11 @@
 package dev.dfonline.codeclient.switcher;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
 import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.location.Plot;
 import dev.dfonline.codeclient.location.Spawn;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -16,7 +16,7 @@ public class SpeedSwitcher extends GenericSwitcher {
     private static int lastSpeed = 3;
 
     public SpeedSwitcher() {
-        super(Component.translatable("codeclient.switcher.speed"), GLFW.GLFW_KEY_F3, GLFW.GLFW_KEY_F5);
+        super(Component.translatable("codeclient.switcher.speed"), InputConstants.KEY_F3, InputConstants.KEY_F5);
     }
 
     public static class SpeedSwitcherFeature extends Feature {

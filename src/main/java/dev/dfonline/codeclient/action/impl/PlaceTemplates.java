@@ -92,7 +92,7 @@ public class PlaceTemplates extends Action {
                     String name = ObjectUtils.firstNonNull(block.action, block.data);
                     for (Map.Entry<BlockPos, SignText> sign : scan.entrySet()) { // Loop through scanned signs
                         SignText text = sign.getValue();                        // ↓ If the blockName and name match
-                        if (text.getMessage(0, false).getString().equals(blockName.name) && text.getMessage(1, false).getString().equals(name)) {
+                        if (text.getMessages(false).get(0).getString().equals(blockName.name) && text.getMessages(false).get(1).getString().equals(name)) {
                             map.put(sign.getKey().east(), item);                // Put it into map
                             leftOvers.remove(item);                             // Remove the template, so we can see if there's anything left over
                             break;                                              // break out :D

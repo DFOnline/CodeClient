@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.dev.menu;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.dfonline.codeclient.ChestFeature;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
@@ -12,7 +13,6 @@ import dev.dfonline.codeclient.hypercube.item.*;
 import dev.dfonline.codeclient.hypercube.item.Number;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -254,10 +254,10 @@ public class InsertOverlayFeature extends Feature {
             public boolean keyPressed(KeyEvent key) {
                 var keyCode = key.input();
                 if (field != null) {
-                    if (keyCode != GLFW.GLFW_KEY_ENTER) {
+                    if (keyCode != InputConstants.KEY_RETURN) {
                         var end = field.keyPressed(key);
-                        if (!end && keyCode == GLFW.GLFW_KEY_TAB && field instanceof CustomChestField<?> chestField) {
-                            chestField.select((key.modifiers() & GLFW.GLFW_MOD_SHIFT) != 1);
+                        if (!end && keyCode == InputConstants.KEY_TAB && field instanceof CustomChestField<?> chestField) {
+                            chestField.select((key.modifiers() & InputConstants.MOD_SHIFT) == 0);
                         }
                     }
                     return true;
@@ -268,7 +268,7 @@ public class InsertOverlayFeature extends Feature {
             public boolean keyReleased(KeyEvent key) {
                 var keyCode = key.input();
                 if (field != null) field.keyReleased(key);
-                if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                if (keyCode == InputConstants.KEY_RETURN || keyCode == InputConstants.KEY_ESCAPE) {
                     close();
                     return true;
                 }

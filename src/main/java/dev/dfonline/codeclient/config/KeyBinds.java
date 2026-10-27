@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.config;
 
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.command.CommandSender;
@@ -20,7 +21,6 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.glfw.GLFW;
 
 public class KeyBinds {
     /**
@@ -65,19 +65,19 @@ public class KeyBinds {
         KeyMapping.Category dev = KeyMapping.Category.register(Identifier.parse("codeclient:dev"));
         KeyMapping.Category navi = KeyMapping.Category.register(Identifier.parse("codeclient:navigation"));
 
-        editBind = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.codepalette", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y, dev));
-        clipBind = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.phaser", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, dev));
-        openAction = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.open_action", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
-        editAction = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.edit_action", InputConstants.Type.KEYSYM, InputConstants.KEY_PERIOD, dev));
-        actionUsages = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.action_usages", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
+        editBind = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.codepalette", InputConstants.Type.KEYBOARD, InputConstants.KEY_Y, dev));
+        clipBind = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.phaser", InputConstants.Type.KEYBOARD, InputConstants.KEY_V, dev));
+        openAction = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.open_action", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), dev));
+        editAction = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.edit_action", InputConstants.Type.KEYBOARD, InputConstants.KEY_PERIOD, dev));
+        actionUsages = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.action_usages", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), dev));
 
-        teleportLeft = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.left", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
-        teleportRight = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.right", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
-        teleportForward = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.forward", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
-        teleportBackward = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.backward", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), navi));
+        teleportLeft = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.left", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), navi));
+        teleportRight = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.right", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), navi));
+        teleportForward = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.forward", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), navi));
+        teleportBackward = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.tp.backward", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), navi));
 
-        previewItemTags = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.preview_item_tags", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
-        previewSounds = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.preview_sounds", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), dev));
+        previewItemTags = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.preview_item_tags", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), dev));
+        previewSounds = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.preview_sounds", InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), dev));
         playDev = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.playDev", InputConstants.UNKNOWN.getValue(), dev));
         playBuild = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.codeclient.playBuild", InputConstants.UNKNOWN.getValue(), dev));
     }
@@ -124,18 +124,18 @@ public class KeyBinds {
                         BlockPos pos = InteractionManager.targetedBlockPos(block.getBlockPos());
                         if (pos == null || (!dev.isInDev(pos)) || CodeClient.MC.level == null) return;
                         if (CodeClient.MC.level.getBlockEntity(pos.west()) instanceof SignBlockEntity sign) {
-                            SignText text = sign.getFrontText();
+                            SignText text = sign.getText(SignTextSlot.FRONT);
 
                             //Checks if 2nd line is empty. There probably is a better way to check this, right...?
-                            if(text.getMessages(false)[1].getSiblings().contains(Component.empty())) return;
+                            if(text.getMessages(false).get(1).getSiblings().contains(Component.empty())) return;
 
                             String command = String.format("usages %s %s",
-                                    text.getMessage(0, false).toFlatList().getFirst().getString()
+                                    text.getMessages(false).get(0).toFlatList().getFirst().getString()
                                             .toLowerCase()
                                             .replace(" ", "_")
                                             .replace("call_function", "function")
                                             .replace("start_process", "process"),
-                                    text.getMessage(1, false).toFlatList().getFirst().getString());
+                                    text.getMessages(false).get(1).toFlatList().getFirst().getString());
                             mc.getConnection().sendCommand(command);
                         }
                     }

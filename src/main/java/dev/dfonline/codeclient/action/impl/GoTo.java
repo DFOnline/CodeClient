@@ -55,7 +55,7 @@ public class GoTo extends Action {
         if (locationItem == null) return super.onReceivePacket(packet);
         if (packet instanceof ClientboundPlayerPositionPacket tp) {
             if (CodeClient.MC.getConnection() == null || CodeClient.MC.player == null) return false;
-            CodeClient.MC.getConnection().send(new ServerboundAcceptTeleportationPacket(tp.id()));
+            CodeClient.MC.getConnection().send(Utility.acceptTeleport(tp, CodeClient.MC.player));
             CodeClient.MC.player.setPos(target);
             active = false;
             callback();

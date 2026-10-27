@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.switcher;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.dfonline.codeclient.CodeClient;
@@ -9,7 +10,6 @@ import dev.dfonline.codeclient.config.Config;
 import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.data.PublicBukkitValues;
 import dev.dfonline.codeclient.hypercube.item.Scope;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class ScopeSwitcher extends GenericSwitcher {
     private final String option;
 
     public ScopeSwitcher(String option) {
-        super(Component.translatable("codeclient.switcher.scope"), -1, GLFW.GLFW_KEY_SPACE);
+        super(Component.translatable("codeclient.switcher.scope"), -1, InputConstants.KEY_SPACE);
         this.option = option;
     }
 
@@ -81,7 +81,7 @@ public class ScopeSwitcher extends GenericSwitcher {
         item.getItemData().setPublicBukkitValues(pbv);
         item.setLore(List.of(getSelected().text()));
         Utility.sendHandItem(item.getItemStack());
-        CodeClient.MC.gameRenderer.itemInHandRenderer.itemUsed(InteractionHand.MAIN_HAND);
+        CodeClient.MC.player.firstPersonHandsAndItems().itemUsed(InteractionHand.MAIN_HAND);
     }
 
     @Override
