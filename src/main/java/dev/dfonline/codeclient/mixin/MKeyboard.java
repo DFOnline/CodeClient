@@ -58,8 +58,7 @@ public class MKeyboard {
         }
 
         if (KeyBinds.previewItemTags.matches(input)) {
-            // 1 = press, 2 = repeat, 0 = release
-            CodeClient.isPreviewingItemTags = action == 1 || action == 2;
+            CodeClient.isPreviewingItemTags = action == InputConstants.PRESS || action == InputConstants.REPEAT;
         }
     }
 

@@ -2,6 +2,7 @@ package dev.dfonline.codeclient.dev.menu.customchest;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.mixin.screen.AbstractContainerScreenAccessor;
 import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
@@ -199,15 +200,16 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
                             && relY > y
                             && relY < y + 18
             ) {
-                if (click.button() == 2) {
-                    this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.CLONE);
+                var screen = (AbstractContainerScreenAccessor) this;
+                if (click.button() == InputConstants.MOUSE_BUTTON_MIDDLE) {
+                    screen.invokeSlotClicked(customSlot, slot.index, click, ContainerInput.CLONE);
                     return true;
                 }
                 if (click.hasShiftDown()) {
-                    this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.QUICK_MOVE);
+                    screen.invokeSlotClicked(customSlot, slot.index, click, ContainerInput.QUICK_MOVE);
                     return true;
                 }
-                this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.PICKUP);
+                screen.invokeSlotClicked(customSlot, slot.index, click, ContainerInput.PICKUP);
                 return true;
             }
         }

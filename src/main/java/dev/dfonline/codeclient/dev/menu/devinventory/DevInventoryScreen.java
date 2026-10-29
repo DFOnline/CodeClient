@@ -184,7 +184,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        if (click.button() == 0) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             Integer clicked = getGroupFromMouse(click.x(), click.y());
             if (clicked != null && clicked != selectedTab) setSelectedTab(clicked);
 
@@ -197,7 +197,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 
     @Override
     public boolean mouseReleased(MouseButtonEvent click) {
-        if (click.button() == 0) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             this.scrolling = false;
         }
         return super.mouseReleased(click);
