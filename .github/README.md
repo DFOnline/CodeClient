@@ -10,7 +10,7 @@
 
 A DiamondFire utility client for advanced coding.
 
-A Fabric 1.21.3 mod for coding more efficiently with utility features including but not limited to:
+A Fabric mod for coding more efficiently with utility features including but not limited to:
 * Automatically placing templates in inventory
 * Moving faster in codespace
 * A palette with all the actions
@@ -26,7 +26,8 @@ There's a [discord](https://discord.gg/NqU6XnyVPA) for CodeClient, and a helpful
 
 ## Versions
 
-* [1.21 (latest)](https://github.com/DFOnline/CodeClient/releases/latest)
+* [latest](https://github.com/DFOnline/CodeClient/releases/latest)
+* [modrinth](https://modrinth.com/mod/codeclient/versions)
 
 ## Contributing
 
