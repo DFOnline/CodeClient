@@ -11,9 +11,11 @@ import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.Variable;
 import dev.dfonline.codeclient.hypercube.item.Vector;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
@@ -62,12 +64,27 @@ public class Icon {
         return getItem(null);
     }
     public ItemStack getItem(@Nullable Item realMaterial) {
-        Identifier materialIdentifier = Identifier.withDefaultNamespace(this.material.toLowerCase());
-        ItemStack item = realMaterial == null
-                ? BuiltInRegistries.ITEM.get(materialIdentifier).orElseThrow().value().getDefaultInstance()
-                : realMaterial.getDefaultInstance();
+        Identifier materialIdentifier = resolveIdentifier(this.material);
+        ItemStack item;
+
         if (realMaterial != null) {
-            item.set(DataComponents.ITEM_MODEL, materialIdentifier);
+            item = realMaterial.getDefaultInstance();
+            if (materialIdentifier != null) {
+                item.set(DataComponents.ITEM_MODEL, materialIdentifier);
+            }
+        } else {
+            Item resolved = null;
+            if (materialIdentifier != null) {
+                resolved = BuiltInRegistries.ITEM.get(materialIdentifier)
+                        .map(Holder.Reference::value)
+                        .orElse(null);
+            }
+
+            if (resolved == null) {
+                resolved = (this.head != null) ? Items.PLAYER_HEAD : Items.BARRIER;
+            }
+
+            item = resolved.getDefaultInstance();
         }
 
         DFItem dfItem = DFItem.of(item);
@@ -88,16 +105,11 @@ public class Icon {
         if (arguments != null && arguments.length != 0) {
             addToLore(lore, "");
             addToLore(lore, "Chest Parameters:");
-            boolean hasOptional = false;
             for (Argument arg : arguments) {
                 lore.addAll(arg.getLore());
             }
             if (tags != null && tags != 0) {
                 lore.add(Component.literal("# ").withStyle(ChatFormatting.DARK_AQUA).withStyle(s -> s.withItalic(false)).append(Component.literal(tags + " Tag" + (tags != 1 ? "s" : "")).withStyle(ChatFormatting.GRAY)));
-            }
-            if (hasOptional) {
-                lore.add(Component.empty());
-                lore.add(Component.literal("*Optional").withStyle(ChatFormatting.GRAY).withStyle(s -> s.withItalic(false)));
             }
         }
         if (returnValues != null && returnValues.length != 0) {
@@ -105,14 +117,25 @@ public class Icon {
             addToLore(lore, "Returns Value:");
             for (ReturnValue returnValue : returnValues) {
                 if (returnValue.text != null) addToLore(lore, returnValue.text);
-                else {
-                    lore.add(Component.empty().append(Component.literal(returnValue.type.display).setStyle(Style.EMPTY.withColor(returnValue.type.color).withItalic(false))).append(Component.literal(" - ").withStyle(ChatFormatting.DARK_GRAY)).append(Component.literal(returnValue.description[0]).withStyle(ChatFormatting.GRAY).withStyle(s -> s.withItalic(false))));
-                    boolean first = true;
-                    for (String description : returnValue.description) {
-                        if (first) {
-                            first = false;
-                            continue;
+                else if (returnValue.type != null) {
+                    boolean hasDesc = returnValue.description != null && returnValue.description.length > 0;
+                    MutableComponent line = Component.empty().append(
+                            Component.literal(returnValue.type.display)
+                                    .setStyle(Style.EMPTY.withColor(returnValue.type.color).withItalic(false))
+                    );
+
+                    if (hasDesc) {
+                        line.append(Component.literal(" - ").withStyle(ChatFormatting.DARK_GRAY)).append(Component.literal(returnValue.description[0]).withStyle(ChatFormatting.GRAY).withStyle(s -> s.withItalic(false)));
+                    }
+                    lore.add(line);
+
+                    if (hasDesc) {
+                        for (int i = 1; i < returnValue.description.length; i++) {
+                            addToLore(lore, "§7" + returnValue.description[i]);
                         }
+                    }
+                } else if (returnValue.description != null) {
+                    for (String description : returnValue.description) {
                         addToLore(lore, "§7" + description);
                     }
                 }
@@ -161,6 +184,19 @@ public class Icon {
         dfItem.setCustomModelData(5000);
 
         return item;
+    }
+
+    @Nullable
+    private Identifier resolveIdentifier(@Nullable String rawMaterial) {
+        if (rawMaterial == null || rawMaterial.isBlank()) {
+            return null;
+        }
+        String clean = rawMaterial.trim().toLowerCase();
+        try {
+            return clean.contains(":") ? Identifier.parse(clean) : Identifier.withDefaultNamespace(clean);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void addToLore(ArrayList<Component> lore, String text) {
