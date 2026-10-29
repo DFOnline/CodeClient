@@ -93,13 +93,14 @@ public class Icon {
         ArrayList<Component> lore = new ArrayList<>();
 
         for (String line : description) {
-            addToLore(lore, "§7" + line);
+            addToLore(lore, "§7" + handleLegacyColor(line));
         }
         if (example != null && example.length != 0) {
             addToLore(lore, "");
             addToLore(lore, "Example:");
             for (String line : example) {
-                addToLore(lore, "§7" + line);
+                String fixed = handleLegacyColor(line);
+                addToLore(lore, "§7" + fixed);
             }
         }
         if (arguments != null && arguments.length != 0) {
@@ -131,7 +132,7 @@ public class Icon {
 
                     if (hasDesc) {
                         for (int i = 1; i < returnValue.description.length; i++) {
-                            addToLore(lore, "§7" + returnValue.description[i]);
+                            addToLore(lore, "§7" + handleLegacyColor(returnValue.description[i]));
                         }
                     }
                 } else if (returnValue.description != null) {
@@ -147,8 +148,9 @@ public class Icon {
             for (String[] group : additionalInfo) {
                 int i = 0;
                 for (String line : group) {
-                    if (i == 0) addToLore(lore, "§b» §7" + line);
-                    else addToLore(lore, "§7" + line);
+                    String fixed = handleLegacyColor(line);
+                    if (i == 0) addToLore(lore, "§b» §7" + fixed);
+                    else addToLore(lore, "§7" + fixed);
                     i++;
                 }
             }
@@ -172,7 +174,7 @@ public class Icon {
             }
         }
 
-        dfItem.setName(Utility.textFromString(name));
+        dfItem.setName(Utility.textFromString(name.replaceAll("&[x0123456789abcdefklmnor]", "")));
         dfItem.setLore(lore);
 
         dfItem.hideFlags();
@@ -197,6 +199,10 @@ public class Icon {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static String handleLegacyColor(String input) {
+        return input.replaceAll("(?i)&(?=[0-9a-fk-orx])", "§");
     }
 
     private void addToLore(ArrayList<Component> lore, String text) {

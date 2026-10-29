@@ -16,6 +16,8 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import static dev.dfonline.codeclient.hypercube.actiondump.Icon.handleLegacyColor;
+
 public class Argument {
     public String type;
     public boolean plural;
@@ -103,6 +105,6 @@ public class Argument {
     }
 
     private void addToLore(ArrayList<Component> lore, String text) {
-        lore.add(Utility.textFromString(text));
+        lore.add(Utility.textFromString(handleLegacyColor(text)));
     }
 }
