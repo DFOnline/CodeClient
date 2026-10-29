@@ -60,8 +60,8 @@ public class CommandJump extends Command {
 
 
             for (var signText : lineStarters ? dev.getLineStartCache().values() : dev.getActionCache().values()) {
-                if (type.pattern.matcher(signText.getMessage(0, false).getString()).matches())
-                    possibilities.add(signText.getMessage(1, false).getString());
+                if (type.pattern.matcher(signText.getMessages(false).get(0).getString()).matches())
+                    possibilities.add(signText.getMessages(false).get(1).getString());
             }
 
             for (String possibility : possibilities) {

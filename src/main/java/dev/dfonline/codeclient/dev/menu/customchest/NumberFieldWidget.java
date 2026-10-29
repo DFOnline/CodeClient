@@ -1,12 +1,12 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 public class NumberFieldWidget extends EditBox {
     @Nullable
@@ -23,8 +23,8 @@ public class NumberFieldWidget extends EditBox {
 
     @Override
     public boolean keyPressed(KeyEvent input) {
-        if(input.input() == GLFW.GLFW_KEY_UP) setNumber(getNumber() + 1);
-        if(input.input() == GLFW.GLFW_KEY_DOWN) setNumber(getNumber() - 1);
+        if(input.input() == InputConstants.KEY_UP) setNumber(getNumber() + 1);
+        if(input.input() == InputConstants.KEY_DOWN) setNumber(getNumber() - 1);
         return super.keyPressed(input);
     }
 

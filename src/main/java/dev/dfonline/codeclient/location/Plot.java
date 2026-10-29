@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.location;
 
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.command.impl.CommandJump;
 import org.jetbrains.annotations.Nullable;
@@ -169,10 +170,10 @@ public abstract class Plot extends Location {
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockEntity block = CodeClient.MC.level.getBlockEntity(pos);
                     if (block instanceof SignBlockEntity sign) {
-                        SignText text = sign.getFrontText();
-                        Matcher nameMatch = name.matcher(text.getMessage(0, false).getString());
+                        SignText text = sign.getText(SignTextSlot.FRONT);
+                        Matcher nameMatch = name.matcher(text.getMessages(false).get(0).getString());
                         if (!nameMatch.matches()) continue;
-                        Matcher scanMatch = scan.matcher(text.getMessage(1, false).getString());
+                        Matcher scanMatch = scan.matcher(text.getMessages(false).get(1).getString());
                         if (scanMatch.matches()) signs.put(pos, text);
                     }
                 }

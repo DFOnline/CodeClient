@@ -81,7 +81,7 @@ public abstract class MInGameHud {
                     .map(ChestPeeker::getOverlayText).orElse(null);
             if (peeker == null || peeker.isEmpty()) peeker = SignPeeker.getOverlayText();
             if (peeker != null && !peeker.isEmpty()) {
-                graphics.tooltip(textRenderer, peeker.stream().map(text -> ClientTooltipComponent.create(text.getVisualOrderText())).toList(), x, yOrig, DefaultTooltipPositioner.INSTANCE, null);
+                graphics.tooltip(textRenderer, peeker.stream().map(text -> ClientTooltipComponent.create(text.getVisualOrderText())).toList(), x, yOrig, DefaultTooltipPositioner.INSTANCE, null, false);
 //                context.renderTooltip();
             }
         } catch (Exception ignored) {

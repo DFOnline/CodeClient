@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.dev.menu;
 
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import dev.dfonline.codeclient.ChestFeature;
 import dev.dfonline.codeclient.CodeClient;
 import dev.dfonline.codeclient.Feature;
@@ -56,7 +57,7 @@ public class SlotGhostManager extends Feature {
             var signEntity = CodeClient.MC.level.getBlockEntity(hitResult.getBlockPos().below().west());
             if (signEntity instanceof SignBlockEntity sign) {
                 try {
-                    action = ActionDump.getActionDump().findAction(sign.getFrontText());
+                    action = ActionDump.getActionDump().findAction(sign.getText(SignTextSlot.FRONT));
                 } catch (Exception ignored) {
                 }
             }

@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Pair;
 import dev.dfonline.codeclient.ChestFeature;
 import dev.dfonline.codeclient.CodeClient;
@@ -171,7 +172,7 @@ public class RecentValues extends Feature {
         public boolean mouseClicked(MouseButtonEvent click) {
             if (hoveredItem == null) return false;
 
-            if (click.button() != 1) {
+            if (click.button() != InputConstants.MOUSE_BUTTON_RIGHT) {
                 for (Slot slot : screen.getMenu().slots) {
                     if (slot.hasItem()) continue;
                     CodeClient.MC.getSoundManager().play(new SimpleSoundInstance(

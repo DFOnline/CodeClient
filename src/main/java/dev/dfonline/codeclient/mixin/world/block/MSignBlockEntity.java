@@ -10,6 +10,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,15 +22,15 @@ public abstract class MSignBlockEntity {
     @Shadow
     private SignText frontText;
 
-    @Inject(method = "getFrontText", at = @At("HEAD"), cancellable = true)
-    public void getFrontText(CallbackInfoReturnable<SignText> cir) {
-        if (CodeClient.location instanceof Dev plot) {
+    @Inject(method = "getText", at = @At("HEAD"), cancellable = true)
+    public void getText(SignTextSlot slot, CallbackInfoReturnable<SignText> cir) {
+        if (slot == SignTextSlot.FRONT && CodeClient.location instanceof Dev plot) {
             if (plot.isInDev(((BlockEntity) (Object) this).getBlockPos())) {
                 SignText orig = this.frontText;
-                Component line1 = orig.getMessage(0, false);
-                Component line2 = orig.getMessage(1, false);
-                Component line3 = orig.getMessage(2, false);
-                Component line4 = orig.getMessage(3, false);
+                Component line1 = orig.getMessages(false).get(0);
+                Component line2 = orig.getMessages(false).get(1);
+                Component line3 = orig.getMessages(false).get(2);
+                Component line4 = orig.getMessages(false).get(3);
 
                 Config config = Config.getConfig();
                 TextColor color3 = null;
@@ -48,11 +49,12 @@ public abstract class MSignBlockEntity {
 
 
                 cir.setReturnValue(
-                        orig
-                                .setMessage(0, line1)
-                                .setMessage(1, line2)
-                                .setMessage(2, line3)
-                                .setMessage(3, line4)
+                        orig.asMutable()
+                                .setLine(0, line1)
+                                .setLine(1, line2)
+                                .setLine(2, line3)
+                                .setLine(3, line4)
+                                .asImmutable()
                 );
             }
         }

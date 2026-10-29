@@ -1,13 +1,14 @@
 package dev.dfonline.codeclient.dev.menu.customchest;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.dfonline.codeclient.CodeClient;
+import dev.dfonline.codeclient.mixin.screen.AbstractContainerScreenAccessor;
 import dev.dfonline.codeclient.hypercube.item.BlockTag;
 import dev.dfonline.codeclient.hypercube.item.VarItem;
 import dev.dfonline.codeclient.hypercube.item.VarItems;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -199,15 +200,16 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
                             && relY > y
                             && relY < y + 18
             ) {
-                if (click.button() == 2) {
-                    this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.CLONE);
+                var screen = (AbstractContainerScreenAccessor) this;
+                if (click.button() == InputConstants.MOUSE_BUTTON_MIDDLE) {
+                    screen.invokeSlotClicked(customSlot, slot.index, click, ContainerInput.CLONE);
                     return true;
                 }
                 if (click.hasShiftDown()) {
-                    this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.QUICK_MOVE);
+                    screen.invokeSlotClicked(customSlot, slot.index, click, ContainerInput.QUICK_MOVE);
                     return true;
                 }
-                this.slotClicked(customSlot, slot.index, click.button(), ContainerInput.PICKUP);
+                screen.invokeSlotClicked(customSlot, slot.index, click, ContainerInput.PICKUP);
                 return true;
             }
         }
@@ -261,8 +263,9 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
     public boolean keyPressed(KeyEvent input) {
         var keyCode = input.input();
         var hasShiftDown = input.hasShiftDown();
-        if (keyCode <= GLFW.GLFW_KEY_DOWN || keyCode >= GLFW.GLFW_KEY_PAGE_DOWN) {
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (keyCode != InputConstants.KEY_UP && keyCode != InputConstants.KEY_DOWN
+                && keyCode != InputConstants.KEY_PAGEUP && keyCode != InputConstants.KEY_PAGEDOWN) {
+            if (keyCode == InputConstants.KEY_ESCAPE) {
                 for (var i : widgets.keySet()) {
                     LayoutElement widget = widgets.get(i);
                     if (widget instanceof AbstractWidget clickable) {
@@ -274,7 +277,7 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
                     }
                 }
             }
-            if(keyCode == GLFW.GLFW_KEY_TAB) {
+            if(keyCode == InputConstants.KEY_TAB) {
                 for (var i : widgets.keySet()) {
                     LayoutElement widget = widgets.get(i);
                     if (widget instanceof AbstractWidget clickable) {
@@ -303,12 +306,12 @@ public class CustomChestMenu extends AbstractContainerScreen<CustomChestHandler>
                 }
             }
         }
-        boolean up = keyCode == GLFW.GLFW_KEY_UP || CodeClient.MC.options.keyUp.matches(input);
-        boolean down = keyCode == GLFW.GLFW_KEY_DOWN || CodeClient.MC.options.keyDown.matches(input);
-        boolean pageUp = keyCode == GLFW.GLFW_KEY_PAGE_UP || (up && hasShiftDown);
-        boolean pageDown = keyCode == GLFW.GLFW_KEY_PAGE_DOWN || (down && hasShiftDown);
-        boolean start = keyCode == GLFW.GLFW_KEY_HOME || (up && input.hasAltDown() && !pageUp);
-        boolean end = keyCode == GLFW.GLFW_KEY_END || (down && input.hasAltDown() && !pageDown);
+        boolean up = keyCode == InputConstants.KEY_UP || CodeClient.MC.options.keyUp.matches(input);
+        boolean down = keyCode == InputConstants.KEY_DOWN || CodeClient.MC.options.keyDown.matches(input);
+        boolean pageUp = keyCode == InputConstants.KEY_PAGEUP || (up && hasShiftDown);
+        boolean pageDown = keyCode == InputConstants.KEY_PAGEDOWN || (down && hasShiftDown);
+        boolean start = keyCode == InputConstants.KEY_HOME || (up && input.hasAltDown() && !pageUp);
+        boolean end = keyCode == InputConstants.KEY_END || (down && input.hasAltDown() && !pageDown);
         int prev = (int) scroll;
         if (pageDown) {
             scroll = Math.min(27 - Size.WIDGETS, scroll + Size.WIDGETS);

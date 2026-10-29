@@ -15,9 +15,12 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -332,4 +335,12 @@ public class Utility {
         return NonWrappingComponentSerializer.INSTANCE.serialize(component);
     }
 
+
+    /**
+     * Builds the teleport acknowledgement for a position packet without applying it to the player.
+     */
+    public static ServerboundAcceptTeleportationPacket acceptTeleport(ClientboundPlayerPositionPacket packet, LocalPlayer player) {
+        PositionMoveRotation pos = PositionMoveRotation.calculateAbsolute(PositionMoveRotation.of(player), packet.change(), packet.relatives());
+        return new ServerboundAcceptTeleportationPacket(packet.id(), pos.position().x, pos.position().y, pos.position().z, pos.yRot(), pos.xRot());
+    }
 }

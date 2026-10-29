@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +121,7 @@ public abstract class GenericSwitcher extends Screen {
             this.selected %= getOptions().size();
             return true;
         }
-        if (key.input() == GLFW.GLFW_KEY_ESCAPE) {
+        if (key.input() == InputConstants.KEY_ESCAPE) {
             this.onClose();
         }
         return super.keyPressed(key);
@@ -146,7 +145,7 @@ public abstract class GenericSwitcher extends Screen {
 
     protected boolean checkFinished() {
         if (this.minecraft == null) return false;
-        if (hasClicked || !InputConstants.isKeyDown(this.minecraft.getWindow(), HOLD_KEY)) {
+        if (hasClicked || !InputConstants.isKeyDown(HOLD_KEY)) {
             Option selected = getSelected();
             if (selected != null) selected.run();
             this.minecraft.gui.setScreen(null);

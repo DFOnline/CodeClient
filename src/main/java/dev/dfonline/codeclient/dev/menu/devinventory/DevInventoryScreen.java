@@ -1,5 +1,6 @@
 package dev.dfonline.codeclient.dev.menu.devinventory;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
@@ -41,7 +42,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.net.URI;
@@ -184,7 +184,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        if (click.button() == 0) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             Integer clicked = getGroupFromMouse(click.x(), click.y());
             if (clicked != null && clicked != selectedTab) setSelectedTab(clicked);
 
@@ -197,7 +197,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
 
     @Override
     public boolean mouseReleased(MouseButtonEvent click) {
-        if (click.button() == 0) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             this.scrolling = false;
         }
         return super.mouseReleased(click);
@@ -332,12 +332,11 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
     @Override
     public boolean keyPressed(KeyEvent input) {
         var keyCode = input.input();
-        if (keyCode == GLFW.GLFW_KEY_GRAVE_ACCENT) {
+        if (keyCode == InputConstants.KEY_GRAVE) {
             this.onClose();
         }
-        if (keyCode >= GLFW.GLFW_KEY_0 && keyCode <= GLFW.GLFW_KEY_9) {
-            int number = keyCode - GLFW.GLFW_KEY_1;
-            if (number == -1) number = 9;
+        if (keyCode >= InputConstants.KEY_1 && keyCode <= InputConstants.KEY_0) {
+            int number = keyCode - InputConstants.KEY_1;
             Slot slot = this.menu.slots.get(number);
             if (this.minecraft == null || this.minecraft.player == null) return false;
             this.minecraft.player.setItemInHand(InteractionHand.MAIN_HAND, slot.getItem());
@@ -345,15 +344,15 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
             this.ignoreNextKey = true;
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_UP || keyCode == GLFW.GLFW_KEY_DOWN) {
-            selectedTab += 7 * ((keyCode == GLFW.GLFW_KEY_DOWN) ? -1 : 1);
+        if (keyCode == InputConstants.KEY_UP || keyCode == InputConstants.KEY_DOWN) {
+            selectedTab += 7 * ((keyCode == InputConstants.KEY_DOWN) ? -1 : 1);
             selectedTab %= GROUPS.length;
             if (selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
             setSelectedTab(selectedTab);
             return true;
         }
-        if (keyCode != GLFW.GLFW_KEY_TAB && searchBox.isFocused()) {
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (keyCode != InputConstants.KEY_TAB && searchBox.isFocused()) {
+            if (keyCode == InputConstants.KEY_ESCAPE) {
                 this.searchBox.setFocused(false);
                 this.setFocused(null);
                 return false;
@@ -362,8 +361,8 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
             populate();
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_TAB || keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_LEFT) {
-            if ((input.modifiers() & GLFW.GLFW_MOD_SHIFT) == 1 || keyCode == GLFW.GLFW_KEY_LEFT) {
+        if (keyCode == InputConstants.KEY_TAB || keyCode == InputConstants.KEY_RIGHT || keyCode == InputConstants.KEY_LEFT) {
+            if ((input.modifiers() & InputConstants.MOD_SHIFT) != 0 || keyCode == InputConstants.KEY_LEFT) {
                 selectedTab = selectedTab - 1;
                 if (selectedTab < 0) selectedTab = GROUPS.length + selectedTab;
                 setSelectedTab(selectedTab);
@@ -372,7 +371,7 @@ public class DevInventoryScreen extends AbstractContainerScreen<CreativeModeInve
         }
         if (searchBox.active) {
             if (CodeClient.MC.options.keyChat.matches(input) || KeyBinds.editBind.matches(input)) {
-                if (keyCode == GLFW.GLFW_KEY_Y) setSelectedTab(SEARCH.getIndex());
+                if (keyCode == InputConstants.KEY_Y) setSelectedTab(SEARCH.getIndex());
                 searchBox.setFocused(true);
                 searchBox.moveCursorToEnd(false);
                 searchBox.setHighlightPos(0);
