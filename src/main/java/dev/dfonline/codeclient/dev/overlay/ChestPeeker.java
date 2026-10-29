@@ -10,15 +10,6 @@ import dev.dfonline.codeclient.data.DFItem;
 import dev.dfonline.codeclient.hypercube.item.Scope;
 import dev.dfonline.codeclient.hypercube.item.Variable;
 import dev.dfonline.codeclient.location.Dev;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Consumer;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
@@ -38,6 +29,14 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public class ChestPeeker extends Feature {
 
@@ -51,6 +50,7 @@ public class ChestPeeker extends Feature {
     private static volatile Consumer<List<ItemStack>> currentCallback = null;
     private static volatile boolean expectingItems = false;
     private static volatile int requestTicks = 0;
+    private static volatile int requestSlot = -1;
 
     public static void pick(Consumer<List<ItemStack>> callback) {
         currentCallback = callback;
@@ -94,6 +94,8 @@ public class ChestPeeker extends Feature {
                     items = new ArrayList<>();
                     itemsFetched = false;
 
+                    requestSlot = CodeClient.MC.player.getInventory().getSelectedSlot();
+                    network.send(new ServerboundSetCarriedItemPacket(requestSlot));
                     Utility.sendHandItem(ItemStack.EMPTY);
                     network.send(new ServerboundPickItemFromBlockPacket(currentBlock, true));
                     Utility.sendHandItem(CodeClient.MC.player.getMainHandItem());
@@ -127,7 +129,7 @@ public class ChestPeeker extends Feature {
             }
             if (expectingItems && packet instanceof ClientboundSetHeldSlotPacket(int slot1)) {
                 net.send(new ServerboundSetCarriedItemPacket(inv.getSelectedSlot()));
-                if (slot1 != inv.getSelectedSlot()) {
+                if (slot1 != requestSlot) {
                     ItemContainerContents container = getChestContents(inv.getItem(slot1));
                     if (container != null) receive(container);
                 }
@@ -141,7 +143,7 @@ public class ChestPeeker extends Feature {
                 var currentItem = handler.getSlot(slotIndex).getItem();
 
                 ItemContainerContents container = getChestContents(slot.getItem());
-                boolean isResponse = slotIndex == 36 + inv.getSelectedSlot() && container != null;
+                boolean isResponse = slotIndex == 36 + requestSlot && container != null;
                 boolean isSwappedOut = slot.getItem().isEmpty() && currentItem.is(Items.CHEST);
                 if (!isResponse && !isSwappedOut) {
                     return false;
