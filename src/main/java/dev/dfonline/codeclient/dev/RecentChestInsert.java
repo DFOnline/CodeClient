@@ -40,7 +40,7 @@ public class RecentChestInsert extends Feature {
             matrices.pushPose();
             try {
                 matrices.translate(pos.getX() - cameraX, pos.getY() - cameraY, pos.getZ() - cameraZ);
-                submitter.submitShapeOutline(matrices, shape, RenderTypes.linesTranslucent(), color, CodeClient.MC.getWindow().getAppropriateLineWidth(), true);
+                submitter.submitShapeOutline(matrices, shape, RenderTypes.linesTranslucentNoDepthWrite(), color, CodeClient.MC.getWindow().getAppropriateLineWidth(), true);
             } finally {
                 matrices.popPose();
             }
